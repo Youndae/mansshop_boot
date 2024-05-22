@@ -1,5 +1,0 @@
-[2024-05-22 22:44:25.256] - 43852 INFO [Test worker] --- org.hibernate.jpa.internal.util.LogHelper: HHH000204: Processing PersistenceUnitInfo [name: default]
-[2024-05-22 22:44:25.289] - 43852 INFO [Test worker] --- org.hibernate.Version: HHH000412: Hibernate ORM core version 6.4.4.Final
-[2024-05-22 22:44:25.308] - 43852 INFO [Test worker] --- org.hibernate.cache.internal.RegionFactoryInitiator: HHH000026: Second-level cache disabled
-[2024-05-22 22:44:25.622] - 43852 WARN [Test worker] --- org.hibernate.orm.deprecation: HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-[2024-05-22 22:44:27.154] - 43852 INFO [Test worker] --- org.hibernate.engine.transaction.jta.platform.internal.JtaPlatformInitiator: HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
