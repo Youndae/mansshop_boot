@@ -1,10 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+import dayjs from "dayjs";
+import isLeapYear from 'dayjs/plugin/isLeapYear';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/ko';
+
+dayjs.extend(isLeapYear, relativeTime);
+dayjs.locale('ko');
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
+
 root.render(
   <React.StrictMode>
     <App />

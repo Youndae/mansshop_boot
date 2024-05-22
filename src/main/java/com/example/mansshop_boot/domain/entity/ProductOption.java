@@ -21,8 +21,6 @@ public class ProductOption {
     @JoinColumn(name = "productId")
     private Product product;
 
-    private String optionName;
-
     private String size;
 
     private String color;

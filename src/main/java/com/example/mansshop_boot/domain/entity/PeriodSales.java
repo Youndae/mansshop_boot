@@ -19,12 +19,9 @@ public class PeriodSales {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NonNull
     private Date period;
 
-    @NonNull
     private long sales;
 
-    @NonNull
     private long salesRate;
 }

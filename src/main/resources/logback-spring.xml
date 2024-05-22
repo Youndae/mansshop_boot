@@ -3,7 +3,7 @@
     <property name="CONSOLE_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %magenta([%thread]) %highlight([%-3level]) %logger{5} - %msg %n" />
     <property name="ROLLING_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS}  %logger{5} - %msg %n" />
     <property name="FILE_NAME" value="/logback-spring/logback-spring.log" />
-    <property name="LOG_NAME_PATTERN" value="./logback-spring/mansSHop-%d{yyyy-MM-dd-HH-mm}.%i.log" />
+    <property name="LOG_NAME_PATTERN" value="./logback-spring/mansShop-%d{yyyy-MM-dd-HH-mm}.%i.log" />
     <property name="MAX_FILE_SIZE" value="10MB" />
     <property name="TOTAL_SIZE" value="30MB" />
     <property name="MAX_HISTORY" value="2" />

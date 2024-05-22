@@ -30,4 +30,6 @@ public class ProductReview {
     private String reviewContent;
 
     private Date createdAt;
+
+    private Date updatedAt;
 }

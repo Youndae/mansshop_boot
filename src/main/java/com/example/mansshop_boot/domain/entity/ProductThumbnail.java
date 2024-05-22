@@ -22,4 +22,6 @@ public class ProductThumbnail {
     private Product product;
 
     private String productThumbnail;
+
+    private int productThumbnailStep;
 }

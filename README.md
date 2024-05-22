@@ -140,7 +140,18 @@
 <br />
 
 ### 2024/05/21
-> 5/21 프로젝트 생성 및 테스트   
+> 5/21 프로젝트 생성 및 간단 테스트   
 > SpringBoot 프로젝트 생성 후 내부에 src/main 하위에 frontend Directory 생성 후 그 안에 CRA를 통한 React 프로젝트 생성.   
 > TestComponent와 TestController 생성해서 1차 테스트 확인.   
 > Build 이후 정상적으로 연동이 되었는지 2차 테스트 확인.
+
+<br />
+
+### 2024/05/22
+> Gradle 의존성 추가.   
+> Security, properties, redis, aop 설정 파일 생성   
+> 세션 테스트 하기 위해 MemberController와 MemberRepository 생성   
+> OAuth2 응답 처리할 interface와 record 생성   
+> OAuthProvider, Role enum 생성   
+> file 경로 담아둘 properties 생성   
+> oauth.yml 내용 작성   

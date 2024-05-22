@@ -31,7 +31,7 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests(registry ->
-                        registry.requestMatchers("/login/**", "/**", "/resources/**")
+                        registry.requestMatchers("/login/**", "/api/**")
                                 .permitAll()
                 );
 
@@ -49,6 +49,14 @@ public class SecurityConfig {
                                 .logoutSuccessUrl("/")
                                 .invalidateHttpSession(true)
                 );
+
+        /*http
+                .oauth2Login((oauth2) ->
+                        oauth2
+                                .userInfoEndpoint((userInfoEndpointConfig) ->
+                                        userInfoEndpointConfig
+                                                .userService())
+                                .successHandler());*/
 
         return http.build();
     }

@@ -14,8 +14,7 @@ import lombok.NoArgsConstructor;
 public class ProductInfoImage {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String infoImageId;
 
     @ManyToOne
     @JoinColumn(name = "productId")
