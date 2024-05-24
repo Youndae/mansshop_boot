@@ -16,6 +16,7 @@
 >> javax.mail   
 >> OAuth2   
 >> Spring Security   
+>> JWT
 > 
 > Front End
 >> React 18.3.1   
@@ -155,4 +156,15 @@
 > OAuthProvider, Role enum 생성   
 > file 경로 담아둘 properties 생성   
 > oauth.yml 내용 작성   
-> 
+
+<br />
+
+### 2024/05/24
+> 인증 / 인가 JWT로 수정.   
+> filePath 처럼 jwt 관련 값들에 대해서 properties 생성   
+> TokenProvider 작성중   
+> React, Spring 통합 빌드 중 발생했던 url 입력 시 404 white label 페이지 출력 문제 해결   
+>> WebController에서 ErrorController 를 implements해서 해결하는 방법과 ErrorPageRegistrar Bean을 통해 처리하는 방법 두가지를 확인.   
+>> 둘다 일단 작성은 해두고 ErrorPageRegistrar의 경우 주석처리 해둔 상태.   
+>> 좀 더 테스트해보고 결정할 계획.   
+> TokenProvider 처리 중 반환되는 결과에 대해 Result enum 생성. TokenProvider가 아니더라도 다른 곳에서 String 반환에 대한 대응이 필요한 경우 추가적으로 작성해서 사용할 계획.

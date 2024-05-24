@@ -22,4 +22,8 @@ public class Auth {
     private Member member;
 
     private String auth;
+
+    public void setMember(Member member) {
+        this.member = member;
+    }
 }
