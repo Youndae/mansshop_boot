@@ -1,14 +1,15 @@
 package com.example.mansshop_boot.domain.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Getter
@@ -29,9 +30,17 @@ public class Member {
 
     private String provider;
 
-    private int memberPoint;
+    private Long memberPoint;
 
     private Date createdAt;
+
+    @OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private final List<Auth> auths = new ArrayList<>();
+
+    public void addAuth(Auth auth) {
+        auths.add(auth);
+        auth.setMember(this);
+    }
 
     public Member(String userId
                 , String userPw
@@ -39,7 +48,7 @@ public class Member {
                 , String nickname
                 , String userEmail
                 , String provider
-                , int memberPoint
+                , Long memberPoint
                 , Date createdAt) {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -48,8 +57,8 @@ public class Member {
         this.userName = userName;
         this.nickname = nickname;
         this.userEmail = userEmail;
-        this.provider = provider;
-        this.memberPoint = memberPoint;
+        this.provider = provider == null ? "local" : provider;
+        this.memberPoint = memberPoint == null ? 0 : memberPoint;
         this.createdAt = createdAt;
     }
 }

@@ -21,6 +21,7 @@ bin/
 application.yml
 application-oauth.yml
 filePath.properties
+jwt.properties
 .idea
 *.iws
 *.iml
