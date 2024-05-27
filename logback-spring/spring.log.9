@@ -1,112 +1,34 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE log SYSTEM "logger.dtd">
-<log>
-<record>
-  <date>2024-05-23T14:39:43.309112Z</date>
-  <millis>1716475183309</millis>
-  <nanos>112000</nanos>
-  <sequence>0</sequence>
-  <logger>org.apache.catalina.core.StandardService</logger>
-  <level>INFO</level>
-  <class>org.apache.catalina.core.StandardService</class>
-  <method>startInternal</method>
-  <thread>1</thread>
-  <message>Starting service [Tomcat]</message>
-</record>
-<record>
-  <date>2024-05-23T14:39:43.311032Z</date>
-  <millis>1716475183311</millis>
-  <nanos>32000</nanos>
-  <sequence>1</sequence>
-  <logger>org.apache.catalina.core.StandardEngine</logger>
-  <level>INFO</level>
-  <class>org.apache.catalina.core.StandardEngine</class>
-  <method>startInternal</method>
-  <thread>1</thread>
-  <message>Starting Servlet engine: [Apache Tomcat/10.1.20]</message>
-</record>
-<record>
-  <date>2024-05-23T14:39:43.333547Z</date>
-  <millis>1716475183333</millis>
-  <nanos>547000</nanos>
-  <sequence>2</sequence>
-  <logger>org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]</logger>
-  <level>INFO</level>
-  <class>org.apache.catalina.core.ApplicationContext</class>
-  <method>log</method>
-  <thread>1</thread>
-  <message>Initializing Spring embedded WebApplicationContext</message>
-</record>
-<record>
-  <date>2024-05-23T14:39:43.487072Z</date>
-  <millis>1716475183487</millis>
-  <nanos>72000</nanos>
-  <sequence>3</sequence>
-  <logger>org.hibernate.jpa.internal.util.LogHelper</logger>
-  <level>INFO</level>
-  <class>org.hibernate.jpa.internal.util.LogHelper</class>
-  <method>logPersistenceUnitInformation</method>
-  <thread>1</thread>
-  <message>HHH000204: Processing PersistenceUnitInfo [name: default]</message>
-</record>
-<record>
-  <date>2024-05-23T14:39:43.513859Z</date>
-  <millis>1716475183513</millis>
-  <nanos>859000</nanos>
-  <sequence>4</sequence>
-  <logger>org.hibernate.Version</logger>
-  <level>INFO</level>
-  <class>org.hibernate.Version</class>
-  <method>logVersion</method>
-  <thread>1</thread>
-  <message>HHH000412: Hibernate ORM core version 6.4.4.Final</message>
-</record>
-<record>
-  <date>2024-05-23T14:39:43.537466Z</date>
-  <millis>1716475183537</millis>
-  <nanos>466000</nanos>
-  <sequence>5</sequence>
-  <logger>org.hibernate.cache.internal.RegionFactoryInitiator</logger>
-  <level>INFO</level>
-  <class>org.hibernate.cache.internal.RegionFactoryInitiator</class>
-  <method>initiateService</method>
-  <thread>1</thread>
-  <message>HHH000026: Second-level cache disabled</message>
-</record>
-<record>
-  <date>2024-05-23T14:39:43.886372Z</date>
-  <millis>1716475183886</millis>
-  <nanos>372000</nanos>
-  <sequence>6</sequence>
-  <logger>org.hibernate.orm.deprecation</logger>
-  <level>WARN</level>
-  <class>org.hibernate.engine.jdbc.dialect.internal.DialectFactoryImpl</class>
-  <method>constructDialect</method>
-  <thread>1</thread>
-  <message>HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)</message>
-</record>
-<record>
-  <date>2024-05-23T14:39:44.455771Z</date>
-  <millis>1716475184455</millis>
-  <nanos>771000</nanos>
-  <sequence>7</sequence>
-  <logger>org.hibernate.engine.transaction.jta.platform.internal.JtaPlatformInitiator</logger>
-  <level>INFO</level>
-  <class>org.hibernate.engine.transaction.jta.platform.internal.JtaPlatformInitiator</class>
-  <method>initiateService</method>
-  <thread>1</thread>
-  <message>HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)</message>
-</record>
-<record>
-  <date>2024-05-23T14:39:48.988597Z</date>
-  <millis>1716475188988</millis>
-  <nanos>597000</nanos>
-  <sequence>8</sequence>
-  <logger>org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]</logger>
-  <level>INFO</level>
-  <class>org.apache.catalina.core.ApplicationContext</class>
-  <method>log</method>
-  <thread>27</thread>
-  <message>Initializing Spring DispatcherServlet 'dispatcherServlet'</message>
-</record>
-</log>
+[2024-05-27 21:40:46.755] - 25385 정보 [restartedMain] --- org.apache.catalina.core.StandardService: Starting service [Tomcat]
+[2024-05-27 21:40:46.758] - 25385 정보 [restartedMain] --- org.apache.catalina.core.StandardEngine: Starting Servlet engine: [Apache Tomcat/10.1.20]
+[2024-05-27 21:40:46.776] - 25385 정보 [restartedMain] --- org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]: Initializing Spring embedded WebApplicationContext
+[2024-05-27 21:40:46.853] - 25385 INFO [restartedMain] --- org.hibernate.jpa.internal.util.LogHelper: HHH000204: Processing PersistenceUnitInfo [name: default]
+[2024-05-27 21:40:46.874] - 25385 INFO [restartedMain] --- org.hibernate.Version: HHH000412: Hibernate ORM core version 6.4.4.Final
+[2024-05-27 21:40:46.889] - 25385 INFO [restartedMain] --- org.hibernate.cache.internal.RegionFactoryInitiator: HHH000026: Second-level cache disabled
+[2024-05-27 21:40:47.153] - 25385 WARN [restartedMain] --- org.hibernate.orm.deprecation: HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+[2024-05-27 21:40:47.552] - 25385 INFO [restartedMain] --- org.hibernate.engine.transaction.jta.platform.internal.JtaPlatformInitiator: HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+[2024-05-27 21:40:47.784] - 25385 정보 [restartedMain] --- org.apache.catalina.core.StandardService: Stopping service [Tomcat]
+[2024-05-27 21:40:47.785] - 25385 경고 [restartedMain] --- org.apache.catalina.loader.WebappClassLoaderBase: The web application [ROOT] appears to have started a thread named [HikariPool-1 housekeeper] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ java.base@17.0.10/jdk.internal.misc.Unsafe.park(Native Method)
+ java.base@17.0.10/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:252)
+ java.base@17.0.10/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:1672)
+ java.base@17.0.10/java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1182)
+ java.base@17.0.10/java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:899)
+ java.base@17.0.10/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1062)
+ java.base@17.0.10/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1122)
+ java.base@17.0.10/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+ java.base@17.0.10/java.lang.Thread.run(Thread.java:840)
+[2024-05-27 21:40:47.785] - 25385 경고 [restartedMain] --- org.apache.catalina.loader.WebappClassLoaderBase: The web application [ROOT] appears to have started a thread named [HikariPool-1 connection adder] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ java.base@17.0.10/jdk.internal.misc.Unsafe.park(Native Method)
+ java.base@17.0.10/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:252)
+ java.base@17.0.10/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:1672)
+ java.base@17.0.10/java.util.concurrent.LinkedBlockingQueue.poll(LinkedBlockingQueue.java:460)
+ java.base@17.0.10/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1061)
+ java.base@17.0.10/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1122)
+ java.base@17.0.10/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+ java.base@17.0.10/java.lang.Thread.run(Thread.java:840)
+[2024-05-27 21:40:47.786] - 25385 경고 [restartedMain] --- org.apache.catalina.loader.WebappClassLoaderBase: The web application [ROOT] appears to have started a thread named [lettuce-timer-3-1] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ java.base@17.0.10/java.lang.Thread.sleep(Native Method)
+ app//io.netty.util.HashedWheelTimer$Worker.waitForNextTick(HashedWheelTimer.java:591)
+ app//io.netty.util.HashedWheelTimer$Worker.run(HashedWheelTimer.java:487)
+ app//io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+ java.base@17.0.10/java.lang.Thread.run(Thread.java:840)

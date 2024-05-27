@@ -1,112 +1,85 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE log SYSTEM "logger.dtd">
-<log>
-<record>
-  <date>2024-05-23T14:44:30.258226Z</date>
-  <millis>1716475470258</millis>
-  <nanos>226000</nanos>
-  <sequence>0</sequence>
-  <logger>org.apache.catalina.core.StandardService</logger>
-  <level>INFO</level>
-  <class>org.apache.catalina.core.StandardService</class>
-  <method>startInternal</method>
-  <thread>1</thread>
-  <message>Starting service [Tomcat]</message>
-</record>
-<record>
-  <date>2024-05-23T14:44:30.260135Z</date>
-  <millis>1716475470260</millis>
-  <nanos>135000</nanos>
-  <sequence>1</sequence>
-  <logger>org.apache.catalina.core.StandardEngine</logger>
-  <level>INFO</level>
-  <class>org.apache.catalina.core.StandardEngine</class>
-  <method>startInternal</method>
-  <thread>1</thread>
-  <message>Starting Servlet engine: [Apache Tomcat/10.1.20]</message>
-</record>
-<record>
-  <date>2024-05-23T14:44:30.282238Z</date>
-  <millis>1716475470282</millis>
-  <nanos>238000</nanos>
-  <sequence>2</sequence>
-  <logger>org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]</logger>
-  <level>INFO</level>
-  <class>org.apache.catalina.core.ApplicationContext</class>
-  <method>log</method>
-  <thread>1</thread>
-  <message>Initializing Spring embedded WebApplicationContext</message>
-</record>
-<record>
-  <date>2024-05-23T14:44:30.425040Z</date>
-  <millis>1716475470425</millis>
-  <nanos>40000</nanos>
-  <sequence>3</sequence>
-  <logger>org.hibernate.jpa.internal.util.LogHelper</logger>
-  <level>INFO</level>
-  <class>org.hibernate.jpa.internal.util.LogHelper</class>
-  <method>logPersistenceUnitInformation</method>
-  <thread>1</thread>
-  <message>HHH000204: Processing PersistenceUnitInfo [name: default]</message>
-</record>
-<record>
-  <date>2024-05-23T14:44:30.451549Z</date>
-  <millis>1716475470451</millis>
-  <nanos>549000</nanos>
-  <sequence>4</sequence>
-  <logger>org.hibernate.Version</logger>
-  <level>INFO</level>
-  <class>org.hibernate.Version</class>
-  <method>logVersion</method>
-  <thread>1</thread>
-  <message>HHH000412: Hibernate ORM core version 6.4.4.Final</message>
-</record>
-<record>
-  <date>2024-05-23T14:44:30.474887Z</date>
-  <millis>1716475470474</millis>
-  <nanos>887000</nanos>
-  <sequence>5</sequence>
-  <logger>org.hibernate.cache.internal.RegionFactoryInitiator</logger>
-  <level>INFO</level>
-  <class>org.hibernate.cache.internal.RegionFactoryInitiator</class>
-  <method>initiateService</method>
-  <thread>1</thread>
-  <message>HHH000026: Second-level cache disabled</message>
-</record>
-<record>
-  <date>2024-05-23T14:44:30.838576Z</date>
-  <millis>1716475470838</millis>
-  <nanos>576000</nanos>
-  <sequence>6</sequence>
-  <logger>org.hibernate.orm.deprecation</logger>
-  <level>WARN</level>
-  <class>org.hibernate.engine.jdbc.dialect.internal.DialectFactoryImpl</class>
-  <method>constructDialect</method>
-  <thread>1</thread>
-  <message>HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)</message>
-</record>
-<record>
-  <date>2024-05-23T14:44:31.450332Z</date>
-  <millis>1716475471450</millis>
-  <nanos>332000</nanos>
-  <sequence>7</sequence>
-  <logger>org.hibernate.engine.transaction.jta.platform.internal.JtaPlatformInitiator</logger>
-  <level>INFO</level>
-  <class>org.hibernate.engine.transaction.jta.platform.internal.JtaPlatformInitiator</class>
-  <method>initiateService</method>
-  <thread>1</thread>
-  <message>HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)</message>
-</record>
-<record>
-  <date>2024-05-23T14:44:32.067065Z</date>
-  <millis>1716475472067</millis>
-  <nanos>65000</nanos>
-  <sequence>8</sequence>
-  <logger>org.apache.catalina.core.StandardService</logger>
-  <level>INFO</level>
-  <class>org.apache.catalina.core.StandardService</class>
-  <method>stopInternal</method>
-  <thread>1</thread>
-  <message>Stopping service [Tomcat]</message>
-</record>
-</log>
+[2024-05-27 21:43:53.781] - 25489 정보 [restartedMain] --- org.apache.catalina.core.StandardService: Starting service [Tomcat]
+[2024-05-27 21:43:53.784] - 25489 정보 [restartedMain] --- org.apache.catalina.core.StandardEngine: Starting Servlet engine: [Apache Tomcat/10.1.20]
+[2024-05-27 21:43:53.805] - 25489 정보 [restartedMain] --- org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]: Initializing Spring embedded WebApplicationContext
+[2024-05-27 21:43:53.898] - 25489 INFO [restartedMain] --- org.hibernate.jpa.internal.util.LogHelper: HHH000204: Processing PersistenceUnitInfo [name: default]
+[2024-05-27 21:43:53.920] - 25489 INFO [restartedMain] --- org.hibernate.Version: HHH000412: Hibernate ORM core version 6.4.4.Final
+[2024-05-27 21:43:53.941] - 25489 INFO [restartedMain] --- org.hibernate.cache.internal.RegionFactoryInitiator: HHH000026: Second-level cache disabled
+[2024-05-27 21:43:54.181] - 25489 WARN [restartedMain] --- org.hibernate.orm.deprecation: HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+[2024-05-27 21:43:54.582] - 25489 INFO [restartedMain] --- org.hibernate.engine.transaction.jta.platform.internal.JtaPlatformInitiator: HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+[2024-05-27 21:43:54.850] - 25489 심각 [restartedMain] --- org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]: Exception starting filter [jwtAuthorizationFilter]
+java.lang.NullPointerException: Cannot invoke "org.apache.commons.logging.Log.isDebugEnabled()" because "this.logger" is null
+	at org.springframework.web.filter.GenericFilterBean.init(GenericFilterBean.java:239)
+	at org.apache.catalina.core.ApplicationFilterConfig.initFilter(ApplicationFilterConfig.java:263)
+	at org.apache.catalina.core.ApplicationFilterConfig.<init>(ApplicationFilterConfig.java:102)
+	at org.apache.catalina.core.StandardContext.filterStart(StandardContext.java:4301)
+	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:4916)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:171)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1332)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1322)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:75)
+	at java.base/java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:145)
+	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:866)
+	at org.apache.catalina.core.StandardHost.startInternal(StandardHost.java:845)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:171)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1332)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1322)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:75)
+	at java.base/java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:145)
+	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:866)
+	at org.apache.catalina.core.StandardEngine.startInternal(StandardEngine.java:240)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:171)
+	at org.apache.catalina.core.StandardService.startInternal(StandardService.java:433)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:171)
+	at org.apache.catalina.core.StandardServer.startInternal(StandardServer.java:921)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:171)
+	at org.apache.catalina.startup.Tomcat.start(Tomcat.java:437)
+	at org.springframework.boot.web.embedded.tomcat.TomcatWebServer.initialize(TomcatWebServer.java:126)
+	at org.springframework.boot.web.embedded.tomcat.TomcatWebServer.<init>(TomcatWebServer.java:105)
+	at org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory.getTomcatWebServer(TomcatServletWebServerFactory.java:499)
+	at org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory.getWebServer(TomcatServletWebServerFactory.java:218)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.createWebServer(ServletWebServerApplicationContext.java:188)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.onRefresh(ServletWebServerApplicationContext.java:162)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:618)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:754)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:456)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:334)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1343)
+	at com.example.mansshop_boot.MansShopBootApplication.main(MansShopBootApplication.java:10)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50)
+
+[2024-05-27 21:43:54.851] - 25489 심각 [restartedMain] --- org.apache.catalina.core.StandardContext: One or more Filters failed to start. Full details will be found in the appropriate container log file
+[2024-05-27 21:43:54.851] - 25489 심각 [restartedMain] --- org.apache.catalina.core.StandardContext: Context [] startup failed due to previous errors
+[2024-05-27 21:43:54.853] - 25489 경고 [restartedMain] --- org.apache.catalina.loader.WebappClassLoaderBase: The web application [ROOT] appears to have started a thread named [HikariPool-1 housekeeper] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ java.base@17.0.10/jdk.internal.misc.Unsafe.park(Native Method)
+ java.base@17.0.10/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:252)
+ java.base@17.0.10/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:1672)
+ java.base@17.0.10/java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1182)
+ java.base@17.0.10/java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:899)
+ java.base@17.0.10/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1062)
+ java.base@17.0.10/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1122)
+ java.base@17.0.10/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+ java.base@17.0.10/java.lang.Thread.run(Thread.java:840)
+[2024-05-27 21:43:54.853] - 25489 경고 [restartedMain] --- org.apache.catalina.loader.WebappClassLoaderBase: The web application [ROOT] appears to have started a thread named [HikariPool-1 connection adder] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ java.base@17.0.10/jdk.internal.misc.Unsafe.park(Native Method)
+ java.base@17.0.10/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:252)
+ java.base@17.0.10/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:1672)
+ java.base@17.0.10/java.util.concurrent.LinkedBlockingQueue.poll(LinkedBlockingQueue.java:460)
+ java.base@17.0.10/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1061)
+ java.base@17.0.10/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1122)
+ java.base@17.0.10/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+ java.base@17.0.10/java.lang.Thread.run(Thread.java:840)
+[2024-05-27 21:43:54.854] - 25489 경고 [restartedMain] --- org.apache.catalina.loader.WebappClassLoaderBase: The web application [ROOT] appears to have started a thread named [lettuce-timer-3-1] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ java.base@17.0.10/java.lang.Thread.sleep(Native Method)
+ app//io.netty.util.HashedWheelTimer$Worker.waitForNextTick(HashedWheelTimer.java:591)
+ app//io.netty.util.HashedWheelTimer$Worker.run(HashedWheelTimer.java:487)
+ app//io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+ java.base@17.0.10/java.lang.Thread.run(Thread.java:840)
+[2024-05-27 21:43:54.870] - 25489 정보 [restartedMain] --- org.apache.catalina.core.StandardService: Stopping service [Tomcat]

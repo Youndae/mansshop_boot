@@ -61,4 +61,12 @@ public class Member {
         this.memberPoint = memberPoint == null ? 0 : memberPoint;
         this.createdAt = createdAt;
     }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
+    }
 }
