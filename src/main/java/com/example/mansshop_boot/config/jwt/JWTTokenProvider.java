@@ -1,4 +1,4 @@
-package com.example.mansshop_boot.service.jwt;
+package com.example.mansshop_boot.config.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.Date;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -25,6 +26,9 @@ public class JWTTokenProvider {
 
     @Value("#{jwt['token.all.prefix']}")
     private String tokenPrefix;
+
+    @Value("#{jwt['token.access.header']}")
+    private String accessHeader;
 
     @Value("#{jwt['token.access.secret']}")
     private String accessSecret;
@@ -56,6 +60,9 @@ public class JWTTokenProvider {
     @Value("#{jwt['cookie.ino.header']}")
     private String inoHeader;
 
+    @Value("#{jwt['cookie.ino.age']}")
+    private Long inoCookieAge;
+
     private final StringRedisTemplate redisTemplate;
 
     /**
@@ -73,6 +80,13 @@ public class JWTTokenProvider {
                 .withExpiresAt(new Date(System.currentTimeMillis() + expiration))
                 .withClaim("userId", userId)
                 .sign(Algorithm.HMAC512(secretKey));
+    }
+
+    public String createIno() {
+
+        return UUID.randomUUID()
+                    .toString()
+                    .replace("-", "");
     }
 
     /**
@@ -98,7 +112,7 @@ public class JWTTokenProvider {
      *
      * 정상인 경우 Redis 데이터와 비교.
      * 일치한다면 userId 반환
-     * 불일치한다면 토큰은 정상이기 때문에 탈취로 판단. TOKEN_STEALING 반환
+     * 불일치한다면 토큰은 정상이기 때문에 탈취로 판단. redis 데이터 삭제 후 TOKEN_STEALING 반환
      */
     public String verifyAccessToken(String accessTokenValue, String inoValue) {
         String claimByUserId = getClaimByUserId(accessTokenValue, accessSecret);
@@ -115,6 +129,7 @@ public class JWTTokenProvider {
         if(accessTokenValue.equals(redisValue))
             return claimByUserId;
         else{
+            deleteTokenValueToRedis(claimByUserId, inoValue);
             return Result.TOKEN_STEALING.getResultKey();
         }
     }
@@ -131,6 +146,7 @@ public class JWTTokenProvider {
      * 해당 메소드를 호출하기 이전 AccessToken을 decode해서 claim을 꺼낸 뒤 보내야 함.
      *
      * 두 토큰은 같은 Claim을 갖기 때문에 두 Claim이 다른 경우 탈취로 판단.
+     * 두 토큰의 Claim에 해당하는 redis 데이터를 삭제 후 탈취 응답.
      *
      * 일치한다면 Redis 데이터와 비교.
      * Redis 데이터와 일치한다면 아이디 반환
@@ -144,8 +160,9 @@ public class JWTTokenProvider {
 
             return claimByUserId;
         }else if(!claimByUserId.equals(accessTokenClaim)){
-            /*deleteTokenValueToRedis(claimByUserId, inoValue);
-            deleteTokenValueToRedis(accessTokenClaim, inoValue);*/
+            deleteTokenValueToRedis(claimByUserId, inoValue);
+            deleteTokenValueToRedis(accessTokenClaim, inoValue);
+
             return Result.TOKEN_STEALING.getResultKey();
         }
 
@@ -295,6 +312,30 @@ public class JWTTokenProvider {
                 .toString();
     }
 
+
+    /**
+     *
+     * @param tokenHeader
+     * @param tokenValue
+     * @param tokenCookieAge
+     * @param response
+     *
+     * Token Cookie 생성
+     */
+    public void setTokenCookie(String tokenHeader, String tokenValue, Long tokenCookieAge, HttpServletResponse response) {
+
+        response.addHeader("Set-Cookie"
+                            , createCookie(
+                                        tokenHeader
+                                        , tokenValue
+                                        , Duration.ofDays(tokenCookieAge)
+                            ));
+    }
+
+    public void setAccessTokenToResponseHeader(String accessToken, HttpServletResponse response){
+        response.addHeader(accessHeader, accessToken);
+    }
+
     /**
      *
      * @param response
@@ -330,5 +371,44 @@ public class JWTTokenProvider {
     public void deleteRedisDataAndCookie(String userId, String ino, HttpServletResponse response){
         deleteTokenValueToRedis(userId, ino);
         deleteCookie(response);
+    }
+
+    /**
+     *
+     * @param userId
+     * @param response
+     *
+     * issue ino, AccessToken, RefreshToken
+     */
+    public void issueAllTokens(String userId, HttpServletResponse response) {
+        String ino = createIno();
+        issueTokens(userId, ino, response);
+
+        setTokenCookie(inoHeader, ino, inoCookieAge, response);
+    }
+
+    /**
+     *
+     * @param userId
+     * @param ino
+     * @param response
+     *
+     * issue AccessToken, RefreshToken
+     */
+    public void issueTokens(String userId, String ino, HttpServletResponse response) {
+        String accessToken = createToken(userId, accessSecret, accessExpiration);
+        String refreshToken = createToken(userId, refreshSecret, refreshExpiration);
+
+        String accessKey = redisAccessPrefix + ino + userId;
+        String refreshKey = redisRefreshPrefix + ino + userId;
+
+        saveTokenToRedis(accessKey, accessToken);
+        saveTokenToRedis(refreshKey, refreshToken);
+
+        accessToken = tokenPrefix + accessToken;
+        refreshToken = tokenPrefix + refreshToken;
+
+        setAccessTokenToResponseHeader(accessToken, response);
+        setTokenCookie(refreshHeader, refreshToken, refreshExpiration, response);
     }
 }

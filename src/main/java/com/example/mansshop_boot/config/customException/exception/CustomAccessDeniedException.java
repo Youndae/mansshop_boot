@@ -1,5 +1,6 @@
-package com.example.mansshop_boot.config.customException;
+package com.example.mansshop_boot.config.customException.exception;
 
+import com.example.mansshop_boot.config.customException.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
