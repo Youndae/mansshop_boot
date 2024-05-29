@@ -7,6 +7,7 @@ import com.example.mansshop_boot.domain.enumuration.OAuthProvider;
 import com.example.mansshop_boot.domain.enumuration.Role;
 import com.example.mansshop_boot.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -17,12 +18,14 @@ import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final MemberRepository memberRepository;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        log.info("OAuth2 loadUser");
         OAuth2User oAuth2User = super.loadUser(userRequest);
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
         OAuth2Response oAuth2Response = null;
@@ -50,7 +53,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                             .auth(Role.MEMBER.getKey())
                             .build();
 
-            member.addAuth(auth);
+            member.addMemberAuth(auth);
 
             memberRepository.save(member);
 

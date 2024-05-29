@@ -63,6 +63,20 @@ public class JWTTokenProvider {
     @Value("#{jwt['cookie.ino.age']}")
     private Long inoCookieAge;
 
+    @Value("#{jwt['token.temporary.header']}")
+    private String temporaryHeader;
+
+    @Value("#{jwt['token.temporary.expiration']}")
+    private Long temporaryExpiration;
+
+    @Value("#{jwt['token.temporary.secret']}")
+    private String temporarySecret;
+
+    @Value("#{jwt['token.temporary.redis.expirationMinute']}")
+    private Long temporaryRedisExpiration;
+
+
+
     private final StringRedisTemplate redisTemplate;
 
     /**
@@ -125,6 +139,9 @@ public class JWTTokenProvider {
 
         String redisKey = setRedisKey(redisAccessPrefix, inoValue, claimByUserId);
         String redisValue = getTokenValueToRedis(redisKey);
+
+        log.info("verify :: accessToken : {}", accessTokenValue);
+        log.info("verify :: redis Token : {}", redisValue);
 
         if(accessTokenValue.equals(redisValue))
             return claimByUserId;
@@ -233,10 +250,10 @@ public class JWTTokenProvider {
      *
      * Redis에 토큰 데이터 저장
      */
-    public void saveTokenToRedis(String key, String value) {
+    public void saveTokenToRedis(String key, String value, Duration redisExpiration) {
         ValueOperations<String, String> stringValueOperations = redisTemplate.opsForValue();
 
-        stringValueOperations.set(key, value, Duration.ofDays(redisExpiration));
+        stringValueOperations.set(key, value, redisExpiration);
     }
 
     /**
@@ -322,13 +339,13 @@ public class JWTTokenProvider {
      *
      * Token Cookie 생성
      */
-    public void setTokenCookie(String tokenHeader, String tokenValue, Long tokenCookieAge, HttpServletResponse response) {
+    public void setTokenCookie(String tokenHeader, String tokenValue, Duration tokenCookieAge, HttpServletResponse response) {
 
         response.addHeader("Set-Cookie"
                             , createCookie(
                                         tokenHeader
                                         , tokenValue
-                                        , Duration.ofDays(tokenCookieAge)
+                                        , tokenCookieAge
                             ));
     }
 
@@ -384,7 +401,7 @@ public class JWTTokenProvider {
         String ino = createIno();
         issueTokens(userId, ino, response);
 
-        setTokenCookie(inoHeader, ino, inoCookieAge, response);
+        setTokenCookie(inoHeader, ino, Duration.ofDays(inoCookieAge), response);
     }
 
     /**
@@ -402,13 +419,77 @@ public class JWTTokenProvider {
         String accessKey = redisAccessPrefix + ino + userId;
         String refreshKey = redisRefreshPrefix + ino + userId;
 
-        saveTokenToRedis(accessKey, accessToken);
-        saveTokenToRedis(refreshKey, refreshToken);
+        Duration tokenExpiration = Duration.ofDays(redisExpiration);
+        saveTokenToRedis(accessKey, accessToken, tokenExpiration);
+        saveTokenToRedis(refreshKey, refreshToken, tokenExpiration);
 
         accessToken = tokenPrefix + accessToken;
         refreshToken = tokenPrefix + refreshToken;
 
         setAccessTokenToResponseHeader(accessToken, response);
-        setTokenCookie(refreshHeader, refreshToken, refreshExpiration, response);
+        setTokenCookie(refreshHeader, refreshToken, Duration.ofDays(refreshExpiration), response);
+    }
+
+    /**
+     *
+     * @param userId
+     * @param response
+     *
+     * 임시 토큰 발행 및 Redis에 저장, 응답 쿠키에 저장 처리
+     * OAuth2 로그인 사용자에 대한 토큰 발급 대응.
+     * response.sendRedirect로 처리되기 때문에 AccessToken 저장 처리를 Client에서 수행할 수 없기 때문에 임시 토큰 발행.
+     */
+    public void createTemporaryToken(String userId, HttpServletResponse response) {
+        String temporaryToken = createToken(userId, temporarySecret, temporaryExpiration);
+
+        saveTokenToRedis(userId, temporaryToken, Duration.ofMinutes(temporaryRedisExpiration));
+        setTokenCookie(temporaryHeader, temporaryToken, Duration.ofMinutes(temporaryRedisExpiration), response);
+
+    }
+
+    /**
+     *
+     * @param temporaryTokenValue
+     * @return
+     *
+     * 임시토큰 검증
+     * 임시 토큰 검증이 정상적으로 수행되어 Claim을 반환받았으나 Redis 데이터와 일치하지 않는다면 위장 토큰으로 의심할 수 있다.
+     * 위장 토큰이 생성되었고 해당 토큰이 정상적으로 Claim을 반환한다는 것은 SecretKey 유출로 볼 수 있다고 생각해 로그를 남겨 확인할 수 있도록 처리.
+     *
+     */
+    public String verifyTemporaryToken(String temporaryTokenValue) {
+        String claimByUserId = getClaimByUserId(temporaryTokenValue, temporarySecret);
+
+        if(claimByUserId.equals(Result.WRONG_TOKEN.getResultKey())
+                || claimByUserId.equals(Result.TOKEN_EXPIRATION.getResultKey())) {
+
+            return claimByUserId;
+        }
+
+        String redisValue = getTokenValueToRedis(claimByUserId);
+
+        if(temporaryTokenValue.equals(redisValue))
+            return claimByUserId;
+        else{
+            log.warn("Temporary token claim is not the same as Redis data");
+            return Result.TOKEN_STEALING.getResultKey();
+        }
+    }
+
+    /**
+     *
+     * @param userId
+     * @param response
+     *
+     * OAuth 사용자의 임시 토큰 발급 이후 토큰 발급 요청으로 발급 처리 된 이후
+     * 임시 토큰의 쿠키 및 Redis 데이터 삭제
+     */
+    public void deleteTemporaryTokenAndCookie(String userId, HttpServletResponse response) {
+        redisTemplate.delete(userId);
+
+        Cookie cookie = new Cookie(temporaryHeader, null);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        response.addCookie(cookie);
     }
 }

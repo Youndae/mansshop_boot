@@ -1,8 +1,8 @@
 package com.example.mansshop_boot.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -15,6 +15,7 @@ import java.util.List;
 @Getter
 @Builder
 @NoArgsConstructor
+@EqualsAndHashCode
 public class Member {
 
     @Id
@@ -37,7 +38,7 @@ public class Member {
     @OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private final List<Auth> auths = new ArrayList<>();
 
-    public void addAuth(Auth auth) {
+    public void addMemberAuth(Auth auth) {
         auths.add(auth);
         auth.setMember(this);
     }
@@ -53,7 +54,7 @@ public class Member {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
         this.userId = userId;
-        this.userPw = passwordEncoder.encode(userPw);
+        this.userPw = userPw == null ? null : passwordEncoder.encode(userPw);
         this.userName = userName;
         this.nickname = nickname;
         this.userEmail = userEmail;

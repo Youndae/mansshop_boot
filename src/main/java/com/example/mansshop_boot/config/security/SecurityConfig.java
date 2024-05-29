@@ -25,12 +25,6 @@ public class SecurityConfig {
 
     private final CorsFilter corsFilter;
 
-    /*private final MemberRepository memberRepository;
-
-    private final JWTTokenProvider jwtTokenProvider;
-
-    private final JWTTokenService jwtTokenService;*/
-
     private final CustomOAuth2UserService customOAuth2UserService;
 
     private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
@@ -67,10 +61,12 @@ public class SecurityConfig {
         http
                 .oauth2Login((oauth2) ->
                         oauth2
+                                .loginPage("/login")
                                 .userInfoEndpoint((userInfoEndpointConfig) ->
                                         userInfoEndpointConfig
                                                 .userService(customOAuth2UserService))
-                                .successHandler(customOAuth2SuccessHandler));
+                                .successHandler(customOAuth2SuccessHandler)
+                );
 
         return http.build();
     }

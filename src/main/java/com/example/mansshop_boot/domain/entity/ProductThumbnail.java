@@ -21,7 +21,7 @@ public class ProductThumbnail {
     @JoinColumn(name = "productId")
     private Product product;
 
-    private String productThumbnail;
+    private String imageName;
 
     private int productThumbnailStep;
 }

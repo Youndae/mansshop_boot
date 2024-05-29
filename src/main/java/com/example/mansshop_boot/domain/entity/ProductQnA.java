@@ -32,4 +32,8 @@ public class ProductQnA {
     private Date createdAt;
 
     private int productQnAStat;
+
+    private Long productQnAGroupId;
+
+    private int productQnAStep;
 }

@@ -27,12 +27,12 @@
         </rollingPolicy>
     </appender>
 
-    <logger name="jdbc" level="OFF">
+    <logger name="jdbc" level="info">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="ROLLING_LOG_FILE"/>
     </logger>
 
-    <logger name="jdbc.sqlonly" level="OFF">
+    <logger name="jdbc.sqlonly" level="info">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="ROLLING_LOG_FILE"/>
     </logger>
@@ -44,7 +44,7 @@
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="ROLLING_LOG_FILE"/>
     </logger>
-    <logger name="jdbc.resultset" level="OFF">
+    <logger name="jdbc.resultset" level="info">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="ROLLING_LOG_FILE"/>
     </logger>

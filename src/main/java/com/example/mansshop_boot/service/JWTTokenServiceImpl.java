@@ -30,7 +30,7 @@ public class JWTTokenServiceImpl implements JWTTokenService{
 
     @Override
     public void tokenStealingExceptionResponse(HttpServletResponse response) {
-        response.setStatus(ErrorCode.TOKEN_STEALING.getHttpStatus().value());
+        response.setStatus(ErrorCode.TOKEN_STEALING.getHttpStatus());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("utf-8");
     }

@@ -8,12 +8,13 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ErrorCode {
 
-    ACCESS_DENIED(HttpStatus.FORBIDDEN, "AccessDeniedException")
-    , BAD_CREDENTIALS(HttpStatus.FORBIDDEN, "BadCredentialsException")
-    , TOKEN_STEALING(HttpStatus.valueOf(800), "TokenStealingException")
-    , TOKEN_EXPIRED(HttpStatus.valueOf(401), "TokenExpiredException");
+    ACCESS_DENIED(403, "AccessDeniedException")
+    , BAD_CREDENTIALS(403, "BadCredentialsException")
+    , TOKEN_STEALING(800, "TokenStealingException")
+    , TOKEN_EXPIRED(401, "TokenExpiredException")
+    , NOT_FOUND(400, "NotFoundException");
 
-    private final HttpStatus httpStatus;
+    private final int httpStatus;
 
     private final String message;
 }

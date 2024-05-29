@@ -8,18 +8,18 @@ import org.springframework.core.io.ClassPathResource;
 @Configuration
 public class PropertiesConfig {
 
-    @Bean(name = "filePath")
-    public PropertiesFactoryBean filePathPropertiesFactoryBean() throws Exception {
-        String filePropertiesPath = "filepath.properties";
-
-        return setPropertiesFactoryBean(filePropertiesPath);
-    }
-
     @Bean(name = "jwt")
     public PropertiesFactoryBean jwtPropertiesFactoryBean() throws Exception {
         String jwtPropertiesPath = "jwt.properties";
 
         return setPropertiesFactoryBean(jwtPropertiesPath);
+    }
+
+    @Bean(name = "filePath")
+    public PropertiesFactoryBean filePathPropertiesFactoryBean() throws Exception {
+        String filePropertiesPath = "filePath.properties";
+
+        return setPropertiesFactoryBean(filePropertiesPath);
     }
 
 

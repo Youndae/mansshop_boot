@@ -1,0 +1,101 @@
+.join-header {
+    text-align: center;
+}
+
+.join-content {
+    font-size: large;
+    padding-left: 45%;
+    font-weight: bold;
+}
+
+.join-form div {
+    margin: 10px;
+}
+
+.join-content input {
+    width: 270px;
+    height: 30px;
+}
+
+.join-form button {
+    text-align: center;
+    width: 100px;
+    height: 30px;
+    margin-left: 7%;
+}
+
+
+/* login */
+
+.content div {
+    text-align: center;
+}
+
+.login-header {
+    font-size: x-large;
+    margin: 10% 0 2% 0;
+}
+
+.login-form input {
+    height: 40px;
+    width: 300px;
+}
+
+.login-btn, .join-search-area button {
+    margin-top: 10px;
+    height: 30px;
+}
+
+.login-btn button {
+    width: 300px;
+}
+
+.join-search-area button {
+    width: 90px;
+    margin-left: 5px;
+}
+
+.join-search-area {
+    margin-top: 10px;
+}
+
+.oauth-area {
+    margin-top: 30px;
+}
+
+.oauth-btn {
+    margin-top: 5px;
+}
+
+.oauth-btn img {
+    width: 200px;
+}
+
+
+/* searchId */
+
+.search-radio-area {
+    margin-bottom: 1%;
+}
+
+.form-group {
+    margin-bottom: 1%;
+}
+
+.search-id-form input {
+    width: 195px;
+    text-align: center;
+}
+
+.search-pw-form input {
+    width: 195px;
+    text-align: center;
+}
+
+.btn-area {
+    margin-top: 1%;
+}
+
+.btn-area button {
+    margin-left: 1%;
+}

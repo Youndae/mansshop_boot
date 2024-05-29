@@ -1,0 +1,63 @@
+import React, {useEffect, useState} from 'react';
+
+import { defaultAxios } from "../../../module/customAxios";
+import {createPagingObject} from "../../../module/pagingModule";
+
+import {useSearchParams} from "react-router-dom";
+import Paging from "../../ui/Paging";
+import MainContent from "../../ui/MainContent";
+
+function SearchProduct() {
+    const [params] = useSearchParams();
+    const page = params.get('page') == null ? 1 : params.get('page');
+    const keyword = params.get('keyword');
+    console.log('search : ', keyword);
+
+    const [data, setData] = useState([]);
+    const [pagingData, setPagingData] = useState({
+        startPage: 0,
+        endPage: 0,
+        prev: false,
+        next: false,
+        activeNo: page,
+    });
+
+    useEffect(() => {
+        getSearchProductList();
+    }, [page, keyword]);
+
+    const getSearchProductList = async () => {
+        await defaultAxios.get(`/main/search?keyword=${keyword}&page=${page}`)
+            .then(res => {
+                setData(res.data.content);
+                console.log('search axios res : ', res);
+                const pagingObject = createPagingObject(page, res.data.totalPages);
+
+                setPagingData({
+                    startPage: pagingObject.startPage,
+                    endPage: pagingObject.endPage,
+                    prev: pagingObject.prev,
+                    next: pagingObject.next,
+                    activeNo: page,
+                });
+            })
+            .catch(err => {
+                console.error('search axios error : ', err);
+            })
+    }
+
+    return (
+        <>
+            <MainContent
+                data={data}
+                classification={''}
+            />
+            <Paging
+                pagingData={pagingData}
+                keywor={keyword}
+            />
+        </>
+    )
+}
+
+export default SearchProduct;
