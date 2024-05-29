@@ -27,17 +27,18 @@ function Navbar() {
 
     const handleSearchBtn = () => {
         //상품 검색 요청
+        navigate(`/search?keyword=${keyword}`);
     }
 
     const handleClassificationBtn = (e) => {
-        const btnName = e.target.text;
-
+        const btnName = e.target.textContent;
+        console.log('navbar :: btnName : ', btnName);
         if(btnName === 'BEST')
             navigate('/');
         else if(btnName === 'NEW')
             navigate('/new');
         else
-            navigate(`/${btnName}`);
+            navigate(`/category/${btnName}`);
     }
 
     return (

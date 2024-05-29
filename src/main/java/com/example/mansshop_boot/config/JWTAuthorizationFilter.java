@@ -18,6 +18,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -76,14 +77,6 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
     private final JWTTokenProvider jwtTokenProvider;
 
     private final JWTTokenService jwtTokenService;
-
-    /*public JWTAuthorizationFilter(MemberRepository memberRepository
-                                , JWTTokenProvider tokenProvider
-                                , JWTTokenService jwtTokenService) {
-        this.memberRepository = memberRepository;
-        this.jwtTokenProvider = tokenProvider;
-        this.jwtTokenService = jwtTokenService;
-    }*/
 
     @Value("#{jwt['token.all.prefix']}")
     private String tokenPrefix;

@@ -32,6 +32,10 @@ public class QProductReview extends EntityPathBase<ProductReview> {
 
     public final StringPath reviewContent = createString("reviewContent");
 
+    public final NumberPath<Long> reviewGroupId = createNumber("reviewGroupId", Long.class);
+
+    public final NumberPath<Integer> reviewStep = createNumber("reviewStep", Integer.class);
+
     public final DateTimePath<java.util.Date> updatedAt = createDateTime("updatedAt", java.util.Date.class);
 
     public QProductReview(String variable) {

@@ -1,7 +1,10 @@
 package com.example.mansshop_boot.controller;
 
+import com.example.mansshop_boot.domain.dto.member.JoinDTO;
 import com.example.mansshop_boot.domain.dto.member.LoginDTO;
 import com.example.mansshop_boot.service.MemberService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,15 +30,20 @@ public class MemberController {
     private final MemberService memberService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginProc(@RequestBody LoginDTO loginDTO){
+    public ResponseEntity<Long> loginProc(@RequestBody LoginDTO loginDTO
+                                        , HttpServletRequest request
+                                        , HttpServletResponse response){
 
-        return memberService.loginProc(loginDTO);
+        log.info("loginDTO :: id : {}", loginDTO.userId());
+        log.info("loginDTO :: pw : {}", loginDTO.userPw());
+
+        return new ResponseEntity<>(memberService.loginProc(loginDTO, request, response), HttpStatus.OK);
     }
 
-    @PostMapping("/post")
-    public ResponseEntity<?> postTest() {
+    @PostMapping("/join")
+    public ResponseEntity<?> joinProc(@RequestBody JoinDTO joinDTO) {
 
-        return new ResponseEntity<>(null, HttpStatus.OK);
+        return new ResponseEntity<>(memberService.joinProc(joinDTO), HttpStatus.OK);
     }
 
     @GetMapping("/display/{imageName}")
@@ -54,6 +62,13 @@ public class MemberController {
         }
 
         return result;
+    }
+
+    @GetMapping("/oAuth/token")
+    public ResponseEntity<Long> oAuthIssueToken(HttpServletRequest request, HttpServletResponse response) {
+
+
+        return new ResponseEntity<>(memberService.oAuthUserIssueToken(request, response), HttpStatus.OK);
     }
 
 }

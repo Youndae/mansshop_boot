@@ -20,13 +20,13 @@ public class QProductThumbnail extends EntityPathBase<ProductThumbnail> {
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
-    public static final QProductThumbnail productThumbnail1 = new QProductThumbnail("productThumbnail1");
+    public static final QProductThumbnail productThumbnail = new QProductThumbnail("productThumbnail");
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final QProduct product;
+    public final StringPath imageName = createString("imageName");
 
-    public final StringPath productThumbnail = createString("productThumbnail");
+    public final QProduct product;
 
     public final NumberPath<Integer> productThumbnailStep = createNumber("productThumbnailStep", Integer.class);
 

@@ -1,5 +1,6 @@
 package com.example.mansshop_boot.domain.entity;
 
+import com.example.mansshop_boot.domain.enumuration.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,5 +26,11 @@ public class Auth {
 
     public void setMember(Member member) {
         this.member = member;
+    }
+
+    public Auth toMemberAuth() {
+        return Auth.builder()
+                .auth(Role.MEMBER.getKey())
+                .build();
     }
 }
