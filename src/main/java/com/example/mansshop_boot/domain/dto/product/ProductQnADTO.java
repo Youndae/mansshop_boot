@@ -7,5 +7,6 @@ public record ProductQnADTO(
         , String qnaContent
         , Date createdAt
         , int productQnAStep
+        , int productQnAStat
 ) {
 }

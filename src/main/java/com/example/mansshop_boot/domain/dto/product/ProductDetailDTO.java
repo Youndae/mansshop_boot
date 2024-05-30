@@ -12,11 +12,12 @@ public record ProductDetailDTO(
         , String productName
         , long productPrice
         , String productImageName
+        , boolean likeStat
         , List<ProductOptionDTO> productOptionList
         , List<String> productThumbnailList
         , List<String> productInfoImageList
-        , Page<ProductReviewDTO> productReviewList
-        , Page<ProductQnADTO> productQnAList
+        , ProductPageableDTO<ProductReviewDTO> productReviewList
+        , ProductPageableDTO<ProductQnADTO> productQnAList
         , UserStatusDTO userStatus
 ){
 }

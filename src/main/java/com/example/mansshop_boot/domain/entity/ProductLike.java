@@ -6,14 +6,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-
 @Entity
 @Getter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MemberQnA {
+@Builder
+public class ProductLike {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,17 +22,6 @@ public class MemberQnA {
     private Member member;
 
     @ManyToOne
-    @JoinColumn(name = "qnaClassificationId")
-    private QnAClassification qnAClassification;
-
-    private String memberQnAContent;
-
-    private Date createdAt;
-
-    private int memberQnAStat;
-
-    private long memberQnAGroupId;
-
-    private long memberQnAStep;
-
+    @JoinColumn(name = "productId")
+    private Product product;
 }

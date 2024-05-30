@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 
 import { defaultAxios } from "../../../module/customAxios";
-import {createPagingObject} from "../../../module/pagingModule";
+import { mainProductPagingObject } from "../../../module/pagingModule";
 
 import MainContent from "../../ui/MainContent";
 import {useParams, useSearchParams} from "react-router-dom";
@@ -31,7 +31,7 @@ function MainClassification() {
                 console.log('Main classification res : ', res);
                 setData(res.data.content);
 
-                const pagingObject = createPagingObject(page, res.data.totalPages);
+                const pagingObject = mainProductPagingObject(page, res.data.totalPages);
 
                 setPagingData({
                     startPage: pagingObject.startPage,

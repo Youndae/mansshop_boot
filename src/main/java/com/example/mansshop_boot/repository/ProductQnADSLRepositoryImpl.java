@@ -1,6 +1,5 @@
 package com.example.mansshop_boot.repository;
 
-import com.example.mansshop_boot.domain.dto.pageable.ProductDetailPageDTO;
 import com.example.mansshop_boot.domain.dto.product.ProductQnADTO;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
@@ -25,7 +24,7 @@ public class ProductQnADSLRepositoryImpl implements ProductQnADSLRepository{
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Page<ProductQnADTO> findByProductId(String productId, ProductDetailPageDTO pageDTO, Pageable pageable) {
+    public Page<ProductQnADTO> findByProductId(String productId, Pageable pageable) {
 
         List<ProductQnADTO> list = jpaQueryFactory
                 .select(
@@ -39,14 +38,15 @@ public class ProductQnADSLRepositoryImpl implements ProductQnADSLRepository{
                                 , productQnA.qnaContent
                                 , productQnA.createdAt
                                 , productQnA.productQnAStep
+                                , productQnA.productQnAStat
                         )
                 )
                 .from(productQnA)
                 .where(productQnA.product.id.eq(productId))
                 .orderBy(productQnA.productQnAGroupId.desc())
                 .orderBy(productQnA.productQnAStep.asc())
-                .offset((pageDTO.pageNum() - 1) * pageDTO.qnaAmount())
-                .limit(pageDTO.qnaAmount())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
                 .fetch();
 
         JPAQuery<Long> count = jpaQueryFactory.select(productQnA.count())

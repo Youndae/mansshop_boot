@@ -1,0 +1,287 @@
+.product-detail-first-thumbnail .first-thumbnail img {
+    width: 400px;
+    height: 535px;
+}
+
+.product-detail-thumbnail-list img {
+    width: 80px;
+    height: 107px;
+    margin: 5px 5px 0 5px;
+}
+
+.product-thumbnail {
+    padding: 0 0 0 15%;
+}
+
+.reply {
+    text-align: left;
+    margin-left: 90px;
+    margin-top: 10px;
+}
+
+.writer {
+    margin-top: 30px;
+}
+
+.product-content .product-detail-info::after{
+    display: inline-block;
+    content: "";
+    vertical-align: middle;
+}
+
+.container div {
+    text-align: center;
+}
+
+ul {
+    list-style: none;
+}
+
+.product-detail-header {
+    display: inline-flex;
+    margin-top: 100px;
+    width: 80%;
+}
+
+.product-detail-option {
+    margin-left: 400px;
+    width: 30%;
+}
+
+.product-detail-option-detail {
+    width: fit-content;
+    float: right;
+    font-size: xx-large;
+}
+
+.mgt-4 {
+    margin-top: 40px;
+}
+
+.product-detail-option-detail label {
+    font-weight: bold;
+    float: left;
+}
+
+.product-detail-option-detail span {
+    font-weight: 100;
+    font-size: xx-large;
+    margin-left: 20px;
+}
+
+.product-detail-option-detail button, .product-detail-qna-header button {
+    background-color: white;
+    border: 1px solid lightgray;
+    cursor: pointer;
+    padding : 5px;
+    margin: 10px;
+    font-size: large;
+}
+
+.temp-order {
+    display: grid;
+}
+
+.temp-order .temp-order-table {
+    text-align: center;
+    width: 100%;
+    border: 0px solid;
+    font-size: medium;
+}
+
+.temp-order .temp-order-table span {
+    font-size: large;
+}
+
+.temp-order .temp-order-table input {
+    width: 20px;
+    border: 1px solid lightgray;
+    margin-left: 10px;
+    margin-top: 5px;
+    text-align: center;
+    height: 20px;
+}
+
+select#product-detail-option-select-box {
+    margin-top: 10px;
+    height: 25px;
+}
+
+.product-detail-content-btn {
+    font-size: xx-large;
+    margin-bottom: 50px;
+    border: solid;
+    border-width: 1px 0 1px 0;
+    position: sticky;
+    top: 230px;
+    z-index: 1;
+    background-color: white;
+    width: 100%;
+}
+
+.product-detail-content-btn label {
+    padding: 0 100px 0 100px;
+    cursor: pointer;
+}
+
+.product-detail-content-btn button {
+    display: none;
+}
+
+.product-detail-review {
+    border: solid;
+    border-width: 1px 0 0 0;
+}
+
+.product-detail-review-header {
+    margin-top: 40px;
+}
+
+.product-detail-review-content {
+    margin-top: 40px;
+}
+
+.product-detail-review-content li {
+    border: 1px solid lightgray;
+    width: 50%;
+    display: inline-grid;
+}
+
+.review-content-header {
+    display: inline-flex;
+}
+
+.review-content-header strong {
+    font-weight: bold;
+    font-size: x-large;
+    width: 100px;
+}
+
+.review-content-header small {
+    font-size: small;
+    padding: 12px 0 0 0;
+}
+
+.review-content-content {
+    display: flex;
+    margin-left: 20%;
+}
+
+.review-paging, .product-detail-qna-paging li {
+    display: inline;
+    margin: 10px;
+    font-size: large;
+}
+
+.product-detail-qna {
+    margin-top: 100px;
+    border: solid;
+    border-width: 1px 0 0 0;
+}
+
+.product-detail-qna-header {
+    margin-top: 40px;
+    display: revert;
+}
+
+.product-detail-qna-content li {
+    margin-top: 30px;
+    border: 1px solid lightgray;
+    width: 50%;
+    display: inline-grid;
+}
+
+.qna-content-header {
+    display: flex;
+}
+
+.qna-content-header strong {
+    font-weight: bold;
+    font-size: x-large;
+    width: 100px;
+}
+
+.qna-content-header small {
+    font-size: small;
+    padding: 12px 10px 0 0;
+}
+
+.qna-content-content {
+    display: flex;
+    margin-left: 20%;
+}
+
+.qna-content-reply {
+    margin-left: 50px;
+    padding-right: 15px;
+}
+
+.product-detail-order-info {
+    margin-top: 100px;
+    border: solid;
+    border-width: 1px 0 0 0;
+}
+
+.product-detail-order-info-header {
+    margin-top: 40px;
+}
+
+.product-detail-order-info-content {
+    display: inline-block;
+    margin-top: 40px;
+}
+
+.qna-input {
+    margin-top: 50px;
+}
+
+.qna-input textarea {
+    width: 1000px;
+    height: 100px;
+    resize: none;
+}
+
+.product-detail-qna-header button {
+    width: 100px;
+    height: 30px;
+    margin: 10px 0 0 35%;
+}
+
+.count-up-down img {
+    width: 10px;
+    border: 1px solid lightgray;
+    margin-top: 5px;
+}
+
+.product-temp-cart-input button {
+    background-color: white;
+    border: 0px solid;
+}
+
+
+.product-temp-cart-input .remove-btn {
+    margin-left: 7px;
+}
+
+.product-temp-cart-input {
+    display: flex;
+}
+
+.product-temp-count {
+    display: flex;
+}
+
+.product-temp-count .count-up-down {
+    display: grid;
+    margin: 0 10px 0 10px;
+}
+
+.count-remove {
+    margin-top: 4px;
+}
+
+.count-remove img {
+    width: 15px;
+    border: 1px solid lightgray;
+    margin-top: 5px;
+}

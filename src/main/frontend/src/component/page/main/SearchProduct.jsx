@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 
 import { defaultAxios } from "../../../module/customAxios";
-import {createPagingObject} from "../../../module/pagingModule";
+import {mainProductPagingObject} from "../../../module/pagingModule";
 
 import {useSearchParams} from "react-router-dom";
 import Paging from "../../ui/Paging";
@@ -31,7 +31,7 @@ function SearchProduct() {
             .then(res => {
                 setData(res.data.content);
                 console.log('search axios res : ', res);
-                const pagingObject = createPagingObject(page, res.data.totalPages);
+                const pagingObject = mainProductPagingObject(page, res.data.totalPages);
 
                 setPagingData({
                     startPage: pagingObject.startPage,

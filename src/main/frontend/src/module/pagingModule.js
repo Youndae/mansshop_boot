@@ -1,6 +1,21 @@
 
-export const createPagingObject = (pageNum, totalPages) => {
-    let endPage = Number(Math.ceil(pageNum / 10.0) * 10);
+export const mainProductPagingObject = (pageNum, totalPages) => {
+    return createPagingObject(pageNum, 12, totalPages);
+}
+
+export const productDetailPagingObject = (pageNum, totalPages) => {
+    return createPagingObject(pageNum, 10, totalPages);
+}
+
+
+
+
+
+
+
+
+const createPagingObject = (pageNum, elementSize,totalPages) => {
+    let endPage = Number(Math.ceil(pageNum / elementSize) * elementSize);
     const startPage = endPage - 9;
     if(totalPages < endPage)
         endPage = totalPages;
