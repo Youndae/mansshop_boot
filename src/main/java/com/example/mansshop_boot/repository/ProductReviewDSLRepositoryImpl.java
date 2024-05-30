@@ -25,7 +25,7 @@ public class ProductReviewDSLRepositoryImpl implements ProductReviewDSLRepositor
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Page<ProductReviewDTO> findByProductId(String productId, ProductDetailPageDTO pageDTO, Pageable pageable) {
+    public Page<ProductReviewDTO> findByProductId(String productId, Pageable pageable) {
 
         List<ProductReviewDTO> list = jpaQueryFactory
                                             .select(
@@ -45,8 +45,8 @@ public class ProductReviewDSLRepositoryImpl implements ProductReviewDSLRepositor
                                             .where(productReview.product.id.eq(productId))
                                             .orderBy(productReview.reviewGroupId.desc())
                                             .orderBy(productReview.reviewStep.asc())
-                                            .offset((pageDTO.pageNum() - 1) * pageDTO.reviewAmount())
-                                            .limit(pageDTO.reviewAmount())
+                                            .offset(pageable.getOffset())
+                                            .limit(pageable.getPageSize())
                                             .fetch();
 
         JPAQuery<Long> count = jpaQueryFactory.select(productReview.count())

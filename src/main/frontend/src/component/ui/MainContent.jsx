@@ -3,6 +3,7 @@ import React, {useEffect, useState} from 'react';
 import {imageDisplayAxios} from "../../module/customAxios";
 
 import '../css/main.css';
+import {Link} from "react-router-dom";
 
 function MainContent(props) {
     const { data, classification } = props;
@@ -48,9 +49,9 @@ function MainContent(props) {
                     return (
                         <div key={index} className="product-img">
                             <div className="thumb-image">
-                                <a href={'/product'} className={'productThumbnail'}>
+                                <Link to={`/product/${image.productId}`}>
                                     <img className={'image-data'} src={image.thumbnail}  alt={''}/>
-                                </a>
+                                </Link>
                             </div>
                             <div className="product-info">
                                 <span className="product-name">{image.productName}</span><br />
