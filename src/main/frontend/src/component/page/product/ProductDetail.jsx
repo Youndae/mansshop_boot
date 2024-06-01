@@ -1,21 +1,20 @@
-import React, {useEffect, useState} from 'react';
-import {useParams} from "react-router-dom";
+import React, {useEffect, useRef, useState} from 'react';
+import {useNavigate, useParams} from "react-router-dom";
 
 import dayjs from "dayjs";
 
 import { defaultAxios } from "../../../module/customAxios";
-import {productDetailPagingObject} from "../../../module/pagingModule";
+import {getClickNumber, getNextNumber, getPrevNumber, productDetailPagingObject} from "../../../module/pagingModule";
 import ProductDetailThumbnail from "../../ui/ProductDetailThumbnail";
 import ProductDetailInfoImage from "../../ui/ProductDetailInfoImage";
 
 import '../../css/productDetail.css';
+import Paging from "../../ui/Paging";
 
 /*
-    바로구매, 장바구니, 관심상품 버튼 handling
-    상품정보, 리뷰, QnA, 주문 정보 버튼 handling
+    바로구매, 장바구니, 관심상품 버튼 handling -> 컴포넌트 작성 이후 테스트
     로그인 여부에 따른 QnA 작성 버튼 handling
-    리뷰, QnA paging
-    리뷰 QnA 처럼 답변 사이즈 조절.
+    리뷰, QnA paging -> 10개 출력 확인. 페이징 구현
  */
 function ProductDetail() {
     const { productId } = useParams();
@@ -48,6 +47,12 @@ function ProductDetail() {
     });
     const [selectOption, setSelectOption] = useState([]);
     const [totalPrice, setTotalPrice] = useState(0);
+
+    const navigate = useNavigate();
+    const productInfoElem = useRef(null);
+    const productReviewElem = useRef(null);
+    const productQnAElem = useRef(null);
+    const productOrderInfoElem = useRef(null);
 
 
 
@@ -183,16 +188,137 @@ function ProductDetail() {
     }
 
     const handleBuyBtn = () => {
-
+        navigate('/order', {state : {
+                type: 'direct',
+                product : selectOption,
+            }}
+        );
     }
 
-    const handleCartBtn = () => {
+    const handleCartBtn = async () => {
 
+        await defaultAxios.post(`/cart`, {
+            option : {selectOption}
+        })
+            .then(res => {
+                console.log('addCart axios success : ', res);
+                alert('장바구니에 상품을 추가했습니다.');
+            })
+            .catch(err => {
+                alert('오류가 발생했습니다.\n문제가 계속된다면 관리자에게 문의해주세요.');
+            })
     }
 
-    const handleLikeBtn = () => {
+    const handleLikeBtn = async () => {
         const pid = productData.productId;
+        const likeStatus = productData.productLikeStat;
+        let url = 'de-like';
+        if(likeStatus)
+            url = 'like'
+
+        await defaultAxios.post(`${url}`, {
+            productId: pid,
+        })
+            .then(res => {
+                console.log('like axios success : ', res);
+
+                setProductData({
+                    ...productData,
+                    productLikeStat: !likeStatus,
+                });
+            })
+            .catch(err => {
+                alert('오류가 발생했습니다.\n문제가 계속된다면 관리자에게 문의해주세요.');
+            })
     }
+
+    const likeBtnText = productData.productLikeStat ? '관심상품 해제' : '관심상품';
+
+    const handleDetailBtn = (e) => {
+        const name = e.target.name;
+
+        if(name === 'detail')
+            productInfoElem.current.scrollIntoView({ behavior: 'smooth', block: 'start'});
+        else if(name === 'review')
+            productReviewElem.current.scrollIntoView({ behavior: 'smooth', block: 'center'});
+        else if(name === 'qna')
+            productQnAElem.current.scrollIntoView({ behavior: 'smooth', block: 'center'});
+        else
+            productOrderInfoElem.current.scrollIntoView({ behavior: 'smooth', block: 'center'});
+    }
+
+    const handleReviewPagingClickNumber = (e) => {
+        console.log('review click number');
+        handleReviewPaging(getClickNumber(e));
+    }
+
+    const handleReviewPagingPrev = () => {
+        handleReviewPaging(getPrevNumber(reviewPagingObject));
+    }
+
+    const handleReviewPagingNext = () => {
+        handleReviewPaging(getNextNumber(reviewPagingObject));
+    }
+
+    const handleReviewPaging = async (clickNo) => {
+        console.log('review clickNo : ', clickNo);
+        //axios.get review?page=
+        await defaultAxios.get(`product/${productId}/review/${clickNo}`)
+            .then(res => {
+                setProductReview(res.data.content);
+
+                const pageNumber = res.data.number + 1;
+                const reviewPagingObject = productDetailPagingObject(pageNumber, res.data.totalPages);
+                setReviewPagingObject({
+                    startPage: reviewPagingObject.startPage,
+                    endPage: reviewPagingObject.endPage,
+                    prev: reviewPagingObject.prev,
+                    next: reviewPagingObject.next,
+                    activeNo: pageNumber,
+                    totalElements: res.data.totalElements,
+                });
+            })
+            .catch(err => {
+                console.log("review get axios error : ", err);
+            })
+    }
+
+    const handleQnAPagingClickNumber = (e) => {
+        console.log('qna paging number click');
+        handleQnAPaging(getClickNumber(e));
+    }
+
+    const handleQnAPagingPrev = () => {
+        handleQnAPaging(getPrevNumber(productQnAPagingObject));
+    }
+
+    const handleQnAPagingNext = () => {
+        handleQnAPaging(getNextNumber(productQnAPagingObject));
+    }
+
+    const handleQnAPaging = async (clickNo) => {
+        //axios.get QnA?page=
+        console.log('qna paging clickNo : ', clickNo);
+        await defaultAxios.get(`product/${productId}/qna/${clickNo}`)
+            .then(res => {
+                setProductQnA(res.data.content);
+
+                const pageNumber = res.data.number + 1;
+                const qnaPagingObject = productDetailPagingObject(pageNumber, res.data.totalPages);
+                setProductQnAPagingObject({
+                    startPage: qnaPagingObject.startPage,
+                    endPage: qnaPagingObject.endPage,
+                    prev: qnaPagingObject.prev,
+                    next: qnaPagingObject.next,
+                    activeNo: pageNumber,
+                    totalElements: res.data.totalElements,
+                })
+            })
+            .catch(err => {
+                console.log("productQnA get axios error : ", err);
+            })
+    }
+
 
     return (
         <div className="product-detail-content">
@@ -237,7 +363,7 @@ function ProductDetail() {
                         </div>
                         <button onClick={handleBuyBtn}>바로구매</button>
                         <button onClick={handleCartBtn}>장바구니</button>
-                        <button onClick={handleLikeBtn}>관심상품</button>
+                        <button onClick={handleLikeBtn}>{likeBtnText}</button>
                         <TotalPrice
                             totalPrice={totalPrice}
                         />
@@ -248,34 +374,45 @@ function ProductDetail() {
             <div className="product-detail-content">
                 <div className="product-detail-content-btn">
                     <label htmlFor="detail-btn">상품정보</label>
-                    <button id={'detail-btn'} name={'detail'}></button>
+                    <button id={'detail-btn'} name={'detail'} onClick={handleDetailBtn}></button>
                     <label htmlFor="review-btn">리뷰({reviewPagingObject.totalElements})</label>
-                    <button id={'review-btn'} name={'review'}></button>
+                    <button id={'review-btn'} name={'review'}  onClick={handleDetailBtn}></button>
                     <label htmlFor="qna-btn">QnA({productQnAPagingObject.totalElements})</label>
-                    <button id={'qna-btn'} name={'qna'}></button>
+                    <button id={'qna-btn'} name={'qna'} onClick={handleDetailBtn}></button>
                     <label htmlFor="order-info-btn">주문정보</label>
-                    <button id={'order-info-btn'} name={'order-info'}></button>
+                    <button id={'order-info-btn'} name={'order-info'} onClick={handleDetailBtn}></button>
                 </div>
-                <div className="product-detail-info">
+                <div className="product-detail-info" ref={productInfoElem}>
                     <h2>상품 정보</h2>
                     <ProductDetailInfoImage imageInfo={infoImage} />
                 </div>
-                <div className="product-detail-review">
+                <div className="product-detail-review" ref={productReviewElem}>
                     <div className="product-detail-review-header">
                         <h2>상품 리뷰</h2>
                     </div>
                     <div className="product-detail-review-content">
                         <ul>
-                            <Review
-                                data={productReview}
-                            />
+                            {productReview.map((review, index) => {
+                                return (
+                                    <Review
+                                        data={review}
+                                        key={index}
+                                    />
+                                )
+                            })}
                         </ul>
                     </div>
                     <div className="product-detail-review-paging">
-
+                        <Paging
+                            pagingData={reviewPagingObject}
+                            onClickNumber={handleReviewPagingClickNumber}
+                            onClickPrev={handleReviewPagingPrev}
+                            onClickNext={handleReviewPagingNext}
+                            clasName={''}
+                        />
                     </div>
                 </div>
-                <div className="product-detail-qna">
+                <div className="product-detail-qna" ref={productQnAElem}>
                     <div className="product-detail-qna-header">
                         <h2>상품 문의</h2>
                         <div className="qna-input">
@@ -285,17 +422,28 @@ function ProductDetail() {
                     </div>
                     <div className="product-detail-qna-content">
                         <ul>
-                            <QnA
-                                data={productQnA}
-                            />
+                            {productQnA.map((qna, index) => {
+                                return (
+                                    <QnA
+                                        data={qna}
+                                        key={index}
+                                    />
+                                )
+                            })}
                         </ul>
                     </div>
                     <div className="product-detail-qna-paging">
-
+                        <Paging
+                            pagingData={productQnAPagingObject}
+                            onClickNumber={handleQnAPagingClickNumber}
+                            onClickPrev={handleQnAPagingPrev}
+                            onClickNext={handleQnAPagingNext}
+                            clasName={''}
+                        />
                     </div>
                 </div>
 
-                <div className="product-detail-order-info">
+                <div className="product-detail-order-info" ref={productOrderInfoElem}>
                     <div className="product-detail-order-info-header">
                         <h2>배송 정보</h2>
                     </div>
@@ -517,92 +665,107 @@ function TotalPrice(props) {
 function Review(props) {
     const { data } = props;
 
-    if(data === []){
-        return (
-            <li>
-                <span>아직 작성된 리뷰가 없습니다.</span>
-            </li>
-        );
-    }else {
-        return (
-            <>
-                {data.map((review, index) => {
-                    if(review.reviewStep === 0){
-                        return(
-                            <li className={'review-content writer'}>
-                                <div className="review-content-header">
-                                    <strong className="reviewer">{review.writer}</strong>
-                                    <small className={'pull-right text-muted'}>{dayjs(review.createdAt).format('YYYY-MM-DD')}</small>
-                                </div>
-                                <div className="review-content-content">
-                                    <p>{review.reviewContent}</p>
-                                </div>
-                            </li>
-                        )
-                    }else {
-                        return (
-                            <li className={'review-content reply'}>
-                                <div className="review-content-header">
-                                    <strong className="reviewer">{review.writer}</strong>
-                                    <small className={'pull-right text-muted'}>{dayjs(review.createdAt).format('YYYY-MM-DD')}</small>
-                                </div>
-                                <div className="review-content-content">
-                                    <p>{review.reviewContent}</p>
-                                </div>
-                            </li>
-                        )
-                    }
-                })}
-            </>
-        )
+    const defaultLi = <li className={'review-content-default'}>
+                            <div key={data.writer} className="review-content-header">
+                                <strong className="reviewer">{data.reviewWriter}</strong>
+                                <small className={'pull-right text-muted'}>{dayjs(data.reviewCreatedAt).format('YYYY-MM-DD')}</small>
+                            </div>
+                            <div className="review-content-content">
+                                <p>{data.reviewContent}</p>
+                            </div>
+                        </li>;
+    let answerLi = null;
+
+    if(data.answerContent !== null){
+        answerLi = <div className="review-content-reply">
+                        <li className={'review-content'}>
+                            <div className="review-content-header">
+                                <strong className="reviewer">관리자</strong>
+                                <small className={'pull-right text-muted'}>{dayjs(data.answerCreatedAt).format('YYYY-MM-DD')}</small>
+                            </div>
+                            <div className="review-content-content">
+                                <p>{data.answerContent}</p>
+                            </div>
+                        </li>
+                    </div>;
     }
 
+    return (
+        <>
+            {defaultLi}
+            {answerLi}
+        </>
+    )
 }
 
 function QnA(props) {
     const { data } = props;
 
-    if(data === null) {
-        return null;
-    }else {
+    let statElem = '';
+    const replyList = data.replyList;
+
+    if(data.productQnAStat === 1)
+        statElem = <small className={'pull-right answer'}>답변완료</small>;
+
+    if(replyList === []){
         return (
+            <li className="qna-content-default">
+                <div className="qna-content-header">
+                    <strong className="qna-writer">{data.writer}</strong>
+                    <small className={'pull-right text-muted'}>{dayjs(data.createdAt).format('YYYY-MM-DD')}</small>
+                    {statElem}
+                </div>
+                <div className="qna-content-content">
+                    <p>{data.qnaContent}</p>
+                </div>
+            </li>
+        )
+    }else {
+        return(
             <>
-                {data.map((qna, index) => {
-                    let statElem = '';
-                    if(qna.productQnAStat === 1)
-                        statElem = <small className={'pull-right answer'}>답변완료</small>;
-                    if(qna.productQnAStep === 0){
-                        return (
-                            <li className="qna-content">
-                                <div className="qna-content-header">
-                                    <strong className="qna-writer">{qna.writer}</strong>
-                                    <small className={'pull-right text-muted'}>{dayjs(qna.createdAt).format('YYYY-MM-DD')}</small>
-                                    {statElem}
-                                </div>
-                                <div className="qna-content-content">
-                                    <p>{qna.qnaContent}</p>
-                                </div>
-                            </li>
-                        )
-                    }else {
-                        return (
-                            <div className="qna-content-reply">
-                                <li className="qna-content">
-                                    <div>
-                                        <div className="qna-content-header">
-                                            <strong className="qna-writer">{qna.writer}</strong>
-                                            <small className={'pull-right text-muted'}>{dayjs(qna.createdAt).format('YYYY-MM-DD')}</small>
-                                        </div>
-                                        <div className="qna-content-content">
-                                            <p>{qna.qnaContent}</p>
-                                        </div>
-                                    </div>
-                                </li>
-                            </div>
-                        )
-                    }
+                <li className="qna-content-default">
+                    <div className="qna-content-header">
+                        <strong className="qna-writer">{data.writer}</strong>
+                        <small className={'pull-right text-muted'}>{dayjs(data.createdAt).format('YYYY-MM-DD')}</small>
+                        {statElem}
+                    </div>
+                    <div className="qna-content-content">
+                        <p>{data.qnaContent}</p>
+                    </div>
+                </li>
+                {replyList.map((reply, index) => {
+                    return (
+                        <QnAReply
+                            data={reply}
+                            key={index}
+                        />
+                    )
                 })}
             </>
+        )
+    }
+}
+
+function QnAReply(props) {
+    const { data } = props;
+
+    if(data === [])
+        return null;
+    else {
+        return (
+            <div className="qna-content-reply">
+                <li className="qna-content">
+                    <div>
+                        <div className="qna-content-header">
+                            <strong className="qna-writer">{data.writer}</strong>
+                            <small className={'pull-right text-muted'}>{dayjs(data.createdAt).format('YYYY-MM-DD')}</small>
+                        </div>
+                        <div className="qna-content-content">
+                            <p>{data.content}</p>
+                        </div>
+                    </div>
+                </li>
+            </div>
         )
     }
 }

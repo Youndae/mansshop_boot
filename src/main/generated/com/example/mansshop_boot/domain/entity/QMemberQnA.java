@@ -34,6 +34,8 @@ public class QMemberQnA extends EntityPathBase<MemberQnA> {
 
     public final QQnAClassification qnAClassification;
 
+    public final DateTimePath<java.util.Date> updatedAt = createDateTime("updatedAt", java.util.Date.class);
+
     public QMemberQnA(String variable) {
         this(MemberQnA.class, forVariable(variable), INITS);
     }

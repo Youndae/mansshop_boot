@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react';
 
 import { defaultAxios } from "../../../module/customAxios";
-import { mainProductPagingObject } from "../../../module/pagingModule";
+import { mainProductPagingObject, getClickNumber, getPrevNumber, getNextNumber } from "../../../module/pagingModule";
 
 import MainContent from "../../ui/MainContent";
-import {useParams, useSearchParams} from "react-router-dom";
+import {useNavigate, useParams, useSearchParams} from "react-router-dom";
 import Paging from "../../ui/Paging";
 
 function MainClassification() {
@@ -20,6 +20,8 @@ function MainClassification() {
         next: false,
         activeNo: page,
     });
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         getClassificationList();
@@ -46,6 +48,22 @@ function MainClassification() {
             })
     }
 
+    const handleOnClickNumber = (e) => {
+        paginationNavigate(getClickNumber(e));
+    }
+
+    const handleOnClickPrev = () => {
+        paginationNavigate(getPrevNumber(pagingData));
+    }
+
+    const handleOnClickNext = () => {
+        paginationNavigate(getNextNumber(pagingData));
+    }
+
+    const paginationNavigate = (clickNo) => {
+        navigate(`?page=${clickNo}`);
+    }
+
     return (
         <>
             <MainContent
@@ -53,8 +71,12 @@ function MainClassification() {
                 classification={classification}
             />
             <Paging
-                pagingData={pagingData}
                 keyword={null}
+                pagingData={pagingData}
+                onClickNumber={handleOnClickNumber}
+                onClickPrev={handleOnClickPrev}
+                onClickNext={handleOnClickNext}
+                className={null}
             />
         </>
     )

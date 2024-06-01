@@ -30,6 +30,7 @@ public class ProductQnADSLRepositoryImpl implements ProductQnADSLRepository{
                 .select(
                         Projections.constructor(
                                 ProductQnADTO.class
+                                , productQnA.id.as("qnaId")
                                 , new CaseBuilder()
                                         .when(productQnA.member.nickname.isNull())
                                         .then(productQnA.member.userName)
@@ -37,14 +38,12 @@ public class ProductQnADSLRepositoryImpl implements ProductQnADSLRepository{
                                         .as("writer")
                                 , productQnA.qnaContent
                                 , productQnA.createdAt
-                                , productQnA.productQnAStep
                                 , productQnA.productQnAStat
                         )
                 )
                 .from(productQnA)
                 .where(productQnA.product.id.eq(productId))
-                .orderBy(productQnA.productQnAGroupId.desc())
-                .orderBy(productQnA.productQnAStep.asc())
+                .orderBy(productQnA.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();

@@ -17,7 +17,7 @@ public record ProductDetailDTO(
         , List<String> productThumbnailList
         , List<String> productInfoImageList
         , ProductPageableDTO<ProductReviewDTO> productReviewList
-        , ProductPageableDTO<ProductQnADTO> productQnAList
+        , ProductPageableDTO<ProductQnAResponseDTO> productQnAList
         , UserStatusDTO userStatus
 ){
 }

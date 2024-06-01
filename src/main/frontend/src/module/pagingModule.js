@@ -7,13 +7,6 @@ export const productDetailPagingObject = (pageNum, totalPages) => {
     return createPagingObject(pageNum, 10, totalPages);
 }
 
-
-
-
-
-
-
-
 const createPagingObject = (pageNum, elementSize,totalPages) => {
     let endPage = Number(Math.ceil(pageNum / elementSize) * elementSize);
     const startPage = endPage - 9;
@@ -31,24 +24,14 @@ const createPagingObject = (pageNum, elementSize,totalPages) => {
     }
 }
 
-export function handlePageNumBtn (e, navigate, keyword) {
-    const clickNo = e.target.textContent;
-
-    paginationNavigate(clickNo, keyword, navigate);
+export const getClickNumber = (e) => {
+    return e.target.textContent;
 }
 
-export function handlePrevBtn (startPage, navigate, keyword) {
-    const prevNumber = startPage - 1;
-
-    paginationNavigate(prevNumber, keyword, navigate);
+export const getPrevNumber = (pagingData) => {
+    return pagingData.startPage - 1;
 }
 
-export function handleNextBtn (endPage, navigate, keyword) {
-    const nextNumber = endPage + 1;
-
-    paginationNavigate(nextNumber, keyword, navigate);
-}
-
-const paginationNavigate = (clickNo, navigate) => {
-    navigate(`?page=${clickNo}`);
+export const getNextNumber = (pagingData) => {
+    return pagingData.endPage + 1;
 }

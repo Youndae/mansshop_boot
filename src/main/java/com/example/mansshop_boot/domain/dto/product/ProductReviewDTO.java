@@ -3,9 +3,10 @@ package com.example.mansshop_boot.domain.dto.product;
 import java.util.Date;
 
 public record ProductReviewDTO(
-        String writer
+        String reviewWriter
         , String reviewContent
-        , Date createdAt
-        , int reviewStep
+        , Date reviewCreatedAt
+        , String answerContent
+        , Date answerCreatedAt
 ) {
 }

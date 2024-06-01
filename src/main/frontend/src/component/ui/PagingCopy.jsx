@@ -1,12 +1,15 @@
 import React from 'react';
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
+
 
 import PagingButton from './PagingButton';
 
-const PagingLiWrapper = styled.li`
+const PagingliWrapper = styled.li`
     list-style: none;
     float: left;
     padding: 10px;
+    cursor: pointer;
 `
 
 /*
@@ -25,9 +28,9 @@ const PagingLiWrapper = styled.li`
     나머지는 각 기능에 대한 className을 받아 css를 적용해 위치를 잡아줄 수 있도록 처리
 
  */
-function Paging(props) {
-    const { pagingData, onClickNumber, onClickPrev, onClickNext, className } = props;
-
+function PagingCopy(props) {
+    const { pagingData, keyword } = props;
+    const navigate = useNavigate();
     let prevElem = null;
     let nextElem = null;
     const pagingNumberArr = [];
@@ -49,25 +52,48 @@ function Paging(props) {
     }
 
     if(pagingData.prev)
-        prevElem = <PagingLiWrapper>
+        prevElem = <PagingliWrapper>
             <PagingButton
                 btnText={'prev'}
                 className={'pagingPrev'}
-                onClick={onClickPrev}
+                onClick={handlePagePrevBtnOnClick}
             />
-        </PagingLiWrapper>;
+        </PagingliWrapper>;
 
     if(pagingData.next)
-        nextElem = <PagingLiWrapper>
+        nextElem = <PagingliWrapper>
             <PagingButton
                 btnText={'next'}
                 className={'pagingNext'}
-                onClick={onClickNext}
+                onClick={handlePageNextBtnOnClick}
             />
-        </PagingLiWrapper>;
+        </PagingliWrapper>;
+
+    const handlePageNoBtnOnClick = (e) => {
+        const clickNo = e.target.textContent;
+
+        paginationNavigate(clickNo);
+    }
+
+    const handlePagePrevBtnOnClick = () => {
+        const prevNumber = pagingData.startPage - 1;
+
+        paginationNavigate(prevNumber);
+    }
+
+    const handlePageNextBtnOnClick = () => {
+        const nextNumber = pagingData.endPage + 1;
+
+        paginationNavigate(nextNumber);
+    }
+
+    const paginationNavigate = (clickNo) => {
+        navigate(`?page=${clickNo}`);
+    }
+
 
     return(
-        <div className={`paging ${className}`}>
+        <div className="paging">
             <ul>
                 {prevElem}
                 {pagingNumberArr.map((pagingNum, index) => {
@@ -75,7 +101,7 @@ function Paging(props) {
                         <PagingNumber
                             key={index}
                             pagingNumberData={pagingNum}
-                            btnOnClick={onClickNumber}
+                            btnOnClick={handlePageNoBtnOnClick}
                         />
                     )
                 })}
@@ -89,14 +115,14 @@ function PagingNumber(props) {
     const { pagingNumberData, btnOnClick } = props;
 
     return (
-        <PagingLiWrapper>
+        <PagingliWrapper>
             <PagingButton
                 btnText={pagingNumberData.pageNum}
                 className={pagingNumberData.className}
                 onClick={btnOnClick}
             />
-        </PagingLiWrapper>
+        </PagingliWrapper>
     )
 }
 
-export default Paging;
+export default PagingCopy;

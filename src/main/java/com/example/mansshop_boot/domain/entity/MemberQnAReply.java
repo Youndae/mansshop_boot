@@ -10,10 +10,10 @@ import java.util.Date;
 
 @Entity
 @Getter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductQnA {
+@Builder
+public class MemberQnAReply {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,12 +24,12 @@ public class ProductQnA {
     private Member member;
 
     @ManyToOne
-    @JoinColumn(name = "productId")
-    private Product product;
+    @JoinColumn(name = "qnaId")
+    private MemberQnA memberQnA;
 
-    private String qnaContent;
+    private String replyContent;
 
     private Date createdAt;
 
-    private int productQnAStat;
+    private Date updatedAt;
 }

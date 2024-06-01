@@ -1,22 +1,23 @@
 package com.example.mansshop_boot.service;
 
 import com.example.mansshop_boot.config.customException.ErrorCode;
+import com.example.mansshop_boot.config.customException.exception.CustomAccessDeniedException;
 import com.example.mansshop_boot.config.customException.exception.CustomNotFoundException;
 import com.example.mansshop_boot.domain.dto.member.UserStatusDTO;
 import com.example.mansshop_boot.domain.dto.pageable.ProductDetailPageDTO;
 import com.example.mansshop_boot.domain.dto.product.*;
-import com.example.mansshop_boot.domain.entity.Product;
+import com.example.mansshop_boot.domain.entity.*;
 import com.example.mansshop_boot.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
@@ -33,11 +34,17 @@ public class ProductServiceImpl implements ProductService{
 
     private final ProductReviewRepository productReviewRepository;
 
+    private final ProductReviewReplyRepository productReviewReplyRepository;
+
     private final ProductQnARepository productQnARepository;
+
+    private final ProductQnAReplyRepository productQnAReplyRepository;
 
     private final PrincipalService principalService;
 
     private final ProductLikeRepository productLikeRepository;
+
+    private final MemberRepository memberRepository;
 
 
     /**
@@ -53,8 +60,9 @@ public class ProductServiceImpl implements ProductService{
      * (List) 상품 옵션 아이디, 옵션 사이즈, 옵션 컬러, 옵션 재고
      * (List) 상품 썸네일 이미지명
      * (List) 상품 정보 이미지명
-     * (List) 상품 리뷰, 작성자, 작성일, 순서, isEmpty, number, totalPages
-     * (List) 상품 문의, 작성자, 작성일, 순서, isEmpty, number, totalPages
+     * 리뷰와 문의 paging 처리에 대한 pageDTO
+     * (List) 상품 리뷰, 작성자, 작성일, 답글 내용, 답글 작성일, isEmpty, number, totalPages
+     * (List) 상품 문의, 작성자, 작성일, 순서, (List)답글, isEmpty, number, totalPages
      * 로그인 상태 (로그인 상태값, 로그인한 사용자 아이디 또는 닉네임)
      *
      */
@@ -78,18 +86,11 @@ public class ProductServiceImpl implements ProductService{
         List<String> productInfoImageList = productInfoImageRepository.findByProductId(productId);
 
         ProductDetailPageDTO pageDTO = new ProductDetailPageDTO();
-        Pageable reviewPageable = PageRequest.of(pageDTO.pageNum() - 1
-                                                    , pageDTO.reviewAmount()
-                                                    , Sort.by("reviewGroupId").descending()
-                                                                    .and(Sort.by("reviewStep").ascending()));
-        Pageable qnaPageable = PageRequest.of(pageDTO.pageNum() - 1
-                                                    , pageDTO.qnaAmount()
-                                                    , Sort.by("productQnAGroupId").descending()
-                                                            .and(Sort.by("productQnAStep").ascending()));
 
-        System.out.println("service :: pageSize : " + reviewPageable.getPageSize());
-        Page<ProductReviewDTO> productReview = productReviewRepository.findByProductId(productId, reviewPageable);
-        Page<ProductQnADTO> productQnA = productQnARepository.findByProductId(productId, qnaPageable);
+        ProductPageableDTO<ProductReviewDTO> productReview = getDetailReview(pageDTO, productId);
+        ProductPageableDTO<ProductQnAResponseDTO> productQnA = getDetailQnA(pageDTO, productId);
+
+
         UserStatusDTO userStatus = new UserStatusDTO(uid);
 
         return ProductDetailDTO.builder()
@@ -100,10 +101,155 @@ public class ProductServiceImpl implements ProductService{
                                 .productOptionList(productOption)
                                 .productThumbnailList(productThumbnailList)
                                 .productInfoImageList(productInfoImageList)
-                                .productReviewList(new ProductPageableDTO<>(productReview))
-                                .productQnAList(new ProductPageableDTO<>(productQnA))
+                                .productReviewList(productReview)
+                                .productQnAList(productQnA)
                                 .userStatus(userStatus)
                                 .likeStat(likeStat)
                                 .build();
+    }
+
+    /**
+     *
+     * @param pageDTO
+     * @param productId
+     * @return
+     *
+     * 페이징 처리를 해야하기 때문에 기능 분리.
+     */
+    @Override
+    public ProductPageableDTO<ProductReviewDTO> getDetailReview(ProductDetailPageDTO pageDTO, String productId) {
+        Pageable reviewPageable = PageRequest.of(pageDTO.pageNum() - 1
+                                                    , pageDTO.reviewAmount()
+                                                    , Sort.by("createdAt").descending()
+                                                );
+
+        Page<ProductReviewDTO> productReview = productReviewRepository.findByProductId(productId, reviewPageable);
+
+        return new ProductPageableDTO<>(productReview);
+    }
+
+    /**
+     *
+     * @param pageDTO
+     * @param productId
+     * @return
+     *
+     * 페이징 처리를 해야 하기 때문에 기능 분리.
+     * 사용자가 작성한 문의 사항을 먼저 10개 단위로 조회.
+     * 조회된 결과에서 id를 idList에 담아준 뒤 해당 리스트를 통해 답변 내역 조회
+     *
+     * 조회된 답변 리스트와 기존 리스트를 반복문으로 비교하면서 체크하고
+     * 사용자 작성 문의 데이터와 답변 리스트를 Mapping
+     *
+     * 처리 이후 ProductPageableDTO 객체 생성 및 반환
+     */
+    @Override
+    public ProductPageableDTO<ProductQnAResponseDTO> getDetailQnA(ProductDetailPageDTO pageDTO, String productId) {
+        Pageable qnaPageable = PageRequest.of(pageDTO.pageNum() - 1
+                                                , pageDTO.qnaAmount()
+                                                , Sort.by("createdAt").descending()
+                                            );
+
+        Page<ProductQnADTO> productQnA = productQnARepository.findByProductId(productId, qnaPageable);
+
+        List<Long> qnaIdList = new ArrayList<>();
+        productQnA.getContent().forEach(v -> qnaIdList.add(v.qnaId()));
+
+        List<ProductQnAResponseDTO> productQnADTOList = new ArrayList<>();
+        List<ProductQnAReply> qnaReplyList = productQnAReplyRepository.getQnAReply(qnaIdList);
+        int replyIdx = 0;
+
+        for(int i = 0; i < productQnA.getContent().size(); i++) {
+            List<ProductQnAReplyDTO> replyList = new ArrayList<>();
+            ProductQnADTO dto = productQnA.getContent().get(i);
+            long qnaId = dto.qnaId();
+
+            for(int j = replyIdx; j < qnaReplyList.size(); j++) {
+                if(qnaId == qnaReplyList.get(j).getProductQnA().getId()){
+                    replyList.add(
+                            new ProductQnAReplyDTO(qnaReplyList.get(j))
+                    );
+                }else{
+                    replyIdx = j;
+                    break;
+                }
+            }
+            productQnADTOList.add(new ProductQnAResponseDTO(dto, replyList));
+        }
+
+        Page<ProductQnAResponseDTO> qnaResponseDTO = new PageImpl<>(
+                productQnADTOList
+                , qnaPageable
+                , productQnA.getTotalElements()
+        );
+
+        return new ProductPageableDTO<>(qnaResponseDTO);
+    }
+
+
+    /**
+     *
+     * @param productId
+     * @param principal
+     * @return
+     *
+     * 관심상품 등록
+     * 사용자 정보가 존재하지 않는 경우에 대응하기 위해 principal null 체크
+     *
+     * Member, Product 조회 수행 후 둘중 하나라도 null이라면 NotFoundException 반환
+     *
+     * 둘다 Null이 아닌 경우 정상으로 판단해 해당 상품에 대해 관심상품 등록
+     */
+    @Override
+    public Long likeProduct(String productId, Principal principal) {
+
+        if(principal == null)
+            throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
+
+        Member member = memberRepository.findById(principal.getName()).orElse(null);
+        Product product = productRepository.findById(productId).orElse(null);
+
+        if(member == null || product == null)
+            throw new CustomNotFoundException(ErrorCode.NOT_FOUND, ErrorCode.NOT_FOUND.getMessage());
+
+        productLikeRepository.save(
+                                    ProductLike.builder()
+                                            .member(member)
+                                            .product(product)
+                                            .build()
+                            );
+
+        return 1L;
+    }
+
+    /**
+     *
+     * @param productId
+     * @param principal
+     * @return
+     *
+     * likeProduct Method 와 동일한 처리.
+     *
+     * save인지 delete인지의 차이.
+     */
+    @Override
+    public Long deLikeProduct(String productId, Principal principal) {
+
+        if(principal == null)
+            throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
+
+        Member member = memberRepository.findById(principal.getName()).orElse(null);
+        Product product = productRepository.findById(productId).orElse(null);
+
+        if(member == null || product == null)
+            throw new CustomNotFoundException(ErrorCode.NOT_FOUND, ErrorCode.NOT_FOUND.getMessage());
+
+        productLikeRepository.delete(
+                                        ProductLike.builder()
+                                                .member(member)
+                                                .product(product)
+                                                .build()
+                                );
+        return null;
     }
 }

@@ -32,8 +32,4 @@ public class ProductReview {
     private Date createdAt;
 
     private Date updatedAt;
-
-    private Long reviewGroupId;
-
-    private int reviewStep;
 }

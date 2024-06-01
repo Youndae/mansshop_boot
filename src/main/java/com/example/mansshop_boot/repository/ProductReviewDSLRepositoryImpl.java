@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 import static com.example.mansshop_boot.domain.entity.QProductReview.productReview;
+import static com.example.mansshop_boot.domain.entity.QProductReviewReply.productReviewReply;
 
 @Repository
 @RequiredArgsConstructor
@@ -35,16 +36,18 @@ public class ProductReviewDSLRepositoryImpl implements ProductReviewDSLRepositor
                                                                     .when(productReview.member.nickname.isNull())
                                                                     .then(productReview.member.userName)
                                                                     .otherwise(productReview.member.nickname)
-                                                                    .as("writer")
+                                                                    .as("reviewWriter")
                                                             , productReview.reviewContent
-                                                            , productReview.createdAt
-                                                            , productReview.reviewStep
+                                                            , productReview.createdAt.as("reviewCreatedAt")
+                                                            , productReviewReply.replyContent.as("answerContent")
+                                                            , productReviewReply.createdAt.as("answerCreatedAt")
                                                     )
                                             )
                                             .from(productReview)
+                                            .leftJoin(productReviewReply)
+                                            .on(productReview.id.eq(productReviewReply.productReview.id))
                                             .where(productReview.product.id.eq(productId))
-                                            .orderBy(productReview.reviewGroupId.desc())
-                                            .orderBy(productReview.reviewStep.asc())
+                                            .orderBy(productReview.createdAt.desc())
                                             .offset(pageable.getOffset())
                                             .limit(pageable.getPageSize())
                                             .fetch();
