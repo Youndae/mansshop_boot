@@ -11,16 +11,16 @@ import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
- * QProductReview is a Querydsl query type for ProductReview
+ * QMemberQnAReply is a Querydsl query type for MemberQnAReply
  */
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
-public class QProductReview extends EntityPathBase<ProductReview> {
+public class QMemberQnAReply extends EntityPathBase<MemberQnAReply> {
 
-    private static final long serialVersionUID = 1427611369L;
+    private static final long serialVersionUID = 332674750L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
-    public static final QProductReview productReview = new QProductReview("productReview");
+    public static final QMemberQnAReply memberQnAReply = new QMemberQnAReply("memberQnAReply");
 
     public final DateTimePath<java.util.Date> createdAt = createDateTime("createdAt", java.util.Date.class);
 
@@ -28,32 +28,32 @@ public class QProductReview extends EntityPathBase<ProductReview> {
 
     public final QMember member;
 
-    public final QProduct product;
+    public final QMemberQnA memberQnA;
 
-    public final StringPath reviewContent = createString("reviewContent");
+    public final StringPath replyContent = createString("replyContent");
 
     public final DateTimePath<java.util.Date> updatedAt = createDateTime("updatedAt", java.util.Date.class);
 
-    public QProductReview(String variable) {
-        this(ProductReview.class, forVariable(variable), INITS);
+    public QMemberQnAReply(String variable) {
+        this(MemberQnAReply.class, forVariable(variable), INITS);
     }
 
-    public QProductReview(Path<? extends ProductReview> path) {
+    public QMemberQnAReply(Path<? extends MemberQnAReply> path) {
         this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QProductReview(PathMetadata metadata) {
+    public QMemberQnAReply(PathMetadata metadata) {
         this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QProductReview(PathMetadata metadata, PathInits inits) {
-        this(ProductReview.class, metadata, inits);
+    public QMemberQnAReply(PathMetadata metadata, PathInits inits) {
+        this(MemberQnAReply.class, metadata, inits);
     }
 
-    public QProductReview(Class<? extends ProductReview> type, PathMetadata metadata, PathInits inits) {
+    public QMemberQnAReply(Class<? extends MemberQnAReply> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.member = inits.isInitialized("member") ? new QMember(forProperty("member")) : null;
-        this.product = inits.isInitialized("product") ? new QProduct(forProperty("product"), inits.get("product")) : null;
+        this.memberQnA = inits.isInitialized("memberQnA") ? new QMemberQnA(forProperty("memberQnA"), inits.get("memberQnA")) : null;
     }
 
 }

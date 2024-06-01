@@ -5,12 +5,14 @@ const PagingButtonWrapper = styled.button`
     background: none;
     border: none;
     color: #17a2b8;
+    cursor: pointer;
 `
 
 const PagingActiveButtonWrapper = styled.button`
     background: none;
     border: none;
     color: black;
+    cursor: pointer;
 `
 
 function PagingButton(props) {

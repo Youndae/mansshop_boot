@@ -37,4 +37,6 @@ public class Product {
     private Date createdAt;
 
     private Date updatedAt;
+
+    private int totalStock;
 }

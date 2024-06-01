@@ -31,10 +31,8 @@ public class MemberQnA {
 
     private Date createdAt;
 
+    private Date updatedAt;
+
     private int memberQnAStat;
-
-    private long memberQnAGroupId;
-
-    private long memberQnAStep;
 
 }

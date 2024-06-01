@@ -40,6 +40,8 @@ public class QProduct extends EntityPathBase<Product> {
 
     public final StringPath thumbnail = createString("thumbnail");
 
+    public final NumberPath<Integer> totalStock = createNumber("totalStock", Integer.class);
+
     public final DateTimePath<java.util.Date> updatedAt = createDateTime("updatedAt", java.util.Date.class);
 
     public QProduct(String variable) {

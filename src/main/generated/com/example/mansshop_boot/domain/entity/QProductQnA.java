@@ -30,11 +30,7 @@ public class QProductQnA extends EntityPathBase<ProductQnA> {
 
     public final QProduct product;
 
-    public final NumberPath<Long> productQnAGroupId = createNumber("productQnAGroupId", Long.class);
-
     public final NumberPath<Integer> productQnAStat = createNumber("productQnAStat", Integer.class);
-
-    public final NumberPath<Integer> productQnAStep = createNumber("productQnAStep", Integer.class);
 
     public final StringPath qnaContent = createString("qnaContent");
 

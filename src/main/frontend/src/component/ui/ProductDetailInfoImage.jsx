@@ -35,8 +35,8 @@ function ProductDetailInfoImage(props) {
         <>
             {imgSrc.map((image, index) => {
                 return (
-                    <div className={'info-image-div'}>
-                        <img key={index} className={'info-image'} alt={''} src={image}/>
+                    <div key={index} className={'info-image-div'}>
+                        <img className={'info-image'} alt={''} src={image}/>
                     </div>
                 )
             })}

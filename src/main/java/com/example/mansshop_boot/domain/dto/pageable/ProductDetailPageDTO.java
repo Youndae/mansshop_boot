@@ -8,4 +8,8 @@ public record ProductDetailPageDTO(
     public ProductDetailPageDTO() {
         this(1, 10, 10);
     }
+
+    public ProductDetailPageDTO(int page) {
+        this(page, 10, 10);
+    }
 }

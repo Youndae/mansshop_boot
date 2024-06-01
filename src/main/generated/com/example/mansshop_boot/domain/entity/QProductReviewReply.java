@@ -11,16 +11,16 @@ import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
- * QProductReview is a Querydsl query type for ProductReview
+ * QProductReviewReply is a Querydsl query type for ProductReviewReply
  */
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
-public class QProductReview extends EntityPathBase<ProductReview> {
+public class QProductReviewReply extends EntityPathBase<ProductReviewReply> {
 
-    private static final long serialVersionUID = 1427611369L;
+    private static final long serialVersionUID = 1900506497L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
-    public static final QProductReview productReview = new QProductReview("productReview");
+    public static final QProductReviewReply productReviewReply = new QProductReviewReply("productReviewReply");
 
     public final DateTimePath<java.util.Date> createdAt = createDateTime("createdAt", java.util.Date.class);
 
@@ -28,32 +28,32 @@ public class QProductReview extends EntityPathBase<ProductReview> {
 
     public final QMember member;
 
-    public final QProduct product;
+    public final QProductReview productReview;
 
-    public final StringPath reviewContent = createString("reviewContent");
+    public final StringPath replyContent = createString("replyContent");
 
     public final DateTimePath<java.util.Date> updatedAt = createDateTime("updatedAt", java.util.Date.class);
 
-    public QProductReview(String variable) {
-        this(ProductReview.class, forVariable(variable), INITS);
+    public QProductReviewReply(String variable) {
+        this(ProductReviewReply.class, forVariable(variable), INITS);
     }
 
-    public QProductReview(Path<? extends ProductReview> path) {
+    public QProductReviewReply(Path<? extends ProductReviewReply> path) {
         this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QProductReview(PathMetadata metadata) {
+    public QProductReviewReply(PathMetadata metadata) {
         this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QProductReview(PathMetadata metadata, PathInits inits) {
-        this(ProductReview.class, metadata, inits);
+    public QProductReviewReply(PathMetadata metadata, PathInits inits) {
+        this(ProductReviewReply.class, metadata, inits);
     }
 
-    public QProductReview(Class<? extends ProductReview> type, PathMetadata metadata, PathInits inits) {
+    public QProductReviewReply(Class<? extends ProductReviewReply> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.member = inits.isInitialized("member") ? new QMember(forProperty("member")) : null;
-        this.product = inits.isInitialized("product") ? new QProduct(forProperty("product"), inits.get("product")) : null;
+        this.productReview = inits.isInitialized("productReview") ? new QProductReview(forProperty("productReview"), inits.get("productReview")) : null;
     }
 
 }
