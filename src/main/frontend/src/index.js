@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { legacy_createStore as createStore} from 'redux';
+import { Provider } from 'react-redux';
 import { CookiesProvider } from "react-cookie";
 
 import dayjs from "dayjs";
@@ -9,17 +11,22 @@ import isLeapYear from 'dayjs/plugin/isLeapYear';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/ko';
 
+import rootReducer from './modules';
+
 dayjs.extend(isLeapYear, relativeTime);
 dayjs.locale('ko');
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
+const store = createStore(rootReducer);
 
 root.render(
-  <React.StrictMode>
-      <CookiesProvider>
-        <App />
-      </CookiesProvider>
-  </React.StrictMode>
+    <>
+        <CookiesProvider>
+            <Provider store={store}>
+                <App />
+            </Provider>
+        </CookiesProvider>
+    </>
 );
 
 // If you want to start measuring performance in your app, pass a function

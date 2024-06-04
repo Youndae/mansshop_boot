@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 
-import { defaultAxios } from "../../../module/customAxios";
+import { defaultAxios } from "../../../modules/customAxios";
 
 import MainContent from "../../ui/MainContent";
 

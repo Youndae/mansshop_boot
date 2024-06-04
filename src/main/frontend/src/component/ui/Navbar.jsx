@@ -1,20 +1,94 @@
-import React, {useState} from 'react';
-import {Link, useNavigate} from "react-router-dom";
+import React, {useEffect, useState} from 'react';
+import {Link, useLocation, useNavigate} from "react-router-dom";
 
 import "../css/header.css";
+import {axiosDefault, checkUserStatus, defaultAxios, getAuthorization} from "../../modules/customAxios";
+import {useDispatch, useSelector} from "react-redux";
+import {handleLocationPathToLogin} from "../../modules/loginModule";
 
 
 function Navbar() {
     const [keyword, setKeyword] = useState('');
 
+    const loginState = useSelector((state) => state.member);
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const { pathname } = useLocation();
+
+    // console.log('loginState : ', loginState);
+
+    /*useEffect(() => {
+        checkUserStatus()
+            .then(res => {
+                console.log('navbar res : ', res);
+                const status = res.data;
+                let dispatchType;
+
+                if(status)
+                    dispatchType = 'isLoggedIn';
+                else
+                    dispatchType = 'isLoggedOut';
+
+                const body = {
+                    type: dispatchType,
+                }
+
+                dispatch(body);
+            })
+    }, []);*/
 
     const handleKeywordOnchange = (e) => {
         setKeyword(e.target.value);
     }
 
     const handleLoginBtn = () => {
-        navigate('/login');
+        handleLocationPathToLogin(pathname, navigate);
+    }
+
+    const handleLogoutBtn = async () => {
+
+        const body = {
+            type: 'isLoggedOut',
+        }
+
+        dispatch(body);
+
+        await axiosDefault.post(`member/logout`)
+            .then(res => {
+                if(res.data.message === 'success') {
+                    window.localStorage.removeItem('Authorization');
+                    navigate('/');
+                }else {
+                    alert('오류가 발생했습니다.\n문제가 계속되면 관리자에게 문의해주세요');
+                }
+            })
+            .catch(err => {
+                const err_code = err.response.status;
+                alert('오류가 발생했습니다.\n문제가 계속되면 관리자에게 문의해주세요');
+            })
+
+
+        /*const authorization = getAuthorization();
+
+        await defaultAxios.post(`member/logout`, {}, {
+            headers: {
+                'Authorization' : `${authorization}`,
+            }
+        })
+            .then(res => {
+                if(res.data.message === 'success') {
+                    window.localStorage.removeItem('Authorization');
+                    navigate('/');
+                }else {
+                    alert('오류가 발생했습니다.\n문제가 계속되면 관리자에게 문의해주세요');
+                }
+            })
+            .catch(err => {
+                const err_code = err.response.status;
+
+                alert('오류가 발생했습니다.\n문제가 계속되면 관리자에게 문의해주세요');
+            })*/
+
     }
 
     const handleCartBtn = () => {
@@ -23,6 +97,10 @@ function Navbar() {
 
     const handleOrderBtn = () => {
         navigate('/order');
+    }
+
+    const handleMyPageBtn = () => {
+        navigate('/myPage');
     }
 
     const handleSearchBtn = () => {
@@ -51,15 +129,14 @@ function Navbar() {
                 </div>
                 <div className="header-nav menu">
                     <ul className="menu-nav">
-                        <li>
-                            <button className="header-btn" type={'button'} onClick={handleLoginBtn}>로그인</button>
-                        </li>
-                        <li>
-                            <button className="header-btn" type={'button'} onClick={handleCartBtn}>장바구니</button>
-                        </li>
-                        <li>
-                            <button className="header-btn" type={'button'} onClick={handleOrderBtn}>주문조회</button>
-                        </li>
+                        <NavbarBtn
+                            loginState={loginState}
+                            handleLoginBtn={handleLoginBtn}
+                            handleLogoutBtn={handleLogoutBtn}
+                            handleCartBtn={handleCartBtn}
+                            handleOrderListBtn={handleOrderBtn}
+                            handleMyPageBtn={handleMyPageBtn}
+                        />
                         <li>
                             <div className="main-search-form">
                                 <input type={'text'} id={'keyword'} value={keyword} onChange={handleKeywordOnchange}/>
@@ -84,6 +161,55 @@ function Navbar() {
             </div>
         </div>
     )
+}
+
+function NavbarBtn(props) {
+    const { loginState, handleLoginBtn, handleLogoutBtn, handleCartBtn, handleOrderListBtn, handleMyPageBtn} = props;
+
+    return (
+        <>
+            <li>
+                <button className="header-btn" type={'button'} onClick={handleLogoutBtn}>로그아웃</button>
+            </li>
+            <li>
+                <button className="header-btn" type={'button'} onClick={handleMyPageBtn}>마이페이지</button>
+            </li>
+            <li>
+                <button className="header-btn" type={'button'} onClick={handleCartBtn}>장바구니</button>
+            </li>
+        </>
+    )
+
+
+    /*if(loginState === 'loggedOut'){
+        return (
+            <>
+                <li>
+                    <button className="header-btn" type={'button'} onClick={handleLoginBtn}>로그인</button>
+                </li>
+                <li>
+                    <button className="header-btn" type={'button'} onClick={handleOrderListBtn}>주문조회</button>
+                </li>
+                <li>
+                    <button className="header-btn" type={'button'} onClick={handleCartBtn}>장바구니</button>
+                </li>
+            </>
+        )
+    }else if(loginState === 'loggedIn'){
+        return (
+            <>
+                <li>
+                    <button className="header-btn" type={'button'} onClick={handleLogoutBtn}>로그아웃</button>
+                </li>
+                <li>
+                    <button className="header-btn" type={'button'} onClick={handleMyPageBtn}>마이페이지</button>
+                </li>
+                <li>
+                    <button className="header-btn" type={'button'} onClick={handleCartBtn}>장바구니</button>
+                </li>
+            </>
+        )
+    }*/
 }
 
 export default Navbar;

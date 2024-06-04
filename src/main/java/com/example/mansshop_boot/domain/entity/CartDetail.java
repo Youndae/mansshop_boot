@@ -28,4 +28,8 @@ public class CartDetail {
     private int cartCount;
 
     private int cartPrice;
+
+    public void setCart(Cart cart) {
+        this.cart = cart;
+    }
 }

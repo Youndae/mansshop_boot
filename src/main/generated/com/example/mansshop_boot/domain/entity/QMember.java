@@ -22,11 +22,15 @@ public class QMember extends EntityPathBase<Member> {
 
     public final ListPath<Auth, QAuth> auths = this.<Auth, QAuth>createList("auths", Auth.class, QAuth.class, PathInits.DIRECT2);
 
+    public final DateTimePath<java.util.Date> birth = createDateTime("birth", java.util.Date.class);
+
     public final DateTimePath<java.util.Date> createdAt = createDateTime("createdAt", java.util.Date.class);
 
     public final NumberPath<Long> memberPoint = createNumber("memberPoint", Long.class);
 
     public final StringPath nickname = createString("nickname");
+
+    public final StringPath phone = createString("phone");
 
     public final StringPath provider = createString("provider");
 

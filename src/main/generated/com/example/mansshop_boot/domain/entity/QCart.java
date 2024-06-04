@@ -22,6 +22,8 @@ public class QCart extends EntityPathBase<Cart> {
 
     public static final QCart cart = new QCart("cart");
 
+    public final SetPath<CartDetail, QCartDetail> cartDetailSet = this.<CartDetail, QCartDetail>createSet("cartDetailSet", CartDetail.class, QCartDetail.class, PathInits.DIRECT2);
+
     public final StringPath cookieId = createString("cookieId");
 
     public final DateTimePath<java.util.Date> createdAt = createDateTime("createdAt", java.util.Date.class);

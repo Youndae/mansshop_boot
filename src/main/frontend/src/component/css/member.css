@@ -6,6 +6,8 @@
     font-size: large;
     padding-left: 45%;
     font-weight: bold;
+    float: left;
+    margin-top: 30px;
 }
 
 .join-form div {
@@ -17,11 +19,26 @@
     height: 30px;
 }
 
+.join-content button {
+    background: white;
+    border: 1px solid lightgray;
+}
+
 .join-form button {
     text-align: center;
     width: 100px;
     height: 30px;
-    margin-left: 7%;
+    margin-left: 2%;
+}
+
+.join-btn {
+    width: 270px;
+    margin: 20px 0 0 30px;
+}
+
+.nickname-info {
+    font-size: small;
+    color: gray;
 }
 
 
@@ -41,9 +58,12 @@
     width: 300px;
 }
 
-.login-btn, .join-search-area button {
+.login-btn button, .join-search-area button {
     margin-top: 10px;
     height: 30px;
+    background: white;
+    border: 1px solid lightgray;
+    cursor: pointer;
 }
 
 .login-btn button {
@@ -69,6 +89,7 @@
 
 .oauth-btn img {
     width: 200px;
+    cursor: pointer;
 }
 
 

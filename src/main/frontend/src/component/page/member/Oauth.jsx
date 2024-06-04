@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {defaultAxios} from "../../../module/customAxios";
+import {defaultAxios} from "../../../modules/customAxios";
 import {useNavigate, useSearchParams} from "react-router-dom";
 
 function Oauth() {

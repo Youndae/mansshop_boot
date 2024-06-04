@@ -95,10 +95,18 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request
                                     , HttpServletResponse response
                                     , FilterChain chain) throws ServletException, IOException {
+
+        log.warn("AuthorizationFilter :: requestURI : {}", request.getRequestURI());
+
+
         String accessToken = request.getHeader(accessHeader);
         Cookie refreshToken = WebUtils.getCookie(request, refreshHeader);
         Cookie inoToken = WebUtils.getCookie(request, inoHeader);
         String username = null; // Authentication 객체 생성 시 필요한 사용자 아이디
+
+        log.warn("AuthorizationFilter :: accessToken : {}", accessToken);
+        log.warn("AuthorizationFilter :: refreshToken : {}", refreshToken == null ? null : refreshToken.getValue());
+        log.warn("AuthorizationFilter :: inoToken : {}", inoToken == null ? null : inoToken.getValue());
 
         if(inoToken != null){
             String inoValue = inoToken.getValue();
@@ -112,15 +120,14 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
                     return;
                 }else {
                     String claimByAccessToken = jwtTokenProvider.verifyAccessToken(accessTokenValue, inoValue);
-
+                    log.info("accessToken verify result : {}", claimByAccessToken);
                     if(claimByAccessToken.equals(Result.WRONG_TOKEN.getResultKey())
                         || claimByAccessToken.equals(Result.TOKEN_STEALING.getResultKey())){
                         jwtTokenService.deleteCookieAndThrowException(response);
                         return;
                     }else if(claimByAccessToken.equals(Result.TOKEN_EXPIRATION.getResultKey())){
-                        if(request.getRequestURI().equals("/api/reIssue")) {
+                        if(request.getRequestURI().equals("/api/reissue")) {
                             chain.doFilter(request, response);
-                            return;
                         }else
                             jwtTokenService.tokenExpirationResponse(response);
 

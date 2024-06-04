@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 
-import { defaultAxios } from "../../../module/customAxios";
-import { mainProductPagingObject, getClickNumber, getPrevNumber, getNextNumber } from "../../../module/pagingModule";
+import { defaultAxios } from "../../../modules/customAxios";
+import { mainProductPagingObject, getClickNumber, getPrevNumber, getNextNumber } from "../../../modules/pagingModule";
 
 import MainContent from "../../ui/MainContent";
 import {useNavigate, useParams, useSearchParams} from "react-router-dom";

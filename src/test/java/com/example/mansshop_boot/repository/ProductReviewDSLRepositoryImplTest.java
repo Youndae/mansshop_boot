@@ -28,7 +28,7 @@ class ProductReviewDSLRepositoryImplTest {
 
         String productId = "BAGS20210629134401";
 
-        Page<ProductReviewDTO> dto = productReviewRepository.findByProductId(productId, pageDTO, reviewPageable);
+        Page<ProductReviewDTO> dto = productReviewRepository.findByProductId(productId, reviewPageable);
 
         System.out.println(dto.getContent());
     }

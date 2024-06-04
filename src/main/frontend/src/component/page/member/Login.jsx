@@ -1,8 +1,9 @@
 import React, {useState} from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import {useNavigate, useLocation} from 'react-router-dom';
+import { useDispatch } from "react-redux";
 
 import "../../css/member.css";
+import {defaultAxios} from "../../../modules/customAxios";
 
 function Login() {
     const [userData, setUserData] = useState({
@@ -11,6 +12,8 @@ function Login() {
     });
 
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const { state } = useLocation();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -18,7 +21,7 @@ function Login() {
         console.log('userId : ', userData.userId);
         console.log('userPw : ', userData.userPw);
 
-        await axios.post(`/api/login`, {
+        await defaultAxios.post(`member/login`, {
             userId: userData.userId,
             userPw: userData.userPw,
         }, {
@@ -28,11 +31,16 @@ function Login() {
             , withCredentials: true
         })
             .then(res => {
-                console.log("login res : ", res);
-                const authorization = res.headers.get('authorization');
+                const authorization = res.headers['authorization'];
                 window.localStorage.setItem('Authorization', authorization);
-                // navigate('/member/mypage');
-                // navigate('/');
+
+                const body = {
+                    type: 'isLoggedIn',
+                }
+
+                dispatch(body);
+                navigate(state);
+
             })
             .catch(err => {
                 console.error('login err : ', err);
@@ -61,14 +69,14 @@ function Login() {
     const handleOAuth = (e) => {
         const oAuthClient = e.target.name;
 
-        console.log('handleOAuth client name : ', oAuthClient);
+        window.sessionStorage.setItem('prev', state.toString());
 
-        if(oAuthClient === 'google')
+        /*if(oAuthClient === 'google')
             window.location.href='http://localhost:8080/oauth2/authorization/google';
         else if(oAuthClient === 'naver')
             window.location.href='http://localhost:8080/oauth2/authorization/naver';
         else if(oAuthClient === 'kakao')
-            window.location.href='http://localhost:8080/oauth2/authorization/kakao';
+            window.location.href='http://localhost:8080/oauth2/authorization/kakao';*/
     }
 
     return (

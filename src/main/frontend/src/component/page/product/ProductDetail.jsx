@@ -3,8 +3,8 @@ import {useNavigate, useParams} from "react-router-dom";
 
 import dayjs from "dayjs";
 
-import { defaultAxios } from "../../../module/customAxios";
-import {getClickNumber, getNextNumber, getPrevNumber, productDetailPagingObject} from "../../../module/pagingModule";
+import { defaultAxios } from "../../../modules/customAxios";
+import {getClickNumber, getNextNumber, getPrevNumber, productDetailPagingObject} from "../../../modules/pagingModule";
 import ProductDetailThumbnail from "../../ui/ProductDetailThumbnail";
 import ProductDetailInfoImage from "../../ui/ProductDetailInfoImage";
 
@@ -14,7 +14,6 @@ import Paging from "../../ui/Paging";
 /*
     바로구매, 장바구니, 관심상품 버튼 handling -> 컴포넌트 작성 이후 테스트
     로그인 여부에 따른 QnA 작성 버튼 handling
-    리뷰, QnA paging -> 10개 출력 확인. 페이징 구현
  */
 function ProductDetail() {
     const { productId } = useParams();
@@ -197,9 +196,18 @@ function ProductDetail() {
 
     const handleCartBtn = async () => {
 
-        await defaultAxios.post(`/cart`, {
-            option : {selectOption}
-        })
+        let addList = [];
+
+        for(let i = 0; i < selectOption.length; i++) {
+            addList.push({
+                optionId: selectOption[i].optionId,
+                count: selectOption[i].count,
+                price: selectOption[i].price,
+            })
+        }
+
+
+        await defaultAxios.post(`cart/`, {addList})
             .then(res => {
                 console.log('addCart axios success : ', res);
                 alert('장바구니에 상품을 추가했습니다.');
@@ -581,7 +589,7 @@ function ProductDetailSelectOption(props) {
         valueText = `${colorValueText}`;
     }
 
-    if(productOption.stock == 0) {
+    if(productOption.stock === 0) {
         return (
             <>
                 <option value={valueText}  disabled={true}>(품절) {optionText} </option>
