@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -28,5 +30,15 @@ public class Cart {
     private Date createdAt;
 
     private Date updatedAt;
+
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
+    private final Set<CartDetail> cartDetailSet = new HashSet<>();
+
+    public void addCartDetail(CartDetail cartDetail) {
+        cartDetailSet.add(cartDetail);
+        cartDetail.setCart(this);
+    }
+
+
 
 }

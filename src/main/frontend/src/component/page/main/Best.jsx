@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 
-import { defaultAxios } from "../../../module/customAxios";
+import {axiosDefault, defaultAxios} from "../../../modules/customAxios";
 
 import MainContent from "../../ui/MainContent";
 
@@ -12,7 +12,7 @@ function Best() {
     }, []);
 
     const getBestData = async() => {
-        await defaultAxios.get('main/')
+        await axiosDefault.get('main/')
             .then(res => {
                 console.log('best res : ', res);
                 setData(res.data.content);

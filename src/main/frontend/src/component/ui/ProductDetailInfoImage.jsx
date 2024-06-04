@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 
-import { imageDisplayAxios } from "../../module/customAxios";
+import { imageDisplayAxios } from "../../modules/customAxios";
 
 function ProductDetailInfoImage(props) {
     const { imageInfo } = props;

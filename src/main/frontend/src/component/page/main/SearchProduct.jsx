@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 
-import { defaultAxios } from "../../../module/customAxios";
-import {mainProductPagingObject} from "../../../module/pagingModule";
+import { defaultAxios } from "../../../modules/customAxios";
+import {mainProductPagingObject} from "../../../modules/pagingModule";
 
 import {useSearchParams} from "react-router-dom";
 import Paging from "../../ui/Paging";

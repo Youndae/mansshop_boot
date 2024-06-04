@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 
-import {imageDisplayAxios} from "../../module/customAxios";
+import {axiosDefault, axiosDisplay, imageDisplayAxios} from "../../modules/customAxios";
 
 import '../css/main.css';
 import {Link} from "react-router-dom";
@@ -17,7 +17,9 @@ function MainContent(props) {
         const imageArr = [];
         for(let i = 0; i < data.length; i++){
             const thumb = data[i].thumbnail;
-            await imageDisplayAxios.get(`display/${thumb}`)
+
+
+            await axiosDisplay.get(`main/display/${thumb}`)
                 .then(res => {
                     const url = window
                         .URL
@@ -34,6 +36,25 @@ function MainContent(props) {
                 .catch(err => {
                     console.error('display request error : ', err);
                 })
+            /*
+
+            await imageDisplayAxios.get(`main/display/${thumb}`)
+                .then(res => {
+                    const url = window
+                        .URL
+                        .createObjectURL(
+                            new Blob([res.data], {type: res.headers['content-type']})
+                        );
+                    imageArr.push({
+                        productId: data[i].productId,
+                        thumbnail: url,
+                        productName: data[i].productName,
+                        productPrice: data[i].productPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','),
+                    });
+                })
+                .catch(err => {
+                    console.error('display request error : ', err);
+                })*/
         }
 
         setImageList(imageArr);

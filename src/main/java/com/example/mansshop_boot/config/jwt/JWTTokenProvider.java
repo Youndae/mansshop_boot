@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
@@ -129,8 +130,9 @@ public class JWTTokenProvider {
      * 불일치한다면 토큰은 정상이기 때문에 탈취로 판단. redis 데이터 삭제 후 TOKEN_STEALING 반환
      */
     public String verifyAccessToken(String accessTokenValue, String inoValue) {
+        log.info("verifyAccessToken :: accessTokenValue : {}", accessTokenValue);
         String claimByUserId = getClaimByUserId(accessTokenValue, accessSecret);
-
+        log.info("verifyAccessToken :: claim : {}", claimByUserId);
         if(claimByUserId.equals(Result.WRONG_TOKEN.getResultKey())
                 || claimByUserId.equals(Result.TOKEN_EXPIRATION.getResultKey())) {
 
@@ -188,8 +190,10 @@ public class JWTTokenProvider {
 
         if(refreshTokenValue.equals(redisValue))
             return claimByUserId;
-        else
+        else {
+            deleteTokenValueToRedis(claimByUserId, inoValue);
             return Result.TOKEN_STEALING.getResultKey();
+        }
 
     }
 
@@ -269,9 +273,12 @@ public class JWTTokenProvider {
     public String getTokenValueToRedis(String tokenKey) {
         long keyExpire = redisTemplate.getExpire(tokenKey);
 
-        if(keyExpire == -2)
+        if(keyExpire == -2) {
+            log.info("RedisValue :: tokenkey : {}", tokenKey);
+            log.info("RedisValue :: key Expire");
             return null;
-
+        }
+        log.info("RedisValue :: key not Expire");
         return redisTemplate.opsForValue().get(tokenKey);
     }
 
@@ -314,7 +321,7 @@ public class JWTTokenProvider {
      * @return ResponseCookie
      *
      * ResponseCookie 생성 후 반환.
-     * RefreshToken cookie와 ino cookie 생성에 사용
+     * RefreshToken cookie와 ino cookie, cartCookie 생성에 사용
      */
     public String createCookie(String name, String value, Duration expires) {
 
@@ -350,6 +357,9 @@ public class JWTTokenProvider {
     }
 
     public void setAccessTokenToResponseHeader(String accessToken, HttpServletResponse response){
+
+        log.info("setAccessToken Header :: responseHeader : {}", accessHeader);
+
         response.addHeader(accessHeader, accessToken);
     }
 
@@ -428,6 +438,7 @@ public class JWTTokenProvider {
 
         setAccessTokenToResponseHeader(accessToken, response);
         setTokenCookie(refreshHeader, refreshToken, Duration.ofDays(refreshExpiration), response);
+        setTokenCookie(inoHeader, ino, Duration.ofDays(inoCookieAge), response);
     }
 
     /**

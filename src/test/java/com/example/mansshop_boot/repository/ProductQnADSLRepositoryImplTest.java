@@ -29,7 +29,7 @@ class ProductQnADSLRepositoryImplTest {
 
         String productId = "BAGS20210629134401";
 
-        Page<ProductQnADTO> dto = productQnARepository.findByProductId(productId, pageDTO, qnaPageable);
+        Page<ProductQnADTO> dto = productQnARepository.findByProductId(productId, qnaPageable);
 
         System.out.println(dto.getContent());
     }

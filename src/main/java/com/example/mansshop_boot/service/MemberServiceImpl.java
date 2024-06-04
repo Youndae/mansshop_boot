@@ -8,10 +8,11 @@ import com.example.mansshop_boot.config.jwt.JWTTokenProvider;
 import com.example.mansshop_boot.config.security.CustomUser;
 import com.example.mansshop_boot.domain.dto.member.JoinDTO;
 import com.example.mansshop_boot.domain.dto.member.LoginDTO;
+import com.example.mansshop_boot.domain.dto.member.LogoutDTO;
+import com.example.mansshop_boot.domain.dto.response.CompleteResponseEntity;
 import com.example.mansshop_boot.domain.entity.Auth;
 import com.example.mansshop_boot.domain.entity.Member;
 import com.example.mansshop_boot.domain.enumuration.Result;
-import com.example.mansshop_boot.domain.enumuration.Role;
 import com.example.mansshop_boot.repository.MemberRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,11 +20,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.WebUtils;
+
+import java.security.Principal;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +47,10 @@ public class MemberServiceImpl implements MemberService{
     @Value("#{jwt['cookie.ino.header']}")
     private String inoHeader;
 
+    private static String checkDuplicatedResponseMessage = "duplicated";
+
+    private static String checkNoDuplicatesResponseMessage = "No duplicates";
+
     /**
      *
      * @param joinDTO
@@ -50,14 +59,17 @@ public class MemberServiceImpl implements MemberService{
      * 로컬 회원가입
      */
     @Override
-    public long joinProc(JoinDTO joinDTO) {
+    public ResponseEntity<?> joinProc(JoinDTO joinDTO) {
 
         Member memberEntity = joinDTO.toEntity();
         memberEntity.addMemberAuth(new Auth().toMemberAuth());
 
         memberRepository.save(memberEntity);
 
-        return 1L;
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        new CompleteResponseEntity("success")
+                );
     }
 
     /**
@@ -89,6 +101,32 @@ public class MemberServiceImpl implements MemberService{
 
         throw new CustomBadCredentialsException(ErrorCode.BAD_CREDENTIALS, ErrorCode.BAD_CREDENTIALS.getMessage());
     }
+
+    /**
+     *
+     * @param dto
+     * @param response
+     * @return
+     *
+     * 로그아웃 처리.
+     * Redis 데이터 및 Token Cookie 만료 기간 0으로 초기화해서 Response에 담아 반환
+     */
+    @Override
+    public ResponseEntity<?> logoutProc(LogoutDTO dto, HttpServletResponse response) {
+
+        try{
+            jwtTokenProvider.deleteRedisDataAndCookie(dto.userId(), dto.inoValue(), response);
+
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new CompleteResponseEntity("success"));
+        }catch (Exception e) {
+            log.warn("logout delete Data Exception");
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
+                    .body(new CompleteResponseEntity("fail"));
+        }
+    }
+
 
     /**
      *
@@ -144,5 +182,38 @@ public class MemberServiceImpl implements MemberService{
             jwtTokenProvider.issueTokens(userId, inoCookie.getValue(), response);
 
         return true;
+    }
+
+    @Override
+    public ResponseEntity<?> checkJoinId(String userId) {
+        Member member = memberRepository.findById(userId).orElse(null);
+
+        String responseMessage = checkDuplicatedResponseMessage;
+
+        if(member == null)
+            responseMessage = checkNoDuplicatesResponseMessage;
+
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        new CompleteResponseEntity(responseMessage)
+                );
+    }
+
+    @Override
+    public ResponseEntity<?> checkNickname(String nickname, Principal principal) {
+
+        Member member = memberRepository.findByNickname(nickname);
+
+        String responseMessage = checkDuplicatedResponseMessage;
+
+        if(member == null || principal != null && member.getUserId().equals(principal.getName()))
+            responseMessage = checkNoDuplicatesResponseMessage;
+
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        new CompleteResponseEntity(responseMessage)
+                );
     }
 }

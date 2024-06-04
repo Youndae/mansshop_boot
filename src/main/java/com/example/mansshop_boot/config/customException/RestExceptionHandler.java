@@ -43,7 +43,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return toResponseEntity(ErrorCode.BAD_CREDENTIALS);
     }
 
-    @ExceptionHandler(CustomNotFoundException.class)
+    @ExceptionHandler({CustomNotFoundException.class, IllegalArgumentException.class})
     public ResponseEntity<?> notFoundException(Exception e) {
         log.warn("NotFoundException : {}", e.getMessage());
 

@@ -1,10 +1,9 @@
 package com.example.mansshop_boot.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.ArrayList;
@@ -13,9 +12,9 @@ import java.util.List;
 
 @Entity
 @Getter
-@Builder
 @NoArgsConstructor
 @EqualsAndHashCode
+@ToString
 public class Member {
 
     @Id
@@ -33,7 +32,12 @@ public class Member {
 
     private Long memberPoint;
 
+    @CreationTimestamp
     private Date createdAt;
+
+    private String phone;
+
+    private Date birth;
 
     @OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private final List<Auth> auths = new ArrayList<>();
@@ -43,6 +47,7 @@ public class Member {
         auth.setMember(this);
     }
 
+    @Builder
     public Member(String userId
                 , String userPw
                 , String userName
@@ -50,8 +55,10 @@ public class Member {
                 , String userEmail
                 , String provider
                 , Long memberPoint
-                , Date createdAt) {
+                , String phone
+                , Date birth) {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        String phoneRegEx = "(\\d{3})(\\d{3,4})(\\d{4})";
 
         this.userId = userId;
         this.userPw = userPw == null ? null : passwordEncoder.encode(userPw);
@@ -60,7 +67,8 @@ public class Member {
         this.userEmail = userEmail;
         this.provider = provider == null ? "local" : provider;
         this.memberPoint = memberPoint == null ? 0 : memberPoint;
-        this.createdAt = createdAt;
+        this.phone = phone.replaceAll(phoneRegEx, "$1-$2-$3");
+        this.birth = birth;
     }
 
     public void setUserName(String userName) {
