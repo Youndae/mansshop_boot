@@ -76,7 +76,7 @@ public class CartServiceImpl implements CartService{
      */
     @Override
     public ResponseEntity<?> getCartList(CartMemberDTO cartMemberDTO) {
-        Long userCartId = cartRepository.findIdByUserId(cartMemberDTO.uid(), cartMemberDTO.cartCookieValue());
+        Long userCartId = cartRepository.findIdByUserId(cartMemberDTO);
 
         if(userCartId == null)
             return ResponseEntity.status(HttpStatus.OK)
@@ -108,7 +108,9 @@ public class CartServiceImpl implements CartService{
         if(cartMemberDTO.uid().equals(nonUserId))
             cookieValue = cartMemberDTO.cartCookieValue() == null ? createAnonymousCookie(response) : cartMemberDTO.cartCookieValue();
 
-        Cart cart = cartRepository.findByUserIdAndCookieValue(cartMemberDTO.uid(), cookieValue);
+        Cart cart = cartRepository.findByUserIdAndCookieValue(
+                new CartMemberDTO(cartMemberDTO.uid(), cookieValue)
+        );
 
         if(cart == null) {
             Member member = memberRepository.findById(cartMemberDTO.uid()).orElseThrow(IllegalArgumentException::new);
@@ -147,7 +149,7 @@ public class CartServiceImpl implements CartService{
     @Transactional(rollbackFor = RuntimeException.class)
     public ResponseEntity<?> deleteAllCart(CartMemberDTO cartMemberDTO, HttpServletResponse response) {
 
-        Long cartId = cartRepository.findIdByUserId(cartMemberDTO.uid(), cartMemberDTO.cartCookieValue());
+        Long cartId = cartRepository.findIdByUserId(cartMemberDTO);
 
         cartRepository.deleteById(cartId);
 
@@ -160,7 +162,7 @@ public class CartServiceImpl implements CartService{
 
     @Override
     public ResponseEntity<?> countUp(CartMemberDTO cartMemberDTO, long cartDetailId) {
-        Cart cart = cartRepository.findByUserIdAndCookieValue(cartMemberDTO.uid(), cartMemberDTO.cartCookieValue());
+        Cart cart = cartRepository.findByUserIdAndCookieValue(cartMemberDTO);
 
         if(cart == null)
             throw new CustomNotFoundException(ErrorCode.NOT_FOUND, ErrorCode.NOT_FOUND.getMessage());
@@ -177,7 +179,7 @@ public class CartServiceImpl implements CartService{
 
     @Override
     public ResponseEntity<?> countDown(CartMemberDTO cartMemberDTO, long cartDetailId) {
-        Cart cart = cartRepository.findByUserIdAndCookieValue(cartMemberDTO.uid(), cartMemberDTO.cartCookieValue());
+        Cart cart = cartRepository.findByUserIdAndCookieValue(cartMemberDTO);
 
         if(cart == null)
             throw new CustomNotFoundException(ErrorCode.NOT_FOUND, ErrorCode.NOT_FOUND.getMessage());
@@ -198,7 +200,7 @@ public class CartServiceImpl implements CartService{
     @Override
     public ResponseEntity<?> deleteCartSelect(CartMemberDTO cartMemberDTO, List<Long> deleteCartDetailId) {
 
-        Long cartId = cartRepository.findIdByUserId(cartMemberDTO.uid(), cartMemberDTO.cartCookieValue());
+        Long cartId = cartRepository.findIdByUserId(cartMemberDTO);
         Long cartDetailSize = cartDetailRepository.countByCartId(cartId);
 
         if(cartDetailSize == deleteCartDetailId.size())

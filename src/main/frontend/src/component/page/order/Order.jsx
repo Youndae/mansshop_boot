@@ -1,12 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import {useLocation} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 
 import DaumPostcode from "react-daum-postcode";
 
+import '../../css/order.css';
 
-import '../css/order.css';
-import {axiosInstance} from "../../modules/customAxios";
-import {numberComma} from "../../modules/numberCommaModule";
+import {axiosInstance} from "../../../modules/customAxios";
+import {numberComma} from "../../../modules/numberCommaModule";
 
 function Order() {
     const location = useLocation();
@@ -31,6 +31,8 @@ function Order() {
         orderMemo: '',
     });
     const [deliveryFee, setDeliveryFee] = useState(3500);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         if(state !== null) {
@@ -61,6 +63,7 @@ function Order() {
         for(let i = 0; i < orderProduct.length; i++) {
             productArr.push({
                 optionId: orderProduct[i].optionId,
+                productName: orderProduct[i].productName,
                 productId: orderProduct[i].productId,
                 detailCount: orderProduct[i].count,
                 detailPrice: orderProduct[i].price,
@@ -82,10 +85,13 @@ function Order() {
             headers: {'Content-Type': 'application/json'}
         })
             .then(res => {
-                console.log('order axios res : ', res);
+                /*주문 리스트 구현 후 주문 리스트로 연결*/
+                if(res.data.message === 'success')
+                    navigate('/');
+
             })
             .catch(err => {
-                console.error('order axios error : ', err);
+                console.error('productOrder axios error : ', err);
             })
 
     }

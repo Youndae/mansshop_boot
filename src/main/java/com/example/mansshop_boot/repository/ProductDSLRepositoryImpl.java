@@ -2,6 +2,7 @@ package com.example.mansshop_boot.repository;
 
 import com.example.mansshop_boot.domain.dto.main.MainListDTO;
 import com.example.mansshop_boot.domain.dto.pageable.MemberPageDTO;
+import com.example.mansshop_boot.domain.entity.Product;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
@@ -123,5 +124,13 @@ public class ProductDSLRepositoryImpl implements ProductDSLRepository{
             return product.productName.like(keyword);
         }else
             return null;
+    }
+
+    @Override
+    public List<Product> findAllByIdList(List<String> productIdList) {
+        return jpaQueryFactory.select(product)
+                .from(product)
+                .where(product.id.in(productIdList))
+                .fetch();
     }
 }

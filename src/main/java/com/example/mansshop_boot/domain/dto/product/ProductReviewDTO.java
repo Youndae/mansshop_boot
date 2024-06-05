@@ -1,12 +1,13 @@
 package com.example.mansshop_boot.domain.dto.product;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public record ProductReviewDTO(
         String reviewWriter
         , String reviewContent
-        , Date reviewCreatedAt
+        , LocalDate reviewCreatedAt
         , String answerContent
-        , Date answerCreatedAt
+        , LocalDate answerCreatedAt
 ) {
 }

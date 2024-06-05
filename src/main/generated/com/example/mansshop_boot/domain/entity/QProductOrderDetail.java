@@ -11,20 +11,18 @@ import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
- * QOrderDetail is a Querydsl query type for OrderDetail
+ * QProductOrderDetail is a Querydsl query type for ProductOrderDetail
  */
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
-public class QOrderDetail extends EntityPathBase<OrderDetail> {
+public class QProductOrderDetail extends EntityPathBase<ProductOrderDetail> {
 
-    private static final long serialVersionUID = -14450815L;
+    private static final long serialVersionUID = 1740358734L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
-    public static final QOrderDetail orderDetail = new QOrderDetail("orderDetail");
+    public static final QProductOrderDetail productOrderDetail = new QProductOrderDetail("productOrderDetail");
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
-
-    public final QOrder order;
 
     public final NumberPath<Integer> orderDetailCount = createNumber("orderDetailCount", Integer.class);
 
@@ -34,27 +32,29 @@ public class QOrderDetail extends EntityPathBase<OrderDetail> {
 
     public final QProductOption productOption;
 
-    public QOrderDetail(String variable) {
-        this(OrderDetail.class, forVariable(variable), INITS);
+    public final QProductOrder productOrder;
+
+    public QProductOrderDetail(String variable) {
+        this(ProductOrderDetail.class, forVariable(variable), INITS);
     }
 
-    public QOrderDetail(Path<? extends OrderDetail> path) {
+    public QProductOrderDetail(Path<? extends ProductOrderDetail> path) {
         this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QOrderDetail(PathMetadata metadata) {
+    public QProductOrderDetail(PathMetadata metadata) {
         this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QOrderDetail(PathMetadata metadata, PathInits inits) {
-        this(OrderDetail.class, metadata, inits);
+    public QProductOrderDetail(PathMetadata metadata, PathInits inits) {
+        this(ProductOrderDetail.class, metadata, inits);
     }
 
-    public QOrderDetail(Class<? extends OrderDetail> type, PathMetadata metadata, PathInits inits) {
+    public QProductOrderDetail(Class<? extends ProductOrderDetail> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.order = inits.isInitialized("order") ? new QOrder(forProperty("order"), inits.get("order")) : null;
         this.product = inits.isInitialized("product") ? new QProduct(forProperty("product"), inits.get("product")) : null;
         this.productOption = inits.isInitialized("productOption") ? new QProductOption(forProperty("productOption"), inits.get("productOption")) : null;
+        this.productOrder = inits.isInitialized("productOrder") ? new QProductOrder(forProperty("productOrder"), inits.get("productOrder")) : null;
     }
 
 }

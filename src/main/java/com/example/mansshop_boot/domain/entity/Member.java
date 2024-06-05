@@ -3,11 +3,10 @@ package com.example.mansshop_boot.domain.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -33,11 +32,11 @@ public class Member {
     private Long memberPoint;
 
     @CreationTimestamp
-    private Date createdAt;
+    private LocalDate createdAt;
 
     private String phone;
 
-    private Date birth;
+    private LocalDate birth;
 
     @OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private final List<Auth> auths = new ArrayList<>();
@@ -56,7 +55,7 @@ public class Member {
                 , String provider
                 , Long memberPoint
                 , String phone
-                , Date birth) {
+                , LocalDate birth) {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String phoneRegEx = "(\\d{3})(\\d{3,4})(\\d{4})";
 
@@ -67,7 +66,7 @@ public class Member {
         this.userEmail = userEmail;
         this.provider = provider == null ? "local" : provider;
         this.memberPoint = memberPoint == null ? 0 : memberPoint;
-        this.phone = phone.replaceAll(phoneRegEx, "$1-$2-$3");
+        this.phone = phone == null ? null : phone.replaceAll(phoneRegEx, "$1-$2-$3");
         this.birth = birth;
     }
 

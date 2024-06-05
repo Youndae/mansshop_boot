@@ -5,7 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,10 +28,10 @@ public class Cart {
     private String cookieId;
 
     @CreationTimestamp
-    private Date createdAt;
+    private LocalDate createdAt;
 
     @UpdateTimestamp
-    private Date updatedAt;
+    private LocalDate updatedAt;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
     private final Set<CartDetail> cartDetailSet = new HashSet<>();

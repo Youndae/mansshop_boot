@@ -132,7 +132,7 @@ function Cart() {
     }
 
     const navigateOrder = (data) => {
-        navigate('/order', {state : {orderProduct: data, orderType: 'cart', totalPrice: totalPrice}});
+        navigate('/productOrder', {state : {orderProduct: data, orderType: 'cart', totalPrice: totalPrice}});
     }
 
     const countRequest = async (reqUrl, data) => {
@@ -222,8 +222,8 @@ function Cart() {
                     <h1>장바구니</h1>
                 </div>
                 <div className="cart-order-btn-content">
-                    <button type={'button'} className={'select-order-btn'} onClick={handleSelectOrder}>선택 상품 주문</button>
-                    <button type={'button'} className={'all-order-btn'} onClick={handleAllOrder}>전체 상품 주문</button>
+                    <button type={'button'} className={'select-productOrder-btn'} onClick={handleSelectOrder}>선택 상품 주문</button>
+                    <button type={'button'} className={'all-productOrder-btn'} onClick={handleAllOrder}>전체 상품 주문</button>
                     <button type={'button'} className={'select-delete-btn'} onClick={handleSelectRemove}>선택 상품 삭제</button>
                     <button type={'button'} className={'all-delete-btn'} onClick={handleAllRemove}>전체 상품 삭제</button>
                 </div>

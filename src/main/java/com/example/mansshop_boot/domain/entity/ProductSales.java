@@ -4,19 +4,17 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.UpdateTimestamp;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class productSales {
+public class ProductSales {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,9 +24,18 @@ public class productSales {
 
     private long sales;
 
-    private Date updatedAt;
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
     private String productName;
 
-    private String optionName;
+    private long optionId;
+
+    public void setSales(long sales) {
+        this.sales = this.sales + sales;
+    }
+
+    public void setSalesRate(long salesRate) {
+        this.salesRate = this.salesRate + salesRate;
+    }
 }

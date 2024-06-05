@@ -21,7 +21,7 @@ public class QPeriodSales extends EntityPathBase<PeriodSales> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final DateTimePath<java.util.Date> period = createDateTime("period", java.util.Date.class);
+    public final DatePath<java.time.LocalDate> period = createDate("period", java.time.LocalDate.class);
 
     public final NumberPath<Long> sales = createNumber("sales", Long.class);
 
