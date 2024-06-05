@@ -3,7 +3,7 @@ package com.example.mansshop_boot.service;
 import com.example.mansshop_boot.domain.dto.main.MainListDTO;
 import com.example.mansshop_boot.domain.dto.member.UserStatusDTO;
 import com.example.mansshop_boot.domain.dto.pageable.MemberPageDTO;
-import com.example.mansshop_boot.domain.dto.response.MainResponseDTO;
+import com.example.mansshop_boot.domain.dto.response.ResponseListDTO;
 import com.example.mansshop_boot.domain.dto.response.PagingResponseDTO;
 import com.example.mansshop_boot.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,15 +26,12 @@ public class MainServiceImpl implements MainService{
 
 
     @Override
-    public MainResponseDTO getBestAndNewList(MemberPageDTO pageDTO, Principal principal) {
+    public ResponseListDTO<MainListDTO> getBestAndNewList(MemberPageDTO pageDTO, Principal principal) {
         String uid = principalService.getPrincipalUid(principal);
 
         List<MainListDTO> listDto = productRepository.findListDefault(pageDTO);
 
-        return MainResponseDTO.builder()
-                .content(listDto)
-                .userStatus(new UserStatusDTO(uid))
-                .build();
+        return new ResponseListDTO<MainListDTO>(listDto, new UserStatusDTO(uid));
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.example.mansshop_boot.service;
 import com.example.mansshop_boot.domain.dto.member.JoinDTO;
 import com.example.mansshop_boot.domain.dto.member.LoginDTO;
 import com.example.mansshop_boot.domain.dto.member.LogoutDTO;
+import com.example.mansshop_boot.domain.dto.response.ResponseUserStatusDTO;
 import com.example.mansshop_boot.domain.entity.Member;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,7 +15,7 @@ public interface MemberService {
 
     ResponseEntity<?> joinProc(JoinDTO joinDTO);
 
-    long loginProc(LoginDTO dto, HttpServletRequest request, HttpServletResponse response);
+    ResponseEntity<ResponseUserStatusDTO> loginProc(LoginDTO dto, HttpServletRequest request, HttpServletResponse response);
 
     long oAuthUserIssueToken(HttpServletRequest request, HttpServletResponse response);
 

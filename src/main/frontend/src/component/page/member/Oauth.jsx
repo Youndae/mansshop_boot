@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {defaultAxios} from "../../../modules/customAxios";
+import {axiosInstance} from "../../../modules/customAxios";
 import {useNavigate, useSearchParams} from "react-router-dom";
 
 function Oauth() {
@@ -14,18 +14,17 @@ function Oauth() {
     const tokenRequest = async () => {
 
 
-        await defaultAxios.get('oAuth/token')
+        await axiosInstance.get('oAuth/token')
             .then(res => {
                 const authorization = res.headers.get('authorization');
                 window.localStorage.setItem('Authorization', authorization);
 
                 const prevUrl = window.sessionStorage.getItem('prev');
-                // navigate(prevUrl);
 
                 if(userType === 'new'){
-                    //navigate('/oAuth/profile')
+                    navigate('/oAuth/profile')
                 }else {
-                    //navigate(prev)
+                    navigate(prevUrl)
                 }
 
 

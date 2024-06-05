@@ -1,6 +1,6 @@
 package com.example.mansshop_boot.domain.dto.response;
 
-public record CompleteResponseEntity(
+public record ResponseMessageDTO(
         String message
 ) {
 }

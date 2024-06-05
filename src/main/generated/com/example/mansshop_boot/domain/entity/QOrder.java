@@ -24,7 +24,7 @@ public class QOrder extends EntityPathBase<Order> {
 
     public final DateTimePath<java.util.Date> createdAt = createDateTime("createdAt", java.util.Date.class);
 
-    public final NumberPath<Integer> deleveryFee = createNumber("deleveryFee", Integer.class);
+    public final NumberPath<Integer> deliveryFee = createNumber("deliveryFee", Integer.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 

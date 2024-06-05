@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
 
@@ -33,8 +34,9 @@ public class Order {
 
     private int orderTotalPrice;
 
-    private int deleveryFee;
+    private int deliveryFee;
 
+    @CreationTimestamp
     private Date createdAt;
 
     private String paymentType;

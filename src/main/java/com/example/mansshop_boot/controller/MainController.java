@@ -2,7 +2,7 @@ package com.example.mansshop_boot.controller;
 
 import com.example.mansshop_boot.domain.dto.main.MainListDTO;
 import com.example.mansshop_boot.domain.dto.pageable.MemberPageDTO;
-import com.example.mansshop_boot.domain.dto.response.MainResponseDTO;
+import com.example.mansshop_boot.domain.dto.response.ResponseListDTO;
 import com.example.mansshop_boot.domain.dto.response.PagingResponseDTO;
 import com.example.mansshop_boot.service.MainService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,7 +32,7 @@ public class MainController {
     private final MainService mainService;
 
     @GetMapping({"/", "/new"})
-    public ResponseEntity<MainResponseDTO> mainList(HttpServletRequest request
+    public ResponseEntity<ResponseListDTO> mainList(HttpServletRequest request
                                     , Principal principal) {
 
         String requestURI = request.getRequestURI();

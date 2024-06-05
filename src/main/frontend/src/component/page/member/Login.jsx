@@ -3,7 +3,8 @@ import {useNavigate, useLocation} from 'react-router-dom';
 import { useDispatch } from "react-redux";
 
 import "../../css/member.css";
-import {defaultAxios} from "../../../modules/customAxios";
+import {axiosInstance} from "../../../modules/customAxios";
+import {setMember} from "../../../modules/member";
 
 function Login() {
     const [userData, setUserData] = useState({
@@ -18,29 +19,21 @@ function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        console.log('userId : ', userData.userId);
-        console.log('userPw : ', userData.userPw);
-
-        await defaultAxios.post(`member/login`, {
+        await axiosInstance.post(`member/login`, {
             userId: userData.userId,
             userPw: userData.userPw,
         }, {
             headers: {
                 'Content-Type': 'application/json'
             }
-            , withCredentials: true
         })
             .then(res => {
                 const authorization = res.headers['authorization'];
                 window.localStorage.setItem('Authorization', authorization);
 
-                const body = {
-                    type: 'isLoggedIn',
-                }
+                dispatch(setMember(res.data.userStatus));
 
-                dispatch(body);
                 navigate(state);
-
             })
             .catch(err => {
                 console.error('login err : ', err);
@@ -71,12 +64,12 @@ function Login() {
 
         window.sessionStorage.setItem('prev', state.toString());
 
-        /*if(oAuthClient === 'google')
+        if(oAuthClient === 'google')
             window.location.href='http://localhost:8080/oauth2/authorization/google';
         else if(oAuthClient === 'naver')
             window.location.href='http://localhost:8080/oauth2/authorization/naver';
         else if(oAuthClient === 'kakao')
-            window.location.href='http://localhost:8080/oauth2/authorization/kakao';*/
+            window.location.href='http://localhost:8080/oauth2/authorization/kakao';
     }
 
     return (

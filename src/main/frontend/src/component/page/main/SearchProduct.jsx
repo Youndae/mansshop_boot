@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 
-import { defaultAxios } from "../../../modules/customAxios";
+import { axiosInstance } from "../../../modules/customAxios";
 import {mainProductPagingObject} from "../../../modules/pagingModule";
 
 import {useSearchParams} from "react-router-dom";
@@ -27,7 +27,7 @@ function SearchProduct() {
     }, [page, keyword]);
 
     const getSearchProductList = async () => {
-        await defaultAxios.get(`/main/search?keyword=${keyword}&page=${page}`)
+        await axiosInstance.get(`/main/search?keyword=${keyword}&page=${page}`)
             .then(res => {
                 setData(res.data.content);
                 console.log('search axios res : ', res);

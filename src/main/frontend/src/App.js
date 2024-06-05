@@ -17,6 +17,7 @@ import MyPage from "./component/page/member/MyPage";
 import Oauth from "./component/page/member/Oauth";
 import ProductDetail from "./component/page/product/ProductDetail";
 import Cart from "./component/page/cart/Cart";
+import Order from "./component/page/Order";
 
 import AdminProduct from "./component/page/admin/AdminProduct";
 import AdminMember from "./component/page/admin/AdminMember";
@@ -40,6 +41,7 @@ function App() {
                 <Route path="oAuth" element={<Oauth />} />
                 <Route path='product/:productId' element={<ProductDetail />} />
                 <Route path='cart' element={<Cart />} />
+                <Route path='order' element={<Order />}/>
                 <Route path='member/mypage' element={<MyPage />} />
 
                 <Route path='admin/product' element={<AdminProduct />} />

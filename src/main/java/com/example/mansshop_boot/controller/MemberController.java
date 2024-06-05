@@ -5,6 +5,7 @@ import com.example.mansshop_boot.config.customException.exception.CustomAccessDe
 import com.example.mansshop_boot.domain.dto.member.JoinDTO;
 import com.example.mansshop_boot.domain.dto.member.LoginDTO;
 import com.example.mansshop_boot.domain.dto.member.LogoutDTO;
+import com.example.mansshop_boot.domain.dto.response.ResponseUserStatusDTO;
 import com.example.mansshop_boot.service.MemberService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,19 +38,14 @@ public class MemberController {
     @Value("#{jwt['cookie.ino.header']}")
     private String inoHeader;
 
-
-
     private final MemberService memberService;
 
     @PostMapping("/login")
-    public ResponseEntity<Long> loginProc(@RequestBody LoginDTO loginDTO
+    public ResponseEntity<ResponseUserStatusDTO> loginProc(@RequestBody LoginDTO loginDTO
                                         , HttpServletRequest request
                                         , HttpServletResponse response){
 
-        log.info("loginDTO :: id : {}", loginDTO.userId());
-        log.info("loginDTO :: pw : {}", loginDTO.userPw());
-
-        return new ResponseEntity<>(memberService.loginProc(loginDTO, request, response), HttpStatus.OK);
+        return memberService.loginProc(loginDTO, request, response);
     }
 
     @PostMapping("/logout")
