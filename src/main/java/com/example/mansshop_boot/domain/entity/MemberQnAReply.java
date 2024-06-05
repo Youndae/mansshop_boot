@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -31,8 +31,8 @@ public class MemberQnAReply {
     private String replyContent;
 
     @CreationTimestamp
-    private Date createdAt;
+    private LocalDate createdAt;
 
     @CreationTimestamp
-    private Date updatedAt;
+    private LocalDate updatedAt;
 }

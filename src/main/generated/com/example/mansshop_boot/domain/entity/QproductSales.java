@@ -10,18 +10,18 @@ import com.querydsl.core.types.Path;
 
 
 /**
- * QproductSales is a Querydsl query type for productSales
+ * QProductSales is a Querydsl query type for ProductSales
  */
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
-public class QproductSales extends EntityPathBase<productSales> {
+public class QProductSales extends EntityPathBase<ProductSales> {
 
-    private static final long serialVersionUID = -2057136325L;
+    private static final long serialVersionUID = -1892816037L;
 
-    public static final QproductSales productSales = new QproductSales("productSales");
+    public static final QProductSales productSales = new QProductSales("productSales");
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final StringPath optionName = createString("optionName");
+    public final NumberPath<Long> optionId = createNumber("optionId", Long.class);
 
     public final StringPath productName = createString("productName");
 
@@ -29,18 +29,18 @@ public class QproductSales extends EntityPathBase<productSales> {
 
     public final NumberPath<Long> salesRate = createNumber("salesRate", Long.class);
 
-    public final DateTimePath<java.util.Date> updatedAt = createDateTime("updatedAt", java.util.Date.class);
+    public final DateTimePath<java.time.LocalDateTime> updatedAt = createDateTime("updatedAt", java.time.LocalDateTime.class);
 
-    public QproductSales(String variable) {
-        super(productSales.class, forVariable(variable));
+    public QProductSales(String variable) {
+        super(ProductSales.class, forVariable(variable));
     }
 
-    public QproductSales(Path<? extends productSales> path) {
+    public QProductSales(Path<? extends ProductSales> path) {
         super(path.getType(), path.getMetadata());
     }
 
-    public QproductSales(PathMetadata metadata) {
-        super(productSales.class, metadata);
+    public QProductSales(PathMetadata metadata) {
+        super(ProductSales.class, metadata);
     }
 
 }

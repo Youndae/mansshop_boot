@@ -11,18 +11,18 @@ import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
- * QOrder is a Querydsl query type for Order
+ * QProductOrder is a Querydsl query type for ProductOrder
  */
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
-public class QOrder extends EntityPathBase<Order> {
+public class QProductOrder extends EntityPathBase<ProductOrder> {
 
-    private static final long serialVersionUID = 1355941648L;
+    private static final long serialVersionUID = -1896011363L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
-    public static final QOrder order = new QOrder("order1");
+    public static final QProductOrder productOrder = new QProductOrder("productOrder");
 
-    public final DateTimePath<java.util.Date> createdAt = createDateTime("createdAt", java.util.Date.class);
+    public final DatePath<java.time.LocalDate> createdAt = createDate("createdAt", java.time.LocalDate.class);
 
     public final NumberPath<Integer> deliveryFee = createNumber("deliveryFee", Integer.class);
 
@@ -42,25 +42,27 @@ public class QOrder extends EntityPathBase<Order> {
 
     public final StringPath paymentType = createString("paymentType");
 
+    public final SetPath<ProductOrderDetail, QProductOrderDetail> productOrderDetailSet = this.<ProductOrderDetail, QProductOrderDetail>createSet("productOrderDetailSet", ProductOrderDetail.class, QProductOrderDetail.class, PathInits.DIRECT2);
+
     public final StringPath recipient = createString("recipient");
 
-    public QOrder(String variable) {
-        this(Order.class, forVariable(variable), INITS);
+    public QProductOrder(String variable) {
+        this(ProductOrder.class, forVariable(variable), INITS);
     }
 
-    public QOrder(Path<? extends Order> path) {
+    public QProductOrder(Path<? extends ProductOrder> path) {
         this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QOrder(PathMetadata metadata) {
+    public QProductOrder(PathMetadata metadata) {
         this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QOrder(PathMetadata metadata, PathInits inits) {
-        this(Order.class, metadata, inits);
+    public QProductOrder(PathMetadata metadata, PathInits inits) {
+        this(ProductOrder.class, metadata, inits);
     }
 
-    public QOrder(Class<? extends Order> type, PathMetadata metadata, PathInits inits) {
+    public QProductOrder(Class<? extends ProductOrder> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.member = inits.isInitialized("member") ? new QMember(forProperty("member")) : null;
     }

@@ -28,4 +28,8 @@ public class ProductOption {
     private int stock;
 
     private int optionClosed;
+
+    public void setStock(int stock) {
+        this.stock = stock;
+    }
 }

@@ -22,7 +22,7 @@ public class QProductReview extends EntityPathBase<ProductReview> {
 
     public static final QProductReview productReview = new QProductReview("productReview");
 
-    public final DateTimePath<java.util.Date> createdAt = createDateTime("createdAt", java.util.Date.class);
+    public final DatePath<java.time.LocalDate> createdAt = createDate("createdAt", java.time.LocalDate.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
@@ -32,7 +32,7 @@ public class QProductReview extends EntityPathBase<ProductReview> {
 
     public final StringPath reviewContent = createString("reviewContent");
 
-    public final DateTimePath<java.util.Date> updatedAt = createDateTime("updatedAt", java.util.Date.class);
+    public final DatePath<java.time.LocalDate> updatedAt = createDate("updatedAt", java.time.LocalDate.class);
 
     public QProductReview(String variable) {
         this(ProductReview.class, forVariable(variable), INITS);

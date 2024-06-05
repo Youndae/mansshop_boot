@@ -22,7 +22,7 @@ public class QMemberQnA extends EntityPathBase<MemberQnA> {
 
     public static final QMemberQnA memberQnA = new QMemberQnA("memberQnA");
 
-    public final DateTimePath<java.util.Date> createdAt = createDateTime("createdAt", java.util.Date.class);
+    public final DatePath<java.time.LocalDate> createdAt = createDate("createdAt", java.time.LocalDate.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
@@ -34,7 +34,7 @@ public class QMemberQnA extends EntityPathBase<MemberQnA> {
 
     public final QQnAClassification qnAClassification;
 
-    public final DateTimePath<java.util.Date> updatedAt = createDateTime("updatedAt", java.util.Date.class);
+    public final DatePath<java.time.LocalDate> updatedAt = createDate("updatedAt", java.time.LocalDate.class);
 
     public QMemberQnA(String variable) {
         this(MemberQnA.class, forVariable(variable), INITS);

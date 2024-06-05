@@ -197,7 +197,7 @@ function ProductDetail() {
     }
 
     const handleBuyBtn = () => {
-        navigate('/order', {state : {
+        navigate('/productOrder', {state : {
                 type: 'direct',
                 product : selectOption,
             }}

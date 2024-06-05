@@ -22,7 +22,7 @@ public class QProductReviewReply extends EntityPathBase<ProductReviewReply> {
 
     public static final QProductReviewReply productReviewReply = new QProductReviewReply("productReviewReply");
 
-    public final DateTimePath<java.util.Date> createdAt = createDateTime("createdAt", java.util.Date.class);
+    public final DatePath<java.time.LocalDate> createdAt = createDate("createdAt", java.time.LocalDate.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
@@ -32,7 +32,7 @@ public class QProductReviewReply extends EntityPathBase<ProductReviewReply> {
 
     public final StringPath replyContent = createString("replyContent");
 
-    public final DateTimePath<java.util.Date> updatedAt = createDateTime("updatedAt", java.util.Date.class);
+    public final DatePath<java.time.LocalDate> updatedAt = createDate("updatedAt", java.time.LocalDate.class);
 
     public QProductReviewReply(String variable) {
         this(ProductReviewReply.class, forVariable(variable), INITS);

@@ -1,8 +1,10 @@
 package com.example.mansshop_boot.repository;
 
 import com.example.mansshop_boot.domain.dto.cart.CartDetailDTO;
+import com.example.mansshop_boot.domain.dto.cart.CartMemberDTO;
 import com.example.mansshop_boot.domain.entity.CartDetail;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -53,5 +55,13 @@ public class CartDetailDSLRepositoryImpl implements CartDetailDSLRepository{
                 .from(cartDetail)
                 .where(cartDetail.cart.id.eq(cartId))
                 .fetchOne();
+    }
+
+    @Override
+    public List<CartDetail> findAllCartDetailByCartId(long cartId) {
+        return jpaQueryFactory.select(cartDetail)
+                .from(cartDetail)
+                .where(cartDetail.cart.id.eq(cartId))
+                .fetch();
     }
 }

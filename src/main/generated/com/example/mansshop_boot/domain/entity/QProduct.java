@@ -26,7 +26,7 @@ public class QProduct extends EntityPathBase<Product> {
 
     public final NumberPath<Integer> closed = createNumber("closed", Integer.class);
 
-    public final DateTimePath<java.util.Date> createdAt = createDateTime("createdAt", java.util.Date.class);
+    public final DatePath<java.time.LocalDate> createdAt = createDate("createdAt", java.time.LocalDate.class);
 
     public final StringPath id = createString("id");
 
@@ -40,9 +40,7 @@ public class QProduct extends EntityPathBase<Product> {
 
     public final StringPath thumbnail = createString("thumbnail");
 
-    public final NumberPath<Integer> totalStock = createNumber("totalStock", Integer.class);
-
-    public final DateTimePath<java.util.Date> updatedAt = createDateTime("updatedAt", java.util.Date.class);
+    public final DatePath<java.time.LocalDate> updatedAt = createDate("updatedAt", java.time.LocalDate.class);
 
     public QProduct(String variable) {
         this(Product.class, forVariable(variable), INITS);

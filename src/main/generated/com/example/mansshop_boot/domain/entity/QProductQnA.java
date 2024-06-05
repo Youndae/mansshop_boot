@@ -22,7 +22,7 @@ public class QProductQnA extends EntityPathBase<ProductQnA> {
 
     public static final QProductQnA productQnA = new QProductQnA("productQnA");
 
-    public final DateTimePath<java.util.Date> createdAt = createDateTime("createdAt", java.util.Date.class);
+    public final DatePath<java.time.LocalDate> createdAt = createDate("createdAt", java.time.LocalDate.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 

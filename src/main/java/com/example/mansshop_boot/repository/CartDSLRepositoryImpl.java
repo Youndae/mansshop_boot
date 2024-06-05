@@ -1,13 +1,12 @@
 package com.example.mansshop_boot.repository;
 
+import com.example.mansshop_boot.domain.dto.cart.CartMemberDTO;
 import com.example.mansshop_boot.domain.entity.Cart;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 
 import static com.example.mansshop_boot.domain.entity.QCart.cart;
 
@@ -17,16 +16,13 @@ public class CartDSLRepositoryImpl implements CartDSLRepository{
 
     private final JPAQueryFactory jpaQueryFactory;
 
-    @Value("#{jwt['cookie.cart.uid']}")
-    private String nonUserId;
-
     @Override
-    public Cart findByUserIdAndCookieValue(String userId, String cookieValue) {
+    public Cart findByUserIdAndCookieValue(CartMemberDTO cartMemberDTO) {
 
         Cart result = jpaQueryFactory.select(cart)
                 .from(cart)
                 .where(
-                        userType(userId, cookieValue)
+                        userType(cartMemberDTO)
                 )
                 .fetchOne();
 
@@ -34,21 +30,20 @@ public class CartDSLRepositoryImpl implements CartDSLRepository{
     }
 
     @Override
-    public Long findIdByUserId(String userId, String cookieValue) {
+    public Long findIdByUserId(CartMemberDTO cartMemberDTO) {
         return jpaQueryFactory.select(cart.id)
                 .from(cart)
                 .where(
-                        userType(userId, cookieValue)
+                        userType(cartMemberDTO)
                 )
                 .fetchOne();
     }
 
-    private BooleanExpression userType(String userId, String cookieValue) {
-        if(cookieValue == null)
-            return cart.member.userId.eq(userId);
+    private BooleanExpression userType(CartMemberDTO cartMemberDTO) {
+        if(cartMemberDTO.cartCookieValue() == null)
+            return cart.member.userId.eq(cartMemberDTO.uid());
         else
-            return cart.cookieId.eq(cookieValue).and(cart.member.userId.eq(nonUserId));
-
+            return cart.cookieId.eq(cartMemberDTO.cartCookieValue()).and(cart.member.userId.eq(cartMemberDTO.uid()));
     }
 
 }

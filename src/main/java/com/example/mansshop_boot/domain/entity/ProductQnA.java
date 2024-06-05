@@ -7,7 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.util.Date;
+import java.time.LocalDate;
+
 
 @Entity
 @Getter
@@ -31,7 +32,7 @@ public class ProductQnA {
     private String qnaContent;
 
     @CreationTimestamp
-    private Date createdAt;
+    private LocalDate createdAt;
 
     private int productQnAStat;
 }

@@ -7,14 +7,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Order {
+public class ProductOrder {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,10 +39,19 @@ public class Order {
     private int deliveryFee;
 
     @CreationTimestamp
-    private Date createdAt;
+    private LocalDate createdAt;
 
     private String paymentType;
 
     private int orderStat;
+
+    @OneToMany(mappedBy = "productOrder", cascade = CascadeType.ALL)
+    private final Set<ProductOrderDetail> productOrderDetailSet = new HashSet<>();
+
+    public void addDetail(ProductOrderDetail productOrderDetail) {
+        productOrderDetailSet.add(productOrderDetail);
+        productOrderDetail.setProductOrder(this);
+    }
+
 
 }

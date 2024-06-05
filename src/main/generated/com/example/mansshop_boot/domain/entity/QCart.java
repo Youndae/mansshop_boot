@@ -26,13 +26,13 @@ public class QCart extends EntityPathBase<Cart> {
 
     public final StringPath cookieId = createString("cookieId");
 
-    public final DateTimePath<java.util.Date> createdAt = createDateTime("createdAt", java.util.Date.class);
+    public final DatePath<java.time.LocalDate> createdAt = createDate("createdAt", java.time.LocalDate.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final QMember member;
 
-    public final DateTimePath<java.util.Date> updatedAt = createDateTime("updatedAt", java.util.Date.class);
+    public final DatePath<java.time.LocalDate> updatedAt = createDate("updatedAt", java.time.LocalDate.class);
 
     public QCart(String variable) {
         this(Cart.class, forVariable(variable), INITS);
