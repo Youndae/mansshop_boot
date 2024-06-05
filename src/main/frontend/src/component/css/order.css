@@ -1,0 +1,90 @@
+.order-header {
+    text-align: center;
+    margin-top: 40px;
+}
+
+.order button {
+    background: white;
+    border: 1px solid lightgrey;
+}
+
+.order-content {
+    margin: 40px 0 0 35%;
+}
+
+.form-content {
+    margin-bottom: 20px;
+}
+
+.form-content-label {
+    font-size: x-large;
+}
+
+.form-content-input input, .form-content-input-address input, .form-content-input-detail-address input{
+    width: 400px;
+    height: 30px;
+    margin-top: 10px;
+}
+
+.form-content-input-postcode input {
+    width: 100px;
+    height: 30px;
+}
+
+.form-content-input-postcode button {
+    width: 100px;
+    height: 30px;
+    margin-left: 10px;
+}
+
+.order-table {
+    width: 700px;
+    text-align: center;
+    margin-top: 40px;
+}
+
+.order-price {
+    margin-top: 30px;
+    width: 700px;
+}
+
+.order-price span {
+    font-size: x-large;
+    margin-left: 10px;
+}
+
+.order-price .total-price {
+    float: right;
+}
+
+.order-payment {
+    margin-top: 60px;
+}
+
+.order-payment div {
+    margin-top: 10px;
+}
+
+.order-payment div input {
+    margin-left: 10px;
+    margin-top: 5px;
+}
+
+.order-payment-btn button {
+    margin-top: 35px;
+    margin-left: 17%;
+    width: 300px;
+    height: 40px;
+    font-size: large;
+    font-weight: 500;
+    text-align: center;
+}
+
+.form-postcode {
+    background : rgba(0,0,0,0.25);
+    position : fixed;
+    left:0;
+    top:0;
+    height:100%;
+    width:100%;
+}

@@ -3,19 +3,24 @@ import {useNavigate, useParams} from "react-router-dom";
 
 import dayjs from "dayjs";
 
-import { defaultAxios } from "../../../modules/customAxios";
+import { axiosInstance } from "../../../modules/customAxios";
 import {getClickNumber, getNextNumber, getPrevNumber, productDetailPagingObject} from "../../../modules/pagingModule";
 import ProductDetailThumbnail from "../../ui/ProductDetailThumbnail";
 import ProductDetailInfoImage from "../../ui/ProductDetailInfoImage";
 
 import '../../css/productDetail.css';
 import Paging from "../../ui/Paging";
+import {setMemberObject} from "../../../modules/loginModule";
+import {useDispatch, useSelector} from "react-redux";
 
 /*
     바로구매, 장바구니, 관심상품 버튼 handling -> 컴포넌트 작성 이후 테스트
     로그인 여부에 따른 QnA 작성 버튼 handling
  */
 function ProductDetail() {
+    const loginStatus = useSelector((state) => state.member.loginStatus);
+    const dispatch = useDispatch();
+
     const { productId } = useParams();
     const [productData, setProductData] = useState({
         productId: '',
@@ -61,7 +66,7 @@ function ProductDetail() {
 
     const getDetailData = async () => {
 
-        await defaultAxios.get(`product/${productId}`)
+        await axiosInstance.get(`product/${productId}`)
             .then(res => {
                 console.log('productDetail axios ::  res : ', res);
                 const productContent = res.data;
@@ -111,6 +116,11 @@ function ProductDetail() {
                     activeNo: productQnA.number + 1,
                     totalElements: productQnA.totalElements,
                 });
+
+                const member = setMemberObject(res, loginStatus);
+
+                if(member !== undefined)
+                    dispatch(member);
 
             })
             .catch(err => {
@@ -207,7 +217,7 @@ function ProductDetail() {
         }
 
 
-        await defaultAxios.post(`cart/`, {addList})
+        await axiosInstance.post(`cart/`, {addList})
             .then(res => {
                 console.log('addCart axios success : ', res);
                 alert('장바구니에 상품을 추가했습니다.');
@@ -224,7 +234,7 @@ function ProductDetail() {
         if(likeStatus)
             url = 'like'
 
-        await defaultAxios.post(`${url}`, {
+        await axiosInstance.post(`${url}`, {
             productId: pid,
         })
             .then(res => {
@@ -271,7 +281,7 @@ function ProductDetail() {
     const handleReviewPaging = async (clickNo) => {
         console.log('review clickNo : ', clickNo);
         //axios.get review?page=
-        await defaultAxios.get(`product/${productId}/review/${clickNo}`)
+        await axiosInstance.get(`product/${productId}/review/${clickNo}`)
             .then(res => {
                 setProductReview(res.data.content);
 
@@ -307,7 +317,7 @@ function ProductDetail() {
     const handleQnAPaging = async (clickNo) => {
         //axios.get QnA?page=
         console.log('qna paging clickNo : ', clickNo);
-        await defaultAxios.get(`product/${productId}/qna/${clickNo}`)
+        await axiosInstance.get(`product/${productId}/qna/${clickNo}`)
             .then(res => {
                 setProductQnA(res.data.content);
 
@@ -586,7 +596,7 @@ function ProductDetailSelectOption(props) {
         }
     }else if(color !== null) {
         optionText = `${colorText}`;
-        valueText = `${colorValueText}`;
+        valueText += `${colorValueText}`;
     }
 
     if(productOption.stock === 0) {

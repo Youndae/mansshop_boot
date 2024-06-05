@@ -1,16 +1,21 @@
 import React, {useEffect, useState} from 'react';
 
-import { defaultAxios } from "../../../modules/customAxios";
+import { axiosInstance } from "../../../modules/customAxios";
 import { mainProductPagingObject, getClickNumber, getPrevNumber, getNextNumber } from "../../../modules/pagingModule";
 
 import MainContent from "../../ui/MainContent";
 import {useNavigate, useParams, useSearchParams} from "react-router-dom";
 import Paging from "../../ui/Paging";
+import {useDispatch, useSelector} from "react-redux";
+import {setMemberObject} from "../../../modules/loginModule";
 
 function MainClassification() {
+    const loginStatus = useSelector((state) => state.member.loginStatus);
     const { classification } = useParams();
     const [params] = useSearchParams();
     const page = params.get('page') == null ? 1 : params.get('page');
+
+    const dispatch = useDispatch();
 
     const [data, setData] = useState([]);
     const [pagingData, setPagingData] = useState({
@@ -28,7 +33,7 @@ function MainClassification() {
     }, [page, classification]);
 
     const getClassificationList = async() => {
-        await defaultAxios.get(`/main/${classification}?page=${page}`)
+        await axiosInstance.get(`/main/${classification}?page=${page}`)
             .then(res => {
                 console.log('Main classification res : ', res);
                 setData(res.data.content);
@@ -42,6 +47,12 @@ function MainClassification() {
                     next: pagingObject.next,
                     activeNo: page,
                 });
+
+                const member = setMemberObject(res, loginStatus);
+
+                if(member !== undefined)
+                    dispatch(member);
+
             })
             .catch(err => {
                 console.error('classification error : ', err);

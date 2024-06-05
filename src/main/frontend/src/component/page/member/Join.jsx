@@ -1,6 +1,6 @@
 import React, {useRef, useState} from 'react';
 import {useNavigate} from "react-router-dom";
-import {defaultAxios} from "../../../modules/customAxios";
+import {axiosInstance} from "../../../modules/customAxios";
 
 
 import Overlap from "../../ui/Overlap";
@@ -157,7 +157,7 @@ function Join() {
         }else {
             const userBirth = birth.year + '/' + birth.month + '/' + birth.day;
 
-            await defaultAxios.post(`member/join`, {
+            await axiosInstance.post(`member/join`, {
                 userId: userData.userId,
                 userPw: userData.userPw,
                 userName: userData.userName,
@@ -185,7 +185,7 @@ function Join() {
         else if(!idPattern.test(userData.userId))
             setIdCheck('invalid');
         else {
-            await defaultAxios.get(`member/check-id?userId=${userData.userId}`)
+            await axiosInstance.get(`member/check-id?userId=${userData.userId}`)
                 .then(res => {
                     const responseMessage = res.data.message;
 
@@ -213,7 +213,7 @@ function Join() {
         if(userData.nickname === '')
             setNicknameCheck('empty');
         else{
-            await defaultAxios.get(`member/check-nickname?nickname=${userData.nickname}`)
+            await axiosInstance.get(`member/check-nickname?nickname=${userData.nickname}`)
                 .then(res => {
                     const responseMessage = res.data.message;
 

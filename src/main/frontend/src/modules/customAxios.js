@@ -1,48 +1,17 @@
 import axios from "axios";
 
-const default_header = {
-    'Content-Type' : 'application/json',
-    'Authorization' : `${localStorage.getItem('Authorization')}`,
-}
+let tokenStealingAlertStatus = true;
 
-export const imageDisplayAxios = axios.create({
-    baseURL: '/api/',
-    headers: default_header,
-    withCredentials: true,
-    responseType: 'blob',
-});
-
-export const defaultAxios = axios.create({
-    baseURL: '/api/',
-    headers: default_header,
-    withCredentials: true,
-})
-
-export const checkUserStatus = async () => {
-    return await axiosDefault.get(`member/check-login`)
-        .catch(err => {
-            console.error('loginCheck Error : ', err);
-        })
-}
-
-export const getAuthorization = () => {
-    return window.localStorage.getItem('Authorization');
-}
-
-export const axiosDisplay = axios.create({
+export const axiosInstance = axios.create({
     baseURL: '/api',
     withCredentials: true,
-    responseType: "blob"
 })
 
-axiosDisplay.interceptors.request.use(
+axiosInstance.interceptors.request.use(
     (config) => {
         const accessToken = getToken();
 
-        config.headers['Content-Type'] = 'application/json';
         config.headers['Authorization'] = `${accessToken}`;
-
-        console.log(`axios display interceptor request config : ${accessToken}`)
 
         return config;
     },
@@ -51,30 +20,8 @@ axiosDisplay.interceptors.request.use(
     }
 )
 
-export const axiosDefault = axios.create({
-    baseURL: '/api',
-    withCredentials: true,
-})
-
-axiosDefault.interceptors.request.use(
-    (config) => {
-        const accessToken = getToken();
-
-        config.headers['Content-Type'] = 'application/json';
-        config.headers['Authorization'] = `${accessToken}`;
-
-        console.log(`axiosDefault interceptor request config : ${accessToken}`);
-
-        return config;
-    },
-    (error) => {
-        console.log('axios interceptor Error : ', error);
-    }
-)
-
-axiosDefault.interceptors.response.use(
+axiosInstance.interceptors.response.use(
     (res) => {
-        console.log('axiosDefault interceptor response then res : ', res);
         return res;
     },
     async (err) => {
@@ -82,20 +29,25 @@ axiosDefault.interceptors.response.use(
             // err.config._retry = true;
             console.log('axios default response status is 401');
 
-            return axiosDefault.get(`reissue`)
+            return axiosInstance.get(`reissue`)
                 .then(res => {
-                    console.log('token Test response success : ', res);
                     window.localStorage.removeItem('Authorization');
 
                     const authorization = res.headers['authorization'];
-                    console.log('authorization : ', authorization);
                     window.localStorage.setItem('Authorization', authorization);
 
-                    return axiosDefault(err.config);
+                    return axiosInstance(err.config);
                 })
                 .catch(error => {
                     console.log('token test error : ', error);
                 })
+        }else if(err.response.status === 800){
+            if(tokenStealingAlertStatus){
+                tokenStealingAlertStatus = false;
+                window.localStorage.removeItem('Authorization');
+                alert('로그인 정보에 문제가 발생해 로그아웃됩니다.\n문제가 계속된다면 관리자에게 문의해주세요.');
+                window.location.href='/';
+            }
         }
     }
 )

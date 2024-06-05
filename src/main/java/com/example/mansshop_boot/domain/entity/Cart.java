@@ -1,10 +1,9 @@
 package com.example.mansshop_boot.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -15,6 +14,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class Cart {
 
     @Id
@@ -27,8 +27,10 @@ public class Cart {
 
     private String cookieId;
 
+    @CreationTimestamp
     private Date createdAt;
 
+    @UpdateTimestamp
     private Date updatedAt;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)

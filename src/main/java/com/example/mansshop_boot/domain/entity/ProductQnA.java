@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
 
@@ -29,6 +30,7 @@ public class ProductQnA {
 
     private String qnaContent;
 
+    @CreationTimestamp
     private Date createdAt;
 
     private int productQnAStat;

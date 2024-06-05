@@ -1,9 +1,10 @@
 import React, {useEffect, useState} from 'react';
 
-import {axiosDefault, axiosDisplay, imageDisplayAxios} from "../../modules/customAxios";
+import { axiosInstance } from "../../modules/customAxios";
 
 import '../css/main.css';
 import {Link} from "react-router-dom";
+import {numberComma} from "../../modules/numberCommaModule";
 
 function MainContent(props) {
     const { data, classification } = props;
@@ -19,7 +20,9 @@ function MainContent(props) {
             const thumb = data[i].thumbnail;
 
 
-            await axiosDisplay.get(`main/display/${thumb}`)
+            await axiosInstance.get(`main/display/${thumb}`, {
+                responseType: 'blob',
+            })
                 .then(res => {
                     const url = window
                         .URL
@@ -30,31 +33,12 @@ function MainContent(props) {
                         productId: data[i].productId,
                         thumbnail: url,
                         productName: data[i].productName,
-                        productPrice: data[i].productPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','),
+                        productPrice: numberComma(data[i].productPrice),
                     });
                 })
                 .catch(err => {
                     console.error('display request error : ', err);
                 })
-            /*
-
-            await imageDisplayAxios.get(`main/display/${thumb}`)
-                .then(res => {
-                    const url = window
-                        .URL
-                        .createObjectURL(
-                            new Blob([res.data], {type: res.headers['content-type']})
-                        );
-                    imageArr.push({
-                        productId: data[i].productId,
-                        thumbnail: url,
-                        productName: data[i].productName,
-                        productPrice: data[i].productPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','),
-                    });
-                })
-                .catch(err => {
-                    console.error('display request error : ', err);
-                })*/
         }
 
         setImageList(imageArr);

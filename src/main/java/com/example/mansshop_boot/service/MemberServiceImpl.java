@@ -9,7 +9,9 @@ import com.example.mansshop_boot.config.security.CustomUser;
 import com.example.mansshop_boot.domain.dto.member.JoinDTO;
 import com.example.mansshop_boot.domain.dto.member.LoginDTO;
 import com.example.mansshop_boot.domain.dto.member.LogoutDTO;
-import com.example.mansshop_boot.domain.dto.response.CompleteResponseEntity;
+import com.example.mansshop_boot.domain.dto.member.UserStatusDTO;
+import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
+import com.example.mansshop_boot.domain.dto.response.ResponseUserStatusDTO;
 import com.example.mansshop_boot.domain.entity.Auth;
 import com.example.mansshop_boot.domain.entity.Member;
 import com.example.mansshop_boot.domain.enumuration.Result;
@@ -68,7 +70,7 @@ public class MemberServiceImpl implements MemberService{
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
-                        new CompleteResponseEntity("success")
+                        new ResponseMessageDTO("success")
                 );
     }
 
@@ -83,19 +85,23 @@ public class MemberServiceImpl implements MemberService{
      *
      */
     @Override
-    public long loginProc(LoginDTO dto, HttpServletRequest request, HttpServletResponse response) {
-        log.info("loginProc");
+    public ResponseEntity<ResponseUserStatusDTO> loginProc(LoginDTO dto, HttpServletRequest request, HttpServletResponse response) {
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(dto.userId(), dto.userPw());
         Authentication authentication =
                 authenticationManagerBuilder.getObject().authenticate(authenticationToken);
         CustomUser customUser = (CustomUser) authentication.getPrincipal();
-        String userId = customUser.getMember().getUserId();
+        String userId = customUser.getUsername();
 
         if(userId != null) {
             if (checkInoAndIssueToken(userId, request, response)) {
-                log.info("issuedToken");
-                return 1L;
+                String uid = customUser.getMember().getNickname() == null ?
+                        customUser.getMember().getUserName() : customUser.getMember().getNickname();
+
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(
+                                new ResponseUserStatusDTO(new UserStatusDTO(uid))
+                        );
             }
         }
 
@@ -118,12 +124,12 @@ public class MemberServiceImpl implements MemberService{
             jwtTokenProvider.deleteRedisDataAndCookie(dto.userId(), dto.inoValue(), response);
 
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(new CompleteResponseEntity("success"));
+                    .body(new ResponseMessageDTO("success"));
         }catch (Exception e) {
             log.warn("logout delete Data Exception");
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
-                    .body(new CompleteResponseEntity("fail"));
+                    .body(new ResponseMessageDTO("fail"));
         }
     }
 
@@ -196,7 +202,7 @@ public class MemberServiceImpl implements MemberService{
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
-                        new CompleteResponseEntity(responseMessage)
+                        new ResponseMessageDTO(responseMessage)
                 );
     }
 
@@ -213,7 +219,7 @@ public class MemberServiceImpl implements MemberService{
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
-                        new CompleteResponseEntity(responseMessage)
+                        new ResponseMessageDTO(responseMessage)
                 );
     }
 }

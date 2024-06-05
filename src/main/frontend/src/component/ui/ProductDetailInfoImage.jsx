@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 
-import { imageDisplayAxios } from "../../modules/customAxios";
+import { axiosInstance } from "../../modules/customAxios";
 
 function ProductDetailInfoImage(props) {
     const { imageInfo } = props;
@@ -15,7 +15,9 @@ function ProductDetailInfoImage(props) {
 
         if(imageInfo.length !== 0) {
             for(let i = 0; i < imageInfo.length; i++){
-                await imageDisplayAxios.get(`display/${imageInfo[i]}`)
+                await axiosInstance.get(`main/display/${imageInfo[i]}`, {
+                    responseType: 'blob',
+                })
                     .then(res => {
                         const url = window.URL.createObjectURL(
                             new Blob ([res.data], { type: res.headers['content-type']})

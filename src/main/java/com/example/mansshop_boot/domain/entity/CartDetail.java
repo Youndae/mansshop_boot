@@ -32,4 +32,16 @@ public class CartDetail {
     public void setCart(Cart cart) {
         this.cart = cart;
     }
+
+    public void countUpDown(String type) {
+        int productPrice = productOption.getProduct().getProductPrice();
+
+        if(type.equals("up")) {
+            this.cartCount = cartCount + 1;
+            this.cartPrice = cartPrice + productPrice;
+        }else {
+            this.cartCount = cartCount - 1;
+            this.cartPrice = cartPrice - productPrice;
+        }
+    }
 }

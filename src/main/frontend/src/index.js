@@ -2,30 +2,33 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { legacy_createStore as createStore} from 'redux';
 import { Provider } from 'react-redux';
 import { CookiesProvider } from "react-cookie";
+import { PersistGate } from "redux-persist/integration/react";
+import { persistStore } from "redux-persist";
 
 import dayjs from "dayjs";
 import isLeapYear from 'dayjs/plugin/isLeapYear';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/ko';
 
-import rootReducer from './modules';
+import store from './modules';
 
 dayjs.extend(isLeapYear, relativeTime);
 dayjs.locale('ko');
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
-const store = createStore(rootReducer);
+const persist = persistStore(store);
 
 root.render(
     <>
-        <CookiesProvider>
-            <Provider store={store}>
-                <App />
-            </Provider>
-        </CookiesProvider>
+        <Provider store={store}>
+            <PersistGate persistor={persist}>
+                <CookiesProvider>
+                    <App />
+                </CookiesProvider>
+            </PersistGate>
+        </Provider>
     </>
 );
 

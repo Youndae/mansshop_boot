@@ -20,21 +20,8 @@ public class CartDSLRepositoryImpl implements CartDSLRepository{
     @Value("#{jwt['cookie.cart.uid']}")
     private String nonUserId;
 
-    /*@Override
-    public Long findIdByUserId(String userId, String cookieValue) {
-
-        List<Long> ids = jpaQueryFactory.select(cart.id)
-                .from(cart)
-                .where(
-                        userType(userId, cookieValue)
-                )
-                .fetch();
-
-        return ids.get(0);
-    }*/
-
     @Override
-    public Cart findIdByUserId(String userId, String cookieValue) {
+    public Cart findByUserIdAndCookieValue(String userId, String cookieValue) {
 
         Cart result = jpaQueryFactory.select(cart)
                 .from(cart)
@@ -43,17 +30,18 @@ public class CartDSLRepositoryImpl implements CartDSLRepository{
                 )
                 .fetchOne();
 
-        /*List<Long> ids = jpaQueryFactory.select(cart.id)
+        return result;
+    }
+
+    @Override
+    public Long findIdByUserId(String userId, String cookieValue) {
+        return jpaQueryFactory.select(cart.id)
                 .from(cart)
                 .where(
                         userType(userId, cookieValue)
                 )
-                .fetch();*/
-
-        return result;
+                .fetchOne();
     }
-
-
 
     private BooleanExpression userType(String userId, String cookieValue) {
         if(cookieValue == null)

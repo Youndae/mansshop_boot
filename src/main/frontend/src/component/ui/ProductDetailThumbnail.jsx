@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 
-import {imageDisplayAxios} from "../../modules/customAxios";
+import {axiosInstance} from "../../modules/customAxios";
 
 function ProductDetailThumbnail(props) {
     const { imageName } = props;
@@ -17,8 +17,14 @@ function ProductDetailThumbnail(props) {
 
         if(imageName.length !== 0){
             for(let i = 0; i < imageName.length; i++) {
-                await imageDisplayAxios.get(`display/${imageName[i]}`)
+                await axiosInstance.get(`main/display/${imageName[i]}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    responseType: 'blob',
+                })
                     .then(res => {
+                        console.log('detailThumb res : ', res);
                         const url = window.URL.createObjectURL(
                             new Blob ([res.data], { type: res.headers['content-type']})
                         );
