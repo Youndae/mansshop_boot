@@ -22,4 +22,14 @@ public record PagingResponseDTO<T>(
                 , new UserStatusDTO(nickname)
         );
     }
+
+    public PagingResponseDTO(List<T> content, boolean isEmpty, long number, long totalPages, String nickname) {
+        this(
+                content
+                , isEmpty
+                , number
+                , totalPages
+                , new UserStatusDTO(nickname)
+        );
+    }
 }

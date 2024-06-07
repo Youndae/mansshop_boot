@@ -33,6 +33,8 @@ public class ProductOrderDetail {
 
     private int orderDetailPrice;
 
+    private int orderReviewStatus;
+
     public void setProductOrder(ProductOrder productOrder) {
         this.productOrder = productOrder;
     }

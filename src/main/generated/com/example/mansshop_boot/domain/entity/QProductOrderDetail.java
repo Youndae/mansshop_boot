@@ -28,6 +28,8 @@ public class QProductOrderDetail extends EntityPathBase<ProductOrderDetail> {
 
     public final NumberPath<Integer> orderDetailPrice = createNumber("orderDetailPrice", Integer.class);
 
+    public final NumberPath<Integer> orderReviewStatus = createNumber("orderReviewStatus", Integer.class);
+
     public final QProduct product;
 
     public final QProductOption productOption;

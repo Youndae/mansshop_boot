@@ -53,11 +53,11 @@ function Navbar() {
     }
 
     const handleOrderBtn = () => {
-        navigate('/order');
+        navigate('/order/info');
     }
 
     const handleMyPageBtn = () => {
-        navigate('/myPage');
+        navigate('/my-page/order');
     }
 
     const handleSearchBtn = () => {

@@ -222,4 +222,5 @@ public class MemberServiceImpl implements MemberService{
                         new ResponseMessageDTO(responseMessage)
                 );
     }
+
 }

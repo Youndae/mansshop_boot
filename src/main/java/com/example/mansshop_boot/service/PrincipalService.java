@@ -5,4 +5,6 @@ import java.security.Principal;
 public interface PrincipalService {
 
     String getPrincipalUid(Principal principal);
+
+    String getUidByUserId(String userId);
 }

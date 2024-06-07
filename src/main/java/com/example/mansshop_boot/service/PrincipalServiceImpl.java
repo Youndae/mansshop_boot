@@ -20,10 +20,30 @@ public class PrincipalServiceImpl implements PrincipalService {
         if(principal == null)
             return null;
 
-        Member member = memberRepository.findById(principal.getName()).orElse(null);
+        String uid = getUid(principal.getName());
+
+        if(uid == null)
+            throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
+
+
+        return uid;
+
+    }
+
+    @Override
+    public String getUidByUserId(String userId) {
+        return getUid(userId);
+    }
+
+    private String getUid(String userId) {
+
+        if(userId == null)
+            return null;
+
+        Member member = memberRepository.findById(userId).orElse(null);
 
         if(member == null)
-            throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
+            return null;
 
         return member.getNickname() == null ? member.getUserName() : member.getNickname();
     }

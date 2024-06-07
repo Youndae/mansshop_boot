@@ -1,10 +1,13 @@
 package com.example.mansshop_boot.controller;
 
 import com.example.mansshop_boot.domain.dto.main.MainListDTO;
+import com.example.mansshop_boot.domain.dto.mypage.MemberOrderDTO;
 import com.example.mansshop_boot.domain.dto.pageable.MemberPageDTO;
+import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseListDTO;
 import com.example.mansshop_boot.domain.dto.response.PagingResponseDTO;
 import com.example.mansshop_boot.service.MainService;
+import com.example.mansshop_boot.service.MyPageService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +33,8 @@ public class MainController {
     private String filePath;
 
     private final MainService mainService;
+
+    private final MyPageService myPageService;
 
     @GetMapping({"/", "/new"})
     public ResponseEntity<ResponseListDTO> mainList(HttpServletRequest request
@@ -96,5 +101,25 @@ public class MainController {
         }
 
         return result;
+    }
+
+    @GetMapping("/order/{term}/{page}")
+    public ResponseEntity<?> nonMemberOrderList(@RequestParam(name = "recipient") String recipient
+                                                , @RequestParam(name = "phone") String phone
+                                                , @PathVariable(name = "term") String term
+                                                , @PathVariable(name = "page") int page){
+
+        MemberOrderDTO memberOrderDTO = MemberOrderDTO.builder()
+                                            .userId(null)
+                                            .recipient(recipient)
+                                            .phone(phone)
+                                            .build();
+        OrderPageDTO orderPageDTO = OrderPageDTO.builder()
+                                        .pageNum(page)
+                                        .term(term)
+                                        .build();
+
+
+        return myPageService.getOrderList(orderPageDTO, memberOrderDTO);
     }
 }
