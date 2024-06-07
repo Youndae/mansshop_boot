@@ -1,0 +1,23 @@
+.side-nav {
+    width: 300px;
+    margin: 5% 0 0 20%;
+}
+
+.side-nav ul {
+    width: 300px;
+}
+
+.side-nav li {
+    list-style: none;
+    font-weight: bold;
+    margin: 40px;
+}
+
+.side-nav-ul li {
+    font-size: x-large;
+}
+
+.side-nav-ul li a {
+    text-decoration: none;
+    color: black;
+}

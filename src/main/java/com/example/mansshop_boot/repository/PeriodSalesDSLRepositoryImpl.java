@@ -20,6 +20,7 @@ public class PeriodSalesDSLRepositoryImpl implements PeriodSalesDSLRepository{
         return jpaQueryFactory.select(periodSales)
                 .from(periodSales)
                 .orderBy(periodSales.period.desc())
+                .limit(1)
                 .fetchOne();
     }
 }

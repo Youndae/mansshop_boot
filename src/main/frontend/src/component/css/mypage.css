@@ -1,0 +1,106 @@
+.mypage {
+    display: flex;
+}
+
+.mypage-content {
+    margin-top: 5%;
+    width: 35%;
+}
+
+.mypage-order-term-select {
+    float: right;
+}
+
+.mypage-order-list-content {
+    margin-top: 15%;
+}
+
+.mypage-order-data {
+    border: 1px solid lightgrey;
+}
+
+.mypage-order-data-header {
+    margin-top: 10px;
+    font-size: larger;
+    font-weight: bold;
+    padding-left: 3%;
+}
+
+.mypage-order-data-content img {
+    width: 150px;
+}
+
+.mypage-order-data-content {
+    display: flex;
+    margin-top: 15px;
+    justify-content: space-around;
+}
+
+.order-data-info-btn {
+    display: inline-grid;
+    padding-left: 35px;
+    padding-top: 4%;
+    align-content: center;
+}
+
+.order-data-info-btn button {
+    width: 100px;
+    height: 30px;
+}
+
+.mypage-order-list-content button {
+    border: 1px solid lightgrey;
+    background: white;
+}
+
+.order-data-info {
+    display: inline-grid;
+    padding-top: 40px;
+}
+
+.mypage-order-data {
+    margin-top: 10%;
+}
+
+.mypage-order-content {
+    border: 1px solid lightgrey;
+    margin-top: 20px;
+}
+
+.mypage-order-data-detail {
+    border: 1px solid lightgrey;
+    padding-bottom: 15px;
+}
+
+.mypage-order-list-content-header span {
+    font-size: larger;
+    font-weight: bold;
+}
+
+.mypage-order-content button {
+    float: right;
+    width: 100px;
+    height: 30px;
+}
+
+.mypage-order-list-content-header {
+    height: 45px;
+    align-content: center;
+    padding: 0 5px 0 5px;
+}
+
+.order-data-totalprice {
+    float: right;
+}
+
+.order-data-info-content {
+    font-size: large;
+    font-weight: 500;
+    height: 30px;
+    align-content: center;
+    padding: 0 5px 0 5px;
+}
+
+.non-member-order {
+    display: ruby-text;
+}

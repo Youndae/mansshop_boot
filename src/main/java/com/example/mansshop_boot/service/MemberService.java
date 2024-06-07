@@ -4,7 +4,6 @@ import com.example.mansshop_boot.domain.dto.member.JoinDTO;
 import com.example.mansshop_boot.domain.dto.member.LoginDTO;
 import com.example.mansshop_boot.domain.dto.member.LogoutDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseUserStatusDTO;
-import com.example.mansshop_boot.domain.entity.Member;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;

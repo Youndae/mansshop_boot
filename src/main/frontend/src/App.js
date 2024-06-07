@@ -11,16 +11,21 @@ import New from './component/page/main/New';
 import MainClassification from "./component/page/main/MainClassification";
 import SearchProduct from "./component/page/main/SearchProduct";
 
+
 import Login from './component/page/member/Login';
 import Join from './component/page/member/Join';
-import MyPage from "./component/page/member/MyPage";
 import Oauth from "./component/page/member/Oauth";
 import ProductDetail from "./component/page/product/ProductDetail";
 import Cart from "./component/page/cart/Cart";
 import Order from "./component/page/order/Order";
+import NonMemberOrderInfo from "./component/page/main/NonMemberOrderInfo";
+import NonMemberOrderList from "./component/page/main/NonMemberOrderList";
+
+import MyPageOrder from "./component/page/mypage/MyPageOrder";
 
 import AdminProduct from "./component/page/admin/AdminProduct";
 import AdminMember from "./component/page/admin/AdminMember";
+
 
 
 
@@ -42,7 +47,13 @@ function App() {
                 <Route path='product/:productId' element={<ProductDetail />} />
                 <Route path='cart' element={<Cart />} />
                 <Route path='productOrder' element={<Order />}/>
-                <Route path='member/mypage' element={<MyPage />} />
+                <Route path='order/info' element={<NonMemberOrderInfo />}/>
+                <Route path='order/detail' element={<NonMemberOrderList />}/>
+                <Route path='order/detail?term=:term&page=:page' element={<NonMemberOrderList />}/>
+
+                <Route path='my-page/order' element={<MyPageOrder />} />
+                <Route path='my-page/order?term=:term' element={<MyPageOrder />} />
+                <Route path='my-page/order?term=:term&page=:page' element={<MyPageOrder />} />
 
                 <Route path='admin/product' element={<AdminProduct />} />
                 <Route path='admin/member' element={<AdminMember />} />
