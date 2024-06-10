@@ -1,8 +1,10 @@
 package com.example.mansshop_boot.repository;
 
+import com.example.mansshop_boot.domain.entity.ProductLike;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -28,5 +30,18 @@ public class ProductLikeDSLRepositoryImpl implements ProductLikeDSLRepository{
                                 .fetch();
 
         return count.get(0).intValue();
+    }
+
+    @Override
+    @Transactional
+    public Long deleteByUserIdAndProductId(ProductLike productLikeEntity) {
+        return jpaQueryFactory.delete(productLike)
+                .where(
+                        productLike.member.eq(productLikeEntity.getMember())
+                        .and(
+                                productLike.product.eq(productLikeEntity.getProduct())
+                        )
+                )
+                .execute();
     }
 }

@@ -2,7 +2,9 @@ import React, {useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from "react-router-dom";
 import {useSelector} from "react-redux";
 
-function NonMemberOrderInfo(props) {
+import '../../css/mypage.css';
+
+function NonMemberOrderInfo() {
     const [params] = useSearchParams();
     const loginStatus = useSelector((state) => state.member.loginStatus);
     const page = params.get('page') === null ? 1 : params.get('page');

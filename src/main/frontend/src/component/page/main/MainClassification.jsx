@@ -82,7 +82,6 @@ function MainClassification() {
                 classification={classification}
             />
             <Paging
-                keyword={null}
                 pagingData={pagingData}
                 onClickNumber={handleOnClickNumber}
                 onClickPrev={handleOnClickPrev}

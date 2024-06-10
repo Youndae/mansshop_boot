@@ -6,11 +6,15 @@ import com.example.mansshop_boot.config.customException.exception.CustomNotFound
 import com.example.mansshop_boot.domain.dto.member.UserStatusDTO;
 import com.example.mansshop_boot.domain.dto.pageable.ProductDetailPageDTO;
 import com.example.mansshop_boot.domain.dto.product.*;
+import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
 import com.example.mansshop_boot.domain.entity.*;
+import com.example.mansshop_boot.domain.enumuration.Result;
 import com.example.mansshop_boot.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -201,7 +205,7 @@ public class ProductServiceImpl implements ProductService{
      * 둘다 Null이 아닌 경우 정상으로 판단해 해당 상품에 대해 관심상품 등록
      */
     @Override
-    public Long likeProduct(String productId, Principal principal) {
+    public ResponseEntity<?> likeProduct(String productId, Principal principal) {
 
         if(principal == null)
             throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
@@ -219,7 +223,8 @@ public class ProductServiceImpl implements ProductService{
                                             .build()
                             );
 
-        return 1L;
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(Result.OK.getResultKey()));
     }
 
     /**
@@ -233,7 +238,7 @@ public class ProductServiceImpl implements ProductService{
      * save인지 delete인지의 차이.
      */
     @Override
-    public Long deLikeProduct(String productId, Principal principal) {
+    public ResponseEntity<?> deLikeProduct(String productId, Principal principal) {
 
         if(principal == null)
             throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
@@ -244,12 +249,16 @@ public class ProductServiceImpl implements ProductService{
         if(member == null || product == null)
             throw new CustomNotFoundException(ErrorCode.NOT_FOUND, ErrorCode.NOT_FOUND.getMessage());
 
-        productLikeRepository.delete(
+        productLikeRepository.deleteByUserIdAndProductId(
                                         ProductLike.builder()
                                                 .member(member)
                                                 .product(product)
                                                 .build()
                                 );
-        return null;
+
+
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(Result.OK.getResultKey()));
     }
 }

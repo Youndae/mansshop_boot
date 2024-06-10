@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {useNavigate, useParams} from "react-router-dom";
+import {useLocation, useNavigate, useParams} from "react-router-dom";
 
 import dayjs from "dayjs";
 
@@ -10,7 +10,7 @@ import ProductDetailInfoImage from "../../ui/ProductDetailInfoImage";
 
 import '../../css/productDetail.css';
 import Paging from "../../ui/Paging";
-import {setMemberObject} from "../../../modules/loginModule";
+import {handleLocationPathToLogin, setMemberObject} from "../../../modules/loginModule";
 import {useDispatch, useSelector} from "react-redux";
 
 /*
@@ -57,6 +57,7 @@ function ProductDetail() {
     const productReviewElem = useRef(null);
     const productQnAElem = useRef(null);
     const productOrderInfoElem = useRef(null);
+    const { pathname } = useLocation();
 
 
 
@@ -197,9 +198,25 @@ function ProductDetail() {
     }
 
     const handleBuyBtn = () => {
+        let orderProductArr = [];
+
+        for(let i = 0; i < selectOption.length; i++) {
+            orderProductArr.push({
+                productId: productData.productId,
+                optionId: selectOption.optionId,
+                productName: productData.productName,
+                size: selectOption[i].size,
+                color: selectOption[i].color,
+                count: selectOption[i].count,
+                price: selectOption[i].price,
+            })
+        }
+
+
         navigate('/productOrder', {state : {
-                type: 'direct',
-                product : selectOption,
+                orderProduct : orderProductArr,
+                orderType: 'direct',
+                totalPrice: totalPrice,
             }}
         );
     }
@@ -228,29 +245,50 @@ function ProductDetail() {
     }
 
     const handleLikeBtn = async () => {
+        if(!loginStatus){
+            if(window.confirm('로그인 사용자만 관심상품 등록이 가능합니다.\n로그인 하시겠습니까?'))
+                handleLocationPathToLogin(pathname, navigate);
+        }else {
+            const pid = productData.productId;
+            const likeStatus = productData.productLikeStat;
+
+            await axiosInstance.post(`product/like`, {
+                productId : pid,
+            }, {
+                headers: {'Content-Type' : 'application/json'},
+            })
+                .then(res => {
+
+                    setProductData({
+                        ...productData,
+                        productLikeStat: !likeStatus,
+                    });
+                })
+                .catch(err => {
+                    alert('오류가 발생했습니다.\n문제가 계속된다면 관리자에게 문의해주세요.');
+                })
+        }
+    }
+
+    const handleDeLikeBtn = async () => {
         const pid = productData.productId;
         const likeStatus = productData.productLikeStat;
-        let url = 'de-like';
-        if(likeStatus)
-            url = 'like'
 
-        await axiosInstance.post(`${url}`, {
-            productId: pid,
-        })
+        await axiosInstance.delete(`product/de-like/${pid}`)
             .then(res => {
-                console.log('like axios success : ', res);
-
-                setProductData({
-                    ...productData,
-                    productLikeStat: !likeStatus,
-                });
+                if(res.data.message === 'OK'){
+                    setProductData({
+                        ...productData,
+                        productLikeStat: !likeStatus,
+                    });
+                }
             })
             .catch(err => {
                 alert('오류가 발생했습니다.\n문제가 계속된다면 관리자에게 문의해주세요.');
             })
     }
 
-    const likeBtnText = productData.productLikeStat ? '관심상품 해제' : '관심상품';
+    const likeBtnText = productData.productLikeStat ? '관심상품 해제' : '관심상품 등록';
 
     const handleDetailBtn = (e) => {
         const name = e.target.name;
@@ -279,8 +317,7 @@ function ProductDetail() {
     }
 
     const handleReviewPaging = async (clickNo) => {
-        console.log('review clickNo : ', clickNo);
-        //axios.get review?page=
+
         await axiosInstance.get(`product/${productId}/review/${clickNo}`)
             .then(res => {
                 setProductReview(res.data.content);
@@ -381,7 +418,11 @@ function ProductDetail() {
                         </div>
                         <button onClick={handleBuyBtn}>바로구매</button>
                         <button onClick={handleCartBtn}>장바구니</button>
-                        <button onClick={handleLikeBtn}>{likeBtnText}</button>
+                        <ProductLikeBtn
+                            likeStatus={productData.productLikeStat}
+                            handleLikeBtn={handleLikeBtn}
+                            handleDeLikeBtn={handleDeLikeBtn}
+                        />
                         <TotalPrice
                             totalPrice={totalPrice}
                         />
@@ -553,7 +594,7 @@ function ProductDetail() {
 function ProductDetailSelect(props) {
     const { productOption, onChange } = props;
 
-    if(productOption === [])
+    if(productOption.length === 1)
         return null;
     else {
         return (
@@ -784,6 +825,20 @@ function QnAReply(props) {
                     </div>
                 </li>
             </div>
+        )
+    }
+}
+
+function ProductLikeBtn(props) {
+    const { likeStatus, handleLikeBtn, handleDeLikeBtn } = props;
+
+    if(likeStatus){
+        return (
+            <button onClick={handleDeLikeBtn}>관심상품 해제</button>
+        )
+    }else {
+        return (
+            <button onClick={handleLikeBtn}>관심상품 등록</button>
         )
     }
 }
