@@ -49,6 +49,7 @@ function App() {
                 <Route path='productOrder' element={<Order />}/>
                 <Route path='order/info' element={<NonMemberOrderInfo />}/>
                 <Route path='order/detail' element={<NonMemberOrderList />}/>
+                <Route path='order/detail?term=:term' element={<NonMemberOrderList />}/>
                 <Route path='order/detail?term=:term&page=:page' element={<NonMemberOrderList />}/>
 
                 <Route path='my-page/order' element={<MyPageOrder />} />

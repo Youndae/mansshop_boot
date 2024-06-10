@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {useLocation, useNavigate, useSearchParams} from "react-router-dom";
 import {useSelector} from "react-redux";
 import {axiosInstance} from "../../../modules/customAxios";
-import {productDetailPagingObject} from "../../../modules/pagingModule";
+import {getClickNumber, getNextNumber, getPrevNumber, productDetailPagingObject} from "../../../modules/pagingModule";
 
 import OrderListDetail from "../../ui/OrderListDetail";
 
@@ -45,7 +45,8 @@ function NonMemberOrderList() {
             }
         })
             .then(res => {
-                const pagingObject = productDetailPagingObject(page, res.data.content.totalPages);
+                const pagingObject = productDetailPagingObject(page, res.data.totalPages);
+
                 setPagingData({
                     startPage: pagingObject.startPage,
                     endPage: pagingObject.endPage,
@@ -61,13 +62,41 @@ function NonMemberOrderList() {
             })
     }
 
+    const handleSelectOnChange = (e) => {
+        const selectTerm = e.target.value;
+
+        navigate(`/order/detail?term=${selectTerm}`, {state: { recipient : state.recipient, phone: state.phone}})
+    }
+
+    const handlePageBtn = (e) => {
+        handlePagingSubmit(getClickNumber(e));
+    }
+
+    const handlePagePrev = () => {
+        handlePagingSubmit(getPrevNumber(pagingData));
+    }
+
+    const handlePageNext = () => {
+        handlePagingSubmit(getNextNumber(pagingData));
+    }
+
+    const handlePagingSubmit = (pageNum) => {
+        navigate(`/order/detail?term=${term}&page=${pageNum}`, {state: { recipient : state.recipient, phone: state.phone}});
+    }
+
+
     return (
         <div className="non-member-order">
             <OrderListDetail
+                className={'non-member-order-content'}
                 orderData={orderData}
                 pagingData={pagingData}
                 term={term}
                 userType={userType}
+                handleSelectOnChange={handleSelectOnChange}
+                handlePageBtn={handlePageBtn}
+                handlePagePrev={handlePagePrev}
+                handlePageNext={handlePageNext}
             />
         </div>
     )

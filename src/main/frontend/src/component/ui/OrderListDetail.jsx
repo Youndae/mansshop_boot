@@ -1,62 +1,95 @@
 import React, {useEffect, useState} from 'react';
 import {numberComma} from "../../modules/numberCommaModule";
 import {axiosInstance} from "../../modules/customAxios";
+import Paging from "./Paging";
 
 function OrderListDetail(props) {
-    const { orderData, pagingData, term, userType } = props;
+    const {
+        className
+        , orderData
+        , pagingData
+        , term
+        , userType
+        , handleSelectOnChange
+        , handlePageBtn
+        , handlePagePrev
+        , handlePageNext
+    } = props;
 
 
-    if(orderData === null) {
-        return (
-            <h2>주문 상품이 없습니다.</h2>
-        )
-    }else {
-        return (
-            <>
-                <div className="mypage-content">
-                    <div className="mypage-order-header">
-                        <h1>주문내역</h1>
-                        <div className="mypage-order-term-select">
-                            <select name="mypage-order-select" value={term}>
-                                <option value="3">3개월</option>
-                                <option value="6">6개월</option>
-                                <option value="12">12개월</option>
-                                <option value="all">전체</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div className="mypage-order-list-content">
-                        <div className="mypage-order-list">
-                            {orderData.map((data, index) => {
-                                return (
-                                    <div key={index} className="mypage-order-content">
-                                        <div className="mypage-order-list-content-header">
-                                            <span>주문일 : {data.orderDate}</span>
-                                            <button type={'button'}>배송조회</button>
-                                        </div>
-                                        {data.detail.map((detail, index) => {
-                                            return(
-                                                <OrderDetail
-                                                    key={index}
-                                                    data={detail}
-                                                    orderStat={data.orderStat}
-                                                    userType={userType}
-                                                />
-                                            )
-                                        })}
-                                        <div className="order-data-info-content">
-                                            <OrderStatus
-                                                orderStat={data.orderStat}
-                                            />
-                                            <span className='order-data-totalprice'>총 주문 금액 : {numberComma(data.orderTotalPrice)}</span>
-                                        </div>
-                                    </div>
-                                )
-                            })}
-                        </div>
+    return (
+        <>
+            <div className={className}>
+                <div className="mypage-order-header">
+                    <h1>주문내역</h1>
+                    <div className="mypage-order-term-select">
+                        <select name="mypage-order-select" onChange={handleSelectOnChange} value={term}>
+                            <option value="3">3개월</option>
+                            <option value="6">6개월</option>
+                            <option value="12">12개월</option>
+                            <option value="all">전체</option>
+                        </select>
                     </div>
                 </div>
-            </>
+                <OrderList
+                    orderData={orderData}
+                    userType={userType}
+                />
+                <Paging
+                    pagingData={pagingData}
+                    onClickNumber={handlePageBtn}
+                    onClickPrev={handlePagePrev}
+                    onClickNext={handlePageNext}
+                    className={'order-paging'}
+                />
+            </div>
+        </>
+    )
+}
+
+function OrderList(props) {
+    const { orderData, userType } = props;
+    console.log('orderList orderData : ', orderData);
+    if(orderData.length === 0) {
+        return (
+            <div className="non-order-data-header">
+                <h2>주문 상품이 없습니다.</h2>
+            </div>
+        )
+    }else {
+
+        return (
+            <div className="mypage-order-list-content">
+                <div className="mypage-order-list">
+                    {orderData.map((data, index) => {
+                        return (
+                            <div key={index} className="mypage-order-content">
+                                <div className="mypage-order-list-content-header">
+                                    <span>주문일 : {data.orderDate}</span>
+                                    <button type={'button'}>배송조회</button>
+                                </div>
+                                {data.detail.map((detail, index) => {
+                                    return (
+                                        <OrderDetail
+                                            key={index}
+                                            data={detail}
+                                            orderStat={data.orderStat}
+                                            userType={userType}
+                                        />
+                                    )
+                                })}
+                                <div className="order-data-info-content">
+                                    <OrderStatus
+                                        orderStat={data.orderStat}
+                                    />
+                                    <span
+                                        className='order-data-totalprice'>총 주문 금액 : {numberComma(data.orderTotalPrice)}</span>
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
+            </div>
         )
     }
 }

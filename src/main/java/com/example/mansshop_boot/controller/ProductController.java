@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/product")
@@ -81,11 +82,13 @@ public class ProductController {
      *
      * 관심상품 등록 기능
      */
-    @PostMapping("/like/{productId}")
-    public ResponseEntity<?> likeProduct(@PathVariable(name = "productId") String productId
+    @PostMapping("/like")
+    public ResponseEntity<?> likeProduct(@RequestBody Map<String, String> productId
                                         , Principal principal) {
 
-        return new ResponseEntity<>(productService.likeProduct(productId, principal), HttpStatus.OK);
+        String productIdValue = productId.get("productId");
+
+        return productService.likeProduct(productIdValue, principal);
     }
 
     /**
@@ -96,10 +99,10 @@ public class ProductController {
      *
      * 관심상품 해제 기능
      */
-    @PostMapping("/de-like/{productId}")
+    @DeleteMapping("/de-like/{productId}")
     public ResponseEntity<?> deLikeProduct(@PathVariable(name = "productId") String productId
             , Principal principal) {
 
-        return new ResponseEntity<>(productService.deLikeProduct(productId, principal), HttpStatus.OK);
+        return productService.deLikeProduct(productId, principal);
     }
 }

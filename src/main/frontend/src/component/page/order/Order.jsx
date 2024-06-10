@@ -34,6 +34,9 @@ function Order() {
 
     const navigate = useNavigate();
 
+    console.log('state : ', state);
+    console.log('orderProduct : ', orderProduct);
+
     useEffect(() => {
         if(state !== null) {
             setOrderProduct(state.orderProduct);

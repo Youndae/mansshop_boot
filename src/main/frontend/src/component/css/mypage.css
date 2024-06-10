@@ -2,9 +2,13 @@
     display: flex;
 }
 
-.mypage-content {
+.mypage-content, .non-member-order-content {
     margin-top: 5%;
     width: 35%;
+}
+
+.mypage-content {
+    margin-left: 35%;
 }
 
 .mypage-order-term-select {
@@ -103,4 +107,42 @@
 
 .non-member-order {
     display: ruby-text;
+}
+
+.order-info-input {
+    display: ruby-text;
+}
+
+.order-info-content-input {
+    margin-top: 15%;
+}
+
+.order-info-content-input label {
+    margin-right: 10px;
+    font-size: large;
+}
+
+.order-info-content-input input {
+    height: 20px;
+    padding-left: 5px;
+}
+
+.order-info-content-input div {
+    margin-top: 15px;
+}
+
+.order-info-btn {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.order-info-btn button {
+    background: white;
+    border: 1px solid lightgrey;
+    width: 200px;
+    height: 35px;
+}
+
+.non-order-data-header {
+    margin-top: 30px;
 }

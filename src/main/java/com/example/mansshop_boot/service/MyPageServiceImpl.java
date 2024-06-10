@@ -70,7 +70,7 @@ public class MyPageServiceImpl implements MyPageService{
                                             , pageDTO.orderAmount()
                                             , Sort.by("orderId").descending());
 
-        Page<ProductOrder> order = productOrderRepository.findByUserId(memberOrderDTO, pageable);
+        Page<ProductOrder> order = productOrderRepository.findByUserId(memberOrderDTO, pageDTO, pageable);
         List<Long> orderIdList = new ArrayList<>();
         order.getContent().forEach(val -> orderIdList.add(val.getId()));
 
@@ -100,11 +100,7 @@ public class MyPageServiceImpl implements MyPageService{
 
         String nickname = principalService.getUidByUserId(memberOrderDTO.userId());
 
-        System.out.println("MyPageService getOrderList :: createNickname");
-
         PagingResponseDTO<MyPageOrderDTO> responseDTO = new PagingResponseDTO<>(contentList, order.isEmpty(), order.getNumber(), order.getTotalPages(), nickname);
-
-        System.out.println("MyPageService getOrderList :: createResponseDTO");
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDTO);

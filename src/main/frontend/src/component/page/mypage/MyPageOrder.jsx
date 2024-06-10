@@ -3,8 +3,8 @@ import {axiosInstance} from "../../../modules/customAxios";
 import MyPageSideNav from "../../ui/MyPageSideNav";
 
 import '../../css/mypage.css';
-import {useSearchParams} from "react-router-dom";
-import {productDetailPagingObject} from "../../../modules/pagingModule";
+import {useNavigate, useSearchParams} from "react-router-dom";
+import {getClickNumber, getNextNumber, getPrevNumber, productDetailPagingObject} from "../../../modules/pagingModule";
 import {useDispatch, useSelector} from "react-redux";
 import {setMemberObject} from "../../../modules/loginModule";
 import OrderListDetail from "../../ui/OrderListDetail";
@@ -28,17 +28,18 @@ function MyPageOrder(props) {
 
     const dispatch = useDispatch();
     const userType = 'user';
+    const navigate = useNavigate();
 
 
     useEffect(() => {
         getOrderData(term);
-    }, []);
+    }, [term, page]);
 
     const getOrderData = async (term) => {
 
         await axiosInstance.get(`my-page/order/${term}/${page}`)
             .then(res => {
-                const pagingObject = productDetailPagingObject(page, res.data.content.totalPages);
+                const pagingObject = productDetailPagingObject(page, res.data.totalPages);
 
                 setPagingData({
                     startPage: pagingObject.startPage,
@@ -60,14 +61,41 @@ function MyPageOrder(props) {
             })
     }
 
+    const handleSelectOnChange = (e) => {
+        const selectTerm = e.target.value;
+
+        navigate(`/my-page/order?term=${selectTerm}`)
+    }
+
+    const handlePageBtn = (e) => {
+        handlePagingSubmit(getClickNumber(e));
+    }
+
+    const handlePagePrev = () => {
+        handlePagingSubmit(getPrevNumber(pagingData));
+    }
+
+    const handlePageNext = () => {
+        handlePagingSubmit(getNextNumber(pagingData));
+    }
+
+    const handlePagingSubmit = (pageNum) => {
+        navigate(`/my-page/order?term=${term}&page=${pageNum}`);
+    }
+
     return (
         <div className="mypage">
             <MyPageSideNav/>
             <OrderListDetail
+                className={'mypage-content'}
                 orderData={orderData}
                 pagingData={pagingData}
                 term={term}
                 userType={userType}
+                handleSelectOnChange={handleSelectOnChange}
+                handlePageBtn={handlePageBtn}
+                handlePagePrev={handlePagePrev}
+                handlePageNext={handlePageNext}
             />
         </div>
     )

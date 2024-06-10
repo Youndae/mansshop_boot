@@ -1,6 +1,7 @@
 .side-nav {
     width: 300px;
     margin: 5% 0 0 20%;
+    position: fixed;
 }
 
 .side-nav ul {
