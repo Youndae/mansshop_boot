@@ -4,7 +4,7 @@
     position: fixed;
 }
 
-.side-nav ul {
+.side-nav-ul {
     width: 170px;
 }
 
@@ -21,4 +21,14 @@
 .side-nav-ul li a {
     text-decoration: none;
     color: black;
+}
+
+.qna-nav-ul {
+    width: 130px;
+}
+
+.qna-nav-ul li {
+    font-size: large;
+    margin-left: 15px;
+    margin-top: 20px;
 }

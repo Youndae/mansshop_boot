@@ -7,4 +7,6 @@ public interface PrincipalService {
     String getPrincipalUid(Principal principal);
 
     String getUidByUserId(String userId);
+
+    String getUserIdByPrincipal(Principal principal);
 }

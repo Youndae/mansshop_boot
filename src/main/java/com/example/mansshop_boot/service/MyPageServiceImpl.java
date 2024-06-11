@@ -2,17 +2,12 @@ package com.example.mansshop_boot.service;
 
 import com.example.mansshop_boot.config.customException.ErrorCode;
 import com.example.mansshop_boot.config.customException.exception.CustomAccessDeniedException;
-import com.example.mansshop_boot.domain.dto.mypage.MemberOrderDTO;
-import com.example.mansshop_boot.domain.dto.mypage.MyPageOrderDTO;
-import com.example.mansshop_boot.domain.dto.mypage.MyPageOrderDetailDTO;
-import com.example.mansshop_boot.domain.dto.mypage.ProductLikeDTO;
+import com.example.mansshop_boot.domain.dto.mypage.*;
 import com.example.mansshop_boot.domain.dto.pageable.LikePageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;
 import com.example.mansshop_boot.domain.dto.response.PagingResponseDTO;
 import com.example.mansshop_boot.domain.entity.ProductOrder;
-import com.example.mansshop_boot.repository.ProductLikeRepository;
-import com.example.mansshop_boot.repository.ProductOrderDetailRepository;
-import com.example.mansshop_boot.repository.ProductOrderRepository;
+import com.example.mansshop_boot.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -39,6 +34,14 @@ public class MyPageServiceImpl implements MyPageService{
     private final PrincipalService principalService;
 
     private final ProductLikeRepository productLikeRepository;
+
+    private final ProductQnARepository productQnARepository;
+
+    private final ProductQnAReplyRepository productQnAReplyRepository;
+
+    private final MemberQnARepository memberQnARepository;
+
+    private final MemberQnAReplyRepository memberQnAReplyRepository;
 
     @Override
     public ResponseEntity<?> getOrderList(OrderPageDTO pageDTO, MemberOrderDTO memberOrderDTO) {
@@ -149,6 +152,127 @@ public class MyPageServiceImpl implements MyPageService{
 
         PagingResponseDTO<ProductLikeDTO> responseDTO = new PagingResponseDTO<>(dto, nickname);
 
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
+    }
+
+    /*
+        content : [
+            {
+                productQnAId
+                productName
+                productQnAStat
+                createdAt
+            },
+            { }...
+        ],
+        totalPages
+     */
+    @Override
+    public ResponseEntity<?> getProductQnAList(MyPagePageDTO pageDTO, Principal principal) {
+
+        String userId = principalService.getUserIdByPrincipal(principal);
+
+        Pageable pageable = PageRequest.of(pageDTO.pageNum() - 1
+                                            , pageDTO.amount()
+                                            , Sort.by("id").descending());
+
+        Page<ProductQnAListDTO> dto = productQnARepository.findByUserId(userId, pageable);
+
+        String nickname = principalService.getPrincipalUid(principal);
+
+        PagingResponseDTO<ProductQnAListDTO> responseDTO = new PagingResponseDTO<>(dto, nickname);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
+    }
+
+    /*
+        productQnAId
+        , productName
+        , writer
+        , qnaContent
+        , createdAt
+        , productQnAStat
+        , reply : [
+                    {
+                        writer
+                        , replyContent
+                        , updatedAt
+                    }
+                ]
+     */
+    @Override
+    public ResponseEntity<?> getProductQnADetail(long productQnAId, Principal principal){
+        String userId = principalService.getUserIdByPrincipal(principal);
+
+        MyPageProductQnADTO qnaDTO = productQnARepository.findByIdAndUserId(productQnAId, userId);
+        if(qnaDTO == null)
+            throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
+
+        List<MyPageProductQnAReplyDTO> replyDTOList = productQnAReplyRepository.findAllByQnAId(productQnAId);
+
+        String nickname = principalService.getPrincipalUid(principal);
+
+        ProductQnADetailDTO responseDTO = new ProductQnADetailDTO(qnaDTO, replyDTOList, nickname);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
+    }
+
+    /*
+        memberQnAId
+        , writer
+        , memberQnAStat
+        , qnaClassificationName
+        , updatedAt
+     */
+    @Override
+    public ResponseEntity<?> getMemberQnAList(MyPagePageDTO pageDTO, Principal principal) {
+
+        String userId = principalService.getUserIdByPrincipal(principal);
+
+        Pageable pageable = PageRequest.of(pageDTO.pageNum() - 1
+                                            , pageDTO.amount()
+                                            , Sort.by("createdAt").descending());
+
+        Page<MemberQnAListDTO> dto = memberQnARepository.findAllByUserId(userId, pageable);
+
+        String nickname = principalService.getPrincipalUid(principal);
+
+        PagingResponseDTO<MemberQnAListDTO> responseDTO = new PagingResponseDTO<>(dto, nickname);
+
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
+    }
+
+    /*
+        memberQnAId
+        , qnaClassificationName
+        , writer
+        , qnaContent
+        , updatedAt
+        , memberQnAStat
+        , reply : [
+                    {
+                        writer
+                        , replyContent
+                        , updatedAt
+                    }
+                ]
+     */
+    @Override
+    public ResponseEntity<?> getMemberQnADetail(long memberQnAId, Principal principal) {
+
+        String userId = principalService.getUserIdByPrincipal(principal);
+
+        MemberQnADTO qnaDTO = memberQnARepository.findByIdAndUserId(memberQnAId, userId);
+        List<MemberQnAReplyDTO> replyDTOList = memberQnAReplyRepository.findAllByQnAId(memberQnAId);
+
+        String nickname = principalService.getPrincipalUid(principal);
+        MemberQnADetailDTO responseDTO = new MemberQnADetailDTO(qnaDTO, replyDTOList, nickname);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDTO);

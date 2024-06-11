@@ -5,12 +5,14 @@ import com.example.mansshop_boot.config.customException.exception.CustomAccessDe
 import com.example.mansshop_boot.domain.entity.Member;
 import com.example.mansshop_boot.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PrincipalServiceImpl implements PrincipalService {
 
     private final MemberRepository memberRepository;
@@ -46,5 +48,21 @@ public class PrincipalServiceImpl implements PrincipalService {
             return null;
 
         return member.getNickname() == null ? member.getUserName() : member.getNickname();
+    }
+
+    @Override
+    public String getUserIdByPrincipal(Principal principal) {
+
+        String userId = null;
+
+        try{
+            userId = principal.getName();
+        }catch (Exception e) {
+            log.info("PrincipalService.getUserIdByPrincipal :: principal Error");
+            e.printStackTrace();
+            throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
+        }
+
+        return userId;
     }
 }

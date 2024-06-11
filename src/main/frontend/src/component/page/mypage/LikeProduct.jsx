@@ -90,7 +90,9 @@ function LikeProduct() {
 
     return (
         <div className="mypage">
-            <MyPageSideNav/>
+            <MyPageSideNav
+                qnaStat={false}
+            />
             <div className="mypage-content">
                 <div className="mypage-like-header">
                     <h1>관심 상품</h1>
