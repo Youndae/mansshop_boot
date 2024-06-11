@@ -23,6 +23,12 @@ import NonMemberOrderList from "./component/page/main/NonMemberOrderList";
 
 import MyPageOrder from "./component/page/mypage/MyPageOrder";
 import LikeProduct from "./component/page/mypage/LikeProduct";
+import MyPageProductQnA from "./component/page/mypage/MyPageProductQnA";
+import MyPageProductQnADetail from "./component/page/mypage/MyPageProductQnADetail";
+import MemberQnA from "./component/page/mypage/MemberQnA";
+import MemberQnADetail from "./component/page/mypage/MemberQnADetail";
+import MyPageReview from "./component/page/mypage/MyPageReview";
+import MyPageUpdateInfo from "./component/page/mypage/MyPageUpdateInfo";
 
 import AdminProduct from "./component/page/admin/AdminProduct";
 import AdminMember from "./component/page/admin/AdminMember";
@@ -57,7 +63,17 @@ function App() {
                 <Route path='my-page/order?term=:term' element={<MyPageOrder />} />
                 <Route path='my-page/order?term=:term&page=:page' element={<MyPageOrder />} />
                 <Route path='my-page/like' element={<LikeProduct />}/>
-                <Route path='my-page/like?page=:page' element={<LikeProduct />}/>
+                <Route path='my-page/like?page=:page' element={<LikeProduct />} />
+                <Route path='my-page/productQnA' element={<MyPageProductQnA />} />
+                <Route path='my-page/productQnA?page=:page' element={<MyPageProductQnA />} />
+                <Route path='my-page/productQnA/:qnaId' element={<MyPageProductQnADetail />}/>
+                <Route path='my-page/memberQnA' element={<MemberQnA />} />
+                <Route path='my-page/memberQnA?page=:page' element={<MemberQnA />} />
+                <Route path='my-page/memberQnA/:qnaId' element={<MemberQnADetail />}/>
+                <Route path='my-page/review' element={<MyPageReview />} />
+                <Route path='my-page/review?page=:page' element={<MyPageReview />} />
+                <Route path='my-page/info' element={<MyPageUpdateInfo />} />
+
 
                 <Route path='admin/product' element={<AdminProduct />} />
                 <Route path='admin/member' element={<AdminMember />} />

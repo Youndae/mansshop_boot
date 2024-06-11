@@ -1,6 +1,7 @@
 package com.example.mansshop_boot.controller;
 
 import com.example.mansshop_boot.domain.dto.mypage.MemberOrderDTO;
+import com.example.mansshop_boot.domain.dto.mypage.MyPagePageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.LikePageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;
 import com.example.mansshop_boot.service.MyPageService;
@@ -46,5 +47,31 @@ public class MyPageController {
         LikePageDTO pageDTO = new LikePageDTO(page);
 
         return myPageService.getLikeList(pageDTO, principal);
+    }
+
+    @GetMapping("/qna/product/{page}")
+    public ResponseEntity<?> getProductQnA(@PathVariable(name = "page") int page, Principal principal) {
+        MyPagePageDTO pageDTO = new MyPagePageDTO(page);
+
+        return myPageService.getProductQnAList(pageDTO, principal);
+    }
+
+    @GetMapping("/qna/product/detail/{qnaId}")
+    public ResponseEntity<?> getProductQnADetail(@PathVariable(name = "qnaId") long qnaId, Principal principal) {
+
+        return myPageService.getProductQnADetail(qnaId, principal);
+    }
+
+    @GetMapping("/qna/member/{page}")
+    public ResponseEntity<?> getMemberQnA(@PathVariable(name = "page") int page, Principal principal) {
+        MyPagePageDTO pageDTO = new MyPagePageDTO(page);
+
+        return myPageService.getMemberQnAList(pageDTO, principal);
+    }
+
+    @GetMapping("/qna/member/detail/{qnaId}")
+    public ResponseEntity<?> getMemberQnADetail(@PathVariable(name = "qnaId") long qnaId, Principal principal) {
+
+        return myPageService.getMemberQnADetail(qnaId, principal);
     }
 }

@@ -30,19 +30,44 @@ import {Link} from "react-router-dom";
     * */
 import '../../css/sidenav.css';
 
-function MyPageSideNav() {
+function MyPageSideNav(props) {
+    const { qnaStat } = props;
 
-    return (
-        <div className="side-nav">
-            <ul className="side-nav-ul">
-                <li><Link to={'/my-page/order'}>주문 내역</Link></li>
-                <li><Link to={'/my-page/like'}>관심 상품</Link></li>
-                <li><Link to={'/my-page/qna'}>문의 내역</Link></li>
-                <li><Link to={'/my-page/review'}>리뷰 내역</Link></li>
-                <li><Link to={'/my-page/info'}>정보 수정</Link></li>
-            </ul>
-        </div>
-    )
+    if(qnaStat){
+        return (
+            <div className="side-nav">
+                <ul className="side-nav-ul">
+                    <li><Link to={'/my-page/order'}>주문 내역</Link></li>
+                    <li><Link to={'/my-page/like'}>관심 상품</Link></li>
+                    <li>
+                        <Link to={'/my-page/productQnA'}>문의 내역</Link>
+                        <ul className="qna-nav-ul">
+                            <li>
+                                <Link to={'/my-page/productQnA'}>상품 문의</Link>
+                            </li>
+                            <li>
+                                <Link to={'/my-page/memberQnA'}>문의 사항</Link>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><Link to={'/my-page/review'}>리뷰 내역</Link></li>
+                    <li><Link to={'/my-page/info'}>정보 수정</Link></li>
+                </ul>
+            </div>
+        )
+    }else {
+        return (
+            <div className="side-nav">
+                <ul className="side-nav-ul">
+                    <li><Link to={'/my-page/order'}>주문 내역</Link></li>
+                    <li><Link to={'/my-page/like'}>관심 상품</Link></li>
+                    <li><Link to={'/my-page/productQnA'}>문의 내역</Link></li>
+                    <li><Link to={'/my-page/review'}>리뷰 내역</Link></li>
+                    <li><Link to={'/my-page/info'}>정보 수정</Link></li>
+                </ul>
+            </div>
+        )
+    }
 }
 
 export default MyPageSideNav;

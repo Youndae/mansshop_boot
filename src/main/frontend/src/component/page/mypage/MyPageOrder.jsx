@@ -85,7 +85,9 @@ function MyPageOrder(props) {
 
     return (
         <div className="mypage">
-            <MyPageSideNav/>
+            <MyPageSideNav
+                qnaStat={false}
+            />
             <OrderListDetail
                 className={'mypage-content'}
                 orderData={orderData}
