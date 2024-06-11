@@ -146,3 +146,43 @@
 .non-order-data-header {
     margin-top: 30px;
 }
+
+.mypage-like-detail {
+    border: 1px solid lightgrey;
+    margin-top: 30px;
+    width: 70%;
+}
+
+.mypage-like-thumbnail {
+    width: 150px;
+    padding: 10px;
+}
+
+.mypage-like-delete-btn {
+    float: right;
+    width: 30px;
+    cursor: pointer;
+}
+
+.like-data-product-price {
+    margin-left: 10px;
+}
+
+.mypage-like-thumb {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.mypage-order-data-header a, .mypage-like-thumb a {
+    text-decoration: none;
+    color: black;
+}
+
+.mypage-like-info {
+    display: grid;
+}
+
+.mypage-like-info span {
+    margin: 10px;
+}

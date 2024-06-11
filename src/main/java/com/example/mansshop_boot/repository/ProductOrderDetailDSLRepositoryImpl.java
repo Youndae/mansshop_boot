@@ -27,6 +27,7 @@ public class ProductOrderDetailDSLRepositoryImpl implements ProductOrderDetailDS
                 Projections.constructor(
                         MyPageOrderDetailDTO.class
                         , productOrder.id.as("orderId")
+                        , product.id.as("productId")
                         , productOrderDetail.id.as("detailId")
                         , product.productName
                         , productOption.size

@@ -5,7 +5,6 @@ import lombok.Builder;
 public record MemberPageDTO(
         int pageNum
         , int mainProductAmount
-        , int orderAmount
         , String keyword
         , String classification
 ) {
@@ -17,7 +16,6 @@ public record MemberPageDTO(
         this(
                 pageNum == null ? 1 : pageNum.intValue()
                 , 12
-                , 20
                 , keyword == null ? null : "%" + keyword + "%"
                 , classification
         );

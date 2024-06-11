@@ -62,6 +62,7 @@ function ProductDetail() {
 
 
     useEffect(() => {
+        window.scrollTo(0, 0);
         getDetailData();
     }, [productId]);
 
@@ -287,8 +288,6 @@ function ProductDetail() {
                 alert('오류가 발생했습니다.\n문제가 계속된다면 관리자에게 문의해주세요.');
             })
     }
-
-    const likeBtnText = productData.productLikeStat ? '관심상품 해제' : '관심상품 등록';
 
     const handleDetailBtn = (e) => {
         const name = e.target.name;

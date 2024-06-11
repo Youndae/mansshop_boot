@@ -5,7 +5,7 @@ import {
     Route
 } from "react-router-dom";
 
-import Navbar from "./component/ui/Navbar";
+import Navbar from "./component/ui/nav/Navbar";
 import Best from "./component/page/main/Best";
 import New from './component/page/main/New';
 import MainClassification from "./component/page/main/MainClassification";
@@ -22,6 +22,7 @@ import NonMemberOrderInfo from "./component/page/main/NonMemberOrderInfo";
 import NonMemberOrderList from "./component/page/main/NonMemberOrderList";
 
 import MyPageOrder from "./component/page/mypage/MyPageOrder";
+import LikeProduct from "./component/page/mypage/LikeProduct";
 
 import AdminProduct from "./component/page/admin/AdminProduct";
 import AdminMember from "./component/page/admin/AdminMember";
@@ -55,6 +56,8 @@ function App() {
                 <Route path='my-page/order' element={<MyPageOrder />} />
                 <Route path='my-page/order?term=:term' element={<MyPageOrder />} />
                 <Route path='my-page/order?term=:term&page=:page' element={<MyPageOrder />} />
+                <Route path='my-page/like' element={<LikeProduct />}/>
+                <Route path='my-page/like?page=:page' element={<LikeProduct />}/>
 
                 <Route path='admin/product' element={<AdminProduct />} />
                 <Route path='admin/member' element={<AdminMember />} />

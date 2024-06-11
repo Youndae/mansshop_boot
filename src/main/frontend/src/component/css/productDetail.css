@@ -279,3 +279,7 @@ select#product-detail-option-select-box {
     border: 1px solid lightgray;
     margin-top: 5px;
 }
+
+.product-detail-content {
+    text-align: center;
+}
