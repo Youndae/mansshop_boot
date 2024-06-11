@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {axiosInstance} from "../../../modules/customAxios";
-import MyPageSideNav from "../../ui/MyPageSideNav";
+import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 
 import '../../css/mypage.css';
 import {useNavigate, useSearchParams} from "react-router-dom";

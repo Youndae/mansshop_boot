@@ -47,7 +47,7 @@ public class ProductDSLRepositoryImpl implements ProductDSLRepository{
                 )
                 .from(product)
                 .orderBy(defaultListOrderBy(pageDTO.classification()))
-                .limit(12)
+                .limit(pageDTO.mainProductAmount())
                 .fetch();
 
 

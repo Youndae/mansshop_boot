@@ -1,11 +1,16 @@
 package com.example.mansshop_boot.service;
 
+import com.example.mansshop_boot.config.customException.ErrorCode;
+import com.example.mansshop_boot.config.customException.exception.CustomAccessDeniedException;
 import com.example.mansshop_boot.domain.dto.mypage.MemberOrderDTO;
 import com.example.mansshop_boot.domain.dto.mypage.MyPageOrderDTO;
 import com.example.mansshop_boot.domain.dto.mypage.MyPageOrderDetailDTO;
+import com.example.mansshop_boot.domain.dto.mypage.ProductLikeDTO;
+import com.example.mansshop_boot.domain.dto.pageable.LikePageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;
 import com.example.mansshop_boot.domain.dto.response.PagingResponseDTO;
 import com.example.mansshop_boot.domain.entity.ProductOrder;
+import com.example.mansshop_boot.repository.ProductLikeRepository;
 import com.example.mansshop_boot.repository.ProductOrderDetailRepository;
 import com.example.mansshop_boot.repository.ProductOrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +37,8 @@ public class MyPageServiceImpl implements MyPageService{
     private final ProductOrderRepository productOrderRepository;
 
     private final PrincipalService principalService;
+
+    private final ProductLikeRepository productLikeRepository;
 
     @Override
     public ResponseEntity<?> getOrderList(OrderPageDTO pageDTO, MemberOrderDTO memberOrderDTO) {
@@ -107,5 +115,42 @@ public class MyPageServiceImpl implements MyPageService{
     }
 
 
+    /*
+        필요 데이터
 
+        likeId
+        productName
+        productPrice
+        thumbnail
+        stock
+        productId
+        createdAt
+     */
+    @Override
+    public ResponseEntity<?> getLikeList(LikePageDTO pageDTO, Principal principal) {
+        String userId = null;
+
+        try{
+            userId = principal.getName();
+        }catch (Exception e) {
+            log.info("MyPageService.getLikeList :: principal Error");
+            e.printStackTrace();
+
+            throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
+        }
+
+        Pageable pageable = PageRequest.of(pageDTO.pageNum() - 1
+                                            , pageDTO.likeAmount()
+                                            , Sort.by("createdAt").descending());
+
+        Page<ProductLikeDTO> dto = productLikeRepository.findByUserId(pageDTO, userId, pageable);
+
+        String nickname = principalService.getPrincipalUid(principal);
+
+        PagingResponseDTO<ProductLikeDTO> responseDTO = new PagingResponseDTO<>(dto, nickname);
+
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
+    }
 }

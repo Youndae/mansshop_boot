@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {numberComma} from "../../modules/numberCommaModule";
 import {axiosInstance} from "../../modules/customAxios";
 import Paging from "./Paging";
+import {Link} from "react-router-dom";
 
 function OrderListDetail(props) {
     const {
@@ -144,7 +145,9 @@ function OrderDetail(props) {
     return (
         <div className="mypage-order-data-detail">
             <div className="mypage-order-data-header">
-                <span>{data.productName}</span>
+                <Link to={`/product/${data.productId}`}>
+                    <span>{data.productName}</span>
+                </Link>
             </div>
             <div className="mypage-order-data-content">
                 <img src={imgSrc} alt={''}/>

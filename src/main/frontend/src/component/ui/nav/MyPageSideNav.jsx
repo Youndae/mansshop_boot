@@ -28,7 +28,7 @@ import {Link} from "react-router-dom";
     *   기간별
     *   상품별
     * */
-import '../css/sidenav.css';
+import '../../css/sidenav.css';
 
 function MyPageSideNav() {
 

@@ -22,6 +22,8 @@ public class QProductLike extends EntityPathBase<ProductLike> {
 
     public static final QProductLike productLike = new QProductLike("productLike");
 
+    public final DateTimePath<java.util.Date> createdAt = createDateTime("createdAt", java.util.Date.class);
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final QMember member;

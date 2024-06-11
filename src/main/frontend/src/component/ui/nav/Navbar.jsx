@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import {Link, useLocation, useNavigate} from "react-router-dom";
 
-import "../css/header.css";
-import {axiosInstance } from "../../modules/customAxios";
+import "../../css/header.css";
+import {axiosInstance } from "../../../modules/customAxios";
 import {useDispatch, useSelector} from "react-redux";
-import {handleLocationPathToLogin} from "../../modules/loginModule";
+import {handleLocationPathToLogin} from "../../../modules/loginModule";
 
 
 function Navbar() {

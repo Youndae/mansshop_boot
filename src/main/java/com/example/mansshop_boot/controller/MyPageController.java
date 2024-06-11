@@ -1,6 +1,7 @@
 package com.example.mansshop_boot.controller;
 
 import com.example.mansshop_boot.domain.dto.mypage.MemberOrderDTO;
+import com.example.mansshop_boot.domain.dto.pageable.LikePageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;
 import com.example.mansshop_boot.service.MyPageService;
 import lombok.RequiredArgsConstructor;
@@ -38,5 +39,12 @@ public class MyPageController {
 
 
         return myPageService.getOrderList(orderPageDTO, memberOrderDTO);
+    }
+
+    @GetMapping("/like/{page}")
+    public ResponseEntity<?> getLikeProduct(@PathVariable(name = "page") int page, Principal principal) {
+        LikePageDTO pageDTO = new LikePageDTO(page);
+
+        return myPageService.getLikeList(pageDTO, principal);
     }
 }
