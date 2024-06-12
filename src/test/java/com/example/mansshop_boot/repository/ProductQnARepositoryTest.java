@@ -1,9 +1,6 @@
 package com.example.mansshop_boot.repository;
 
-import com.example.mansshop_boot.domain.dto.mypage.MyPageProductQnADTO;
-import com.example.mansshop_boot.domain.dto.mypage.MyPageProductQnAReplyDTO;
-import com.example.mansshop_boot.domain.dto.mypage.ProductQnADetailDTO;
-import com.example.mansshop_boot.domain.dto.mypage.ProductQnAListDTO;
+import com.example.mansshop_boot.domain.dto.mypage.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +43,7 @@ class ProductQnARepositoryTest {
 
         MyPageProductQnADTO dto = productQnARepository.findByIdAndUserId(productQnAId, userId);
 
-        List<MyPageProductQnAReplyDTO> replyDTOList = productQnAReplyRepository.findAllByQnAId(productQnAId);
+        List<MyPageQnAReplyDTO> replyDTOList = productQnAReplyRepository.findAllByQnAId(productQnAId);
 
         String nickname = "코코에용";
 

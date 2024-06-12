@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 
@@ -34,7 +35,11 @@ public class ProductQnAReply {
     @CreationTimestamp
     private LocalDate createdAt;
 
-    @CreationTimestamp
+    @UpdateTimestamp
     private LocalDate updatedAt;
+
+    public void setReplyContent(String content) {
+        this.replyContent = content;
+    }
 
 }

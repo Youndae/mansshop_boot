@@ -1,4 +1,9 @@
 package com.example.mansshop_boot.domain.dto.response;
 
-public record ResponseDTO() {
+import com.example.mansshop_boot.domain.dto.member.UserStatusDTO;
+
+public record ResponseDTO<T>(
+        T content
+        , UserStatusDTO userStatus
+) {
 }

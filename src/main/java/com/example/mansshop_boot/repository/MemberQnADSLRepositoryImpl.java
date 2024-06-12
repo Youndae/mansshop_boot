@@ -2,6 +2,8 @@ package com.example.mansshop_boot.repository;
 
 import com.example.mansshop_boot.domain.dto.mypage.MemberQnADTO;
 import com.example.mansshop_boot.domain.dto.mypage.MemberQnAListDTO;
+import com.example.mansshop_boot.domain.dto.mypage.MemberQnAModifyDataDTO;
+import com.example.mansshop_boot.domain.entity.MemberQnA;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -30,11 +32,7 @@ public class MemberQnADSLRepositoryImpl implements MemberQnADSLRepository{
                 Projections.constructor(
                         MemberQnAListDTO.class
                         , memberQnA.id.as("memberQnAId")
-                        , new CaseBuilder()
-                                .when(memberQnA.member.nickname.isNull())
-                                .then(memberQnA.member.userName)
-                                .otherwise(memberQnA.member.nickname)
-                                .as("writer")
+                        , memberQnA.memberQnATitle
                         , memberQnA.memberQnAStat
                         , qnAClassification.qnaClassificationName.as("qnaClassification")
                         , memberQnA.updatedAt
@@ -63,6 +61,7 @@ public class MemberQnADSLRepositoryImpl implements MemberQnADSLRepository{
                         MemberQnADTO.class
                         , memberQnA.id.as("memberQnAId")
                         , qnAClassification.qnaClassificationName.as("qnaClassification")
+                        , memberQnA.memberQnATitle.as("qnaTitle")
                         , new CaseBuilder()
                                 .when(memberQnA.member.nickname.isNull())
                                 .then(memberQnA.member.userName)
@@ -77,6 +76,17 @@ public class MemberQnADSLRepositoryImpl implements MemberQnADSLRepository{
                 .innerJoin(qnAClassification)
                 .on(memberQnA.qnAClassification.id.eq(qnAClassification.id))
                 .where(memberQnA.id.eq(memberQnAId).and(memberQnA.member.userId.eq(userId)))
+                .fetchOne();
+    }
+
+    @Override
+    public MemberQnA findModifyDataByIdAndUserId(long qnaId, String userId) {
+        return jpaQueryFactory.select(memberQnA)
+                .from(memberQnA)
+                .where(
+                        memberQnA.id.eq(qnaId)
+                                .and(memberQnA.member.userId.eq(userId))
+                )
                 .fetchOne();
     }
 }

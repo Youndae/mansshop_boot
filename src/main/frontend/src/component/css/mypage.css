@@ -174,7 +174,7 @@
     align-items: center;
 }
 
-.mypage-order-data-header a, .mypage-like-thumb a {
+.mypage-order-data-header a, .mypage-like-thumb a, .qna-table a {
     text-decoration: none;
     color: black;
 }
@@ -185,4 +185,139 @@
 
 .mypage-like-info span {
     margin: 10px;
+}
+
+.qna-table {
+    text-align: center;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.qna-table th, td {
+    padding: .75rem;
+    vertical-align: top;
+    border-top: 1px solid lightgrey;
+}
+
+.mypage-qna-content {
+    margin-top: 30px;
+}
+
+.mypage-qna-content-title {
+    border-bottom: 1px solid lightgrey;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.mypage-qna-content-content {
+    margin-top: 20px;
+    font-size: large;
+    margin-bottom: 30px;
+}
+
+.qna-reply-input {
+    border-top: 1px solid lightgrey;
+    padding-top: 20px;
+    display: flex;
+}
+
+.qna-detail-reply {
+    margin-top: 20px;
+    border: 1px solid lightgrey;
+}
+
+.qna-reply-writer, .qna-reply-content {
+    padding: 10px 0 10px 10px;
+    display: flex;
+    align-items: center;
+}
+
+.qna-detail-reply button, .qna-reply-input button, .mypage-qna-header-btn button {
+    background-color: white;
+    border: 1px solid lightgrey;
+    width: 70px;
+    height: 30px;
+    margin-left: 20px;
+}
+
+.qna-reply-modify-input {
+    width: 100%;
+    padding: 10px 0 10px 0;
+}
+
+.qna-reply-modify-input textarea, .qna-reply-input textarea {
+    margin-left: 20px;
+    width: 90%;
+    height: 50px;
+    resize: none;
+}
+
+.qna-reply-modify-input button {
+    margin-left: 80%;
+}
+
+.qna-reply-date {
+    font-size: small;
+    color: grey;
+    margin-left: 10px;
+}
+
+.mypage-qna-content-reply {
+    margin-top: 40px;
+}
+
+.qna-reply-input button {
+    height: 50px;
+}
+
+.mypage-qna-header-btn button {
+    float: right;
+    margin-bottom: 20px;
+}
+
+.mypage-qna-write-title {
+
+}
+
+.mypage-qna-write-title input {
+    width: 70%;
+    margin-left: 10px;
+    height: 20px;
+}
+
+.mypage-qna-write-title select {
+    margin-left: 10px;
+}
+
+.mypage-qna-content-textarea textarea{
+    margin-top: 20px;
+    width: 90%;
+    height: 500px;
+    resize: none;
+}
+
+.mypage-qna-content-btn button {
+    margin-top: 20px;
+    background-color: white;
+    border: 1px solid lightgrey;
+    width: 100px;
+    height: 30px;
+    float: right;
+    margin-right: 10%;
+}
+
+.mypage-qna-content-header-btn button {
+    background-color: white;
+    border: 1px solid lightgrey;
+    width: 70px;
+    height: 30px;
+    margin-left: 10px;
+}
+
+.mypage-qna-content-header-btn {
+    width: 100%;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: flex-end;
 }

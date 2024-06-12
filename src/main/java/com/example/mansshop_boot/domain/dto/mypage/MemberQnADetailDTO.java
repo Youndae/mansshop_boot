@@ -8,18 +8,20 @@ import java.util.List;
 public record MemberQnADetailDTO(
         long memberQnAId
         , String qnaClassification
+        , String qnaTitle
         , String writer
         , String qnaContent
         , LocalDate updatedAt
         , int memberQnAStat
-        , List<MemberQnAReplyDTO> replyList
+        , List<MyPageQnAReplyDTO> replyList
         , UserStatusDTO userStatus
 ) {
 
-    public MemberQnADetailDTO(MemberQnADTO memberQnADTO, List<MemberQnAReplyDTO> replyList, String nickname) {
+    public MemberQnADetailDTO(MemberQnADTO memberQnADTO, List<MyPageQnAReplyDTO> replyList, String nickname) {
         this(
                 memberQnADTO.memberQnAId()
                 , memberQnADTO.qnaClassification()
+                , memberQnADTO.qnaTitle()
                 , memberQnADTO.writer()
                 , memberQnADTO.qnaContent()
                 , memberQnADTO.updatedAt()

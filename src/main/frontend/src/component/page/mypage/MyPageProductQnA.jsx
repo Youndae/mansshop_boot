@@ -1,10 +1,11 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import {useDispatch, useSelector} from "react-redux";
-import {useNavigate, useSearchParams} from "react-router-dom";
+import {Link, useNavigate, useSearchParams} from "react-router-dom";
 import {axiosInstance} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
-import {useState} from "@types/react";
+import Paging from "../../ui/Paging";
+import {getClickNumber, getNextNumber, getPrevNumber, productDetailPagingObject} from "../../../modules/pagingModule";
 
 function MyPageProductQnA() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
@@ -17,6 +18,7 @@ function MyPageProductQnA() {
         next: false,
         activeNo: page,
     });
+    const [qnaData, setQnAData] = useState([]);
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -30,6 +32,18 @@ function MyPageProductQnA() {
             .then(res => {
                 console.log('productQnA res : ', res);
 
+                setQnAData(res.data.content);
+
+                const pagingObject = productDetailPagingObject(page, res.data.totalPages);
+
+                setPagingData({
+                    startPage: pagingObject.startPage,
+                    endPage: pagingObject.endPage,
+                    prev: pagingObject.prev,
+                    next: pagingObject.next,
+                    activeNo: page,
+                });
+
                 const member = setMemberObject(res, loginStatus);
 
                 if(member !== undefined)
@@ -40,12 +54,80 @@ function MyPageProductQnA() {
             })
     }
 
+    const handlePageBtn = (e) => {
+        handlePagingSubmit(getClickNumber(e));
+    }
+
+    const handlePagePrev = () => {
+        handlePagingSubmit(getPrevNumber(pagingData));
+    }
+
+    const handlePageNext = () => {
+        handlePagingSubmit(getNextNumber(pagingData));
+    }
+
+    const handlePagingSubmit = (pageNum) => {
+        navigate(`/my-page/qna/product?page=${pageNum}`);
+    }
+
     return (
         <div className="mypage">
             <MyPageSideNav
                 qnaStat={true}
             />
+            <div className="mypage-content">
+                <div className="mypage-qna-header">
+                    <h1>상품 문의</h1>
+                </div>
+                <div className="mypage-qna-content">
+                    <table className="qna-table">
+                        <thead>
+                            <tr>
+                                <th>상품명</th>
+                                <th>답변 상태</th>
+                                <th>작성일</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {qnaData.map((data, index) => {
+                                return (
+                                    <ProductQnABody
+                                        key={index}
+                                        data={data}
+                                    />
+                                )
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+                <Paging
+                    pagingData={pagingData}
+                    onClickNumber={handlePageBtn}
+                    onClickPrev={handlePagePrev}
+                    onClickNext={handlePageNext}
+                    className={'like-paging'}
+                />
+            </div>
         </div>
+    )
+}
+
+function ProductQnABody(props) {
+    const { data } = props;
+    let qnaStatText = '답변 완료';
+    if(data.productQnAStat === 0)
+        qnaStatText = '미답변';
+
+    return (
+        <tr>
+            <td>
+                <Link to={`/my-page/qna/product/detail/${data.productQnAId}`}>
+                    {data.productName}
+                </Link>
+            </td>
+            <td>{qnaStatText}</td>
+            <td>{data.createdAt}</td>
+        </tr>
     )
 }
 

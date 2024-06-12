@@ -1,16 +1,29 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
-import {useNavigate, useParams} from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {axiosInstance} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
 import MyPageSideNav from "../../ui/nav/MyPageSideNav";
+import QnADetail from "./QnADetail";
 
 function MemberQnADetail() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
+    const userState = useSelector((state) => state.member);
+    const loginStatus = userState.loginStatus;
+    const nickname = userState.id;
     const { qnaId } = useParams();
+    const [data, setData] = useState({
+        memberQnAId: ''
+        , title: ''
+        , writer: ''
+        , qnaContent: ''
+        , date: ''
+        , qnaStatus: ''
+    });
+    const [replyData, setReplyData] = useState([]);
+    const [modifyTextValue, setModifyTextValue] = useState('');
+    const [inputValue, setInputValue] = useState('');
 
     const dispatch = useDispatch();
-    const navigate = useNavigate();
 
     useEffect(() => {
         getMemberQnADetail();
@@ -20,7 +33,31 @@ function MemberQnADetail() {
 
         await axiosInstance.get(`my-page/qna/member/detail/${qnaId}`)
             .then(res => {
-                console.log('productQnADetail res : ', res);
+                console.log('memberQnADetail res : ', res);
+
+                setData({
+                    memberQnAId: res.data.memberQnAId
+                    , title: `[${res.data.qnaClassification}] ${res.data.qnaTitle}`
+                    , writer: res.data.writer
+                    , qnaContent: res.data.qnaContent
+                    , date: res.data.updatedAt
+                    , qnaStatus: res.data.memberQnAStat
+                });
+
+                let replyArr = [];
+                const replyList = res.data.replyList;
+
+                for(let i = 0; i < replyList.length; i++) {
+                    replyArr.push({
+                        replyId: replyList[i].replyId,
+                        writer: replyList[i].writer,
+                        replyContent: replyList[i].replyContent,
+                        updatedAt: replyList[i].updatedAt,
+                        inputStatus: false,
+                    });
+                }
+
+                setReplyData(replyArr);
 
                 const member = setMemberObject(res, loginStatus);
 
@@ -32,10 +69,92 @@ function MemberQnADetail() {
             })
     }
 
+    const handleReplyModifyOpen = (e) => {
+        setReplyModifyStatus(e, true);
+
+    }
+
+    const handleReplyModifyClose = (e) => {
+        setReplyModifyStatus(e, false);
+    }
+
+    const setReplyModifyStatus = (e, status) => {
+        const idx = e.target.value;
+
+        replyData[idx] = {
+            replyId: replyData[idx].replyId,
+            writer: replyData[idx].writer,
+            replyContent: replyData[idx].replyContent,
+            updatedAt: replyData[idx].updatedAt,
+            inputStatus: status,
+        }
+
+        setReplyData([...replyData]);
+
+        if(status)
+            setModifyTextValue(replyData[idx].replyContent);
+    }
+
+    const handleModifyOnChange = (e) => {
+        setModifyTextValue(e.target.value);
+    }
+
+    const handleModifySubmit = async (e) => {
+        const idx = e.target.value;
+        const replyId = replyData[idx].replyId;
+
+        await axiosInstance.patch(`my-page/qna/member/reply`, {
+            replyId: replyId
+            , content: modifyTextValue,
+        }, {
+            headers: {'Content-Type': 'application/json'},
+        })
+            .then(res => {
+                if(res.data.message === 'OK')
+                    getMemberQnADetail();
+            })
+            .catch(err => {
+                console.error('modifyReply Error : ', err);
+            })
+    }
+
+    const handleInputOnChange = (e) => {
+        setInputValue(e.target.value);
+    }
+
+    const handleInputSubmit = async () => {
+        await axiosInstance.post(`my-page/qna/member/reply`, {
+            qnaId: data.memberQnAId,
+            content: inputValue,
+        })
+            .then(res => {
+                if(res.data.message === 'OK')
+                    getMemberQnADetail();
+            })
+            .catch(err => {
+                console.error('productQnADetail input submit error : ', err);
+            })
+    }
+
     return (
         <div className="mypage">
             <MyPageSideNav
                 qnaStat={true}
+            />
+            <QnADetail
+                data={data}
+                replyData={replyData}
+                nickname={nickname}
+                handleReplyModifyOpen={handleReplyModifyOpen}
+                handleReplyModifyClose={handleReplyModifyClose}
+                handleModifyOnChange={handleModifyOnChange}
+                modifyTextValue={modifyTextValue}
+                handleModifySubmit={handleModifySubmit}
+                handleInputOnChange={handleInputOnChange}
+                inputValue={inputValue}
+                handleInputSubmit={handleInputSubmit}
+                titleText={'문의 사항'}
+                type={'member'}
             />
         </div>
     )
