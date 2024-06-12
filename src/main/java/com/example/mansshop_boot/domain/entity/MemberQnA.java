@@ -1,5 +1,6 @@
 package com.example.mansshop_boot.domain.entity;
 
+import com.example.mansshop_boot.domain.dto.mypage.MemberQnAModifyDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,6 +30,8 @@ public class MemberQnA {
     @JoinColumn(name = "qnaClassificationId")
     private QnAClassification qnAClassification;
 
+    private String memberQnATitle;
+
     private String memberQnAContent;
 
     @CreationTimestamp
@@ -39,4 +42,9 @@ public class MemberQnA {
 
     private int memberQnAStat;
 
+    public void setModifyData(MemberQnAModifyDTO modifyDTO, QnAClassification qnaClassification) {
+        this.qnAClassification = qnaClassification;
+        this.memberQnATitle = modifyDTO.title();
+        this.memberQnAContent = modifyDTO.content();
+    }
 }

@@ -1,9 +1,6 @@
 package com.example.mansshop_boot.repository;
 
-import com.example.mansshop_boot.domain.dto.mypage.MemberQnADTO;
-import com.example.mansshop_boot.domain.dto.mypage.MemberQnADetailDTO;
-import com.example.mansshop_boot.domain.dto.mypage.MemberQnAListDTO;
-import com.example.mansshop_boot.domain.dto.mypage.MemberQnAReplyDTO;
+import com.example.mansshop_boot.domain.dto.mypage.*;
 import com.example.mansshop_boot.domain.dto.response.PagingResponseDTO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,7 +48,7 @@ class MemberQnARepositoryTest {
         long memberQnAId = 1L;
 
         MemberQnADTO qnaDTO = memberQnARepository.findByIdAndUserId(memberQnAId, userId);
-        List<MemberQnAReplyDTO> replyDTOList = memberQnAReplyRepository.findAllByQnAId(memberQnAId);
+        List<MyPageQnAReplyDTO> replyDTOList = memberQnAReplyRepository.findAllByQnAId(memberQnAId);
 
         String nickname = "코코에용";
 

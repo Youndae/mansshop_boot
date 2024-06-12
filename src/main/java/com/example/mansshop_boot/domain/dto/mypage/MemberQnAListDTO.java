@@ -5,7 +5,7 @@ import java.time.LocalDate;
 
 public record MemberQnAListDTO(
         long memberQnAId
-        , String writer
+        , String memberQnATitle
         , int memberQnAStat
         , String qnaClassification
         , LocalDate updatedAt

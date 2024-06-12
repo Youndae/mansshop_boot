@@ -40,13 +40,13 @@ function MyPageSideNav(props) {
                     <li><Link to={'/my-page/order'}>주문 내역</Link></li>
                     <li><Link to={'/my-page/like'}>관심 상품</Link></li>
                     <li>
-                        <Link to={'/my-page/productQnA'}>문의 내역</Link>
+                        <Link to={'/my-page/qna/product'}>문의 내역</Link>
                         <ul className="qna-nav-ul">
                             <li>
-                                <Link to={'/my-page/productQnA'}>상품 문의</Link>
+                                <Link to={'/my-page/qna/product'}>상품 문의</Link>
                             </li>
                             <li>
-                                <Link to={'/my-page/memberQnA'}>문의 사항</Link>
+                                <Link to={'/my-page/qna/member'}>문의 사항</Link>
                             </li>
                         </ul>
                     </li>
@@ -61,7 +61,7 @@ function MyPageSideNav(props) {
                 <ul className="side-nav-ul">
                     <li><Link to={'/my-page/order'}>주문 내역</Link></li>
                     <li><Link to={'/my-page/like'}>관심 상품</Link></li>
-                    <li><Link to={'/my-page/productQnA'}>문의 내역</Link></li>
+                    <li><Link to={'/my-page/qna/product'}>문의 내역</Link></li>
                     <li><Link to={'/my-page/review'}>리뷰 내역</Link></li>
                     <li><Link to={'/my-page/info'}>정보 수정</Link></li>
                 </ul>

@@ -1,7 +1,7 @@
 package com.example.mansshop_boot.repository;
 
 
-import com.example.mansshop_boot.domain.dto.mypage.MemberQnAReplyDTO;
+import com.example.mansshop_boot.domain.dto.mypage.MyPageQnAReplyDTO;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -19,11 +19,12 @@ public class MemberQnAReplyDSLRepositoryImpl implements MemberQnAReplyDSLReposit
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public List<MemberQnAReplyDTO> findAllByQnAId(long memberQnAId) {
+    public List<MyPageQnAReplyDTO> findAllByQnAId(long memberQnAId) {
 
         return jpaQueryFactory.select(
                 Projections.constructor(
-                        MemberQnAReplyDTO.class
+                        MyPageQnAReplyDTO.class
+                        , memberQnAReply.id.as("replyId")
                         , new CaseBuilder()
                                 .when(memberQnAReply.member.nickname.isNull())
                                 .then(memberQnAReply.member.userName)

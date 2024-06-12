@@ -32,6 +32,8 @@ public class QMemberQnA extends EntityPathBase<MemberQnA> {
 
     public final NumberPath<Integer> memberQnAStat = createNumber("memberQnAStat", Integer.class);
 
+    public final StringPath memberQnATitle = createString("memberQnATitle");
+
     public final QQnAClassification qnAClassification;
 
     public final DatePath<java.time.LocalDate> updatedAt = createDate("updatedAt", java.time.LocalDate.class);

@@ -12,12 +12,12 @@ public record ProductQnADetailDTO(
         , String qnaContent
         , LocalDate createdAt
         , int productQnAStat
-        , List<MyPageProductQnAReplyDTO> replyList
+        , List<MyPageQnAReplyDTO> replyList
         , UserStatusDTO userStatus
 ) {
 
     public ProductQnADetailDTO(MyPageProductQnADTO qnaDTO
-                                , List<MyPageProductQnAReplyDTO> replyList
+                                , List<MyPageQnAReplyDTO> replyList
                                 , String nickname) {
         this(
                 qnaDTO.productQnAId()

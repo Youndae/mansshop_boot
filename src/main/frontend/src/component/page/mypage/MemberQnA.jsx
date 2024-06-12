@@ -1,10 +1,11 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import {useDispatch, useSelector} from "react-redux";
-import {useNavigate, useSearchParams} from "react-router-dom";
+import {Link, useNavigate, useSearchParams} from "react-router-dom";
 import {axiosInstance} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
-import {useState} from "@types/react";
+import {getClickNumber, getNextNumber, getPrevNumber, productDetailPagingObject} from "../../../modules/pagingModule";
+import Paging from "../../ui/Paging";
 
 function MemberQnA() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
@@ -17,6 +18,7 @@ function MemberQnA() {
         next: false,
         activeNo: page,
     });
+    const [qnaData, setQnAData] = useState([]);
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -30,6 +32,17 @@ function MemberQnA() {
         await axiosInstance.get(`my-page/qna/member/${page}`)
             .then(res => {
                 console.log('memberQnA res : ', res);
+                setQnAData(res.data.content);
+
+                const pagingObject = productDetailPagingObject(page, res.data.totalPages);
+
+                setPagingData({
+                    startPage: pagingObject.startPage,
+                    endPage: pagingObject.endPage,
+                    prev: pagingObject.prev,
+                    next: pagingObject.next,
+                    activeNo: page,
+                });
 
                 const member = setMemberObject(res, loginStatus);
 
@@ -41,13 +54,89 @@ function MemberQnA() {
             })
     }
 
+    const handlePageBtn = (e) => {
+        handlePagingSubmit(getClickNumber(e));
+    }
+
+    const handlePagePrev = () => {
+        handlePagingSubmit(getPrevNumber(pagingData));
+    }
+
+    const handlePageNext = () => {
+        handlePagingSubmit(getNextNumber(pagingData));
+    }
+
+    const handlePagingSubmit = (pageNum) => {
+        navigate(`/my-page/qna/member?page=${pageNum}`);
+    }
+
+    const handleInsertBtn = () => {
+        navigate('/my-page/qna/member/write');
+    }
+
 
     return (
         <div className="mypage">
             <MyPageSideNav
                 qnaStat={true}
             />
+            <div className="mypage-content">
+                <div className="mypage-qna-header">
+                    <h1>문의 사항</h1>
+                    <div className="mypage-qna-header-btn">
+                        <button type={'button'} onClick={handleInsertBtn}>문의하기</button>
+                    </div>
+                </div>
+                <div className="mypage-qna-content">
+                    <table className="qna-table">
+                        <thead>
+                            <tr>
+                                <th>분류</th>
+                                <th>제목</th>
+                                <th>답변 상태</th>
+                                <th>작성일</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {qnaData.map((data, index) => {
+                            return (
+                                <ProductQnABody
+                                    key={index}
+                                    data={data}
+                                />
+                            )
+                        })}
+                        </tbody>
+                    </table>
+                </div>
+                <Paging
+                    pagingData={pagingData}
+                    onClickNumber={handlePageBtn}
+                    onClickPrev={handlePagePrev}
+                    onClickNext={handlePageNext}
+                    className={'like-paging'}
+                />
+            </div>
         </div>
+    )
+}
+function ProductQnABody(props) {
+    const { data } = props;
+    let qnaStatText = '답변 완료';
+    if(data.memberQnAStat === 0)
+        qnaStatText = '미답변';
+
+    return (
+        <tr>
+            <td>{data.qnaClassification}</td>
+            <td>
+                <Link to={`/my-page/qna/member/detail/${data.memberQnAId}`}>
+                    {data.memberQnATitle}
+                </Link>
+            </td>
+            <td>{qnaStatText}</td>
+            <td>{data.updatedAt}</td>
+        </tr>
     )
 }
 
