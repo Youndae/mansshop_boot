@@ -4,24 +4,20 @@ import com.example.mansshop_boot.config.customException.ErrorCode;
 import com.example.mansshop_boot.config.customException.exception.CustomAccessDeniedException;
 import com.example.mansshop_boot.config.customException.exception.CustomNotFoundException;
 import com.example.mansshop_boot.domain.dto.member.UserStatusDTO;
+import com.example.mansshop_boot.domain.dto.product.ProductQnAPostDTO;
 import com.example.mansshop_boot.domain.dto.pageable.ProductDetailPageDTO;
 import com.example.mansshop_boot.domain.dto.product.*;
-import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
 import com.example.mansshop_boot.domain.entity.*;
 import com.example.mansshop_boot.domain.enumuration.Result;
 import com.example.mansshop_boot.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
@@ -98,18 +94,18 @@ public class ProductServiceImpl implements ProductService{
         UserStatusDTO userStatus = new UserStatusDTO(uid);
 
         return ProductDetailDTO.builder()
-                                .productId(product.getId())
-                                .productName(product.getProductName())
-                                .productPrice(product.getProductPrice())
-                                .productImageName(product.getThumbnail())
-                                .productOptionList(productOption)
-                                .productThumbnailList(productThumbnailList)
-                                .productInfoImageList(productInfoImageList)
-                                .productReviewList(productReview)
-                                .productQnAList(productQnA)
-                                .userStatus(userStatus)
-                                .likeStat(likeStat)
-                                .build();
+                .productId(product.getId())
+                .productName(product.getProductName())
+                .productPrice(product.getProductPrice())
+                .productImageName(product.getThumbnail())
+                .productOptionList(productOption)
+                .productThumbnailList(productThumbnailList)
+                .productInfoImageList(productInfoImageList)
+                .productReviewList(productReview)
+                .productQnAList(productQnA)
+                .userStatus(userStatus)
+                .likeStat(likeStat)
+                .build();
     }
 
     /**
@@ -205,7 +201,7 @@ public class ProductServiceImpl implements ProductService{
      * 둘다 Null이 아닌 경우 정상으로 판단해 해당 상품에 대해 관심상품 등록
      */
     @Override
-    public ResponseEntity<?> likeProduct(String productId, Principal principal) {
+    public String likeProduct(String productId, Principal principal) {
 
         if(principal == null)
             throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
@@ -223,8 +219,7 @@ public class ProductServiceImpl implements ProductService{
                                             .build()
                             );
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new ResponseMessageDTO(Result.OK.getResultKey()));
+        return Result.OK.getResultKey();
     }
 
     /**
@@ -238,7 +233,7 @@ public class ProductServiceImpl implements ProductService{
      * save인지 delete인지의 차이.
      */
     @Override
-    public ResponseEntity<?> deLikeProduct(String productId, Principal principal) {
+    public String deLikeProduct(String productId, Principal principal) {
 
         if(principal == null)
             throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
@@ -258,7 +253,19 @@ public class ProductServiceImpl implements ProductService{
 
 
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new ResponseMessageDTO(Result.OK.getResultKey()));
+        return Result.OK.getResultKey();
+    }
+
+    @Override
+    public String postProductQnA(ProductQnAPostDTO postDTO, Principal principal) {
+
+        Member member = memberRepository.findById(principal.getName()).orElseThrow(IllegalArgumentException::new);
+        Product product = productRepository.findById(postDTO.productId()).orElseThrow(IllegalArgumentException::new);
+
+        ProductQnA productQnA = postDTO.toProductQnAEntity(member, product);
+
+        productQnARepository.save(productQnA);
+
+        return Result.OK.getResultKey();
     }
 }

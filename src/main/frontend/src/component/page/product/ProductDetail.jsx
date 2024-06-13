@@ -3,15 +3,17 @@ import {useLocation, useNavigate, useParams} from "react-router-dom";
 
 import dayjs from "dayjs";
 
-import { axiosInstance } from "../../../modules/customAxios";
+import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {getClickNumber, getNextNumber, getPrevNumber, productDetailPagingObject} from "../../../modules/pagingModule";
 import ProductDetailThumbnail from "../../ui/ProductDetailThumbnail";
-import ProductDetailInfoImage from "../../ui/ProductDetailInfoImage";
 
 import '../../css/productDetail.css';
 import Paging from "../../ui/Paging";
 import {handleLocationPathToLogin, setMemberObject} from "../../../modules/loginModule";
 import {useDispatch, useSelector} from "react-redux";
+import Image from "../../ui/Image";
+import DefaultBtn from "../../ui/DefaultBtn";
+import {numberComma} from "../../../modules/numberCommaModule";
 
 /*
     바로구매, 장바구니, 관심상품 버튼 handling -> 컴포넌트 작성 이후 테스트
@@ -51,6 +53,7 @@ function ProductDetail() {
     });
     const [selectOption, setSelectOption] = useState([]);
     const [totalPrice, setTotalPrice] = useState(0);
+    const [qnaInputValue, setQnAInputValue] = useState('');
 
     const navigate = useNavigate();
     const productInfoElem = useRef(null);
@@ -70,7 +73,6 @@ function ProductDetail() {
 
         await axiosInstance.get(`product/${productId}`)
             .then(res => {
-                console.log('productDetail axios ::  res : ', res);
                 const productContent = res.data;
                 const productReview = res.data.productReviewList;
                 const productQnA = res.data.productQnAList;
@@ -234,11 +236,12 @@ function ProductDetail() {
             })
         }
 
-
         await axiosInstance.post(`cart/`, {addList})
             .then(res => {
                 console.log('addCart axios success : ', res);
-                alert('장바구니에 상품을 추가했습니다.');
+
+                if(checkResponseMessageOk(res))
+                    alert('장바구니에 상품을 추가했습니다.');
             })
             .catch(err => {
                 alert('오류가 발생했습니다.\n문제가 계속된다면 관리자에게 문의해주세요.');
@@ -275,9 +278,9 @@ function ProductDetail() {
         const pid = productData.productId;
         const likeStatus = productData.productLikeStat;
 
-        await axiosInstance.delete(`product/de-like/${pid}`)
+        await axiosInstance.delete(`product/like/${pid}`)
             .then(res => {
-                if(res.data.message === 'OK'){
+                if(checkResponseMessageOk(res)) {
                     setProductData({
                         ...productData,
                         productLikeStat: !likeStatus,
@@ -373,6 +376,30 @@ function ProductDetail() {
             })
     }
 
+    const handleQnAOnChange = (e) => {
+        setQnAInputValue(e.target.value);
+    }
+
+    const handleQnASubmit = async () => {
+        const productId = productData.productId;
+
+        await axiosInstance.post(`my-page/qna/product`, {
+            productId: productId,
+            content: qnaInputValue,
+        }, {
+            headers: {'Content-Type' : 'application/json'}
+        })
+            .then(res => {
+                if(checkResponseMessageOk(res)){
+                    setQnAInputValue('');
+                    handleQnAPaging(1);
+                }
+            })
+            .catch(err => {
+                console.error('ProductDetail QnA submit error : ', err);
+            })
+    }
+
 
     return (
         <div className="product-detail-content">
@@ -390,7 +417,7 @@ function ProductDetail() {
                             </div>
                             <div className="product-price mgt-4">
                                 <label>가격</label>
-                                <span className="price">{productData.productPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} 원</span>
+                                <span className="price">{numberComma(productData.productPrice)} 원</span>
                             </div>
                             <ProductDetailSelect
                                 productOption={productOption}
@@ -415,8 +442,8 @@ function ProductDetail() {
                                 </tbody>
                             </table>
                         </div>
-                        <button onClick={handleBuyBtn}>바로구매</button>
-                        <button onClick={handleCartBtn}>장바구니</button>
+                        <DefaultBtn onClick={handleBuyBtn} btnText={'바로구매'}/>
+                        <DefaultBtn onClick={handleCartBtn} btnText={'장바구니'}/>
                         <ProductLikeBtn
                             likeStatus={productData.productLikeStat}
                             handleLikeBtn={handleLikeBtn}
@@ -442,7 +469,14 @@ function ProductDetail() {
                 </div>
                 <div className="product-detail-info" ref={productInfoElem}>
                     <h2>상품 정보</h2>
-                    <ProductDetailInfoImage imageInfo={infoImage} />
+                    {infoImage.map((image, index) => {
+                        return (
+                            <div key={index} className={'info-image-div'}>
+                                <Image className={'info-image'} imageName={image}/>
+                            </div>
+                        )
+                    })}
+                    {/*<ProductDetailInfoImage imageInfo={infoImage} />*/}
                 </div>
                 <div className="product-detail-review" ref={productReviewElem}>
                     <div className="product-detail-review-header">
@@ -474,9 +508,9 @@ function ProductDetail() {
                     <div className="product-detail-qna-header">
                         <h2>상품 문의</h2>
                         <div className="qna-input">
-                            <textarea name="qna-text"></textarea>
+                            <textarea name="qna-text" value={qnaInputValue} onChange={handleQnAOnChange}>{qnaInputValue}</textarea>
                         </div>
-                        <button>문의하기</button>
+                        <DefaultBtn onClick={handleQnASubmit} btnText={'문의하기'}/>
                     </div>
                     <div className="product-detail-qna-content">
                         <ul>
@@ -676,9 +710,6 @@ function TempOrderTableBody(props) {
             optionText = `${colorText}`;
         }
 
-        const price = selectOption.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' 원';
-
-
         return (
             <>
                 <tr className="product-temp-cart">
@@ -696,7 +727,7 @@ function TempOrderTableBody(props) {
                         </div>
                     </td>
                     <td className={'product-price'}>
-                        <span>{price}</span>
+                        <span>{`${numberComma(selectOption.price)} 원`}</span>
                     </td>
                 </tr>
             </>
@@ -713,7 +744,7 @@ function TotalPrice(props) {
         return (
             <div className="total-price">
                 <p>
-                    총 금액 : <span>{totalPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} 원</span>
+                    총 금액 : <span>{`${numberComma(totalPrice)} 원`}</span>
                 </p>
             </div>
         )
@@ -726,7 +757,7 @@ function Review(props) {
     const defaultLi = <li className={'review-content-default'}>
                             <div key={data.writer} className="review-content-header">
                                 <strong className="reviewer">{data.reviewWriter}</strong>
-                                <small className={'pull-right text-muted'}>{dayjs(data.reviewCreatedAt).format('YYYY-MM-DD')}</small>
+                                <small className={'pull-right text-muted'}>{data.reviewCreatedAt}</small>
                             </div>
                             <div className="review-content-content">
                                 <p>{data.reviewContent}</p>
@@ -739,7 +770,7 @@ function Review(props) {
                         <li className={'review-content'}>
                             <div className="review-content-header">
                                 <strong className="reviewer">관리자</strong>
-                                <small className={'pull-right text-muted'}>{dayjs(data.answerCreatedAt).format('YYYY-MM-DD')}</small>
+                                <small className={'pull-right text-muted'}>{data.answerCreatedAt}</small>
                             </div>
                             <div className="review-content-content">
                                 <p>{data.answerContent}</p>
@@ -770,7 +801,7 @@ function QnA(props) {
             <li className="qna-content-default">
                 <div className="qna-content-header">
                     <strong className="qna-writer">{data.writer}</strong>
-                    <small className={'pull-right text-muted'}>{dayjs(data.createdAt).format('YYYY-MM-DD')}</small>
+                    <small className={'pull-right text-muted'}>{data.createdAt}</small>
                     {statElem}
                 </div>
                 <div className="qna-content-content">
@@ -784,7 +815,7 @@ function QnA(props) {
                 <li className="qna-content-default">
                     <div className="qna-content-header">
                         <strong className="qna-writer">{data.writer}</strong>
-                        <small className={'pull-right text-muted'}>{dayjs(data.createdAt).format('YYYY-MM-DD')}</small>
+                        <small className={'pull-right text-muted'}>{data.createdAt}</small>
                         {statElem}
                     </div>
                     <div className="qna-content-content">
@@ -816,7 +847,7 @@ function QnAReply(props) {
                     <div>
                         <div className="qna-content-header">
                             <strong className="qna-writer">{data.writer}</strong>
-                            <small className={'pull-right text-muted'}>{dayjs(data.createdAt).format('YYYY-MM-DD')}</small>
+                            <small className={'pull-right text-muted'}>{data.createdAt}</small>
                         </div>
                         <div className="qna-content-content">
                             <p>{data.content}</p>
@@ -833,11 +864,11 @@ function ProductLikeBtn(props) {
 
     if(likeStatus){
         return (
-            <button onClick={handleDeLikeBtn}>관심상품 해제</button>
+            <DefaultBtn onClick={handleDeLikeBtn} btnText={'관심상품 해제'}/>
         )
     }else {
         return (
-            <button onClick={handleLikeBtn}>관심상품 등록</button>
+            <DefaultBtn onClick={handleLikeBtn} btnText={'관심상품 등록'}/>
         )
     }
 }

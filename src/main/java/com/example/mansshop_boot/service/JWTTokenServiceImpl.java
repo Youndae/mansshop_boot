@@ -47,7 +47,7 @@ public class JWTTokenServiceImpl implements JWTTokenService{
     }
 
     @Override
-    public ResponseEntity<?> reIssueToken(TokenDTO tokenDTO, HttpServletResponse response) {
+    public String reIssueToken(TokenDTO tokenDTO, HttpServletResponse response) {
 
         log.info("reIssued :: dto : {}", tokenDTO);
 
@@ -61,8 +61,7 @@ public class JWTTokenServiceImpl implements JWTTokenService{
             if(decodeRefreshToken.equals(Result.WRONG_TOKEN.getResultKey())){
                 jwtTokenProvider.deleteCookie(response);
 
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(new ResponseMessageDTO("fail"));
+                return Result.FAIL.getResultKey();
             }
         }else {
             String claimByRefreshToken = jwtTokenProvider.verifyRefreshToken(
@@ -74,14 +73,13 @@ public class JWTTokenServiceImpl implements JWTTokenService{
             if(claimByRefreshToken.equals(Result.TOKEN_STEALING.getResultKey())
                     || claimByRefreshToken.equals(Result.WRONG_TOKEN.getResultKey())) {
                 deleteCookieAndThrowException(response);
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(new ResponseMessageDTO("fail"));
+                return Result.FAIL.getResultKey();
             }else
                 jwtTokenProvider.issueTokens(decodeAccessToken, tokenDTO.inoValue(), response);
         }
 
         log.info("reissue success");
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new ResponseMessageDTO("success"));
+
+        return Result.OK.getResultKey();
     }
 }

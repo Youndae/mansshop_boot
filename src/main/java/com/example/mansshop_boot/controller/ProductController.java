@@ -1,8 +1,12 @@
 package com.example.mansshop_boot.controller;
 
+import com.example.mansshop_boot.domain.dto.product.ProductQnAPostDTO;
 import com.example.mansshop_boot.domain.dto.pageable.ProductDetailPageDTO;
 import com.example.mansshop_boot.domain.dto.product.ProductDetailDTO;
 import com.example.mansshop_boot.domain.dto.product.ProductPageableDTO;
+import com.example.mansshop_boot.domain.dto.product.ProductQnAResponseDTO;
+import com.example.mansshop_boot.domain.dto.product.ProductReviewDTO;
+import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
 import com.example.mansshop_boot.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +37,10 @@ public class ProductController {
     @GetMapping("/{productId}")
     public ResponseEntity<ProductDetailDTO> getDetail(@PathVariable(name = "productId") String productId, Principal principal) {
 
-        return new ResponseEntity<>(productService.getDetail(productId, principal), HttpStatus.OK);
+        ProductDetailDTO responseDTO = productService.getDetail(productId, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     /**
@@ -48,12 +55,15 @@ public class ProductController {
      *
      */
     @GetMapping("/{productId}/review/{page}")
-    public ResponseEntity<ProductPageableDTO> getReview(@PathVariable(name = "productId") String productId
+    public ResponseEntity<ProductPageableDTO<ProductReviewDTO>> getReview(@PathVariable(name = "productId") String productId
                                                         , @PathVariable(name = "page") int page) {
 
         ProductDetailPageDTO pageDTO = new ProductDetailPageDTO(page);
 
-        return new ResponseEntity<>(productService.getDetailReview(pageDTO, productId), HttpStatus.OK);
+        ProductPageableDTO<ProductReviewDTO> responseDTO = productService.getDetailReview(pageDTO, productId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     /**
@@ -66,12 +76,24 @@ public class ProductController {
      * 위 리뷰와 마찬가지로 첫페이지의 데이터가 아닌 페이징 기능을 위함
      */
     @GetMapping("/{productId}/qna/{page}")
-    public ResponseEntity<ProductPageableDTO> getQnA(@PathVariable(name = "productId") String productId
+    public ResponseEntity<ProductPageableDTO<ProductQnAResponseDTO>> getQnA(@PathVariable(name = "productId") String productId
                                                     , @PathVariable(name = "page") int page) {
 
         ProductDetailPageDTO pageDTO = new ProductDetailPageDTO(page);
 
-        return new ResponseEntity<>(productService.getDetailQnA(pageDTO, productId), HttpStatus.OK);
+        ProductPageableDTO<ProductQnAResponseDTO> responseDTO = productService.getDetailQnA(pageDTO, productId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
+    }
+
+    @PostMapping("/qna")
+    public ResponseEntity<?> postProductQnA(@RequestBody ProductQnAPostDTO postDTO, Principal principal) {
+
+        String responseMessage = productService.postProductQnA(postDTO, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
     }
 
     /**
@@ -88,7 +110,10 @@ public class ProductController {
 
         String productIdValue = productId.get("productId");
 
-        return productService.likeProduct(productIdValue, principal);
+        String responseMessage = productService.likeProduct(productIdValue, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
     }
 
     /**
@@ -99,10 +124,13 @@ public class ProductController {
      *
      * 관심상품 해제 기능
      */
-    @DeleteMapping("/de-like/{productId}")
+    @DeleteMapping("/like/{productId}")
     public ResponseEntity<?> deLikeProduct(@PathVariable(name = "productId") String productId
             , Principal principal) {
 
-        return productService.deLikeProduct(productId, principal);
+        String responseMessage = productService.deLikeProduct(productId, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
     }
 }

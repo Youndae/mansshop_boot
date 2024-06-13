@@ -3,6 +3,7 @@ import {useNavigate, useSearchParams} from "react-router-dom";
 import {useSelector} from "react-redux";
 
 import '../../css/mypage.css';
+import DefaultBtn from "../../ui/DefaultBtn";
 
 function NonMemberOrderInfo() {
     const [params] = useSearchParams();
@@ -50,7 +51,7 @@ function NonMemberOrderInfo() {
                     </div>
                 </div>
                 <div className="order-info-btn">
-                    <button type={'button'} onClick={handleSubmit}>주문 조회</button>
+                    <DefaultBtn onClick={handleSubmit} btnText={'주문 조회'} />
                 </div>
             </div>
         </div>

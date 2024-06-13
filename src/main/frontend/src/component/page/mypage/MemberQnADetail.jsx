@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
-import { useParams } from "react-router-dom";
-import {axiosInstance} from "../../../modules/customAxios";
+import {useNavigate, useParams} from "react-router-dom";
+import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
 import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import QnADetail from "./QnADetail";
@@ -24,6 +24,7 @@ function MemberQnADetail() {
     const [inputValue, setInputValue] = useState('');
 
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     useEffect(() => {
         getMemberQnADetail();
@@ -110,7 +111,7 @@ function MemberQnADetail() {
             headers: {'Content-Type': 'application/json'},
         })
             .then(res => {
-                if(res.data.message === 'OK')
+                if(checkResponseMessageOk(res))
                     getMemberQnADetail();
             })
             .catch(err => {
@@ -128,11 +129,23 @@ function MemberQnADetail() {
             content: inputValue,
         })
             .then(res => {
-                if(res.data.message === 'OK')
+                if(checkResponseMessageOk(res))
                     getMemberQnADetail();
             })
             .catch(err => {
                 console.error('productQnADetail input submit error : ', err);
+            })
+    }
+
+    const handleDeleteBtn = async () => {
+
+        await axiosInstance.delete(`my-page/qna/member/${data.memberQnAId}`)
+            .then(res => {
+                if(checkResponseMessageOk(res))
+                    navigate('/my-page/qna/member')
+            })
+            .catch(err => {
+                console.error('memberQnA delete error : ', err);
             })
     }
 
@@ -155,6 +168,7 @@ function MemberQnADetail() {
                 handleInputSubmit={handleInputSubmit}
                 titleText={'문의 사항'}
                 type={'member'}
+                handleDeleteBtn={handleDeleteBtn}
             />
         </div>
     )

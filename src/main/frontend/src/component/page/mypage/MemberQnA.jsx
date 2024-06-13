@@ -6,6 +6,7 @@ import {axiosInstance} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
 import {getClickNumber, getNextNumber, getPrevNumber, productDetailPagingObject} from "../../../modules/pagingModule";
 import Paging from "../../ui/Paging";
+import DefaultBtn from "../../ui/DefaultBtn";
 
 function MemberQnA() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
@@ -84,7 +85,7 @@ function MemberQnA() {
                 <div className="mypage-qna-header">
                     <h1>문의 사항</h1>
                     <div className="mypage-qna-header-btn">
-                        <button type={'button'} onClick={handleInsertBtn}>문의하기</button>
+                        <DefaultBtn onClick={handleInsertBtn} btnText={'문의하기'}/>
                     </div>
                 </div>
                 <div className="mypage-qna-content">

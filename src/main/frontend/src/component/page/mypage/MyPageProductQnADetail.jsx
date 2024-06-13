@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
-import { useParams } from "react-router-dom";
-import {axiosInstance} from "../../../modules/customAxios";
+import {useNavigate, useParams} from "react-router-dom";
+import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
 import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import QnADetail from "./QnADetail";
@@ -24,6 +24,7 @@ function MyPageProductQnADetail() {
     const [inputValue, setInputValue] = useState('');
 
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     useEffect(() => {
         getProductQnADetail();
@@ -108,7 +109,7 @@ function MyPageProductQnADetail() {
             headers: {'Content-Type': 'application/json'},
         })
             .then(res => {
-                if(res.data.message === 'OK')
+                if(checkResponseMessageOk(res))
                     getProductQnADetail();
             })
             .catch(err => {
@@ -126,11 +127,23 @@ function MyPageProductQnADetail() {
             content: inputValue,
         })
             .then(res => {
-                if(res.data.message === 'OK')
+                if(checkResponseMessageOk(res))
                     getProductQnADetail();
             })
             .catch(err => {
                 console.error('productQnADetail input submit error : ', err);
+            })
+    }
+
+    const handleDeleteBtn = async () => {
+
+        await axiosInstance.delete(`my-page/qna/product/${data.productQnAId}`)
+            .then(res => {
+                if(checkResponseMessageOk(res))
+                    navigate('/my-page/qna/product')
+            })
+            .catch(err => {
+                console.error('productQnA delete error : ', err);
             })
     }
 
@@ -150,8 +163,9 @@ function MyPageProductQnADetail() {
                 handleModifySubmit={handleModifySubmit}
                 handleInputOnChange={handleInputOnChange}
                 inputValue={inputValue}
-                handleInputSubmit={handleInputSubmit}항
+                handleInputSubmit={handleInputSubmit}
                 titleText={'상품 문의'}
+                handleDeleteBtn={handleDeleteBtn}
             />
        </div>
     )

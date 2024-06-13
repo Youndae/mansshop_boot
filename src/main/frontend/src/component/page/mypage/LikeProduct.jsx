@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {axiosInstance} from "../../../modules/customAxios";
+import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import {Link, useNavigate, useSearchParams} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
@@ -79,7 +79,7 @@ function LikeProduct() {
 
         await axiosInstance.delete(`product/de-like/${productId}`)
             .then(res => {
-                if(res.data.message === 'OK'){
+                if(checkResponseMessageOk(res)) {
                     getLikeProduct();
                 }
             })

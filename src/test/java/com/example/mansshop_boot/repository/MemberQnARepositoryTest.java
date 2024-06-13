@@ -1,6 +1,9 @@
 package com.example.mansshop_boot.repository;
 
-import com.example.mansshop_boot.domain.dto.mypage.*;
+import com.example.mansshop_boot.domain.dto.mypage.qna.MemberQnADTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.MemberQnADetailDTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.MemberQnAListDTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.MyPageQnAReplyDTO;
 import com.example.mansshop_boot.domain.dto.response.PagingResponseDTO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,8 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class MemberQnARepositoryTest {

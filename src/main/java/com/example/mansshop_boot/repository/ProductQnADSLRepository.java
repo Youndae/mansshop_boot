@@ -1,8 +1,7 @@
 package com.example.mansshop_boot.repository;
 
-import com.example.mansshop_boot.domain.dto.mypage.MyPagePageDTO;
-import com.example.mansshop_boot.domain.dto.mypage.MyPageProductQnADTO;
-import com.example.mansshop_boot.domain.dto.mypage.ProductQnAListDTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.MyPageProductQnADTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.ProductQnAListDTO;
 import com.example.mansshop_boot.domain.dto.product.ProductQnADTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

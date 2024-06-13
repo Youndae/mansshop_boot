@@ -74,19 +74,16 @@ public class MemberController {
     @PostMapping("/join")
     public ResponseEntity<?> joinProc(@RequestBody JoinDTO joinDTO) {
 
-
-        log.info("member join :: joinDTO : {}", joinDTO);
-
         return memberService.joinProc(joinDTO);
     }
 
 
 
     @GetMapping("/oAuth/token")
-    public ResponseEntity<Long> oAuthIssueToken(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> oAuthIssueToken(HttpServletRequest request, HttpServletResponse response) {
 
 
-        return new ResponseEntity<>(memberService.oAuthUserIssueToken(request, response), HttpStatus.OK);
+        return memberService.oAuthUserIssueToken(request, response);
     }
 
     @GetMapping("/check-id")

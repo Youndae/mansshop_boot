@@ -6,5 +6,5 @@ import org.springframework.http.ResponseEntity;
 
 public interface OrderService {
 
-    ResponseEntity<?> payment(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO);
+    String payment(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO);
 }

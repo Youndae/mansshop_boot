@@ -70,7 +70,7 @@ public class MemberServiceImpl implements MemberService{
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
-                        new ResponseMessageDTO("success")
+                        new ResponseMessageDTO(Result.OK.getResultKey())
                 );
     }
 
@@ -124,12 +124,12 @@ public class MemberServiceImpl implements MemberService{
             jwtTokenProvider.deleteRedisDataAndCookie(dto.userId(), dto.inoValue(), response);
 
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(new ResponseMessageDTO("success"));
+                    .body(new ResponseMessageDTO(Result.OK.getResultKey()));
         }catch (Exception e) {
             log.warn("logout delete Data Exception");
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
-                    .body(new ResponseMessageDTO("fail"));
+                    .body(new ResponseMessageDTO(Result.FAIL.getResultKey()));
         }
     }
 
@@ -144,7 +144,7 @@ public class MemberServiceImpl implements MemberService{
      * 임시 토큰 검증 후 토큰 발행
      */
     @Override
-    public long oAuthUserIssueToken(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> oAuthUserIssueToken(HttpServletRequest request, HttpServletResponse response) {
 
         Cookie temporaryCookie = WebUtils.getCookie(request, temporaryHeader);
 
@@ -163,7 +163,7 @@ public class MemberServiceImpl implements MemberService{
         jwtTokenProvider.deleteTemporaryTokenAndCookie(temporaryClaimByUserId, response);
 
         if(checkInoAndIssueToken(temporaryClaimByUserId, request, response))
-            return 1L;
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessageDTO(Result.OK.getResultKey()));
         else
             throw new CustomBadCredentialsException(ErrorCode.BAD_CREDENTIALS, ErrorCode.BAD_CREDENTIALS.getMessage());
 

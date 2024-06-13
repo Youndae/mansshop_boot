@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {axiosInstance} from "../../../modules/customAxios";
+import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {useDispatch, useSelector} from "react-redux";
 import {setMemberObject} from "../../../modules/loginModule";
 
@@ -7,6 +7,8 @@ import '../../css/cart.css';
 import {useNavigate} from "react-router-dom";
 
 import {numberComma} from "../../../modules/numberCommaModule";
+import Image from "../../ui/Image";
+import DefaultBtn from "../../ui/DefaultBtn";
 
 function Cart() {
     const [cartData, setCartData] = useState([]);
@@ -37,8 +39,6 @@ function Cart() {
         })
             .then(res => {
                 setCartData(res.data.content);
-
-                console.log('getCart Axios res : ', res);
 
                 const data = res.data.content;
                 if(data !== undefined ){
@@ -140,7 +140,7 @@ function Cart() {
             headers: {'Content-Type': 'application/json'}
         })
             .then(res => {
-                if(res.data.message === 'success')
+                if(checkResponseMessageOk(res))
                     getCartData();
             })
             .catch(err => {
@@ -152,7 +152,7 @@ function Cart() {
         if(reqData === null){
             await axiosInstance.delete(`${reqUrl}`)
                 .then(res => {
-                    if(res.data.message === 'success') {
+                    if(checkResponseMessageOk(res)) {
                         setTotalPrice(0);
                         getCartData();
                     }
@@ -170,7 +170,7 @@ function Cart() {
                 }
             })
                 .then(res => {
-                    if(res.data.message === 'success')
+                    if(checkResponseMessageOk(res))
                         getCartData();
                 })
                 .catch(err => {
@@ -222,10 +222,10 @@ function Cart() {
                     <h1>장바구니</h1>
                 </div>
                 <div className="cart-order-btn-content">
-                    <button type={'button'} className={'select-productOrder-btn'} onClick={handleSelectOrder}>선택 상품 주문</button>
-                    <button type={'button'} className={'all-productOrder-btn'} onClick={handleAllOrder}>전체 상품 주문</button>
-                    <button type={'button'} className={'select-delete-btn'} onClick={handleSelectRemove}>선택 상품 삭제</button>
-                    <button type={'button'} className={'all-delete-btn'} onClick={handleAllRemove}>전체 상품 삭제</button>
+                    <DefaultBtn className={'select-productOrder-btn'} onClick={handleSelectOrder} btnText={'선택 상품 주문'} />
+                    <DefaultBtn className={'all-productOrder-btn'} onClick={handleAllOrder} btnText={'전체 상품 주문'} />
+                    <DefaultBtn className={'select-delete-btn'} onClick={handleSelectRemove} btnText={'선택 상품 삭제'} />
+                    <DefaultBtn className={'all-delete-btn'} onClick={handleAllRemove} btnText={'전체 상품 삭제'} />
                 </div>
                 <CartDetail
                     data={cartData}
@@ -299,8 +299,9 @@ function CartDetail(props) {
                                      onClick={handleRemoveProduct}/>
                             </div>
                             <div className="cart-data-content">
-                                <CartImage
+                                <Image
                                     imageName={cart.productThumbnail}
+                                    className={'cart-thumbnail'}
                                 />
                                 <div className="cart-info">
                                     <span className="productOption">{productOption}</span>
@@ -327,7 +328,6 @@ function CartDetail(props) {
             </div>
         )
     }
-
 }
 
 function SelectBoxInput(props) {
@@ -346,40 +346,6 @@ function SelectBoxInput(props) {
             </>
         )
     }
-}
-
-function CartImage(props) {
-    const { imageName } = props;
-    const [thumb, setThumb] = useState('');
-
-    useEffect(() => {
-        getDisplayImage(imageName);
-    }, [imageName]);
-
-    const getDisplayImage = async (imageName) => {
-        await axiosInstance.get(`main/display/${imageName}`, {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            responseType: 'blob',
-        })
-            .then(res => {
-                const url = window.URL.createObjectURL(
-                    new Blob ([res.data], { type: res.headers['content-type']})
-                );
-
-                setThumb(url);
-            })
-            .catch(err => {
-                console.log('display axios err : ', err);
-            })
-    }
-
-    return (
-        <>
-            <img src={thumb} alt={''} className={'cart-thumbnail'}/>
-        </>
-    )
 }
 
 export default Cart;

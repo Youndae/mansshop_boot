@@ -1,6 +1,8 @@
 package com.example.mansshop_boot.controller;
 
 import com.example.mansshop_boot.domain.dto.TokenDTO;
+import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
+import com.example.mansshop_boot.domain.enumuration.Result;
 import com.example.mansshop_boot.service.JWTTokenService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,7 +38,7 @@ public class TokenController {
     private final JWTTokenService tokenService;
 
     @GetMapping("/reissue")
-    public ResponseEntity<?> reIssueToken(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<ResponseMessageDTO> reIssueToken(HttpServletRequest request, HttpServletResponse response) {
         String accessToken = request.getHeader(accessHeader).replace(tokenPrefix, "");
         Cookie refreshToken = WebUtils.getCookie(request, refreshHeader);
         Cookie ino = WebUtils.getCookie(request, inoHeader);
@@ -48,6 +51,14 @@ public class TokenController {
                 .inoValue(ino == null ? null : ino.getValue())
                 .build();
 
-        return tokenService.reIssueToken(tokenDTO, response);
+        String responseMessage = tokenService.reIssueToken(tokenDTO, response);
+        HttpStatus status = HttpStatus.OK;
+
+        if(responseMessage.equals(Result.FAIL.getResultKey()))
+            status = HttpStatus.FORBIDDEN;
+
+
+        return ResponseEntity.status(status)
+                .body(new ResponseMessageDTO(responseMessage));
     }
 }
