@@ -2,14 +2,14 @@ import React from "react";
 
 function MemberQnAWriteForm(props) {
     const { inputData, classificationId, classification, handleInputOnChange, handleSelectOnChange, handleSubmit, btnText } = props;
-
+    console.log('qna writeForm classificationId : ', classificationId);
 
     return (
         <div className="mypage-qna-content">
             <div className="mypage-qna-write-title">
                 <label>제목 : </label>
                 <input type={'text'} value={inputData.title} name={'title'} onChange={handleInputOnChange}/>
-                <select className="classification-box" defaultValue={classificationId} onChange={handleSelectOnChange}>
+                <select className="classification-box" defaultValue={classificationId} value={classificationId} onChange={handleSelectOnChange}>
                     {classification.map((option, index) => {
                         return (
                             <MemberQnAClassificationOption

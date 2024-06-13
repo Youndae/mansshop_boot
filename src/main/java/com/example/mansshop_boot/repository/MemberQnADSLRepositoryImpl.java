@@ -1,8 +1,7 @@
 package com.example.mansshop_boot.repository;
 
-import com.example.mansshop_boot.domain.dto.mypage.MemberQnADTO;
-import com.example.mansshop_boot.domain.dto.mypage.MemberQnAListDTO;
-import com.example.mansshop_boot.domain.dto.mypage.MemberQnAModifyDataDTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.MemberQnADTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.MemberQnAListDTO;
 import com.example.mansshop_boot.domain.entity.MemberQnA;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;

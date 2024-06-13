@@ -1,4 +1,4 @@
-package com.example.mansshop_boot.domain.dto.mypage;
+package com.example.mansshop_boot.domain.dto.mypage.qna.req;
 
 public record MemberQnAModifyDTO(
         long qnaId

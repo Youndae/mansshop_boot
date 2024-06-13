@@ -11,6 +11,7 @@ import com.example.mansshop_boot.domain.dto.response.ResponseUserStatusDTO;
 import com.example.mansshop_boot.domain.entity.Cart;
 import com.example.mansshop_boot.domain.entity.CartDetail;
 import com.example.mansshop_boot.domain.entity.Member;
+import com.example.mansshop_boot.domain.enumuration.Result;
 import com.example.mansshop_boot.domain.enumuration.Success;
 import com.example.mansshop_boot.repository.CartDetailRepository;
 import com.example.mansshop_boot.repository.CartRepository;
@@ -75,17 +76,15 @@ public class CartServiceImpl implements CartService{
 
      */
     @Override
-    public ResponseEntity<?> getCartList(CartMemberDTO cartMemberDTO) {
+    public ResponseListDTO<CartDetailDTO> getCartList(CartMemberDTO cartMemberDTO) {
         Long userCartId = cartRepository.findIdByUserId(cartMemberDTO);
 
         if(userCartId == null)
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(new ResponseUserStatusDTO(new UserStatusDTO(cartMemberDTO.uid())));
+            return new ResponseListDTO<>(null, new UserStatusDTO(cartMemberDTO.uid()));
 
         List<CartDetailDTO> cartDetailList = cartDetailRepository.findAllByCartId(userCartId);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new ResponseListDTO<>(cartDetailList, new UserStatusDTO(cartMemberDTO.uid())));
+        return new ResponseListDTO<>(cartDetailList, new UserStatusDTO(cartMemberDTO.uid()));
     }
 
     /*
@@ -99,7 +98,7 @@ public class CartServiceImpl implements CartService{
          */
     @Override
     @Transactional(rollbackFor = RuntimeException.class)
-    public ResponseEntity<?> addCart(List<AddCartDTO> addList
+    public String addCart(List<AddCartDTO> addList
                         , CartMemberDTO cartMemberDTO
                         , HttpServletResponse response
                         , Principal principal) {
@@ -135,11 +134,7 @@ public class CartServiceImpl implements CartService{
 
         cartRepository.save(cart);
 
-        return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(
-                            new ResponseMessageDTO(Success.OK.getMessage())
-                    );
+        return Result.OK.getResultKey();
     }
 
     /*
@@ -147,21 +142,17 @@ public class CartServiceImpl implements CartService{
      */
     @Override
     @Transactional(rollbackFor = RuntimeException.class)
-    public ResponseEntity<?> deleteAllCart(CartMemberDTO cartMemberDTO, HttpServletResponse response) {
+    public String deleteAllCart(CartMemberDTO cartMemberDTO, HttpServletResponse response) {
 
         Long cartId = cartRepository.findIdByUserId(cartMemberDTO);
 
         cartRepository.deleteById(cartId);
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(
-                        new ResponseMessageDTO("success")
-                );
+        return Result.OK.getResultKey();
     }
 
     @Override
-    public ResponseEntity<?> countUp(CartMemberDTO cartMemberDTO, long cartDetailId) {
+    public String countUp(CartMemberDTO cartMemberDTO, long cartDetailId) {
         Cart cart = cartRepository.findByUserIdAndCookieValue(cartMemberDTO);
 
         if(cart == null)
@@ -173,12 +164,11 @@ public class CartServiceImpl implements CartService{
         cartDetailRepository.save(cartDetail);
 
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new ResponseMessageDTO("success"));
+        return Result.OK.getResultKey();
     }
 
     @Override
-    public ResponseEntity<?> countDown(CartMemberDTO cartMemberDTO, long cartDetailId) {
+    public String countDown(CartMemberDTO cartMemberDTO, long cartDetailId) {
         Cart cart = cartRepository.findByUserIdAndCookieValue(cartMemberDTO);
 
         if(cart == null)
@@ -189,8 +179,7 @@ public class CartServiceImpl implements CartService{
 
         cartDetailRepository.save(cartDetail);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new ResponseMessageDTO("success"));
+        return Result.OK.getResultKey();
     }
 
     /*
@@ -198,7 +187,7 @@ public class CartServiceImpl implements CartService{
             선택 목록이 전체일 경우도 감안해야 함.
          */
     @Override
-    public ResponseEntity<?> deleteCartSelect(CartMemberDTO cartMemberDTO, List<Long> deleteCartDetailId) {
+    public String deleteCartSelect(CartMemberDTO cartMemberDTO, List<Long> deleteCartDetailId) {
 
         Long cartId = cartRepository.findIdByUserId(cartMemberDTO);
         Long cartDetailSize = cartDetailRepository.countByCartId(cartId);
@@ -209,11 +198,7 @@ public class CartServiceImpl implements CartService{
             cartDetailRepository.deleteAllById(deleteCartDetailId);
 
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(
-                        new ResponseMessageDTO("success")
-                );
+        return Result.OK.getResultKey();
     }
 
     private String createAnonymousCookie(HttpServletResponse response) {

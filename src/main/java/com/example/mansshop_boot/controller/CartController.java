@@ -1,8 +1,10 @@
 package com.example.mansshop_boot.controller;
 
 import com.example.mansshop_boot.domain.dto.cart.AddCartDTO;
+import com.example.mansshop_boot.domain.dto.cart.CartDetailDTO;
 import com.example.mansshop_boot.domain.dto.cart.CartMemberDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseDTO;
+import com.example.mansshop_boot.domain.dto.response.ResponseListDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
 import com.example.mansshop_boot.service.CartService;
 import jakarta.servlet.http.Cookie;
@@ -32,38 +34,49 @@ public class CartController {
 
     //사용자 장바구니 목록
     @GetMapping("/")
-    public ResponseEntity<?> getCartList(HttpServletRequest request, Principal principal) {
+    public ResponseEntity<ResponseListDTO<CartDetailDTO>> getCartList(HttpServletRequest request, Principal principal) {
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
 
         if(cartMemberDTO.uid() == null && cartMemberDTO.cartCookieValue() == null)
             return ResponseEntity.status(HttpStatus.OK).body(null);
 
+        ResponseListDTO<CartDetailDTO> responseDTO = cartService.getCartList(cartMemberDTO);
 
-        return cartService.getCartList(cartMemberDTO);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     //장바구니 상품 추가
     @PostMapping("/")
-    public ResponseEntity<?> addCart(@RequestBody AddCartDTO addList, HttpServletRequest request, HttpServletResponse response, Principal principal) {
+    public ResponseEntity<ResponseMessageDTO> addCart(@RequestBody AddCartDTO addList, HttpServletRequest request, HttpServletResponse response, Principal principal) {
 
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
 
-        return cartService.addCart(addList.addList(), cartMemberDTO, response, principal);
+        String responseMessage = cartService.addCart(addList.addList(), cartMemberDTO, response, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
     }
 
     @PatchMapping("/count-up/{cartDetailId}")
-    public ResponseEntity<?> cartCountUp(@PathVariable(name = "cartDetailId") long cartDetailId, HttpServletRequest request, Principal principal) {
+    public ResponseEntity<ResponseMessageDTO> cartCountUp(@PathVariable(name = "cartDetailId") long cartDetailId, HttpServletRequest request, Principal principal) {
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
 
 
-        return cartService.countUp(cartMemberDTO, cartDetailId);
+        String responseMessage = cartService.countUp(cartMemberDTO, cartDetailId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
     }
 
     @PatchMapping("/count-down/{cartDetailId}")
-    public ResponseEntity<?> cartCountDown(@PathVariable(name = "cartDetailId") long cartDetailId, HttpServletRequest request, Principal principal) {
+    public ResponseEntity<ResponseMessageDTO> cartCountDown(@PathVariable(name = "cartDetailId") long cartDetailId, HttpServletRequest request, Principal principal) {
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
 
-        return cartService.countDown(cartMemberDTO, cartDetailId);
+        String responseMessage = cartService.countDown(cartMemberDTO, cartDetailId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
     }
 
     /*
@@ -83,7 +96,7 @@ public class CartController {
             이렇게 보내니 {0=5, 1=6, 2=7, 3=8} 형태로 전달되며 Map으로 매핑이 가능해진다.
      */
     @DeleteMapping("/select")
-    public ResponseEntity<?> deleteSelectCart(@RequestBody Map<String, Long> deleteSelectId, HttpServletRequest request, Principal principal) {
+    public ResponseEntity<ResponseMessageDTO> deleteSelectCart(@RequestBody Map<String, Long> deleteSelectId, HttpServletRequest request, Principal principal) {
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
 
         List<Long> cartDetailIdList = new ArrayList<>();
@@ -92,15 +105,21 @@ public class CartController {
         cartDetailIdList.forEach(v -> System.out.println("list : " + v));
 
 
-        return cartService.deleteCartSelect(cartMemberDTO, cartDetailIdList);
+        String responseMessage = cartService.deleteCartSelect(cartMemberDTO, cartDetailIdList);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
     }
 
     @DeleteMapping("/all")
-    public ResponseEntity<?> deleteCart(Principal principal, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<ResponseMessageDTO> deleteCart(Principal principal, HttpServletRequest request, HttpServletResponse response) {
 
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
 
-        return cartService.deleteAllCart(cartMemberDTO, response);
+        String responseMessage = cartService.deleteAllCart(cartMemberDTO, response);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
     }
 
 }

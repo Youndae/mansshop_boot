@@ -11,7 +11,7 @@
 }
 
 .join-form div {
-    margin: 10px;
+    margin-top: 20px;
 }
 
 .join-content input {
@@ -33,12 +33,21 @@
 
 .join-btn {
     width: 270px;
-    margin: 20px 0 0 30px;
+    margin-top: 20px;
+    height: 30px;
 }
 
 .nickname-info {
     font-size: small;
     color: gray;
+}
+
+.email-select {
+    height: 30px;
+}
+
+.join-birth select {
+    margin-left: 10px;
 }
 
 

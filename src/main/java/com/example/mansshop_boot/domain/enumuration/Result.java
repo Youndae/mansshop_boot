@@ -10,7 +10,8 @@ public enum Result {
     TOKEN_STEALING("token Stealing")
     , TOKEN_EXPIRATION("token expiration")
     , WRONG_TOKEN("wrong token")
-    , OK("OK");
+    , OK("OK")
+    , FAIL("FAIL");
 
     private final String resultKey;
 }

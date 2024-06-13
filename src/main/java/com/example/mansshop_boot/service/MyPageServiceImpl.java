@@ -2,15 +2,18 @@ package com.example.mansshop_boot.service;
 
 import com.example.mansshop_boot.config.customException.ErrorCode;
 import com.example.mansshop_boot.config.customException.exception.CustomAccessDeniedException;
-import com.example.mansshop_boot.config.customException.exception.CustomNotFoundException;
 import com.example.mansshop_boot.domain.dto.member.UserStatusDTO;
 import com.example.mansshop_boot.domain.dto.mypage.*;
+import com.example.mansshop_boot.domain.dto.mypage.qna.*;
+import com.example.mansshop_boot.domain.dto.mypage.qna.req.MemberQnAInsertDTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.req.MemberQnAModifyDTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.req.QnAReplyDTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.req.QnAReplyInsertDTO;
 import com.example.mansshop_boot.domain.dto.pageable.LikePageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;
 import com.example.mansshop_boot.domain.dto.response.PagingResponseDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseIdDTO;
-import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
 import com.example.mansshop_boot.domain.entity.*;
 import com.example.mansshop_boot.domain.enumuration.Result;
 import com.example.mansshop_boot.repository.*;
@@ -20,8 +23,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -53,8 +54,10 @@ public class MyPageServiceImpl implements MyPageService{
 
     private final MemberRepository memberRepository;
 
+    private final ProductRepository productRepository;
+
     @Override
-    public ResponseEntity<?> getOrderList(OrderPageDTO pageDTO, MemberOrderDTO memberOrderDTO) {
+    public PagingResponseDTO<MyPageOrderDTO> getOrderList(OrderPageDTO pageDTO, MemberOrderDTO memberOrderDTO) {
 
         /*
             data
@@ -121,10 +124,13 @@ public class MyPageServiceImpl implements MyPageService{
 
         String nickname = principalService.getUidByUserId(memberOrderDTO.userId());
 
-        PagingResponseDTO<MyPageOrderDTO> responseDTO = new PagingResponseDTO<>(contentList, order.isEmpty(), order.getNumber(), order.getTotalPages(), nickname);
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(responseDTO);
+        return new PagingResponseDTO<>(
+                contentList
+                , order.isEmpty()
+                , order.getNumber()
+                , order.getTotalPages()
+                , nickname
+        );
     }
 
 
@@ -140,7 +146,7 @@ public class MyPageServiceImpl implements MyPageService{
         createdAt
      */
     @Override
-    public ResponseEntity<?> getLikeList(LikePageDTO pageDTO, Principal principal) {
+    public PagingResponseDTO<ProductLikeDTO> getLikeList(LikePageDTO pageDTO, Principal principal) {
         String userId = null;
 
         try{
@@ -160,11 +166,7 @@ public class MyPageServiceImpl implements MyPageService{
 
         String nickname = principalService.getPrincipalUid(principal);
 
-        PagingResponseDTO<ProductLikeDTO> responseDTO = new PagingResponseDTO<>(dto, nickname);
-
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(responseDTO);
+        return new PagingResponseDTO<>(dto, nickname);
     }
 
     /*
@@ -180,7 +182,7 @@ public class MyPageServiceImpl implements MyPageService{
         totalPages
      */
     @Override
-    public ResponseEntity<?> getProductQnAList(MyPagePageDTO pageDTO, Principal principal) {
+    public PagingResponseDTO<ProductQnAListDTO> getProductQnAList(MyPagePageDTO pageDTO, Principal principal) {
 
         String userId = principalService.getUserIdByPrincipal(principal);
 
@@ -192,10 +194,7 @@ public class MyPageServiceImpl implements MyPageService{
 
         String nickname = principalService.getPrincipalUid(principal);
 
-        PagingResponseDTO<ProductQnAListDTO> responseDTO = new PagingResponseDTO<>(dto, nickname);
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(responseDTO);
+        return new PagingResponseDTO<>(dto, nickname);
     }
 
     /*
@@ -214,7 +213,7 @@ public class MyPageServiceImpl implements MyPageService{
                 ]
      */
     @Override
-    public ResponseEntity<?> getProductQnADetail(long productQnAId, Principal principal){
+    public ProductQnADetailDTO getProductQnADetail(long productQnAId, Principal principal){
         String userId = principalService.getUserIdByPrincipal(principal);
 
         MyPageProductQnADTO qnaDTO = productQnARepository.findByIdAndUserId(productQnAId, userId);
@@ -225,10 +224,55 @@ public class MyPageServiceImpl implements MyPageService{
 
         String nickname = principalService.getPrincipalUid(principal);
 
-        ProductQnADetailDTO responseDTO = new ProductQnADetailDTO(qnaDTO, replyDTOList, nickname);
+        return new ProductQnADetailDTO(qnaDTO, replyDTOList, nickname);
+    }
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(responseDTO);
+    @Override
+    public String postProductQnAReply(QnAReplyInsertDTO insertDTO, Principal principal) {
+
+        Member member = memberRepository.findById(principal.getName()).orElseThrow(IllegalArgumentException::new);
+        ProductQnA productQnA = productQnARepository.findById(insertDTO.qnaId()).orElseThrow(IllegalArgumentException::new);
+
+        ProductQnAReply productQnAReply = ProductQnAReply.builder()
+                .member(member)
+                .productQnA(productQnA)
+                .replyContent(insertDTO.content())
+                .build();
+
+        productQnAReplyRepository.save(productQnAReply);
+
+        return Result.OK.getResultKey();
+    }
+
+    @Override
+    public String patchProductQnAReply(QnAReplyDTO replyDTO, Principal principal) {
+
+        ProductQnAReply qnaReplyEntity = productQnAReplyRepository.findById(replyDTO.replyId()).orElseThrow(IllegalArgumentException::new);
+        String userId = principalService.getUserIdByPrincipal(principal);
+
+        if(!qnaReplyEntity.getMember().getUserId().equals(userId))
+            throw new IllegalArgumentException();
+
+        qnaReplyEntity.setReplyContent(replyDTO.content());
+
+        productQnAReplyRepository.save(qnaReplyEntity);
+
+        return Result.OK.getResultKey();
+    }
+
+    @Override
+    public String deleteProductQnA(long qnaId, Principal principal) {
+
+        String userId = principalService.getUserIdByPrincipal(principal);
+
+        ProductQnA productQnA = productQnARepository.findById(qnaId).orElseThrow(IllegalArgumentException::new);
+
+        if(!productQnA.getMember().getUserId().equals(userId))
+            throw new IllegalArgumentException();
+
+        productQnARepository.deleteById(qnaId);
+
+        return Result.OK.getResultKey();
     }
 
     /*
@@ -239,7 +283,7 @@ public class MyPageServiceImpl implements MyPageService{
         , updatedAt
      */
     @Override
-    public ResponseEntity<?> getMemberQnAList(MyPagePageDTO pageDTO, Principal principal) {
+    public PagingResponseDTO<MemberQnAListDTO> getMemberQnAList(MyPagePageDTO pageDTO, Principal principal) {
 
         String userId = principalService.getUserIdByPrincipal(principal);
 
@@ -251,11 +295,25 @@ public class MyPageServiceImpl implements MyPageService{
 
         String nickname = principalService.getPrincipalUid(principal);
 
-        PagingResponseDTO<MemberQnAListDTO> responseDTO = new PagingResponseDTO<>(dto, nickname);
+        return new PagingResponseDTO<>(dto, nickname);
+    }
 
+    @Override
+    public ResponseIdDTO postMemberQnA(MemberQnAInsertDTO insertDTO, Principal principal) {
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(responseDTO);
+        Member member = memberRepository.findById(principal.getName()).orElseThrow(IllegalArgumentException::new);
+        QnAClassification qnAClassification = qnAClassificationRepository.findById(insertDTO.classificationId()).orElseThrow(IllegalArgumentException::new);
+
+        MemberQnA memberQnA = MemberQnA.builder()
+                .member(member)
+                .qnAClassification(qnAClassification)
+                .memberQnATitle(insertDTO.title())
+                .memberQnAContent(insertDTO.content())
+                .build();
+
+        long id = memberQnARepository.save(memberQnA).getId();
+
+        return new ResponseIdDTO(id);
     }
 
     /*
@@ -274,7 +332,7 @@ public class MyPageServiceImpl implements MyPageService{
                 ]
      */
     @Override
-    public ResponseEntity<?> getMemberQnADetail(long memberQnAId, Principal principal) {
+    public MemberQnADetailDTO getMemberQnADetail(long memberQnAId, Principal principal) {
 
         String userId = principalService.getUserIdByPrincipal(principal);
 
@@ -282,110 +340,12 @@ public class MyPageServiceImpl implements MyPageService{
         List<MyPageQnAReplyDTO> replyDTOList = memberQnAReplyRepository.findAllByQnAId(memberQnAId);
 
         String nickname = principalService.getPrincipalUid(principal);
-        MemberQnADetailDTO responseDTO = new MemberQnADetailDTO(qnaDTO, replyDTOList, nickname);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(responseDTO);
+        return new MemberQnADetailDTO(qnaDTO, replyDTOList, nickname);
     }
 
     @Override
-    public ResponseEntity<?> patchProductQnAReply(QnAReplyDTO replyDTO, Principal principal) {
-
-        ProductQnAReply qnaReplyEntity = productQnAReplyRepository.findById(replyDTO.replyId()).orElseThrow(IllegalArgumentException::new);
-        String userId = principalService.getUserIdByPrincipal(principal);
-
-        if(!qnaReplyEntity.getMember().getUserId().equals(userId))
-            throw new IllegalArgumentException();
-
-        qnaReplyEntity.setReplyContent(replyDTO.content());
-
-        productQnAReplyRepository.save(qnaReplyEntity);
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new ResponseMessageDTO(Result.OK.getResultKey()));
-    }
-
-    @Override
-    public ResponseEntity<?> patchMemberQnAReply(QnAReplyDTO replyDTO, Principal principal) {
-
-        MemberQnAReply memberQnAReplyEntity = memberQnAReplyRepository.findById(replyDTO.replyId()).orElseThrow(IllegalArgumentException::new);
-        String userId = principalService.getUserIdByPrincipal(principal);
-
-        if(!memberQnAReplyEntity.getMember().getUserId().equals(userId))
-            throw new IllegalArgumentException();
-
-        memberQnAReplyEntity.setReplyContent(replyDTO.content());
-
-        memberQnAReplyRepository.save(memberQnAReplyEntity);
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new ResponseMessageDTO(Result.OK.getResultKey()));
-    }
-
-    @Override
-    public ResponseEntity<?> getQnAClassification(Principal principal) {
-
-        List<QnAClassification> classificationList = qnAClassificationRepository.findAll();
-        List<QnAClassificationDTO> dtoList = new ArrayList<>();
-        classificationList.forEach(v ->
-                dtoList.add(
-                        QnAClassificationDTO.builder()
-                                .id(v.getId())
-                                .name(v.getQnaClassificationName())
-                                .build()
-                )
-        );
-
-        QnAClassificationResponseDTO responseDTO = QnAClassificationResponseDTO.builder()
-                .classificationList(dtoList)
-                .userStatus(
-                        new UserStatusDTO(principalService.getPrincipalUid(principal))
-                )
-                .build();
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(responseDTO);
-    }
-
-    @Override
-    public ResponseEntity<?> postMemberQnA(MemberQnAInsertDTO insertDTO, Principal principal) {
-
-        Member member = memberRepository.findById(principal.getName()).orElseThrow(IllegalArgumentException::new);
-        QnAClassification qnAClassification = qnAClassificationRepository.findById(insertDTO.classificationId()).orElseThrow(IllegalArgumentException::new);
-
-        MemberQnA memberQnA = MemberQnA.builder()
-                .member(member)
-                .qnAClassification(qnAClassification)
-                .memberQnATitle(insertDTO.title())
-                .memberQnAContent(insertDTO.content())
-                .build();
-
-        long id = memberQnARepository.save(memberQnA).getId();
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new ResponseIdDTO(id));
-    }
-
-    @Override
-    public ResponseEntity<?> postProductQnAReply(QnAReplyInsertDTO insertDTO, Principal principal) {
-
-        Member member = memberRepository.findById(principal.getName()).orElseThrow(IllegalArgumentException::new);
-        ProductQnA productQnA = productQnARepository.findById(insertDTO.qnaId()).orElseThrow(IllegalArgumentException::new);
-
-        ProductQnAReply productQnAReply = ProductQnAReply.builder()
-                .member(member)
-                .productQnA(productQnA)
-                .replyContent(insertDTO.content())
-                .build();
-
-        productQnAReplyRepository.save(productQnAReply);
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new ResponseMessageDTO(Result.OK.getResultKey()));
-    }
-
-    @Override
-    public ResponseEntity<?> postMemberQnAReply(QnAReplyInsertDTO insertDTO, Principal principal) {
+    public String postMemberQnAReply(QnAReplyInsertDTO insertDTO, Principal principal) {
 
         Member member = memberRepository.findById(principal.getName()).orElseThrow(IllegalArgumentException::new);
         MemberQnA memberQnA = memberQnARepository.findById(insertDTO.qnaId()).orElseThrow(IllegalArgumentException::new);
@@ -398,12 +358,27 @@ public class MyPageServiceImpl implements MyPageService{
 
         memberQnAReplyRepository.save(memberQnAReply);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new ResponseMessageDTO(Result.OK.getResultKey()));
+        return Result.OK.getResultKey();
     }
 
     @Override
-    public ResponseEntity<?> getModifyData(long qnaId, Principal principal) {
+    public String patchMemberQnAReply(QnAReplyDTO replyDTO, Principal principal) {
+
+        MemberQnAReply memberQnAReplyEntity = memberQnAReplyRepository.findById(replyDTO.replyId()).orElseThrow(IllegalArgumentException::new);
+        String userId = principalService.getUserIdByPrincipal(principal);
+
+        if(!memberQnAReplyEntity.getMember().getUserId().equals(userId))
+            throw new IllegalArgumentException();
+
+        memberQnAReplyEntity.setReplyContent(replyDTO.content());
+
+        memberQnAReplyRepository.save(memberQnAReplyEntity);
+
+        return Result.OK.getResultKey();
+    }
+
+    @Override
+    public ResponseDTO<MemberQnAModifyDataDTO> getModifyData(long qnaId, Principal principal) {
 
         String userId = principalService.getUserIdByPrincipal(principal);
 
@@ -421,14 +396,12 @@ public class MyPageServiceImpl implements MyPageService{
 
         MemberQnAModifyDataDTO modifyDataDTO = new MemberQnAModifyDataDTO(memberQnA, classificationDTO);
         String nickname = principalService.getPrincipalUid(principal);
-        ResponseDTO<MemberQnAModifyDataDTO> responseDTO = new ResponseDTO<>(modifyDataDTO, new UserStatusDTO(nickname));
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(responseDTO);
+        return new ResponseDTO<>(modifyDataDTO, new UserStatusDTO(nickname));
     }
 
     @Override
-    public ResponseEntity<?> patchMemberQnA(MemberQnAModifyDTO modifyDTO, Principal principal) {
+    public String patchMemberQnA(MemberQnAModifyDTO modifyDTO, Principal principal) {
 
         MemberQnA memberQnA = memberQnARepository.findById(modifyDTO.qnaId()).orElseThrow(IllegalArgumentException::new);
         String userId = principalService.getUserIdByPrincipal(principal);
@@ -442,7 +415,42 @@ public class MyPageServiceImpl implements MyPageService{
 
         memberQnARepository.save(memberQnA);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new ResponseMessageDTO(Result.OK.getResultKey()));
+        return Result.OK.getResultKey();
+    }
+
+    @Override
+    public String deleteMemberQnA(long qnaId, Principal principal) {
+        String userId = principalService.getUserIdByPrincipal(principal);
+
+        MemberQnA memberQnA = memberQnARepository.findById(qnaId).orElseThrow(IllegalArgumentException::new);
+
+        if(!memberQnA.getMember().getUserId().equals(userId))
+            throw new IllegalArgumentException();
+
+        memberQnARepository.deleteById(qnaId);
+
+        return Result.OK.getResultKey();
+    }
+
+    @Override
+    public QnAClassificationResponseDTO getQnAClassification(Principal principal) {
+
+        List<QnAClassification> classificationList = qnAClassificationRepository.findAll();
+        List<QnAClassificationDTO> dtoList = new ArrayList<>();
+        classificationList.forEach(v ->
+                dtoList.add(
+                        QnAClassificationDTO.builder()
+                                .id(v.getId())
+                                .name(v.getQnaClassificationName())
+                                .build()
+                )
+        );
+
+        return QnAClassificationResponseDTO.builder()
+                .classificationList(dtoList)
+                .userStatus(
+                        new UserStatusDTO(principalService.getPrincipalUid(principal))
+                )
+                .build();
     }
 }

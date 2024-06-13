@@ -15,5 +15,5 @@ public interface JWTTokenService {
 
     void tokenExpirationResponse(HttpServletResponse response);
 
-    ResponseEntity<?> reIssueToken(TokenDTO tokenDTO, HttpServletResponse response);
+    String reIssueToken(TokenDTO tokenDTO, HttpServletResponse response);
 }

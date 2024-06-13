@@ -5,8 +5,9 @@ import DaumPostcode from "react-daum-postcode";
 
 import '../../css/order.css';
 
-import {axiosInstance} from "../../../modules/customAxios";
+import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {numberComma} from "../../../modules/numberCommaModule";
+import DefaultBtn from "../../ui/DefaultBtn";
 
 function Order() {
     const location = useLocation();
@@ -34,9 +35,6 @@ function Order() {
 
     const navigate = useNavigate();
 
-    console.log('state : ', state);
-    console.log('orderProduct : ', orderProduct);
-
     useEffect(() => {
         if(state !== null) {
             setOrderProduct(state.orderProduct);
@@ -53,14 +51,7 @@ function Order() {
     }
 
     const handleOrderSubmit = async () => {
-        console.log('submit :: order data : ', orderData);
         const addr = `${userAddress.postCode} ${userAddress.address} ${userAddress.detail}`;
-        console.log('submit :: address : ', addr);
-        console.log('submit :: orderProduct : ', orderProduct);
-        console.log('submit :: paymentType : ', paymentType);
-        console.log('submit :: totalPrice : ', totalPrice);
-
-
         let productArr = [];
 
         for(let i = 0; i < orderProduct.length; i++) {
@@ -72,7 +63,6 @@ function Order() {
                 detailPrice: orderProduct[i].price,
             })
         }
-
 
         await axiosInstance.post(`order/`, {
             recipient: orderData.recipient,
@@ -88,8 +78,8 @@ function Order() {
             headers: {'Content-Type': 'application/json'}
         })
             .then(res => {
-                /*주문 리스트 구현 후 주문 리스트로 연결*/
-                if(res.data.message === 'success')
+                /*주문 결과 페이지 생성 후 연결*/
+                if(checkResponseMessageOk(res))
                     navigate('/');
 
             })
@@ -189,7 +179,7 @@ function Order() {
                             </div>
                             <div className="form-content-input-postcode">
                                 <input type={'text'} name={'postCode'} placeholder={'우편번호'} value={userAddress.postCode} readOnly/>
-                                <button type={'button'} onClick={handlePostCodeBtn}>우편번호 찾기</button>
+                                <DefaultBtn onClick={handlePostCodeBtn} btnText={'우편번호 찾기'}/>
                             </div>
                             <div className={'form-content-input-address'}>
                                 <input type={'text'} name={'address'} placeholder={'주소'}  value={userAddress.address} readOnly/>
@@ -250,7 +240,7 @@ function Order() {
                         </div>
                     </div>
                     <div className="order-payment-btn">
-                        <button type={'button'} onClick={handleOrderSubmit}>결제하기</button>
+                        <DefaultBtn onClick={handleOrderSubmit} btnText={'결제하기'}/>
                     </div>
                 </div>
             </div>

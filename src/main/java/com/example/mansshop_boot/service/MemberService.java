@@ -16,7 +16,7 @@ public interface MemberService {
 
     ResponseEntity<ResponseUserStatusDTO> loginProc(LoginDTO dto, HttpServletRequest request, HttpServletResponse response);
 
-    long oAuthUserIssueToken(HttpServletRequest request, HttpServletResponse response);
+    ResponseEntity<?> oAuthUserIssueToken(HttpServletRequest request, HttpServletResponse response);
 
     ResponseEntity<?> checkJoinId(String userId);
 

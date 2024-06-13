@@ -55,3 +55,8 @@ axiosInstance.interceptors.response.use(
 const getToken = () => {
     return window.localStorage.getItem('Authorization');
 };
+
+
+export const checkResponseMessageOk = (res) => {
+    return res.data.message === 'OK';
+}

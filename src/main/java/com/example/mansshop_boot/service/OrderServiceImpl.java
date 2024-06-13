@@ -5,6 +5,7 @@ import com.example.mansshop_boot.domain.dto.order.OrderProductDTO;
 import com.example.mansshop_boot.domain.dto.order.PaymentDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
 import com.example.mansshop_boot.domain.entity.*;
+import com.example.mansshop_boot.domain.enumuration.Result;
 import com.example.mansshop_boot.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +56,7 @@ public class OrderServiceImpl implements OrderService{
      */
     @Override
     @Transactional(rollbackFor = RuntimeException.class)
-    public ResponseEntity<?> payment(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO) {
+    public String payment(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO) {
         ProductOrder productOrder = paymentDTO.toOrderEntity(cartMemberDTO.uid()); // 주문내역
         List<OrderProductDTO> orderProductList = paymentDTO.orderProduct();// 주문 내역 중 상품 옵션 정보 리스트
         List<Long> orderOptionIdList = new ArrayList<>();// 주문한 상품 옵션 아이디를 담아줄 리스트
@@ -209,7 +210,6 @@ public class OrderServiceImpl implements OrderService{
         productRepository.saveAll(productSetList);
 
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new ResponseMessageDTO("success"));
+        return Result.OK.getResultKey();
     }
 }

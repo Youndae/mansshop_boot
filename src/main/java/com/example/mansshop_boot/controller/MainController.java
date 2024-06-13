@@ -2,6 +2,7 @@ package com.example.mansshop_boot.controller;
 
 import com.example.mansshop_boot.domain.dto.main.MainListDTO;
 import com.example.mansshop_boot.domain.dto.mypage.MemberOrderDTO;
+import com.example.mansshop_boot.domain.dto.mypage.MyPageOrderDTO;
 import com.example.mansshop_boot.domain.dto.pageable.MemberPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseListDTO;
@@ -37,7 +38,7 @@ public class MainController {
     private final MyPageService myPageService;
 
     @GetMapping({"/", "/new"})
-    public ResponseEntity<ResponseListDTO> mainList(HttpServletRequest request
+    public ResponseEntity<ResponseListDTO<MainListDTO>> mainList(HttpServletRequest request
                                     , Principal principal) {
 
         String requestURI = request.getRequestURI();
@@ -51,7 +52,10 @@ public class MainController {
                                                     .classification(classification)
                                                     .build();
 
-        return new ResponseEntity<>(mainService.getBestAndNewList(memberPageDTO, principal), HttpStatus.OK);
+        ResponseListDTO<MainListDTO> responseDTO = mainService.getBestAndNewList(memberPageDTO, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     @GetMapping("/{classification}")
@@ -65,7 +69,10 @@ public class MainController {
                                                 .classification(classification)
                                                 .build();
 
-        return new ResponseEntity<>(mainService.getClassificationAndSearchList(memberPageDTO, principal), HttpStatus.OK);
+        PagingResponseDTO<MainListDTO> responseDTO = mainService.getClassificationAndSearchList(memberPageDTO, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     @GetMapping("/search")
@@ -73,16 +80,16 @@ public class MainController {
                                                                     , @RequestParam(name = "keyword", required = false) String keyword
                                                                     , Principal principal){
 
-        log.info("MainController.Search :: keyword : {}", keyword);
-        log.info("MainController.Search :: page : {}", page);
-
         MemberPageDTO memberPageDTO = MemberPageDTO.builder()
                                                 .pageNum(page)
                                                 .keyword(keyword)
                                                 .classification(null)
                                                 .build();
 
-        return new ResponseEntity<>(mainService.getClassificationAndSearchList(memberPageDTO, principal), HttpStatus.OK);
+        PagingResponseDTO<MainListDTO> responseDTO = mainService.getClassificationAndSearchList(memberPageDTO, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     @GetMapping("/display/{imageName}")
@@ -104,7 +111,7 @@ public class MainController {
     }
 
     @GetMapping("/order/{term}/{page}")
-    public ResponseEntity<?> nonMemberOrderList(@RequestParam(name = "recipient") String recipient
+    public ResponseEntity<PagingResponseDTO<MyPageOrderDTO>> nonMemberOrderList(@RequestParam(name = "recipient") String recipient
                                                 , @RequestParam(name = "phone") String phone
                                                 , @PathVariable(name = "term") String term
                                                 , @PathVariable(name = "page") int page){
@@ -120,6 +127,9 @@ public class MainController {
                                         .build();
 
 
-        return myPageService.getOrderList(orderPageDTO, memberOrderDTO);
+        PagingResponseDTO<MyPageOrderDTO> responseDTO = myPageService.getOrderList(orderPageDTO, memberOrderDTO);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 }

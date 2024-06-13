@@ -1,9 +1,10 @@
 import React, {useRef, useState} from 'react';
 import {useNavigate} from "react-router-dom";
-import {axiosInstance} from "../../../modules/customAxios";
+import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 
 
 import Overlap from "../../ui/Overlap";
+import DefaultBtn from "../../ui/DefaultBtn";
 
 function Join() {
     const [userData, setUserData] = useState({
@@ -167,7 +168,7 @@ function Join() {
                 userEmail: userEmail,
             })
                 .then(res => {
-                    if(res.data.message === 'success'){
+                    if(checkResponseMessageOk(res)) {
                         navigate('/login');
                     }
                 })
@@ -292,7 +293,7 @@ function Join() {
                             </div>
                             <div>
                                 <input type={'text'} name={'userId'} placeholder={'아이디'} onChange={handleOnChange} ref={idElem}/>
-                                <button type={'button'} onClick={handleIdCheck}>중복체크</button>
+                                <DefaultBtn onClick={handleIdCheck} btnText={'중복체크'} />
                                 <IdOverlap
                                     checkValue={idCheck}
                                 />
@@ -337,7 +338,7 @@ function Join() {
                             </div>
                             <div>
                                 <input type={'text'} name={'nickname'} placeholder={'닉네임'} onChange={handleOnChange} ref={nicknameElem} />
-                                <button type={'button'} onClick={handleNicknameCheck}>중복체크</button>
+                                <DefaultBtn onClick={handleNicknameCheck} btnText={'중복체크'} />
                                 <p className={'nickname-info'}>닉네임을 입력하지 않을 시 활동 내역에 대해 닉네임 대신 이름으로 처리됩니다.</p>
                                 <NicknameOverlap
                                     checkValue={nicknameCheck}
@@ -359,7 +360,7 @@ function Join() {
                             <div>
                                 <label>생년월일</label>
                             </div>
-                            <div>
+                            <div className="join-birth">
                                 <BirthSelect
                                     onChange={handleBirthOnChange}
                                     birth={birth}
@@ -373,7 +374,7 @@ function Join() {
                             </div>
                             <div>
                                 <input type={'text'} name={'email'} placeholder={'이메일'} onChange={handleOnChange} ref={mailElem}/>
-                                <span>@</span>
+                                <span> @ </span>
                                 <EmailProvider providerStatus={emailProvider} handleInputChange={handleEmailSuffixChange}/>
                                 <select className={'email-select'} name={'email-suffix'} onChange={handleEmailSelectOnChange} defaultValue={'naver'}>
                                     <option value={'naver'}>네이버</option>
@@ -388,7 +389,7 @@ function Join() {
                         </div>
                     </div>
                 </div>
-                <button className={'join-btn'} type={'button'} onClick={handleJoinSubmit}>가입</button>
+                <DefaultBtn className={'join-btn'} onClick={handleJoinSubmit} btnText={'가입'}/>
             </div>
         </div>
     )

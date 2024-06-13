@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
-import {axiosInstance} from "../../../modules/customAxios";
+import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
 import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import MemberQnAWriteForm from "../../ui/MemberQnAWriteForm";
@@ -26,7 +26,7 @@ function MemberQnAModify() {
     const getPatchData = async () => {
         await axiosInstance.get(`my-page/qna/member/modify/${qnaId}`)
             .then(res => {
-
+                console.log('memberqna modify res : ', res);
                 setInputData({
                     title: res.data.content.qnaTitle,
                     content: res.data.content.qnaContent
@@ -56,7 +56,7 @@ function MemberQnAModify() {
             .then(res => {
                 console.log('member qna patch res : ', res);
 
-                if(res.data.message === 'OK')
+                if(checkResponseMessageOk(res))
                     navigate(`/my-page/qna/member/detail/${qnaId}`);
             })
             .catch(err => {

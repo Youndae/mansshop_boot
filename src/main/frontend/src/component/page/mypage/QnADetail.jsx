@@ -1,5 +1,6 @@
 import React from "react";
 import {useNavigate} from "react-router-dom";
+import DefaultBtn from "../../ui/DefaultBtn";
 
 function QnADetail(props) {
     const { data
@@ -15,6 +16,7 @@ function QnADetail(props) {
         , handleInputSubmit
         , titleText
         , type
+        , handleDeleteBtn
     } = props;
 
     const navigate = useNavigate();
@@ -36,6 +38,7 @@ function QnADetail(props) {
                         status={data.qnaStatus}
                         type={type}
                         handleModifyBtn={handleModifyBtn}
+                        handleDeleteBtn={handleDeleteBtn}
                     />
                 </div>
                 <div className="mypage-qna-content-title">
@@ -48,7 +51,7 @@ function QnADetail(props) {
                 </div>
                 <div className="qna-reply-input">
                     <textarea className="reply-input-textarea" onChange={handleInputOnChange} value={inputValue}>{inputValue}</textarea>
-                    <button type={'button'} onClick={handleInputSubmit}>작성</button>
+                    <DefaultBtn onClick={handleInputSubmit} btnText={'작성'}/>
                 </div>
                 <div className="mypage-qna-content-reply">
                     {replyData.map((reply, index) => {
@@ -73,18 +76,18 @@ function QnADetail(props) {
 }
 
 function HeaderBtn(props) {
-    const { status, type, handleModifyBtn } = props;
+    const { status, type, handleModifyBtn, handleDeleteBtn } = props;
 
     if(type !== undefined && status === 0){
         return (
             <>
-                <button className={'header-btn-modify'} onClick={handleModifyBtn} type={'button'}>수정</button>
-                <button className={'header-btn-delete'} type={'button'}>삭제</button>
+                <DefaultBtn className={'header-btn-modify'} onClick={handleModifyBtn} btnText={'수정'}/>
+                <DefaultBtn className={'header-btn-delete'} onClick={handleDeleteBtn} btnText={'삭제'}/>
             </>
         )
     }else {
         return (
-            <button className={'header-btn-delete'} type={'button'}>삭제</button>
+            <DefaultBtn className={'header-btn-delete'} onClick={handleDeleteBtn} btnText={'삭제'}/>
         )
     }
 }
@@ -153,11 +156,11 @@ function QnAModifyButton(props) {
 
     if(inputStatus) {
         return (
-            <button type={'button'} onClick={handleReplyModifyClose} value={index}>닫기</button>
+            <DefaultBtn onClick={handleReplyModifyClose} value={index} btnText={'닫기'}/>
         )
     }else {
         return (
-            <button type={'button'} onClick={handleReplyModifyOpen} value={index}>댓글 수정</button>
+            <DefaultBtn onClick={handleReplyModifyOpen} value={index} btnText={'댓글 수정'}/>
         )
     }
 }
@@ -170,7 +173,7 @@ function QnAModifyArea(props) {
             <div className="qna-reply-modify-input">
                 <textarea onChange={handleModifyOnChange} className="qna-reply-modify-text" value={modifyTextValue}>{modifyTextValue}</textarea>
                 <div className="qna-reply-modify-btn">
-                    <button type={'button'} onClick={handleModifySubmit} value={index}>수정</button>
+                    <DefaultBtn onClick={handleModifySubmit} value={index} btnText={'수정'}/>
                 </div>
             </div>
         )

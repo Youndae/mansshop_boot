@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import "../../css/member.css";
 import {axiosInstance} from "../../../modules/customAxios";
 import {setMember} from "../../../modules/member";
+import DefaultBtn from "../../ui/DefaultBtn";
 
 function Login() {
     const [userData, setUserData] = useState({
@@ -86,12 +87,12 @@ function Login() {
                 </div>
                 <div className="login-form-btn-area">
                     <div className="login-btn">
-                        <button className={'login-btn'} onClick={handleSubmit}>Login</button>
+                        <DefaultBtn className={'login-btn'} onClick={handleSubmit} btnText={'Login'}/>
                     </div>
                     <div className="join-search-area">
-                        <button className={'join-btn'} onClick={handleJoin}>회원가입</button>
-                        <button className={'search-id-btn'} onClick={handleSearchId}>아이디 찾기</button>
-                        <button className={'search-pw-btn'} onClick={handleSearchPw}>비밀번호 찾기</button>
+                        <DefaultBtn className={'join-btn'} onClick={handleJoin} btnText={'회원가입'}/>
+                        <DefaultBtn className={'search-id-btn'} onClick={handleSearchId} btnText={'아이디 찾기'}/>
+                        <DefaultBtn className={'search-pw-btn'} onClick={handleSearchPw} btnText={'비밀번호 찾기'}/>
                     </div>
                     <div className="oauth-area">
                         <div className="oauth-btn">
