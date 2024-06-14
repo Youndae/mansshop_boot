@@ -348,3 +348,21 @@
 >> 응답 메세지를 Result Enum을 통해 반환하도록 수정.   
 >> 서비스에서 ResponseEntity를 생성한 뒤 반환하도록 처리했었으나 재사용성이 떨어진다고 생각해 다시 객체 반환으로 수정.   
 >> ResponseEntity 생성은 Controller에서 처리.
+>> MyPage QnA 관련 DTO가 많아 dto.mypage.qna 패키지를 따로 생성해 분리. 그 안에서도 클라이언트 요청시 RequestBody로 받는 DTO는 req 패키지에 추가 분리.   
+
+<br />
+
+### 2024/06/14
+> frontend
+>> 회원 정보 수정 추가. 테스트 완료.
+>> 모든 마이페이지 컴포넌트, 메인 및 상품 관련 컴포넌트 처리 완료. 테스트도 완료.   
+>> Admin 페이지의 sideNav 구현 및 수정 완료.   
+>> Admin 페이지에 사용될 컴포넌트 생성.  내부 내용은 아직 없고 주석으로 필요한 데이터만 작성해둔 상태.
+> 
+> backend
+>> 마이페이지 리뷰 작성, 수정, 삭제 처리 구현, 테스트 완료.   
+>> 마이페이지 정보 수정 getData, 수정 처리 구현, 테스트 완료.   
+>> 마이페이지와 메인에 대한 처리 마무리되면서 해당 controller에 @PreAuthorize로 권한관리 하도록 추가.   
+>> 정보 수정 중 이메일 처리에 prefix, suffix, type을 나눠서 응답하기 위해 해당 suffix의 타입을 체크하기 위한 MailSuffix enum 생성.   
+>> member, ProductReview에 patch 수행 시 필요한 필드의 set 처리를 위한 setter 또는 메소드 생성.   
+>> AdminController, AdminService, impl 생성만 해둔 상태.

@@ -68,7 +68,7 @@ public class ProductServiceImpl implements ProductService{
      */
     @Override
     public ProductDetailDTO getDetail(String productId, Principal principal) {
-        String uid = principalService.getPrincipalUid(principal);
+        String uid = principalService.getNicknameByPrincipal(principal);
         Product product = productRepository.findById(productId).orElse(null);
         boolean likeStat = false;
         if(product == null)

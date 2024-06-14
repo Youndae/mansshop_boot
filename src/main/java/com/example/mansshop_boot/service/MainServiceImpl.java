@@ -29,7 +29,7 @@ public class MainServiceImpl implements MainService{
 
     @Override
     public ResponseListDTO<MainListDTO> getBestAndNewList(MemberPageDTO pageDTO, Principal principal) {
-        String uid = principalService.getPrincipalUid(principal);
+        String uid = principalService.getNicknameByPrincipal(principal);
 
         List<MainListDTO> listDto = productRepository.findListDefault(pageDTO);
 
@@ -38,7 +38,7 @@ public class MainServiceImpl implements MainService{
 
     @Override
     public PagingResponseDTO<MainListDTO> getClassificationAndSearchList(MemberPageDTO pageDTO, Principal principal) {
-        String uid = principalService.getPrincipalUid(principal);
+        String uid = principalService.getNicknameByPrincipal(principal);
 
         Pageable pageable =  PageRequest.of(pageDTO.pageNum() - 1
                                             , pageDTO.mainProductAmount()

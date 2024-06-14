@@ -23,12 +23,16 @@
     color: black;
 }
 
-.qna-nav-ul {
+.side-nav-category-ul {
     width: 130px;
 }
 
-.qna-nav-ul li {
+.side-nav-category-ul li, .admin-side-nav-category-ul li {
     font-size: large;
     margin-left: 15px;
     margin-top: 20px;
+}
+
+.admin-side-nav-category-ul {
+    width: 190px;
 }

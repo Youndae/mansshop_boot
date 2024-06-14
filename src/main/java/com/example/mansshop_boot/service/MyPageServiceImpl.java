@@ -15,6 +15,7 @@ import com.example.mansshop_boot.domain.dto.response.PagingResponseDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseIdDTO;
 import com.example.mansshop_boot.domain.entity.*;
+import com.example.mansshop_boot.domain.enumuration.MailSuffix;
 import com.example.mansshop_boot.domain.enumuration.Result;
 import com.example.mansshop_boot.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +54,8 @@ public class MyPageServiceImpl implements MyPageService{
     private final QnAClassificationRepository qnAClassificationRepository;
 
     private final MemberRepository memberRepository;
+
+    private final ProductReviewRepository productReviewRepository;
 
     private final ProductRepository productRepository;
 
@@ -122,7 +125,7 @@ public class MyPageServiceImpl implements MyPageService{
             orderDetailList = new ArrayList<>();
         }
 
-        String nickname = principalService.getUidByUserId(memberOrderDTO.userId());
+        String nickname = principalService.getNicknameByUserId(memberOrderDTO.userId());
 
         return new PagingResponseDTO<>(
                 contentList
@@ -164,7 +167,7 @@ public class MyPageServiceImpl implements MyPageService{
 
         Page<ProductLikeDTO> dto = productLikeRepository.findByUserId(pageDTO, userId, pageable);
 
-        String nickname = principalService.getPrincipalUid(principal);
+        String nickname = principalService.getNicknameByPrincipal(principal);
 
         return new PagingResponseDTO<>(dto, nickname);
     }
@@ -192,7 +195,7 @@ public class MyPageServiceImpl implements MyPageService{
 
         Page<ProductQnAListDTO> dto = productQnARepository.findByUserId(userId, pageable);
 
-        String nickname = principalService.getPrincipalUid(principal);
+        String nickname = principalService.getNicknameByPrincipal(principal);
 
         return new PagingResponseDTO<>(dto, nickname);
     }
@@ -222,7 +225,7 @@ public class MyPageServiceImpl implements MyPageService{
 
         List<MyPageQnAReplyDTO> replyDTOList = productQnAReplyRepository.findAllByQnAId(productQnAId);
 
-        String nickname = principalService.getPrincipalUid(principal);
+        String nickname = principalService.getNicknameByPrincipal(principal);
 
         return new ProductQnADetailDTO(qnaDTO, replyDTOList, nickname);
     }
@@ -289,11 +292,11 @@ public class MyPageServiceImpl implements MyPageService{
 
         Pageable pageable = PageRequest.of(pageDTO.pageNum() - 1
                                             , pageDTO.amount()
-                                            , Sort.by("createdAt").descending());
+                                            , Sort.by("id").descending());
 
         Page<MemberQnAListDTO> dto = memberQnARepository.findAllByUserId(userId, pageable);
 
-        String nickname = principalService.getPrincipalUid(principal);
+        String nickname = principalService.getNicknameByPrincipal(principal);
 
         return new PagingResponseDTO<>(dto, nickname);
     }
@@ -339,7 +342,7 @@ public class MyPageServiceImpl implements MyPageService{
         MemberQnADTO qnaDTO = memberQnARepository.findByIdAndUserId(memberQnAId, userId);
         List<MyPageQnAReplyDTO> replyDTOList = memberQnAReplyRepository.findAllByQnAId(memberQnAId);
 
-        String nickname = principalService.getPrincipalUid(principal);
+        String nickname = principalService.getNicknameByPrincipal(principal);
 
         return new MemberQnADetailDTO(qnaDTO, replyDTOList, nickname);
     }
@@ -395,7 +398,7 @@ public class MyPageServiceImpl implements MyPageService{
         );
 
         MemberQnAModifyDataDTO modifyDataDTO = new MemberQnAModifyDataDTO(memberQnA, classificationDTO);
-        String nickname = principalService.getPrincipalUid(principal);
+        String nickname = principalService.getNicknameByPrincipal(principal);
 
         return new ResponseDTO<>(modifyDataDTO, new UserStatusDTO(nickname));
     }
@@ -449,8 +452,136 @@ public class MyPageServiceImpl implements MyPageService{
         return QnAClassificationResponseDTO.builder()
                 .classificationList(dtoList)
                 .userStatus(
-                        new UserStatusDTO(principalService.getPrincipalUid(principal))
+                        new UserStatusDTO(principalService.getNicknameByPrincipal(principal))
                 )
                 .build();
+    }
+
+    @Override
+    public PagingResponseDTO<MyPageReviewDTO> getReview(MyPagePageDTO pageDTO, Principal principal) {
+
+        Pageable pageable = PageRequest.of(pageDTO.pageNum() - 1
+                                            , pageDTO.amount()
+                                            , Sort.by("id").descending());
+
+        String userId = principalService.getUserIdByPrincipal(principal);
+
+        Page<MyPageReviewDTO> dto = productReviewRepository.findAllByUserId(userId, pageable);
+
+        String nickname = principalService.getNicknameByPrincipal(principal);
+
+        return new PagingResponseDTO<>(dto, nickname);
+    }
+
+    @Override
+    public ResponseDTO<MyPagePatchReviewDataDTO> getPatchReview(long reviewId, Principal principal) {
+
+        String userId = principalService.getUserIdByPrincipal(principal);
+
+        ProductReview productReview = productReviewRepository.findById(reviewId).orElseThrow(IllegalArgumentException::new);
+
+        if(!productReview.getMember().getUserId().equals(userId))
+            throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
+
+        MyPagePatchReviewDataDTO dto = MyPagePatchReviewDataDTO.builder()
+                                            .reviewId(productReview.getId())
+                                            .content(productReview.getReviewContent())
+                                            .productName(productReview.getProduct().getProductName())
+                                            .build();
+
+        String nickname = principalService.getNicknameByPrincipal(principal);
+
+        return new ResponseDTO<>(dto, new UserStatusDTO(nickname));
+    }
+
+    @Override
+    public String postReview(MyPagePostReviewDTO reviewDTO, Principal principal) {
+
+        Member member = memberRepository.findById(principal.getName()).orElseThrow(IllegalArgumentException::new);
+        Product product = productRepository.findById(reviewDTO.productId()).orElseThrow(IllegalArgumentException::new);
+
+        ProductReview productReview = ProductReview.builder()
+                .member(member)
+                .product(product)
+                .reviewContent(reviewDTO.content())
+                .build();
+
+        productReviewRepository.save(productReview);
+
+
+        return Result.OK.getResultKey();
+    }
+
+    @Override
+    public String patchReview(MyPagePatchReviewDTO reviewDTO, Principal principal) {
+
+        ProductReview productReview = productReviewRepository.findById(reviewDTO.reviewId()).orElseThrow(IllegalArgumentException::new);
+
+        String userId = principalService.getUserIdByPrincipal(principal);
+
+        if(!productReview.getMember().getUserId().equals(userId))
+            throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
+
+        productReview.setReviewContent(reviewDTO.content());
+
+        productReviewRepository.save(productReview);
+
+
+        return Result.OK.getResultKey();
+    }
+
+    @Override
+    public String deleteReview(long reviewId, Principal principal) {
+
+        ProductReview productReview = productReviewRepository.findById(reviewId).orElseThrow(IllegalArgumentException::new);
+
+        String userId = principalService.getUserIdByPrincipal(principal);
+
+        if(!productReview.getMember().getUserId().equals(userId))
+            throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
+
+        productReviewRepository.deleteById(reviewId);
+
+        return Result.OK.getResultKey();
+    }
+
+    /*
+        suffix를 enum 타입과 비교해서 처리하는 방법으로 구분하고 해당하는 값을 type으로 반환.
+        직접 입력의 경우 어떻게 처리할 지 고민 필요.
+     */
+    @Override
+    public ResponseDTO<MyPageInfoDTO> getInfo(Principal principal) {
+
+        Member member = memberRepository.findById(principal.getName()).orElseThrow(IllegalArgumentException::new);
+
+        String[] splitMail = member.getUserEmail().split("@");
+
+        String mailSuffix = splitMail[1].substring(0, splitMail[1].indexOf('.'));
+        String type = MailSuffix.findSuffixType(mailSuffix);
+
+        MyPageInfoDTO infoDTO = MyPageInfoDTO.builder()
+                .nickname(member.getNickname())
+                .phone(member.getPhone().replaceAll("-", ""))
+                .mailPrefix(splitMail[0])
+                .mailSuffix(splitMail[1])
+                .mailType(type)
+                .build();
+
+        return new ResponseDTO<>(infoDTO, new UserStatusDTO(member.getNickname()));
+    }
+
+    @Override
+    public String patchInfo(MyPageInfoPatchDTO infoDTO, Principal principal) {
+
+        Member member = memberRepository.findById(principal.getName()).orElseThrow(IllegalArgumentException::new);
+
+        System.out.println("MyPageService.patchInfo :: infoDTO : " + infoDTO);
+
+        member.patchUser(infoDTO);
+
+        memberRepository.save(member);
+
+
+        return Result.OK.getResultKey();
     }
 }

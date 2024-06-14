@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -88,6 +89,7 @@ public class ProductController {
     }
 
     @PostMapping("/qna")
+    @PreAuthorize("hasAnyRole('ROLE_MEMBER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
     public ResponseEntity<?> postProductQnA(@RequestBody ProductQnAPostDTO postDTO, Principal principal) {
 
         String responseMessage = productService.postProductQnA(postDTO, principal);
@@ -105,6 +107,7 @@ public class ProductController {
      * 관심상품 등록 기능
      */
     @PostMapping("/like")
+    @PreAuthorize("hasAnyRole('ROLE_MEMBER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
     public ResponseEntity<?> likeProduct(@RequestBody Map<String, String> productId
                                         , Principal principal) {
 
@@ -125,6 +128,7 @@ public class ProductController {
      * 관심상품 해제 기능
      */
     @DeleteMapping("/like/{productId}")
+    @PreAuthorize("hasAnyRole('ROLE_MEMBER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
     public ResponseEntity<?> deLikeProduct(@PathVariable(name = "productId") String productId
             , Principal principal) {
 

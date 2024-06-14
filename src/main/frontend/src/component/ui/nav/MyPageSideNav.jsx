@@ -36,7 +36,7 @@ function MyPageSideNav(props) {
     if(qnaStat){
         return (
             <div className="side-nav">
-                <ul className="side-nav-ul">
+                <ul className="side-nav-category-ul">
                     <li><Link to={'/my-page/order'}>주문 내역</Link></li>
                     <li><Link to={'/my-page/like'}>관심 상품</Link></li>
                     <li>

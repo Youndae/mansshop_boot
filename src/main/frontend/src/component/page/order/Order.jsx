@@ -8,6 +8,7 @@ import '../../css/order.css';
 import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {numberComma} from "../../../modules/numberCommaModule";
 import DefaultBtn from "../../ui/DefaultBtn";
+import {useSelector} from "react-redux";
 
 function Order() {
     const location = useLocation();

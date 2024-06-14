@@ -30,10 +30,13 @@ import MemberQnADetail from "./component/page/mypage/MemberQnADetail";
 import MemberQnAWrite from "./component/page/mypage/MemberQnAWrite";
 import MemberQnAModify from "./component/page/mypage/MemberQnAModify";
 import MyPageReview from "./component/page/mypage/MyPageReview";
+import MyPageReviewWrite from "./component/page/mypage/MyPageReviewWrite";
+import MyPageReviewModify from "./component/page/mypage/MyPageReviewModify";
 import MyPageUpdateInfo from "./component/page/mypage/MyPageUpdateInfo";
 
 import AdminProduct from "./component/page/admin/AdminProduct";
 import AdminMember from "./component/page/admin/AdminMember";
+import AdminOrder from "./component/page/admin/AdminOrder";
 
 
 
@@ -45,42 +48,47 @@ function App() {
               <Navbar />
             <Routes>
               <Route index element={<Best />}/>
-                <Route path='new' element={<New />} />
-                <Route path="search" element={<SearchProduct />} />
-                <Route path="search?keyword=:keyword" element={<SearchProduct />} />
-                <Route path="search?keyword=:keyword&page=:page" element={<SearchProduct />} />
-                <Route path='category/:classification' element={<MainClassification />} />
-                <Route path='login' element={<Login />} />
-                <Route path='join' element={<Join />} />
-                <Route path="oAuth" element={<Oauth />} />
-                <Route path='product/:productId' element={<ProductDetail />} />
-                <Route path='cart' element={<Cart />} />
-                <Route path='productOrder' element={<Order />}/>
-                <Route path='order/info' element={<NonMemberOrderInfo />}/>
-                <Route path='order/detail' element={<NonMemberOrderList />}/>
-                <Route path='order/detail?term=:term' element={<NonMemberOrderList />}/>
-                <Route path='order/detail?term=:term&page=:page' element={<NonMemberOrderList />}/>
+              <Route path='new' element={<New />} />
+              <Route path="search" element={<SearchProduct />} />
+              <Route path="search?keyword=:keyword" element={<SearchProduct />} />
+              <Route path="search?keyword=:keyword&page=:page" element={<SearchProduct />} />
+              <Route path='category/:classification' element={<MainClassification />} />
+              <Route path='product/:productId' element={<ProductDetail />} />
 
-                <Route path='my-page/order' element={<MyPageOrder />} />
-                <Route path='my-page/order?term=:term' element={<MyPageOrder />} />
-                <Route path='my-page/order?term=:term&page=:page' element={<MyPageOrder />} />
-                <Route path='my-page/like' element={<LikeProduct />}/>
-                <Route path='my-page/like?page=:page' element={<LikeProduct />} />
-                <Route path='my-page/qna/product' element={<MyPageProductQnA />} />
-                <Route path='my-page/qna/product?page=:page' element={<MyPageProductQnA />} />
-                <Route path='my-page/qna/product/detail/:qnaId' element={<MyPageProductQnADetail />}/>
-                <Route path='my-page/qna/member' element={<MemberQnA />} />
-                <Route path='my-page/qna/member?page=:page' element={<MemberQnA />} />
-                <Route path='my-page/qna/member/detail/:qnaId' element={<MemberQnADetail />}/>
-                <Route path='my-page/qna/member/write' element={<MemberQnAWrite />}/>
-                <Route path='my-page/qna/member/update/:qnaId' element={<MemberQnAModify />}/>
-                <Route path='my-page/review' element={<MyPageReview />} />
-                <Route path='my-page/review?page=:page' element={<MyPageReview />} />
-                <Route path='my-page/info' element={<MyPageUpdateInfo />} />
+              <Route path='login' element={<Login />} />
+              <Route path='join' element={<Join />} />
+              <Route path="oAuth" element={<Oauth />} />
+
+              <Route path='cart' element={<Cart />} />
+              <Route path='productOrder' element={<Order />}/>
+              <Route path='order/info' element={<NonMemberOrderInfo />}/>
+              <Route path='order/detail' element={<NonMemberOrderList />}/>
+              <Route path='order/detail?term=:term' element={<NonMemberOrderList />}/>
+              <Route path='order/detail?term=:term&page=:page' element={<NonMemberOrderList />}/>
+
+              <Route path='my-page/order' element={<MyPageOrder />} />
+              <Route path='my-page/order?term=:term' element={<MyPageOrder />} />
+              <Route path='my-page/order?term=:term&page=:page' element={<MyPageOrder />} />
+              <Route path='my-page/like' element={<LikeProduct />}/>
+              <Route path='my-page/like?page=:page' element={<LikeProduct />} />
+              <Route path='my-page/qna/product' element={<MyPageProductQnA />} />
+              <Route path='my-page/qna/product?page=:page' element={<MyPageProductQnA />} />
+              <Route path='my-page/qna/product/detail/:qnaId' element={<MyPageProductQnADetail />}/>
+              <Route path='my-page/qna/member' element={<MemberQnA />} />
+              <Route path='my-page/qna/member?page=:page' element={<MemberQnA />} />
+              <Route path='my-page/qna/member/detail/:qnaId' element={<MemberQnADetail />}/>
+              <Route path='my-page/qna/member/write' element={<MemberQnAWrite />}/>
+              <Route path='my-page/qna/member/update/:qnaId' element={<MemberQnAModify />}/>
+              <Route path='my-page/review' element={<MyPageReview />} />
+              <Route path='my-page/review?page=:page' element={<MyPageReview />} />
+              <Route path='my-page/review/write' element={<MyPageReviewWrite />} />
+              <Route path='my-page/review/modify/:reviewId' element={<MyPageReviewModify />} />
+              <Route path='my-page/info' element={<MyPageUpdateInfo />} />
 
 
-                <Route path='admin/product' element={<AdminProduct />} />
-                <Route path='admin/member' element={<AdminMember />} />
+              <Route path='admin/product' element={<AdminProduct />} />
+              <Route path='admin/order' element={<AdminOrder />} />
+              <Route path='admin/member' element={<AdminMember />} />
             </Routes>
           </div>
       </BrowserRouter>

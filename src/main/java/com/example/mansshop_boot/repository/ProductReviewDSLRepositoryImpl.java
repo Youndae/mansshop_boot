@@ -1,6 +1,6 @@
 package com.example.mansshop_boot.repository;
 
-import com.example.mansshop_boot.domain.dto.pageable.ProductDetailPageDTO;
+import com.example.mansshop_boot.domain.dto.mypage.MyPageReviewDTO;
 import com.example.mansshop_boot.domain.dto.product.ProductReviewDTO;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
@@ -17,6 +17,7 @@ import java.util.List;
 
 import static com.example.mansshop_boot.domain.entity.QProductReview.productReview;
 import static com.example.mansshop_boot.domain.entity.QProductReviewReply.productReviewReply;
+import static com.example.mansshop_boot.domain.entity.QProduct.product;
 
 @Repository
 @RequiredArgsConstructor
@@ -55,6 +56,40 @@ public class ProductReviewDSLRepositoryImpl implements ProductReviewDSLRepositor
         JPAQuery<Long> count = jpaQueryFactory.select(productReview.count())
                 .from(productReview)
                 .where(productReview.product.id.eq(productId));
+
+        return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
+    }
+
+    @Override
+    public Page<MyPageReviewDTO> findAllByUserId(String userId, Pageable pageable) {
+
+        List<MyPageReviewDTO> list = jpaQueryFactory.select(
+                Projections.constructor(
+                        MyPageReviewDTO.class
+                        , productReview.id.as("reviewId")
+                        , product.thumbnail
+                        , product.productName
+                        , productReview.reviewContent.as("content")
+                        , productReview.createdAt
+                        , productReview.updatedAt
+                        , productReviewReply.replyContent
+                        , productReviewReply.updatedAt.as("replyUpdatedAt")
+                )
+        )
+                .from(productReview)
+                .innerJoin(product)
+                .on(productReview.product.id.eq(product.id))
+                .leftJoin(productReviewReply)
+                .on(productReviewReply.productReview.id.eq(productReview.id))
+                .where(productReview.member.userId.eq(userId))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .orderBy(productReview.id.desc())
+                .fetch();
+
+        JPAQuery<Long> count = jpaQueryFactory.select(productReview.countDistinct())
+                .from(productReview)
+                .where(productReview.member.userId.eq(userId));
 
         return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
     }

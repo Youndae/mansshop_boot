@@ -1,5 +1,6 @@
 package com.example.mansshop_boot.domain.entity;
 
+import com.example.mansshop_boot.domain.dto.mypage.MyPageInfoPatchDTO;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -76,5 +77,13 @@ public class Member {
 
     public void setUserEmail(String userEmail) {
         this.userEmail = userEmail;
+    }
+
+    public void patchUser(MyPageInfoPatchDTO patchDTO) {
+        String phoneRegEx = "(\\d{3})(\\d{3,4})(\\d{4})";
+
+        this.nickname = patchDTO.nickname();
+        this.phone = patchDTO.phone().replaceAll(phoneRegEx, "$1-$2-$3");
+        this.userEmail = patchDTO.mail();
     }
 }
