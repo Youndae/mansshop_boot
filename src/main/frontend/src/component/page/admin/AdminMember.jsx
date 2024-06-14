@@ -1,10 +1,13 @@
 import React from 'react';
+import AdminSideNav from "../../ui/nav/AdminSideNav";
 
 function AdminMember() {
     return (
-        <>
-            <h1>AdminMember</h1>
-        </>
+        <div className="mypage">
+            <AdminSideNav
+                categoryStatus={'member'}
+            />
+        </div>
     )
 }
 

@@ -51,7 +51,7 @@ public class ProductQnAReplyDSLRepositoryImpl implements ProductQnAReplyDSLRepos
         )
                 .from(productQnAReply)
                 .where(productQnAReply.productQnA.id.eq(productQnAId))
-                .orderBy(productQnAReply.id.desc())
+                .orderBy(productQnAReply.id.asc())
                 .fetch();
     }
 }

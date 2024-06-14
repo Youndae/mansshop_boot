@@ -48,4 +48,18 @@ public interface MyPageService {
     String deleteMemberQnA(long qnaId, Principal principal);
 
     QnAClassificationResponseDTO getQnAClassification(Principal principal);
+
+    PagingResponseDTO<MyPageReviewDTO> getReview(MyPagePageDTO pageDTO, Principal principal);
+
+    ResponseDTO<MyPagePatchReviewDataDTO> getPatchReview(long reviewId, Principal principal);
+
+    String patchReview(MyPagePatchReviewDTO reviewDTO, Principal principal);
+
+    String deleteReview(long reviewId, Principal principal);
+
+    String postReview(MyPagePostReviewDTO reviewDTO, Principal principal);
+
+    ResponseDTO<MyPageInfoDTO> getInfo(Principal principal);
+
+    String patchInfo(MyPageInfoPatchDTO infoDTO, Principal principal);
 }

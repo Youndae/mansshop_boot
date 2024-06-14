@@ -1,0 +1,24 @@
+@media (min-width: 1280px) {
+    .admin-content {
+        margin-left: 40%;
+        margin-top: 5%;
+    }
+}
+
+@media (min-width: 1630px){
+    .admin-content {
+        margin-left: 35%;
+        margin-top: 5%;
+    }
+}
+
+@media (min-width: 2000px){
+    .admin-content {
+        margin-left: 30%;
+        margin-top: 5%;
+    }
+}
+
+.admin-content-content {
+    margin-top: 10%;
+}

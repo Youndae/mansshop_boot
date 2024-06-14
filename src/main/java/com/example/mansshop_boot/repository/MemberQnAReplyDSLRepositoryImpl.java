@@ -36,6 +36,7 @@ public class MemberQnAReplyDSLRepositoryImpl implements MemberQnAReplyDSLReposit
         )
                 .from(memberQnAReply)
                 .where(memberQnAReply.memberQnA.id.eq(memberQnAId))
+                .orderBy(memberQnAReply.id.asc())
                 .fetch();
     }
 }

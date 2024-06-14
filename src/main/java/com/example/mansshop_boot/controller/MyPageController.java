@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -25,6 +26,7 @@ import java.security.Principal;
 @RequestMapping("/api/my-page")
 @RequiredArgsConstructor
 @Slf4j
+@PreAuthorize("hasAnyRole('ROLE_MEMBER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
 public class MyPageController {
 
     private final MyPageService myPageService;
@@ -189,5 +191,69 @@ public class MyPageController {
                 .body(responseDTO);
     }
 
+    @GetMapping("/review/{page}")
+    public ResponseEntity<PagingResponseDTO<MyPageReviewDTO>> getReview(@PathVariable(name = "page") int page, Principal principal) {
+        MyPagePageDTO pageDTO = new MyPagePageDTO(page);
+
+        PagingResponseDTO<MyPageReviewDTO> responseDTO = myPageService.getReview(pageDTO, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
+    }
+
+    @GetMapping("/review/modify/{reviewId}")
+    public ResponseEntity<ResponseDTO<MyPagePatchReviewDataDTO>> getPatchReviewData(@PathVariable(name = "reviewId") long reviewId, Principal principal) {
+
+        ResponseDTO<MyPagePatchReviewDataDTO> responseDTO = myPageService.getPatchReview(reviewId, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
+    }
+
+    @PostMapping("/review")
+    public ResponseEntity<ResponseMessageDTO> postReview(@RequestBody MyPagePostReviewDTO reviewDTO, Principal principal) {
+
+        String responseMessage = myPageService.postReview(reviewDTO, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
+    }
+
+    @PatchMapping("/review")
+    public ResponseEntity<ResponseMessageDTO> patchReview(@RequestBody MyPagePatchReviewDTO reviewDTO, Principal principal) {
+
+
+        String responseMessage = myPageService.patchReview(reviewDTO, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
+    }
+
+    @DeleteMapping("/review/{reviewId}")
+    public ResponseEntity<ResponseMessageDTO> deleteReview(@PathVariable(name = "reviewId") long reviewId, Principal principal) {
+
+        String responseMessage = myPageService.deleteReview(reviewId, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
+    }
+
+    @GetMapping("/info")
+    public ResponseEntity<ResponseDTO<MyPageInfoDTO>> getInfo(Principal principal) {
+
+        ResponseDTO<MyPageInfoDTO> responseDTO = myPageService.getInfo(principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
+    }
+
+    @PatchMapping("/info")
+    public ResponseEntity<?> patchInfo(@RequestBody MyPageInfoPatchDTO infoDTO, Principal principal) {
+
+        String responseMessage = myPageService.patchInfo(infoDTO, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
+    }
 
 }

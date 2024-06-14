@@ -18,7 +18,7 @@ public class PrincipalServiceImpl implements PrincipalService {
     private final MemberRepository memberRepository;
 
     @Override
-    public String getPrincipalUid(Principal principal) {
+    public String getNicknameByPrincipal(Principal principal) {
         if(principal == null)
             return null;
 
@@ -33,7 +33,7 @@ public class PrincipalServiceImpl implements PrincipalService {
     }
 
     @Override
-    public String getUidByUserId(String userId) {
+    public String getNicknameByUserId(String userId) {
         return getUid(userId);
     }
 

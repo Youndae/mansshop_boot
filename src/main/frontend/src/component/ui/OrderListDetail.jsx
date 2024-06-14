@@ -2,7 +2,8 @@ import React, {useEffect, useState} from 'react';
 import {numberComma} from "../../modules/numberCommaModule";
 import {axiosInstance} from "../../modules/customAxios";
 import Paging from "./Paging";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
+import Image from "./Image";
 
 function OrderListDetail(props) {
     const {
@@ -98,30 +99,6 @@ function OrderList(props) {
 
 function OrderDetail(props) {
     const { data, orderStat, userType } = props;
-    const [imgSrc, setImgSrc] = useState('');
-
-    useEffect(() => {
-        getImageDisplay(data.thumbnail);
-    }, []);
-
-    const getImageDisplay = async (imageName) => {
-        await axiosInstance.get(`main/display/${imageName}`, {
-            responseType: 'blob',
-        })
-            .then(res => {
-                const url = window
-                    .URL
-                    .createObjectURL(
-                        new Blob([res.data], {type: res.headers['content-type']})
-                    );
-
-                setImgSrc(url);
-            })
-            .catch(err => {
-                console.error('orderDetail display axios error : ', err);
-            });
-    }
-
 
     let sizeText = '사이즈 : ';
     let colorText = '컬러 : ';
@@ -141,6 +118,8 @@ function OrderDetail(props) {
 
     const optionText = `${sizeText}${colorText}`;
 
+    console.log('data : ', data);
+
 
     return (
         <div className="mypage-order-data-detail">
@@ -150,7 +129,9 @@ function OrderDetail(props) {
                 </Link>
             </div>
             <div className="mypage-order-data-content">
-                <img src={imgSrc} alt={''}/>
+                <Image
+                    imageName={data.thumbnail}
+                />
                 <div className="order-data-info">
                     <span className="order-data-product-option">{optionText}</span>
                     <span className="order-data-product-count">주문 수량 : {data.detailCount}</span>
@@ -159,10 +140,10 @@ function OrderDetail(props) {
                 <div className="order-data-info-btn">
                     <ReviewBtn
                         reviewStat={data.reviewStatus}
-                        detailId={data.detailId}
-                        orderId={data.orderId}
                         orderStat={orderStat}
                         userType={userType}
+                        productName={data.productName}
+                        productId={data.productId}
                     />
                 </div>
             </div>
@@ -171,17 +152,19 @@ function OrderDetail(props) {
 }
 
 function ReviewBtn(props) {
-    const { reviewStat, detailId, orderId, orderStat, userType } = props;
-
-    let reviewBtnValue = `${orderId}/${detailId}`;
+    const { reviewStat, orderStat, userType, productName, productId } = props;
+    const navigate = useNavigate();
 
     if(orderStat !== 2 || userType === 'none')
         return null;
 
+    const handleReviewBtn = () => {
+        navigate('/my-page/review/write', {state : {productId: productId, productName: productName}});
+    }
 
     if(reviewStat === 0) {
         return (
-            <button type={'button'} value={reviewBtnValue}>리뷰작성</button>
+            <button type={'button'} onClick={handleReviewBtn}>리뷰작성</button>
         )
     }else {
         return (

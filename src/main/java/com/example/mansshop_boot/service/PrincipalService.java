@@ -4,9 +4,9 @@ import java.security.Principal;
 
 public interface PrincipalService {
 
-    String getPrincipalUid(Principal principal);
+    String getNicknameByPrincipal(Principal principal);
 
-    String getUidByUserId(String userId);
+    String getNicknameByUserId(String userId);
 
     String getUserIdByPrincipal(Principal principal);
 }

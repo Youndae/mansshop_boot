@@ -321,3 +321,78 @@
     display: flex;
     justify-content: flex-end;
 }
+
+.mypage-review-detail-date {
+    font-size: small;
+    color: grey
+}
+
+.mypage-review-detail {
+    width: 100%;
+}
+
+.modal-header {
+    text-align: center;
+    border-bottom: 1px solid lightgrey;
+    display: ruby-text;
+}
+
+.modal-content {
+    margin-top: 10px;
+}
+
+.modal-review-reply-content {
+    border-top: 1px solid lightgrey;
+    margin-top: 20px;
+    padding-left: 5px;
+}
+
+.modal-reply-header {
+    margin-top: 10px;
+}
+
+.modal-reply-header small {
+    color: grey;
+    margin-left: 10px;
+}
+
+.modal-reply-content {
+    margin-top: 5px;
+}
+
+.modal-header button {
+    width: 50px;
+    height: 20px;
+    float: right;
+    margin: 4px 5px 0 0;
+}
+
+.mypage-user-info-content {
+    margin-top: 20px;
+}
+
+.mypage-user-info-content div {
+    margin-top: 10px;
+}
+
+.mypage-user-info-content label {
+    font-size: large;
+    font-weight: bold;
+}
+
+.mypage-user-info-content input, .nickname-info {
+    height: 20px;
+    margin-left: 10px;
+}
+
+.nickname-check-btn {
+    margin-left: 10px;
+    height: 20px;
+    width: 70px;
+}
+
+.info-submit-btn {
+    width: 100px;
+    height: 30px;
+    margin: 10px 0 0 10px;
+}
