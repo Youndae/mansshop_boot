@@ -28,8 +28,6 @@ public class QProductThumbnail extends EntityPathBase<ProductThumbnail> {
 
     public final QProduct product;
 
-    public final NumberPath<Integer> productThumbnailStep = createNumber("productThumbnailStep", Integer.class);
-
     public QProductThumbnail(String variable) {
         this(ProductThumbnail.class, forVariable(variable), INITS);
     }

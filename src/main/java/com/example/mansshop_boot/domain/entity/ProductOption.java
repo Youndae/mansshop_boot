@@ -27,7 +27,11 @@ public class ProductOption {
 
     private int stock;
 
-    private int optionClosed;
+    private boolean isOpen;
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
 
     public void setStock(int stock) {
         this.stock = stock;

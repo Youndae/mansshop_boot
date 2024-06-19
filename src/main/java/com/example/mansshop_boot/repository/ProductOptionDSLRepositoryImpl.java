@@ -1,7 +1,9 @@
 package com.example.mansshop_boot.repository;
 
+import com.example.mansshop_boot.domain.dto.admin.AdminProductOptionDTO;
 import com.example.mansshop_boot.domain.dto.product.ProductOptionDTO;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -30,7 +32,24 @@ public class ProductOptionDSLRepositoryImpl implements ProductOptionDSLRepositor
                         )
                 )
                 .from(productOption)
-                .where(productOption.product.id.eq(productId).and(productOption.optionClosed.eq(0)))
+                .where(productOption.product.id.eq(productId).and(productOption.isOpen.isTrue()))
+                .fetch();
+    }
+
+    @Override
+    public List<AdminProductOptionDTO> findAllByProductId(String productId) {
+        return jpaQueryFactory.select(
+                        Projections.constructor(
+                                AdminProductOptionDTO.class
+                                , productOption.id.as("optionId")
+                                , productOption.size
+                                , productOption.color
+                                , productOption.stock.as("optionStock")
+                                , productOption.isOpen.as("optionIsOpen")
+                        )
+                )
+                .from(productOption)
+                .where(productOption.product.id.eq(productId))
                 .fetch();
     }
 }

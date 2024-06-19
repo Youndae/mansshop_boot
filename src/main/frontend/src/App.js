@@ -35,8 +35,27 @@ import MyPageReviewModify from "./component/page/mypage/MyPageReviewModify";
 import MyPageUpdateInfo from "./component/page/mypage/MyPageUpdateInfo";
 
 import AdminProduct from "./component/page/admin/AdminProduct";
-import AdminMember from "./component/page/admin/AdminMember";
+import AdminProductDetail from "./component/page/admin/AdminProductDetail";
+import AddProduct from "./component/page/admin/AddProduct";
+import UpdateProduct from "./component/page/admin/UpdateProduct";
+import ProductStock from "./component/page/admin/ProductStock";
+import AdminDiscount from "./component/page/admin/AdminDiscount";
+import ProductDiscount from "./component/page/admin/ProductDiscount";
+import AdminClassification from "./component/page/admin/AdminClassification";
 import AdminOrder from "./component/page/admin/AdminOrder";
+import AdminAllOrder from "./component/page/admin/AdminAllOrder";
+import AdminProductQnA from "./component/page/admin/AdminProductQnA";
+import AdminProductQnADetail from "./component/page/admin/AdminProductQnADetail";
+import AdminMemberQnA from "./component/page/admin/AdminMemberQnA";
+import AdminMemberQnADetail from "./component/page/admin/AdminMemberQnADetail";
+import AdminQnAClassification from "./component/page/admin/AdminQnAClassification";
+import AdminMember from "./component/page/admin/AdminMember";
+import AdminMemberDetail from "./component/page/admin/AdminMemberDetail";
+import AdminPeriodSales from "./component/page/admin/AdminPeriodSales";
+import AdminPeriodSalesDetail from "./component/page/admin/AdminPeriodSalesDetail";
+import AdminProductSales from "./component/page/admin/AdminProductSales";
+import AdminProductSalesDetail from "./component/page/admin/AdminProductSalesDetail";
+
 
 
 
@@ -87,8 +106,44 @@ function App() {
 
 
               <Route path='admin/product' element={<AdminProduct />} />
+              <Route path='admin/product?page=:page' element={<AdminProduct />} />
+              <Route path='admin/product?keyword=:keyword&page=:page' element={<AdminProduct />} />
+              <Route path='admin/product/:productId' element={<AdminProductDetail />}/>
+              <Route path='admin/product/add' element={<AddProduct />}/>
+              <Route path='admin/product/update/:productId' element={<UpdateProduct />}/>
+              <Route path='admin/product/stock' element={<ProductStock />}/>
+              <Route path='admin/product/stock?page=:page' element={<ProductStock />}/>
+              <Route path='admin/product/stock?keyword=:keyword&page=:page' element={<ProductStock />}/>
+              <Route path='admin/product/discount' element={<AdminDiscount />}/>
+              <Route path='admin/product/discount?page=:page' element={<AdminDiscount />}/>
+              <Route path='admin/product/discount?keyword=:keyword&page=:page' element={<AdminDiscount />}/>
+              <Route path='admin/product/discount/setting' element={<ProductDiscount />}/>
+              <Route path='admin/product/classification' element={<AdminClassification />}/>
               <Route path='admin/order' element={<AdminOrder />} />
+              <Route path='admin/order?page=:page' element={<AdminOrder />} />
+              <Route path='admin/order/all' element={<AdminAllOrder />} />
+              <Route path='admin/order/all?page=:page' element={<AdminAllOrder />} />
+              <Route path='admin/order/all?keyword=:keyword&page=:page' element={<AdminAllOrder />} />
+              <Route path='admin/qna/product' element={<AdminProductQnA />} />
+              <Route path='admin/qna/product?page=:page' element={<AdminProductQnA />} />
+              <Route path='admin/qna/product?keyword=:keyword&page=:page' element={<AdminProductQnA />} />
+              <Route path='admin/qna/product/:qnaId' element={<AdminProductQnADetail />} />
+              <Route path='admin/qna/member' element={<AdminMemberQnA />} />
+              <Route path='admin/qna/member?page=:page' element={<AdminMemberQnA />} />
+              <Route path='admin/qna/member?keyword=:keyword&page=:page' element={<AdminMemberQnA />} />
+              <Route path='admin/qna/member/:qnaId' element={<AdminMemberQnADetail />} />
+              <Route path='admin/qna/classification' element={<AdminQnAClassification />} />
               <Route path='admin/member' element={<AdminMember />} />
+              <Route path='admin/member?page=:page' element={<AdminMember />} />
+              <Route path='admin/member?keyword=:keyword&page=:page' element={<AdminMember />} />
+              <Route path='admin/member/:userId' element={<AdminMemberDetail />} />
+              <Route path='admin/sales/period' element={<AdminPeriodSales />} />
+              <Route path='admin/sales/period?page=:page&term=:term' element={<AdminPeriodSales />} />
+              <Route path='admin/sales/period/:date' element={<AdminPeriodSalesDetail />} />
+              <Route path='admin/sales/product' element={<AdminProductSales />} />
+              <Route path='admin/sales/product?page=:page' element={<AdminProductSales />} />
+              <Route path='admin/sales/product?keyword=:keyword&page=:page' element={<AdminProductSales />} />
+              <Route path='admin/sales/product/:productId' element={<AdminProductSalesDetail />} />
             </Routes>
           </div>
       </BrowserRouter>

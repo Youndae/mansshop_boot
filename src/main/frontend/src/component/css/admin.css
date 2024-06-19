@@ -2,6 +2,7 @@
     .admin-content {
         margin-left: 40%;
         margin-top: 5%;
+        width: 30%;
     }
 }
 
@@ -9,6 +10,7 @@
     .admin-content {
         margin-left: 35%;
         margin-top: 5%;
+        width: 30%;
     }
 }
 
@@ -16,9 +18,213 @@
     .admin-content {
         margin-left: 30%;
         margin-top: 5%;
+        width: 30%;
     }
 }
 
 .admin-content-content {
     margin-top: 10%;
+}
+
+.admin-content-table a {
+    text-decoration: none;
+    color: black;
+}
+
+.admin-content-table {
+    text-align: center;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-content-table th, td {
+    padding: .75rem;
+    vertical-align: top;
+    border-top: 1px solid lightgrey;
+}
+
+.admin-search {
+    display: flex;
+    align-items: center;
+}
+
+.admin-search img {
+    width: 25px;
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+.admin-search input {
+    width: 100px;
+    height: 20px;
+}
+
+.admin-detail-header {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.admin-detail-header button {
+    width: 50px;
+}
+
+.admin-detail-content {
+    margin-top: 10%;
+}
+
+.admin-detail-content p {
+    font-size: large;
+    margin-top: 10px;
+}
+
+.option-test {
+    margin-top: 10%;
+}
+
+.option-detail {
+    border: 1px solid lightgrey;
+    margin-top: 20px;
+    display: grid;
+    width: 100%;
+}
+
+.option-detail span {
+    margin: 5px;
+}
+
+.product-label {
+    font-size: large;
+    font-weight: bold;
+}
+
+.radio-label {
+    font-size: medium;
+    font-weight: 500;
+}
+
+.product-input {
+    margin-left: 10px;
+}
+
+.radio-input {
+    margin-left: 10px;
+}
+
+.add-product, .isOpen-radio {
+    margin-top: 10px;
+}
+
+.option-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.option-detail div {
+    margin-top: 5px;
+}
+
+.option-detail-header button {
+    float: right;
+}
+
+.detail-first-thumbnail, .detail-thumbnail, .detail-info-image {
+    margin-top: 5%;
+}
+
+.detail-thumbnail img, .product-thumbnail-content img {
+    width: 150px;
+    height: 200px;
+    margin-right: 10px;
+    margin-top: 10px;
+}
+
+.detail-info-image, .info-image-content {
+    display: grid;
+}
+
+.detail-info-image img, .info-image-content img {
+    width: 500px;
+}
+
+.file-input {
+    display: none;
+}
+
+.thumbnail-header {
+    margin-top: 5%;
+}
+
+.thumbnail-input {
+    margin-top: 10px;
+}
+
+.thumbnail-input .file-input-btn {
+    width: 130px;
+    height: 30px;
+    border: 1px solid lightgrey;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: medium;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.thumbnail-content {
+    margin-top: 10px;
+}
+
+.first-thumbnail-content, .product-thumbnail-content {
+    display: flex;
+}
+
+.first-thumbnail-content img {
+    width: 400px;
+}
+
+.image-btn {
+    padding: 4px;
+    position: absolute;
+    float: right;
+    font-size: medium;
+    background: none;
+    color: black;
+    border: none;
+    cursor: pointer;
+}
+
+.first-thumbnail-delete-btn {
+    margin-left: 360px;
+}
+
+.thumbnail-delete-btn {
+    margin-top: 10px;
+    margin-left: 110px;
+}
+
+.info-image-delete-btn {
+    margin-top: 10px;
+    margin-left: 460px;
+}
+
+.info-image-content-image {
+    border-top: 1px solid lightgrey;
+}
+
+.product-submit-btn {
+    float: right;
+    width: 70px;
+    height: 30px;
+}
+
+.admin-product-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.admin-product-header button {
+    width: 70px;
+    height: 30px;
 }

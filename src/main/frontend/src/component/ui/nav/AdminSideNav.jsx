@@ -51,8 +51,6 @@ function AdminSideNav(props) {
 function SideMenuCategory(props) {
     const { categoryStatus, status } = props;
 
-    console.log('categoryStatus : ', categoryStatus);
-
     let categoryData = [];
 
     if(categoryStatus === status){

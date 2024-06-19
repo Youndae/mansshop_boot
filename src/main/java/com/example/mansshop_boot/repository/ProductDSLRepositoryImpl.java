@@ -1,6 +1,8 @@
 package com.example.mansshop_boot.repository;
 
+import com.example.mansshop_boot.domain.dto.admin.AdminProductListDTO;
 import com.example.mansshop_boot.domain.dto.main.MainListDTO;
+import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.MemberPageDTO;
 import com.example.mansshop_boot.domain.entity.Product;
 import com.querydsl.core.types.Order;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 import static com.example.mansshop_boot.domain.entity.QProduct.product;
+import static com.example.mansshop_boot.domain.entity.QProductOption.productOption;
 
 @Repository
 @RequiredArgsConstructor
@@ -132,5 +135,45 @@ public class ProductDSLRepositoryImpl implements ProductDSLRepository{
                 .from(product)
                 .where(product.id.in(productIdList))
                 .fetch();
+    }
+
+    @Override
+    public Page<AdminProductListDTO> findAdminProductList(AdminPageDTO pageDTO, Pageable pageable) {
+
+        List<AdminProductListDTO> list = jpaQueryFactory.select(
+                Projections.constructor(
+                        AdminProductListDTO.class
+                        , product.id.as("productId")
+                        , product.classification.id.as("classification")
+                        , product.productName
+                        , productOption.stock.sum().as("stock")
+                        , productOption.id.count().as("optionCount")
+                        , product.productPrice.as("price")
+                )
+        )
+                .from(product)
+                .innerJoin(productOption)
+                .on(product.id.eq(productOption.product.id))
+                .where(adminProductSearch(pageDTO))
+                .groupBy(product.id)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .orderBy(product.createdAt.desc())
+                .fetch();
+
+        JPAQuery<Long> count = jpaQueryFactory.select(product.countDistinct())
+                                .from(product)
+                                .where(adminProductSearch(pageDTO));
+
+
+        return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
+    }
+
+    private BooleanExpression adminProductSearch(AdminPageDTO pageDTO) {
+        if(pageDTO.keyword() != null){
+            return product.productName.like(pageDTO.keyword());
+        }else {
+            return null;
+        }
     }
 }

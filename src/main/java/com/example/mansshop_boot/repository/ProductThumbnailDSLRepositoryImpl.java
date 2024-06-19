@@ -22,7 +22,14 @@ public class ProductThumbnailDSLRepositoryImpl implements ProductThumbnailDSLRep
                 .select(productThumbnail.imageName)
                 .from(productThumbnail)
                 .where(productThumbnail.product.id.eq(productId))
-                .orderBy(productThumbnail.productThumbnailStep.asc())
+                .orderBy(productThumbnail.id.asc())
                 .fetch();
+    }
+
+    @Override
+    public void deleteByImageName(List<String> deleteList) {
+        jpaQueryFactory.delete(productThumbnail)
+                .where(productThumbnail.imageName.in(deleteList))
+                .execute();
     }
 }

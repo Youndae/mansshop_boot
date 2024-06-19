@@ -6,7 +6,8 @@ function Image(props) {
     const [imgSrc, setImgSrc] = useState('');
 
     useEffect(() => {
-        getImageDisplay();
+        if(imageName !== '')
+            getImageDisplay();
     }, [imageName]);
 
     const getImageDisplay = async () => {
