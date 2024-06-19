@@ -95,9 +95,9 @@ public class AdminController {
                 .body(responseDTO);
     }
 
-    @GetMapping("/product/stock/{keyword}/{page}")
-    public ResponseEntity<?> getProductStock(@PathVariable(name = "keyword", required = false) String keyword
-                                            , @PathVariable(name = "page") int page) {
+    @GetMapping("/product/stock")
+    public ResponseEntity<PagingResponseDTO<AdminProductStockDTO>> getProductStock(@RequestParam(name = "keyword", required = false) String keyword
+                                            , @RequestParam(name = "page") int page) {
 
         /*
             재고 탭
@@ -109,7 +109,12 @@ public class AdminController {
             ]
          */
 
-        return null;
+        AdminPageDTO pageDTO = new AdminPageDTO(keyword, page);
+
+        PagingResponseDTO<AdminProductStockDTO> responseDTO = adminService.getProductStock(pageDTO);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     @GetMapping("/product/discount")

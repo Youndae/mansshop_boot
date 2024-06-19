@@ -1,6 +1,7 @@
 package com.example.mansshop_boot.repository;
 
 import com.example.mansshop_boot.domain.dto.admin.AdminProductListDTO;
+import com.example.mansshop_boot.domain.dto.admin.AdminProductStockDataDTO;
 import com.example.mansshop_boot.domain.dto.main.MainListDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.MemberPageDTO;
@@ -19,4 +20,6 @@ public interface ProductDSLRepository {
     List<Product> findAllByIdList(List<String> productIdList);
 
     Page<AdminProductListDTO> findAdminProductList(AdminPageDTO pageDTO, Pageable pageable);
+
+    Page<AdminProductStockDataDTO> findStockData(AdminPageDTO pageDTO, Pageable pageable);
 }

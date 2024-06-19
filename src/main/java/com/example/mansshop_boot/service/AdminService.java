@@ -23,4 +23,6 @@ public interface AdminService {
     ResponseIdDTO<String> postProduct(AdminProductPatchDTO patchDTO, AdminProductImageDTO imageDTO);
 
     ResponseIdDTO<String> patchProduct(String productId, List<Long> deleteOptionList, AdminProductPatchDTO patchDTO, AdminProductImageDTO imageDTO);
+
+    PagingResponseDTO<AdminProductStockDTO> getProductStock(AdminPageDTO pageDTO);
 }

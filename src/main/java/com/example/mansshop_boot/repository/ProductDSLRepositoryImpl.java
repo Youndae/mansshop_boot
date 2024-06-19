@@ -1,14 +1,19 @@
 package com.example.mansshop_boot.repository;
 
 import com.example.mansshop_boot.domain.dto.admin.AdminProductListDTO;
+import com.example.mansshop_boot.domain.dto.admin.AdminProductStockDataDTO;
 import com.example.mansshop_boot.domain.dto.main.MainListDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.MemberPageDTO;
 import com.example.mansshop_boot.domain.entity.Product;
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberPath;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -175,5 +180,39 @@ public class ProductDSLRepositoryImpl implements ProductDSLRepository{
         }else {
             return null;
         }
+    }
+
+    @Override
+    public Page<AdminProductStockDataDTO> findStockData(AdminPageDTO pageDTO, Pageable pageable) {
+
+        NumberPath<Integer> aliasSum = Expressions.numberPath(Integer.class, "totalStock");
+
+        List<AdminProductStockDataDTO> list = jpaQueryFactory.select(
+                        Projections.constructor(
+                                AdminProductStockDataDTO.class
+                                , product.id.as("productId")
+                                , product.classification.id.as("classification")
+                                , product.productName
+                                , ExpressionUtils.as(
+                                        JPAExpressions.select(productOption.stock.sum())
+                                                .from(productOption)
+                                                .where(productOption.product.id.eq(product.id))
+                                                .groupBy(product.id), aliasSum
+                                )
+                                , product.isOpen.as("isOpen")
+                        )
+                )
+                .from(product)
+                .where(adminProductSearch(pageDTO))
+                .orderBy(aliasSum.asc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        JPAQuery<Long> count = jpaQueryFactory.select(product.countDistinct())
+                                                .from(product)
+                                                .where(adminProductSearch(pageDTO));
+
+        return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
     }
 }

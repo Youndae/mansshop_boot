@@ -1,7 +1,8 @@
 import React from 'react';
 
-function ProductDiscount() {
-    /*
+
+
+/*
         할인 설정 컴포넌트.
 
         두개의 select box가 존재.
@@ -50,6 +51,8 @@ function ProductDiscount() {
 
         서버에 전달하는 처리 body로는 선택된 productId 리스트와 할인율을 전달한다.
      */
+function ProductDiscount() {
+
 }
 
 export default ProductDiscount;
