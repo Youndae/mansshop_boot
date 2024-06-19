@@ -2,6 +2,7 @@ package com.example.mansshop_boot.repository;
 
 import com.example.mansshop_boot.domain.dto.admin.AdminProductOptionDTO;
 import com.example.mansshop_boot.domain.dto.product.ProductOptionDTO;
+import com.example.mansshop_boot.domain.entity.ProductOption;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -50,6 +51,14 @@ public class ProductOptionDSLRepositoryImpl implements ProductOptionDSLRepositor
                 )
                 .from(productOption)
                 .where(productOption.product.id.eq(productId))
+                .fetch();
+    }
+
+    @Override
+    public List<ProductOption> findAllOptionByProductId(List<String> productIdList) {
+        return jpaQueryFactory.select(productOption)
+                .from(productOption)
+                .where(productOption.product.id.in(productIdList))
                 .fetch();
     }
 }

@@ -228,3 +228,11 @@
     width: 70px;
     height: 30px;
 }
+
+.product-stock-table {
+    width: max-content;
+}
+
+.admin-stock-option {
+    color: grey;
+}

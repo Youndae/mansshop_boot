@@ -237,4 +237,56 @@ public class AdminServiceImpl implements AdminService {
         if(file.exists())
             file.delete();
     }
+
+    @Override
+    public PagingResponseDTO<AdminProductStockDTO> getProductStock(AdminPageDTO pageDTO) {
+
+        Pageable pageable = PageRequest.of(pageDTO.page() - 1
+                                            , pageDTO.amount()
+                                            , Sort.by("totalStock").ascending());
+
+        Page<AdminProductStockDataDTO> dataList = productRepository.findStockData(pageDTO, pageable);
+        List<String> productIdList = new ArrayList<>();
+        dataList.getContent().forEach(dto -> productIdList.add(dto.productId()));
+
+
+        List<ProductOption> optionList = productOptionRepository.findAllOptionByProductId(productIdList);
+
+        List<AdminProductStockDTO> responseContent = new ArrayList<>();
+        List<AdminProductOptionStockDTO> responseOptionList = new ArrayList<>();
+
+        for(int i = 0; i < dataList.getContent().size(); i++) {
+            AdminProductStockDataDTO stockDTO = dataList.getContent().get(i);
+            String productId = stockDTO.productId();
+
+            for(int j = 0; j < optionList.size(); j++) {
+                if(productId.equals(optionList.get(j).getProduct().getId())){
+                    ProductOption productOption = optionList.get(j);
+                    responseOptionList.add(
+                            AdminProductOptionStockDTO.builder()
+                                    .size(productOption.getSize())
+                                    .color(productOption.getColor())
+                                    .optionStock(productOption.getStock())
+                                    .optionIsOpen(productOption.isOpen())
+                                    .build()
+                    );
+                }
+            }
+
+            responseContent.add(
+                    AdminProductStockDTO.builder()
+                            .productId(productId)
+                            .classification(stockDTO.classification())
+                            .productName(stockDTO.productName())
+                            .totalStock(stockDTO.totalStock())
+                            .isOpen(stockDTO.isOpen())
+                            .optionList(responseOptionList)
+                            .build()
+            );
+
+            responseOptionList = new ArrayList<>();
+        }
+
+        return new PagingResponseDTO<>(responseContent, dataList.isEmpty(), dataList.getNumber(), dataList.getTotalPages(), adminNickname);
+    }
 }
