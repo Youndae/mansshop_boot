@@ -1,17 +1,58 @@
-import {axiosInstance} from "./customAxios";
 
+export const imageInputChange = (e, files) => {
+    const validationResult = imageValidation(e);
 
-export const getImageSrc = (res) => {
+    if(validationResult){
+        const fileList = e.target.files;
+        let fileArr = [...files];
 
-    return window
-        .URL
-        .createObjectURL(
-            new Blob([res.data], {type: res.headers['content-type']})
-        );
+        for(let i = 0; i < fileList.length; i++)
+            fileArr.push(fileList[i]);
+
+        return fileArr;
+    }else {
+        return null;
+    }
 }
 
-export const imageDisplay = async (imageName) => {
-    await axiosInstance.get(`main/display/${imageName}`, {
-        responseType: 'blob',
-    });
+export const imageValidation = (e) => {
+    const files = e.target.files;
+
+    for(let i = 0; i < files.length; i++) {
+        const fileName = files[i].name;
+        const fileNameExtensionIndex = fileName.lastIndexOf('.') + 1;
+        const fileNameExtension = fileName.toLowerCase().substring(fileNameExtensionIndex, fileName.length);
+
+        if(!(fileNameExtension === 'jpg') && !(fileNameExtension === 'gif')
+            && !(fileNameExtension === 'png') && !(fileNameExtension === 'jpeg'))
+            return false;
+    }
+
+    return true;
+}
+
+export const setProductFormData = (productData, optionList, firstThumbnail, thumbnail, infoImage) => {
+    let formData = new FormData();
+
+    formData.append('classification', productData.classification);
+    formData.append('productName', productData.productName);
+    formData.append('price', productData.price);
+    formData.append('isOpen', productData.isOpen);
+    formData.append('discount', productData.discount);
+    for(let i = 0; i < optionList.length; i++) {
+        formData.append('optionList[' + i + '].optionId', optionList[i].optionId);
+        formData.append('optionList[' + i + '].size', optionList[i].size);
+        formData.append('optionList[' + i + '].color', optionList[i].color);
+        formData.append('optionList[' + i + '].optionStock', optionList[i].optionStock);
+        formData.append('optionList[' + i + '].optionIsOpen', optionList[i].optionIsOpen);
+    }
+
+    thumbnail.forEach(file => formData.append('thumbnail', file));
+    infoImage.forEach(file => formData.append('infoImage', file));
+
+    if(firstThumbnail !== '')
+        formData.append('firstThumbnail', firstThumbnail);
+
+    return formData;
+
 }

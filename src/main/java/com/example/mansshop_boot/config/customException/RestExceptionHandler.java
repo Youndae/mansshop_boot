@@ -50,6 +50,13 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return toResponseEntity(ErrorCode.NOT_FOUND);
     }
 
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<?> nullPointerException(Exception e) {
+        log.warn("nullPointerException : {}", e.getMessage());
+
+        return toResponseEntity(ErrorCode.NOT_FOUND);
+    }
+
     private ResponseEntity<?> toResponseEntity(ErrorCode errorCode){
 
         return ResponseEntity.status(errorCode.getHttpStatus())

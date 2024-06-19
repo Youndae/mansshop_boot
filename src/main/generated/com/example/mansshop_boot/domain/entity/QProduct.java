@@ -24,11 +24,11 @@ public class QProduct extends EntityPathBase<Product> {
 
     public final QClassification classification;
 
-    public final NumberPath<Integer> closed = createNumber("closed", Integer.class);
-
     public final DatePath<java.time.LocalDate> createdAt = createDate("createdAt", java.time.LocalDate.class);
 
     public final StringPath id = createString("id");
+
+    public final BooleanPath isOpen = createBoolean("isOpen");
 
     public final NumberPath<Integer> productDiscount = createNumber("productDiscount", Integer.class);
 

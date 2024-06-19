@@ -1,19 +1,20 @@
 package com.example.mansshop_boot.domain.entity;
 
+import com.example.mansshop_boot.domain.dto.admin.AdminProductPatchDTO;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class Product {
 
     @Id
@@ -29,7 +30,7 @@ public class Product {
 
     private String thumbnail;
 
-    private int closed;
+    private boolean isOpen;
 
     private Long productSales;
 
@@ -43,5 +44,21 @@ public class Product {
 
     public void setProductSales(long productSales) {
         this.productSales = productSales;
+    }
+
+    public void setThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
+
+    public void setId(String productId){
+        this.id = productId;
+    }
+
+    public void setPatchData(AdminProductPatchDTO patchDTO) {
+        this.productName = patchDTO.getProductName();
+        this.classification = Classification.builder().id(patchDTO.getClassification()).build();
+        this.productPrice = patchDTO.getPrice();
+        this.isOpen = patchDTO.getIsOpen();
+        this.productDiscount = patchDTO.getDiscount();
     }
 }

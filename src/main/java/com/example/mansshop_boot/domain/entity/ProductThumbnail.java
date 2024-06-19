@@ -22,6 +22,4 @@ public class ProductThumbnail {
     private Product product;
 
     private String imageName;
-
-    private int productThumbnailStep;
 }

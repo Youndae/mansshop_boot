@@ -12,7 +12,8 @@ public enum ErrorCode {
     , BAD_CREDENTIALS(403, "BadCredentialsException")
     , TOKEN_STEALING(800, "TokenStealingException")
     , TOKEN_EXPIRED(401, "TokenExpiredException")
-    , NOT_FOUND(400, "NotFoundException");
+    , NOT_FOUND(400, "NotFoundException")
+    , NULL_POINTER(500, "NullPointerException");
 
     private final int httpStatus;
 

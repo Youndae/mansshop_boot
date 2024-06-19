@@ -22,9 +22,9 @@ public class QProductInfoImage extends EntityPathBase<ProductInfoImage> {
 
     public static final QProductInfoImage productInfoImage = new QProductInfoImage("productInfoImage");
 
-    public final StringPath imageName = createString("imageName");
+    public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final StringPath infoImageId = createString("infoImageId");
+    public final StringPath imageName = createString("imageName");
 
     public final QProduct product;
 

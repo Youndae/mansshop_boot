@@ -25,4 +25,11 @@ public class ProductInfoImageDSLRepositoryImpl implements ProductInfoImageDSLRep
                 .where(productInfoImage.product.id.eq(productId))
                 .fetch();
     }
+
+    @Override
+    public void deleteByImageName(List<String> deleteList) {
+        jpaQueryFactory.delete(productInfoImage)
+                .where(productInfoImage.imageName.in(deleteList))
+                .execute();
+    }
 }

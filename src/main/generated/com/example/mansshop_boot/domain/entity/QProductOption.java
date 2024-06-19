@@ -26,7 +26,7 @@ public class QProductOption extends EntityPathBase<ProductOption> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final NumberPath<Integer> optionClosed = createNumber("optionClosed", Integer.class);
+    public final BooleanPath isOpen = createBoolean("isOpen");
 
     public final QProduct product;
 
