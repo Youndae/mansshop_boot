@@ -1,12 +1,11 @@
 package com.example.mansshop_boot.controller;
 
 import com.example.mansshop_boot.domain.dto.admin.*;
+import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
-import com.example.mansshop_boot.domain.dto.response.PagingResponseDTO;
-import com.example.mansshop_boot.domain.dto.response.ResponseDTO;
-import com.example.mansshop_boot.domain.dto.response.ResponseIdDTO;
-import com.example.mansshop_boot.domain.dto.response.ResponseListDTO;
+import com.example.mansshop_boot.domain.dto.response.*;
 import com.example.mansshop_boot.service.AdminService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
+import java.util.Enumeration;
 import java.util.List;
 
 @RestController
@@ -99,16 +99,6 @@ public class AdminController {
     public ResponseEntity<PagingResponseDTO<AdminProductStockDTO>> getProductStock(@RequestParam(name = "keyword", required = false) String keyword
                                             , @RequestParam(name = "page") int page) {
 
-        /*
-            재고 탭
-            content: [
-                상품 데이터,
-                optionList : [
-                    ...
-                ]
-            ]
-         */
-
         AdminPageDTO pageDTO = new AdminPageDTO(keyword, page);
 
         PagingResponseDTO<AdminProductStockDTO> responseDTO = adminService.getProductStock(pageDTO);
@@ -118,30 +108,61 @@ public class AdminController {
     }
 
     @GetMapping("/product/discount")
-    public ResponseEntity<?> getDiscountProductList() {
+    public ResponseEntity<PagingResponseDTO<AdminDiscountResponseDTO>> getDiscountProductList(@RequestParam(name = "keyword", required = false) String keyword
+                                                    , @RequestParam(name = "page") int page) {
 
         /*
             할인중인 상품들의 리스트 반환
          */
 
-        return null;
+        AdminPageDTO pageDTO = new AdminPageDTO(keyword, page);
+
+        PagingResponseDTO<AdminDiscountResponseDTO> responseDTO = adminService.getDiscountProduct(pageDTO);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
-    @PatchMapping("/product/discount")
-    public ResponseEntity<?> patchDiscountProduct() {
-
+    @GetMapping("/product/discount/classification")
+    public ResponseEntity<?> getDiscountClassification() {
         /*
-            ProductIdList, 할인율을 받고 해당 상품들의 할인율을 수정.
+            List<String> classification
          */
 
-        return null;
+        ResponseListDTO<String> responseDTO = adminService.getClassification();
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
+    }
+
+    @GetMapping("/product/discount/select/{classification}")
+    public ResponseEntity<ResponseListDTO<AdminDiscountProductDTO>> getDiscountProductSelectList(@PathVariable(name = "classification") String classification) {
+
+        /*
+            ProductId
+            productName
+         */
+
+        ResponseListDTO<AdminDiscountProductDTO> responseDTO = adminService.getSelectDiscountProduct(classification);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
+    }
+
+    @PatchMapping(value = "/product/discount", consumes = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<ResponseMessageDTO> patchDiscountProduct(@RequestBody AdminDiscountPatchDTO patchDTO) {
+
+        ResponseMessageDTO responseDTO = adminService.patchDiscountProduct(patchDTO);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
 
     @GetMapping("/product/classification")
-    public ResponseEntity<ResponseListDTO<String>> getProductClassification(Principal principal) {
+    public ResponseEntity<ResponseListDTO<String>> getProductClassification() {
 
-        ResponseListDTO<String> responseDTO = adminService.getClassification(principal);
+        ResponseListDTO<String> responseDTO = adminService.getClassification();
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDTO);
@@ -158,28 +179,72 @@ public class AdminController {
         return null;
     }
 
-    @GetMapping("/order/{type}/{keyword}/{page}")
-    public ResponseEntity<?> getNewOrder(@PathVariable(name = "type") String listType
-                                        , @PathVariable(name = "keyword", required = false) String keyword
-                                        , @PathVariable(name = "page") int page) {
+    @GetMapping("/order/{type}")
+    public ResponseEntity<PagingResponseDTO<AdminOrderResponseDTO>> getNewOrder(@PathVariable(name = "type") String listType
+                                                                                , @RequestParam(name = "searchType", required = false) String searchType
+                                                                                , @RequestParam(name = "keyword", required = false) String keyword
+                                                                                , @RequestParam(name = "page", required = false) int page) {
 
         /*
             type = new -> 미처리 주문
             type = all -> 전체 주문
          */
 
-        return null;
-    }
-
-    @GetMapping("/order/{orderId}")
-    public ResponseEntity<?> getOrderDetail(@PathVariable(name = "orderId") long orderId) {
-
         /*
-            주문 정보 요청
+            data
+
+            content : [
+                {
+                    orderId
+                    recipient
+                    userId
+                    phone
+                    createdAt
+                    address
+                    detailList : [
+                        {
+                            (OrderDetail join productOption, product)
+                            classification
+                            productName
+                            size
+                            color
+                            count
+                            price
+                            reviewStatus
+                        },
+                        ...
+                    ]
+                },
+                ...
+                pagingData
+            ]
          */
 
-        return null;
+        AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(keyword, searchType, page);
+
+        PagingResponseDTO<AdminOrderResponseDTO> responseDTO;
+
+        if(listType.equals("all"))
+            responseDTO = adminService.getAllOrderList(pageDTO);
+        else if(listType.equals("new"))
+            responseDTO = adminService.getNewOrderList(pageDTO);
+        else
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(null);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
+
+    /*@GetMapping("/order/{orderId}")
+    public ResponseEntity<?> getOrderDetail(@PathVariable(name = "orderId") long orderId) {
+
+        *//*
+            주문 정보 요청
+         *//*
+
+        return null;
+    }*/
 
     @PatchMapping("/order/{orderId}")
     public ResponseEntity<?> patchOrder(@PathVariable(name = "orderId") long orderId) {

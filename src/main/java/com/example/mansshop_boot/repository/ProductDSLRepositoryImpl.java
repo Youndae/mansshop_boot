@@ -1,5 +1,6 @@
 package com.example.mansshop_boot.repository;
 
+import com.example.mansshop_boot.domain.dto.admin.AdminDiscountPatchDTO;
 import com.example.mansshop_boot.domain.dto.admin.AdminProductListDTO;
 import com.example.mansshop_boot.domain.dto.admin.AdminProductStockDataDTO;
 import com.example.mansshop_boot.domain.dto.main.MainListDTO;
@@ -21,7 +22,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static com.example.mansshop_boot.domain.entity.QProduct.product;
@@ -214,5 +217,42 @@ public class ProductDSLRepositoryImpl implements ProductDSLRepository{
                                                 .where(adminProductSearch(pageDTO));
 
         return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
+    }
+
+    @Override
+    public Page<Product> getDiscountProduct(AdminPageDTO pageDTO, Pageable pageable) {
+
+        List<Product> list = jpaQueryFactory.select(product)
+                                            .from(product)
+                                            .where(product.productDiscount.ne(0).and(adminProductSearch(pageDTO)))
+                                            .offset(pageable.getOffset())
+                                            .limit(pageable.getPageSize())
+                                            .orderBy(product.updatedAt.desc())
+                                            .fetch();
+
+        JPAQuery<Long> count = jpaQueryFactory.select(product.countDistinct())
+                .from(product)
+                .where(product.productDiscount.ne(0).and(adminProductSearch(pageDTO)));
+
+        return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
+    }
+
+    @Override
+    public List<Product> getProductByClassification(String classification) {
+        return jpaQueryFactory.select(product)
+                .from(product)
+                .where(product.classification.id.eq(classification))
+                .fetch();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void patchProductDiscount(AdminDiscountPatchDTO patchDTO) {
+        jpaQueryFactory.update(product)
+                .set(product.productDiscount, patchDTO.discount())
+                .set(product.updatedAt, LocalDate.now())
+                .where(product.id.in(patchDTO.productIdList()))
+                .execute();
+
     }
 }

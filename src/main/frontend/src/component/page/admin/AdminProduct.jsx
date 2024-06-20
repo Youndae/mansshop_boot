@@ -104,7 +104,7 @@ function AdminProduct() {
     }
 
     const handleSearchOnClick = async () => {
-        navigate(`/admin/product?keyword=${keywordInput}&page=${page}`);
+        navigate(`/admin/product?keyword=${keywordInput}`);
     }
 
     const handleAddBtnOnClick = () => {

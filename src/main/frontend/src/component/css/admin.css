@@ -236,3 +236,54 @@
 .admin-stock-option {
     color: grey;
 }
+
+.discount-btn {
+    float: right;
+    width: 70px;
+    height: 30px;
+}
+
+.discount-content-header {
+    margin-top: 20%;
+    display: grid;
+}
+
+.discount-content-header div {
+    margin-bottom: 5%;
+}
+
+.discount-input input {
+    margin-left: 10px;
+}
+
+.discount-product-content {
+    border : 1px solid lightgrey;
+    margin-top: 5%;
+}
+
+.discount-product-content-header {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 10px 0 10px;
+}
+
+.discount-product-content-header button {
+    width: 50px;
+    height: 20px;
+}
+
+.discount-product-content-content {
+    margin: 5% 15px 0 15px;
+}
+
+.discount-product-content div {
+    margin-top: 10px;
+}
+
+.discount-product-content label {
+    font-weight: 500;
+}
+
+.admin-order-body-tr {
+    cursor: pointer;
+}
