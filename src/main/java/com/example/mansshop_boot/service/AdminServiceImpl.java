@@ -2,12 +2,11 @@ package com.example.mansshop_boot.service;
 
 import com.example.mansshop_boot.domain.dto.admin.*;
 import com.example.mansshop_boot.domain.dto.member.UserStatusDTO;
+import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
-import com.example.mansshop_boot.domain.dto.response.PagingResponseDTO;
-import com.example.mansshop_boot.domain.dto.response.ResponseDTO;
-import com.example.mansshop_boot.domain.dto.response.ResponseIdDTO;
-import com.example.mansshop_boot.domain.dto.response.ResponseListDTO;
+import com.example.mansshop_boot.domain.dto.response.*;
 import com.example.mansshop_boot.domain.entity.*;
+import com.example.mansshop_boot.domain.enumuration.Result;
 import com.example.mansshop_boot.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +23,8 @@ import java.io.File;
 import java.io.IOException;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -47,6 +48,10 @@ public class AdminServiceImpl implements AdminService {
     private final ProductThumbnailRepository productThumbnailRepository;
 
     private final ProductInfoImageRepository productInfoImageRepository;
+
+    private final ProductOrderRepository productOrderRepository;
+
+    private final ProductOrderDetailRepository productOrderDetailRepository;
 
     private static final String adminNickname = "관리자";
 
@@ -115,8 +120,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public ResponseListDTO<String> getClassification(Principal principal) {
-        String nickname = principalService.getNicknameByPrincipal(principal);
+    public ResponseListDTO<String> getClassification() {
 
         List<Classification> entity = classificationRepository.findAll(Sort.by("classificationStep").descending());
         List<String> responseList = new ArrayList<>();
@@ -124,7 +128,7 @@ public class AdminServiceImpl implements AdminService {
         entity.forEach(value -> responseList.add(value.getId()));
 
 
-        return new ResponseListDTO<>(responseList, new UserStatusDTO(nickname));
+        return new ResponseListDTO<>(responseList, new UserStatusDTO(adminNickname));
     }
 
     @Override
@@ -288,5 +292,146 @@ public class AdminServiceImpl implements AdminService {
         }
 
         return new PagingResponseDTO<>(responseContent, dataList.isEmpty(), dataList.getNumber(), dataList.getTotalPages(), adminNickname);
+    }
+
+    @Override
+    public PagingResponseDTO<AdminDiscountResponseDTO> getDiscountProduct(AdminPageDTO pageDTO) {
+
+        Pageable pageable = PageRequest.of(pageDTO.page() - 1
+                                            , pageDTO.amount()
+                                            , Sort.by("updatedAt").descending());
+
+        Page<Product> entityList = productRepository.getDiscountProduct(pageDTO, pageable);
+        List<AdminDiscountResponseDTO> responseDTOList = new ArrayList<>();
+
+        int discount = 30;
+
+        entityList.getContent().forEach(entity ->
+                    responseDTOList.add(
+                            AdminDiscountResponseDTO.builder()
+                                    .productId(entity.getId())
+                                    .classification(entity.getClassification().getId())
+                                    .productName(entity.getProductName())
+                                    .price(entity.getProductPrice())
+                                    .discount(entity.getProductDiscount())
+                                    .build()
+                    )
+                );
+
+
+        return new PagingResponseDTO<>(responseDTOList, entityList.isEmpty(), entityList.getNumber(), entityList.getTotalPages(), adminNickname);
+    }
+
+    @Override
+    public ResponseListDTO<AdminDiscountProductDTO> getSelectDiscountProduct(String classification) {
+
+        List<Product> product = productRepository.getProductByClassification(classification);
+        List<AdminDiscountProductDTO> responseContent = new ArrayList<>();
+
+        product.forEach(entity -> responseContent.add(
+                AdminDiscountProductDTO.builder()
+                        .productName(entity.getProductName())
+                        .productId(entity.getId())
+                        .productPrice(entity.getProductPrice())
+                        .build()
+        ));
+
+        return new ResponseListDTO<>(responseContent, new UserStatusDTO(adminNickname));
+    }
+
+    @Override
+    public ResponseMessageDTO patchDiscountProduct(AdminDiscountPatchDTO patchDTO) {
+
+        productRepository.patchProductDiscount(patchDTO);
+
+        return new ResponseMessageDTO(Result.OK.getResultKey());
+    }
+
+    @Override
+    public PagingResponseDTO<AdminOrderResponseDTO> getAllOrderList(AdminOrderPageDTO pageDTO) {
+
+        //Page<dto> orderList
+        //orderIdList
+        //select orderDetail orderIdList
+        //mapping
+
+        log.info("AdminServiceImpl.getAllOrderList :: pageDTO : {}", pageDTO);
+
+        Pageable pageable = PageRequest.of(pageDTO.page() - 1
+                                        , pageDTO.amount()
+                                        , Sort.by("createdAt").descending());
+
+        Page<AdminOrderDTO> orderDTOList = productOrderRepository.findAllOrderList(pageDTO, pageable);
+
+        log.info("AdminServiceImpl.getAllOrderList :: orderDTOList : {}", orderDTOList);
+        log.info("AdminServiceImpl.getAllOrderList :: orderDTOList.getContent() : {}", orderDTOList.getContent());
+
+        List<AdminOrderResponseDTO> responseContent = mappingOrderData(orderDTOList);
+
+
+
+        return new PagingResponseDTO<>(
+                responseContent
+                , orderDTOList.isEmpty()
+                , orderDTOList.getNumber()
+                , orderDTOList.getTotalPages()
+                , adminNickname
+        );
+    }
+
+    @Override
+    public PagingResponseDTO<AdminOrderResponseDTO> getNewOrderList(AdminOrderPageDTO pageDTO) {
+
+        Pageable pageable = PageRequest.of(pageDTO.page() - 1
+                , pageDTO.amount()
+                , Sort.by("createdAt").descending());
+
+        LocalDate today = LocalDate.now();
+        LocalDateTime todayLastOrderTime = LocalDateTime.of(
+                today.getYear()
+                , today.getMonth()
+                , today.getDayOfMonth()
+                , 16
+                , 0
+                , 0
+        );
+
+        Page<AdminOrderDTO> orderDTOList = productOrderRepository.findAllNewOrderList(pageDTO, todayLastOrderTime, pageable);
+        List<AdminOrderResponseDTO> responseContent = mappingOrderData(orderDTOList);
+
+        return new PagingResponseDTO<>(
+                responseContent
+                , orderDTOList.isEmpty()
+                , orderDTOList.getNumber()
+                , orderDTOList.getTotalPages()
+                , adminNickname
+        );
+    }
+
+    private List<AdminOrderResponseDTO> mappingOrderData(Page<AdminOrderDTO> orderDTOList) {
+        List<Long> orderIdList = new ArrayList<>();
+        orderDTOList.getContent().forEach(dto -> orderIdList.add(dto.orderId()));
+        List<ProductOrderDetail> detailList = productOrderDetailRepository.findAllById(orderIdList);
+        List<AdminOrderDetailDTO> detailDTOList = new ArrayList<>();
+        List<AdminOrderResponseDTO> responseContent = new ArrayList<>();
+
+        for(int i = 0; i < orderDTOList.getContent().size(); i++) {
+            AdminOrderDTO orderDTO = orderDTOList.getContent().get(i);
+            long orderId = orderDTO.orderId();
+
+            for(int j = 0; j < detailList.size(); j++) {
+                if(orderId == detailList.get(j).getId()){
+                    detailDTOList.add(
+                            new AdminOrderDetailDTO(detailList.get(j))
+                    );
+                }
+            }
+
+            responseContent.add(orderDTO.toResponseDTO(detailDTOList));
+            detailDTOList = new ArrayList<>();
+        }
+
+
+        return responseContent;
     }
 }

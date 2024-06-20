@@ -67,10 +67,6 @@ function SideMenuCategory(props) {
                 {
                     link: '/admin/product/discount',
                     text: '할인 설정',
-                },
-                {
-                    link: '/admin/product/classification',
-                    text: '상품 카테고리 설정',
                 }
             ]
         }else if(categoryStatus === 'order') {

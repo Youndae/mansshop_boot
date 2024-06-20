@@ -95,7 +95,7 @@ function ProductStock() {
     }
 
     const handleSearchOnClick = async () => {
-        navigate(`/admin/product?keyword=${keywordInput}`);
+        navigate(`/admin/product/stock?keyword=${keywordInput}`);
     }
 
 

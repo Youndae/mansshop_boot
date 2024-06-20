@@ -22,7 +22,7 @@ public class QProductOrder extends EntityPathBase<ProductOrder> {
 
     public static final QProductOrder productOrder = new QProductOrder("productOrder");
 
-    public final DatePath<java.time.LocalDate> createdAt = createDate("createdAt", java.time.LocalDate.class);
+    public final DateTimePath<java.time.LocalDateTime> createdAt = createDateTime("createdAt", java.time.LocalDateTime.class);
 
     public final NumberPath<Integer> deliveryFee = createNumber("deliveryFee", Integer.class);
 

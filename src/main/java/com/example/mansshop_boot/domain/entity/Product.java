@@ -4,6 +4,7 @@ import com.example.mansshop_boot.domain.dto.admin.AdminProductPatchDTO;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -39,7 +40,7 @@ public class Product {
     @CreationTimestamp
     private LocalDate createdAt;
 
-    @CreationTimestamp
+    @UpdateTimestamp
     private LocalDate updatedAt;
 
     public void setProductSales(long productSales) {
