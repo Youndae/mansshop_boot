@@ -6,8 +6,10 @@ import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;
 import com.example.mansshop_boot.domain.entity.ProductOrder;
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -72,27 +74,17 @@ public class ProductOrderDSLRepositoryImpl implements ProductOrderDSLRepository{
     @Override
     public Page<AdminOrderDTO> findAllOrderList(AdminOrderPageDTO pageDTO, Pageable pageable) {
 
-        List<AdminOrderDTO> list = jpaQueryFactory.select(
-                Projections.constructor(
-                        AdminOrderDTO.class
-                        , productOrder.id.as("orderId")
-                        , productOrder.recipient
-                        , productOrder.member.userId.as("userId")
-                        , productOrder.orderPhone.as("phone")
-                        , productOrder.createdAt
-                        , productOrder.orderAddress.as("address")
-                )
-        )
-                .from(productOrder)
-                .where(searchAdminOrder(pageDTO))
-                .orderBy(productOrder.createdAt.desc())
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
+        List<AdminOrderDTO> list = jpaQueryFactory.select(getFindAllOrderListSelect())
+                                                .from(productOrder)
+                                                .where(searchAdminOrder(pageDTO))
+                                                .orderBy(productOrder.createdAt.desc())
+                                                .offset(pageable.getOffset())
+                                                .limit(pageable.getPageSize())
+                                                .fetch();
 
         JPAQuery<Long> count = jpaQueryFactory.select(productOrder.countDistinct())
-                .from(productOrder)
-                .where(searchAdminOrder(pageDTO));
+                                            .from(productOrder)
+                                            .where(searchAdminOrder(pageDTO));
 
 
         return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
@@ -101,29 +93,36 @@ public class ProductOrderDSLRepositoryImpl implements ProductOrderDSLRepository{
     @Override
     public Page<AdminOrderDTO> findAllNewOrderList(AdminOrderPageDTO pageDTO, LocalDateTime todayLastOrderTime, Pageable pageable) {
 
-        List<AdminOrderDTO> list = jpaQueryFactory.select(
-                Projections.constructor(
+        List<AdminOrderDTO> list = jpaQueryFactory.select(getFindAllOrderListSelect())
+                                                .from(productOrder)
+                                                .where(productOrder.createdAt.lt(todayLastOrderTime))
+                                                .orderBy(productOrder.createdAt.desc())
+                                                .offset(pageable.getOffset())
+                                                .limit(pageable.getPageSize())
+                                                .fetch();
+
+        JPAQuery<Long> count = jpaQueryFactory.select(productOrder.countDistinct())
+                                            .from(productOrder)
+                                            .where(searchAdminOrder(pageDTO));
+
+        return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
+    }
+
+    public Expression<AdminOrderDTO> getFindAllOrderListSelect() {
+        return Projections.constructor(
                         AdminOrderDTO.class
                         , productOrder.id.as("orderId")
                         , productOrder.recipient
-                        , productOrder.member.userId.as("userId")
+                        , new CaseBuilder()
+                                .when(productOrder.member.userId.eq("Anonymous"))
+                                .then("비회원")
+                                .otherwise(productOrder.member.userId)
+                                .as("userId")
                         , productOrder.orderPhone.as("phone")
                         , productOrder.createdAt
                         , productOrder.orderAddress.as("address")
-                )
-        )
-                .from(productOrder)
-                .where(productOrder.createdAt.lt(todayLastOrderTime))
-                .orderBy(productOrder.createdAt.desc())
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
-
-        JPAQuery<Long> count = jpaQueryFactory.select(productOrder.countDistinct())
-                .from(productOrder)
-                .where(searchAdminOrder(pageDTO));
-
-        return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
+                        , productOrder.orderStat.as("orderStatus")
+                );
     }
 
     public BooleanExpression searchAdminOrder(AdminOrderPageDTO pageDTO) {

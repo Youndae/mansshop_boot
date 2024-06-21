@@ -7,9 +7,7 @@ import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import QnADetail from "./QnADetail";
 
 function MemberQnADetail() {
-    const userState = useSelector((state) => state.member);
-    const loginStatus = userState.loginStatus;
-    const nickname = userState.id;
+    const loginStatus = useSelector((state) => state.member.loginStatus);
     const { qnaId } = useParams();
     const [data, setData] = useState({
         memberQnAId: ''
@@ -157,7 +155,6 @@ function MemberQnADetail() {
             <QnADetail
                 data={data}
                 replyData={replyData}
-                nickname={nickname}
                 handleReplyModifyOpen={handleReplyModifyOpen}
                 handleReplyModifyClose={handleReplyModifyClose}
                 handleModifyOnChange={handleModifyOnChange}

@@ -6,7 +6,7 @@ import java.time.LocalDate;
 public record MemberQnAListDTO(
         long memberQnAId
         , String memberQnATitle
-        , int memberQnAStat
+        , boolean memberQnAStat
         , String qnaClassification
         , LocalDate updatedAt
 ) {

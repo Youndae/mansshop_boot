@@ -11,7 +11,7 @@ public record ProductQnADetailDTO(
         , String writer
         , String qnaContent
         , LocalDate createdAt
-        , int productQnAStat
+        , boolean productQnAStat
         , List<MyPageQnAReplyDTO> replyList
         , UserStatusDTO userStatus
 ) {

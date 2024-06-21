@@ -1,4 +1,5 @@
 import React from 'react';
+import AdminSideNav from "../../ui/nav/AdminSideNav";
 
 function AdminPeriodSales() {
     /*
@@ -17,6 +18,22 @@ function AdminPeriodSales() {
         일단 상세에서 보여줘야 하는 정보로는
         해당 기간의 상품 분류별 매출, 판매량, 상품별 매출, 판매량 정도가 아닐까 싶은데??
      */
+
+    return (
+        <div className="mypage">
+            <AdminSideNav
+                categoryStatus={'sales'}
+            />
+            <div className="admin-content">
+                <div className="admin-content-header">
+
+                </div>
+                <div className="admin-content-content">
+
+                </div>
+            </div>
+        </div>
+    )
 }
 
 export default AdminPeriodSales;

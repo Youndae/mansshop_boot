@@ -7,7 +7,7 @@ import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import {getClickNumber, getNextNumber, getPrevNumber, productDetailPagingObject} from "../../../modules/pagingModule";
 import Paging from "../../ui/Paging";
 import Image from "../../ui/Image";
-import Modal from "./Modal";
+import MyPageModal from "./MyPageModal";
 
 function MyPageReview() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
@@ -131,7 +131,7 @@ function MyPageReview() {
                     </div>
                 </div>
                 {isOpen && (
-                    <Modal
+                    <MyPageModal
                         closeModal={closeModal}
                         data={modalData}
                         modalRef={modalRef}

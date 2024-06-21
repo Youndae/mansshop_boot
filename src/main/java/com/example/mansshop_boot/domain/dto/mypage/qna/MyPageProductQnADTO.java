@@ -8,6 +8,6 @@ public record MyPageProductQnADTO(
         , String writer
         , String qnaContent
         , LocalDate createdAt
-        , int productQnAStat
+        , boolean productQnAStat
 ) {
 }

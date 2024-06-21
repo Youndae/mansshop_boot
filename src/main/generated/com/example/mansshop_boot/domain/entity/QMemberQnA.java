@@ -30,7 +30,7 @@ public class QMemberQnA extends EntityPathBase<MemberQnA> {
 
     public final StringPath memberQnAContent = createString("memberQnAContent");
 
-    public final NumberPath<Integer> memberQnAStat = createNumber("memberQnAStat", Integer.class);
+    public final BooleanPath memberQnAStat = createBoolean("memberQnAStat");
 
     public final StringPath memberQnATitle = createString("memberQnATitle");
 

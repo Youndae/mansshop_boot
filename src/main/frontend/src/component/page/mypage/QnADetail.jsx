@@ -1,11 +1,11 @@
 import React from "react";
 import {useNavigate} from "react-router-dom";
 import DefaultBtn from "../../ui/DefaultBtn";
+import {useSelector} from "react-redux";
 
 function QnADetail(props) {
     const { data
         , replyData
-        , nickname
         , handleReplyModifyOpen
         , handleReplyModifyClose
         , handleModifyOnChange
@@ -17,7 +17,10 @@ function QnADetail(props) {
         , titleText
         , type
         , handleDeleteBtn
+        , handleCompleteBtn
     } = props;
+
+    const nickname = useSelector((state) => state.member.id);
 
     const navigate = useNavigate();
 
@@ -35,10 +38,12 @@ function QnADetail(props) {
             <div className="mypage-qna-content">
                 <div className="mypage-qna-content-header-btn">
                     <HeaderBtn
+                        nickname={nickname}
                         status={data.qnaStatus}
                         type={type}
                         handleModifyBtn={handleModifyBtn}
                         handleDeleteBtn={handleDeleteBtn}
+                        handleCompleteBtn={handleCompleteBtn}
                     />
                 </div>
                 <div className="mypage-qna-content-title">
@@ -76,9 +81,17 @@ function QnADetail(props) {
 }
 
 function HeaderBtn(props) {
-    const { status, type, handleModifyBtn, handleDeleteBtn } = props;
+    const { nickname, status, type, handleModifyBtn, handleDeleteBtn, handleCompleteBtn } = props;
 
-    if(type !== undefined && status === 0){
+    if(nickname === '관리자') {
+        if(status) {
+            return null;
+        }else {
+            return (
+                <DefaultBtn className={'header-btn-modify'} onClick={handleCompleteBtn} btnText={'답변 완료 처리'}/>
+            )
+        }
+    }else if(type !== undefined && status === 0){
         return (
             <>
                 <DefaultBtn className={'header-btn-modify'} onClick={handleModifyBtn} btnText={'수정'}/>

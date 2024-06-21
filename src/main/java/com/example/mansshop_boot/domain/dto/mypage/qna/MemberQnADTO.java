@@ -9,6 +9,6 @@ public record MemberQnADTO(
         , String writer
         , String qnaContent
         , LocalDate updatedAt
-        , int memberQnAStat
+        , boolean memberQnAStat
 ) {
 }

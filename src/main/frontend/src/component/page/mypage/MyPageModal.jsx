@@ -30,7 +30,7 @@ const ModalBackground = styled.div`
       cursor: auto;
 `
 
-function Modal(props) {
+function MyPageModal(props) {
     const { closeModal, data, modalRef } = props;
 
     const navigate = useNavigate();
@@ -54,15 +54,16 @@ function Modal(props) {
     return (
         <ModalBackground>
             <ModalContent className="modal" ref={modalRef}>
-                <div className="modal-header">
+                <div className="modal-content-header">
                     <h2>{data.productName}</h2>
                     <DefaultBtn
                         onClick={handleModifyBtn}
                         btnText={'수정'}
                         value={data.reviewId}
+                        className="mypage-modal-header-btn"
                     />
                 </div>
-                <div className="modal-content">
+                <div className="modal-content-content">
                     <div className="modal-review">
                         {data.content}
                     </div>
@@ -95,4 +96,4 @@ function ReviewReply(props) {
     }
 }
 
-export default Modal;
+export default MyPageModal;

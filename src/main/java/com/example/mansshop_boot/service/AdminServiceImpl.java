@@ -1,7 +1,12 @@
 package com.example.mansshop_boot.service;
 
+import com.example.mansshop_boot.config.customException.ErrorCode;
+import com.example.mansshop_boot.config.customException.exception.CustomAccessDeniedException;
+import com.example.mansshop_boot.config.customException.exception.CustomNotFoundException;
 import com.example.mansshop_boot.domain.dto.admin.*;
 import com.example.mansshop_boot.domain.dto.member.UserStatusDTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.*;
+import com.example.mansshop_boot.domain.dto.mypage.qna.req.QnAReplyInsertDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.response.*;
@@ -52,6 +57,20 @@ public class AdminServiceImpl implements AdminService {
     private final ProductOrderRepository productOrderRepository;
 
     private final ProductOrderDetailRepository productOrderDetailRepository;
+
+    private final ProductQnARepository productQnARepository;
+
+    private final ProductQnAReplyRepository productQnAReplyRepository;
+
+    private final MemberQnARepository memberQnARepository;
+
+    private final MemberQnAReplyRepository memberQnAReplyRepository;
+
+    private final QnAClassificationRepository qnAClassificationRepository;
+
+    private final MemberRepository memberRepository;
+
+    private final MyPageService myPageService;
 
     private static final String adminNickname = "관리자";
 
@@ -117,18 +136,6 @@ public class AdminServiceImpl implements AdminService {
                 .classificationList(classificationList)
                 .nickname(nickname)
                 .build();
-    }
-
-    @Override
-    public ResponseListDTO<String> getClassification() {
-
-        List<Classification> entity = classificationRepository.findAll(Sort.by("classificationStep").descending());
-        List<String> responseList = new ArrayList<>();
-
-        entity.forEach(value -> responseList.add(value.getId()));
-
-
-        return new ResponseListDTO<>(responseList, new UserStatusDTO(adminNickname));
     }
 
     @Override
@@ -323,6 +330,17 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    public ResponseListDTO<String> getClassification() {
+
+        List<Classification> classification = classificationRepository.findAll(Sort.by("classificationStep").ascending());
+        List<String> responseList = new ArrayList<>();
+
+        classification.forEach(entity -> responseList.add(entity.getId()));
+
+        return new ResponseListDTO<>(responseList, new UserStatusDTO(adminNickname));
+    }
+
+    @Override
     public ResponseListDTO<AdminDiscountProductDTO> getSelectDiscountProduct(String classification) {
 
         List<Product> product = productRepository.getProductByClassification(classification);
@@ -367,6 +385,8 @@ public class AdminServiceImpl implements AdminService {
         log.info("AdminServiceImpl.getAllOrderList :: orderDTOList.getContent() : {}", orderDTOList.getContent());
 
         List<AdminOrderResponseDTO> responseContent = mappingOrderData(orderDTOList);
+
+        log.info("AdminServiceImpl.getAllOrderList :: responseContent : {}", responseContent);
 
 
 
@@ -420,7 +440,7 @@ public class AdminServiceImpl implements AdminService {
             long orderId = orderDTO.orderId();
 
             for(int j = 0; j < detailList.size(); j++) {
-                if(orderId == detailList.get(j).getId()){
+                if(orderId == detailList.get(j).getProductOrder().getId()){
                     detailDTOList.add(
                             new AdminOrderDetailDTO(detailList.get(j))
                     );
@@ -433,5 +453,157 @@ public class AdminServiceImpl implements AdminService {
 
 
         return responseContent;
+    }
+
+    @Override
+    public PagingResponseDTO<AdminQnAListResponseDTO> getProductQnAList(AdminPageDTO pageDTO, String listType) {
+
+        /*
+            select *
+            from productQnA
+            where stat = 0
+
+            all
+            where x
+         */
+
+        Pageable pageable = PageRequest.of(pageDTO.page() - 1
+                                            , pageDTO.amount()
+                                            , Sort.by("createdAt").descending());
+
+        Page<AdminQnAListResponseDTO> responseDTO = productQnARepository.findAllByAdminProductQnA(pageDTO, listType, pageable);
+
+
+        return new PagingResponseDTO<>(responseDTO, adminNickname);
+    }
+
+    @Override
+    public ProductQnADetailDTO getProductQnADetail(long qnaId) {
+
+        MyPageProductQnADTO qnaDTO = productQnARepository.findByQnAId(qnaId);
+
+        List<MyPageQnAReplyDTO> replyDTOList = productQnAReplyRepository.findAllByQnAId(qnaId);
+
+        return new ProductQnADetailDTO(qnaDTO, replyDTOList, adminNickname);
+    }
+
+    @Override
+    public String patchProductQnAComplete(long qnaId) {
+
+        ProductQnA productQnA = productQnARepository.findById(qnaId).orElseThrow(IllegalArgumentException::new);
+
+        productQnA.setProductQnAStat(true);
+        productQnARepository.save(productQnA);
+
+        return Result.OK.getResultKey();
+    }
+
+    @Override
+    public String postProductQnAReply(QnAReplyInsertDTO insertDTO, Principal principal) {
+
+        String postReplyResult = myPageService.postProductQnAReply(insertDTO, principal);
+
+        if(postReplyResult.equals(Result.OK.getResultKey())){
+            return patchProductQnAComplete(insertDTO.qnaId());
+        }else {
+            throw new IllegalArgumentException();
+        }
+    }
+
+    @Override
+    public PagingResponseDTO<AdminQnAListResponseDTO> getMemberQnAList(AdminPageDTO pageDTO, String listType) {
+
+        Pageable pageable = PageRequest.of(pageDTO.page() - 1
+                , pageDTO.amount()
+                , Sort.by("createdAt").descending());
+
+        Page<AdminQnAListResponseDTO> responseDTO = memberQnARepository.findAllByAdminMemberQnA(pageDTO, listType, pageable);
+
+
+        return new PagingResponseDTO<>(responseDTO, adminNickname);
+    }
+
+    @Override
+    public MemberQnADetailDTO getMemberQnADetail(long qnaId) {
+
+        MemberQnADTO qnaDTO = memberQnARepository.findByQnAId(qnaId);
+
+        List<MyPageQnAReplyDTO> replyDTOList = memberQnAReplyRepository.findAllByQnAId(qnaId);
+
+        return new MemberQnADetailDTO(qnaDTO, replyDTOList, adminNickname);
+    }
+
+    @Override
+    public String patchMemberQnAComplete(long qnaId) {
+        MemberQnA memberQnA = memberQnARepository.findById(qnaId).orElseThrow(IllegalArgumentException::new);
+
+        memberQnA.setMemberQnAStat(true);
+        memberQnARepository.save(memberQnA);
+
+        return Result.OK.getResultKey();
+    }
+
+    @Override
+    public String postMemberQnAReply(QnAReplyInsertDTO insertDTO, Principal principal) {
+
+        log.info("AdminServiceImpl.postMemberQnAReply :: insertDTO : {}", insertDTO);
+
+        String postReplyResult = myPageService.postMemberQnAReply(insertDTO, principal);
+
+        if(postReplyResult.equals(Result.OK.getResultKey())){
+            return patchMemberQnAComplete(insertDTO.qnaId());
+        }else {
+            throw new IllegalArgumentException();
+        }
+
+    }
+
+    @Override
+    public ResponseListDTO<AdminQnAClassificationDTO> getQnAClassification() {
+
+        List<QnAClassification> entity = qnAClassificationRepository.findAll(Sort.by("id").ascending());
+        List<AdminQnAClassificationDTO> responseList = new ArrayList<>();
+
+        entity.forEach(value ->
+                responseList.add(AdminQnAClassificationDTO.builder()
+                        .id(value.getId())
+                        .name(value.getQnaClassificationName())
+                        .build())
+        );
+
+
+        return new ResponseListDTO<>(responseList, new UserStatusDTO(adminNickname));
+    }
+
+    @Override
+    public String postQnAClassification(String classificationName) {
+
+        QnAClassification entity = QnAClassification.builder()
+                .qnaClassificationName(classificationName)
+                .build();
+
+        qnAClassificationRepository.save(entity);
+
+        return Result.OK.getResultKey();
+    }
+
+    @Override
+    public String deleteQnAClassification(long classificationId) {
+
+        qnAClassificationRepository.deleteById(classificationId);
+
+        return Result.OK.getResultKey();
+    }
+
+    @Override
+    public PagingResponseDTO<AdminMemberDTO> getMemberList(AdminPageDTO pageDTO) {
+
+        Pageable pageable = PageRequest.of(pageDTO.page() - 1
+                                        , pageDTO.amount()
+                                        , Sort.by("createdAt").descending());
+
+        Page<AdminMemberDTO> responseContent = memberRepository.findMember(pageDTO, pageable);
+
+        return new PagingResponseDTO<>(responseContent, adminNickname);
     }
 }
