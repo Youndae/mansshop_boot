@@ -35,3 +35,14 @@ export const getPrevNumber = (pagingData) => {
 export const getNextNumber = (pagingData) => {
     return pagingData.endPage + 1;
 }
+
+export const pagingSubmit = (page, keyword, list, navigate) => {
+    if(keyword === null)
+        navigate(`?page=${page}`)
+    else
+        navigate(`?keyword=${keyword}&page=${page}&list=${list}`)
+}
+
+export const searchSubmit = (keyword, navigate) => {
+    navigate(`?keyword=${keyword}&list=all`);
+}

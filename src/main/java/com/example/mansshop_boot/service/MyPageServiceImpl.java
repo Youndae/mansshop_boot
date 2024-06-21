@@ -219,8 +219,9 @@ public class MyPageServiceImpl implements MyPageService{
     public ProductQnADetailDTO getProductQnADetail(long productQnAId, Principal principal){
         String userId = principalService.getUserIdByPrincipal(principal);
 
-        MyPageProductQnADTO qnaDTO = productQnARepository.findByIdAndUserId(productQnAId, userId);
-        if(qnaDTO == null)
+        MyPageProductQnADTO qnaDTO = productQnARepository.findByQnAId(productQnAId);
+
+        if(qnaDTO == null || !qnaDTO.writer().equals(userId))
             throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
 
         List<MyPageQnAReplyDTO> replyDTOList = productQnAReplyRepository.findAllByQnAId(productQnAId);
@@ -339,7 +340,10 @@ public class MyPageServiceImpl implements MyPageService{
 
         String userId = principalService.getUserIdByPrincipal(principal);
 
-        MemberQnADTO qnaDTO = memberQnARepository.findByIdAndUserId(memberQnAId, userId);
+        MemberQnADTO qnaDTO = memberQnARepository.findByQnAId(memberQnAId);
+        if(qnaDTO == null || !qnaDTO.writer().equals(userId))
+            throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
+
         List<MyPageQnAReplyDTO> replyDTOList = memberQnAReplyRepository.findAllByQnAId(memberQnAId);
 
         String nickname = principalService.getNicknameByPrincipal(principal);

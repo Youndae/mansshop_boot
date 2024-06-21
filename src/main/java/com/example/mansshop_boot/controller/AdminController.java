@@ -1,10 +1,15 @@
 package com.example.mansshop_boot.controller;
 
 import com.example.mansshop_boot.domain.dto.admin.*;
+import com.example.mansshop_boot.domain.dto.mypage.qna.MemberQnADetailDTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.ProductQnADetailDTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.req.QnAReplyDTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.req.QnAReplyInsertDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.response.*;
 import com.example.mansshop_boot.service.AdminService;
+import com.example.mansshop_boot.service.MyPageService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.security.Principal;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -26,6 +32,8 @@ import java.util.List;
 public class AdminController {
 
     private final AdminService adminService;
+
+    private final MyPageService myPageService;
 
     @GetMapping("/product")
     public ResponseEntity<PagingResponseDTO<AdminProductListDTO>> getProductList(@RequestParam(name = "keyword", required = false) String keyword
@@ -158,16 +166,6 @@ public class AdminController {
                 .body(responseDTO);
     }
 
-
-    @GetMapping("/product/classification")
-    public ResponseEntity<ResponseListDTO<String>> getProductClassification() {
-
-        ResponseListDTO<String> responseDTO = adminService.getClassification();
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(responseDTO);
-    }
-
     @PostMapping("/product/classification")
     public ResponseEntity<?> postProductClassification() {
 
@@ -190,36 +188,6 @@ public class AdminController {
             type = all -> 전체 주문
          */
 
-        /*
-            data
-
-            content : [
-                {
-                    orderId
-                    recipient
-                    userId
-                    phone
-                    createdAt
-                    address
-                    detailList : [
-                        {
-                            (OrderDetail join productOption, product)
-                            classification
-                            productName
-                            size
-                            color
-                            count
-                            price
-                            reviewStatus
-                        },
-                        ...
-                    ]
-                },
-                ...
-                pagingData
-            ]
-         */
-
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(keyword, searchType, page);
 
         PagingResponseDTO<AdminOrderResponseDTO> responseDTO;
@@ -236,16 +204,6 @@ public class AdminController {
                 .body(responseDTO);
     }
 
-    /*@GetMapping("/order/{orderId}")
-    public ResponseEntity<?> getOrderDetail(@PathVariable(name = "orderId") long orderId) {
-
-        *//*
-            주문 정보 요청
-         *//*
-
-        return null;
-    }*/
-
     @PatchMapping("/order/{orderId}")
     public ResponseEntity<?> patchOrder(@PathVariable(name = "orderId") long orderId) {
 
@@ -257,15 +215,21 @@ public class AdminController {
         return null;
     }
 
-    @GetMapping("/qna/product/{keyword}/{page}")
-    public ResponseEntity<?> getProductQnA(@PathVariable(name = "keyword", required = false) String keyword
-                                        , @PathVariable(name = "page") int page) {
+    @GetMapping("/qna/product")
+    public ResponseEntity<?> getProductQnA(@RequestParam(name = "keyword", required = false) String keyword
+                                        , @RequestParam(name = "page") int page
+                                        , @RequestParam(name = "type") String listType) {
 
         /*
             상품 문의 리스트
          */
 
-        return null;
+        AdminPageDTO pageDTO = new AdminPageDTO(keyword, page);
+
+        PagingResponseDTO<AdminQnAListResponseDTO> responseDTO = adminService.getProductQnAList(pageDTO, listType);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     @GetMapping("/qna/product/{qnaId}")
@@ -275,7 +239,10 @@ public class AdminController {
             상품 문의 상세
          */
 
-        return null;
+        ProductQnADetailDTO responseDTO = adminService.getProductQnADetail(qnaId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     @PatchMapping("/qna/product/{qnaId}")
@@ -285,29 +252,50 @@ public class AdminController {
             상품 문의 답변 완료 처리
          */
 
-        return null;
+        String responseMessage = adminService.patchProductQnAComplete(qnaId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
     }
 
     @PostMapping("/qna/product/reply")
-    public ResponseEntity<?> postProductQnAReply() {
+    public ResponseEntity<?> postProductQnAReply(@RequestBody QnAReplyInsertDTO insertDTO, Principal principal) {
 
         /*
             상품 문의 답변 작성
             qnaId, content를 받음.
          */
 
-        return null;
+        String responseMessage = adminService.postProductQnAReply(insertDTO, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
     }
 
-    @GetMapping("/qna/member/{keyword}/{page}")
-    public ResponseEntity<?> getMemberQnA(@PathVariable(name = "keyword", required = false) String keyword
-                                            , @PathVariable(name = "page") int page) {
+    @PatchMapping("/qna/product/reply")
+    public ResponseEntity<ResponseMessageDTO> patchProductQnAReply(@RequestBody QnAReplyDTO replyDTO, Principal principal) {
+
+        String responseMessage = myPageService.patchProductQnAReply(replyDTO, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
+    }
+
+    @GetMapping("/qna/member")
+    public ResponseEntity<?> getMemberQnA(@RequestParam(name = "keyword", required = false) String keyword
+                                        , @RequestParam(name = "page") int page
+                                        , @RequestParam(name = "type") String listType) {
 
         /*
             회원 문의 리스트
          */
 
-        return null;
+        AdminPageDTO pageDTO = new AdminPageDTO(keyword, page);
+
+        PagingResponseDTO<AdminQnAListResponseDTO> responseDTO = adminService.getMemberQnAList(pageDTO, listType);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     @GetMapping("/qna/member/{qnaId}")
@@ -317,7 +305,10 @@ public class AdminController {
             회원 문의 상세
          */
 
-        return null;
+        MemberQnADetailDTO responseDTO = adminService.getMemberQnADetail(qnaId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     @PatchMapping("/qna/member/{qnaId}")
@@ -327,11 +318,14 @@ public class AdminController {
             회원 문의 답변 완료 처리
          */
 
-        return null;
+        String responseMessage = adminService.patchMemberQnAComplete(qnaId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
     }
 
     @PostMapping("/qna/member/reply")
-    public ResponseEntity<?> postMemberQnAReply() {
+    public ResponseEntity<?> postMemberQnAReply(@RequestBody QnAReplyInsertDTO insertDTO, Principal principal) {
 
         /*
             회원 문의 답변 작성
@@ -340,29 +334,77 @@ public class AdminController {
             처리 이전 사용자가 답변을 작성하는 경우 status를 0으로 바꾸도록 먼저 수정해놓고 처리.
          */
 
-        return null;
+        String responseMessage = adminService.postMemberQnAReply(insertDTO, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
     }
 
-    @PostMapping("/qna/classification")
-    public ResponseEntity<?> postQnAClassification() {
+    @PatchMapping("/qna/member/reply")
+    public ResponseEntity<ResponseMessageDTO> patchMemberQnAReply(@RequestBody QnAReplyDTO replyDTO, Principal principal) {
+
+        String responseMessage = myPageService.patchMemberQnAReply(replyDTO, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
+    }
+
+    @GetMapping("/qna/classification")
+    public ResponseEntity<?> getQnAClassification() {
 
         /*
             문의 분류 추가 및 제거.
             제거를 감안해서 처리해야 함.
          */
 
-        return null;
+        ResponseListDTO<AdminQnAClassificationDTO> responseDTO = adminService.getQnAClassification();
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
-    @GetMapping("/member/{keyword}/{page}")
-    public ResponseEntity<?> getMember(@PathVariable(name = "keyword", required = false) String keyword
-                                        , @PathVariable(name = "page") int page) {
+    @PostMapping("/qna/classification")
+    public ResponseEntity<?> postQnAClassification(@RequestBody Map<String, String> classification) {
+
+        /*
+            문의 분류 추가 및 제거.
+            제거를 감안해서 처리해야 함.
+         */
+
+        String responseMessage = adminService.postQnAClassification(classification.get("name"));
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
+    }
+
+    @DeleteMapping("/qna/classification/{qnaClassificationId}")
+    public ResponseEntity<?> deleteQnAClassification(@PathVariable(name = "qnaClassificationId") Long classificationId) {
+
+        /*
+            문의 분류 추가 및 제거.
+            제거를 감안해서 처리해야 함.
+         */
+
+        String responseMessage = adminService.deleteQnAClassification(classificationId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
+    }
+
+    @GetMapping("/member")
+    public ResponseEntity<PagingResponseDTO<AdminMemberDTO>> getMember(@RequestParam(name = "keyword", required = false) String keyword
+                                        , @RequestParam(name = "page") int page) {
 
         /*
             회원 목록
          */
 
-        return null;
+        AdminPageDTO pageDTO = new AdminPageDTO(keyword, page);
+
+        PagingResponseDTO<AdminMemberDTO> responseDTO = adminService.getMemberList(pageDTO);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     @GetMapping("/member/{userId}")

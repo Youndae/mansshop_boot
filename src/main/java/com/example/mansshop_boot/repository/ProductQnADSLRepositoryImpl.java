@@ -1,9 +1,12 @@
 package com.example.mansshop_boot.repository;
 
+import com.example.mansshop_boot.domain.dto.admin.AdminQnAListResponseDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.MyPageProductQnADTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.ProductQnAListDTO;
+import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.product.ProductQnADTO;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -88,7 +91,7 @@ public class ProductQnADSLRepositoryImpl implements ProductQnADSLRepository{
     }
 
     @Override
-    public MyPageProductQnADTO findByIdAndUserId(long productQnAId, String userId) {
+    public MyPageProductQnADTO findByQnAId(long productQnAId) {
 
         return jpaQueryFactory.select(
                 Projections.constructor(
@@ -106,7 +109,55 @@ public class ProductQnADSLRepositoryImpl implements ProductQnADSLRepository{
                 )
         )
                 .from(productQnA)
-                .where(productQnA.id.eq(productQnAId).and(productQnA.member.userId.eq(userId)))
+                .where(productQnA.id.eq(productQnAId))
                 .fetchOne();
+    }
+
+    @Override
+    public Page<AdminQnAListResponseDTO> findAllByAdminProductQnA(AdminPageDTO pageDTO, String listType, Pageable pageable) {
+
+        List<AdminQnAListResponseDTO> list = jpaQueryFactory.select(
+                Projections.constructor(
+                        AdminQnAListResponseDTO.class
+                        , productQnA.id.as("qnaId")
+                        , product.classification.id.as("classification")
+                        , product.productName.as("title")
+                        , new CaseBuilder()
+                                .when(productQnA.member.nickname.isNull())
+                                .then(productQnA.member.userName)
+                                .otherwise(productQnA.member.nickname)
+                                .as("writer")
+                        , productQnA.createdAt
+                        , productQnA.productQnAStat
+                )
+        )
+                .from(productQnA)
+                .innerJoin(product)
+                .on(productQnA.product.id.eq(product.id))
+                .where(adminProductQnASearch(pageDTO, listType))
+                .orderBy(productQnA.createdAt.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        JPAQuery<Long> count = jpaQueryFactory.select(productQnA.countDistinct())
+                                        .from(productQnA)
+                                        .where(adminProductQnASearch(pageDTO, listType));
+
+        return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
+    }
+
+    public BooleanExpression adminProductQnASearch(AdminPageDTO pageDTO, String listType) {
+        if(listType.equals("new")){
+            if(pageDTO.keyword() != null)
+                return productQnA.member.userId.eq(pageDTO.keyword()).and(productQnA.productQnAStat.isFalse());
+            else
+                return productQnA.productQnAStat.isFalse();
+        }else if(listType.equals("all")){
+            if(pageDTO.keyword() != null)
+                return productQnA.member.userId.eq(pageDTO.keyword());
+        }
+
+        return null;
     }
 }

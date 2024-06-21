@@ -13,6 +13,7 @@ public record AdminOrderResponseDTO(
         , String phone
         , LocalDateTime createdAt
         , String address
+        , int orderStatus
         , List<AdminOrderDetailDTO> detailList
 ) {
 }

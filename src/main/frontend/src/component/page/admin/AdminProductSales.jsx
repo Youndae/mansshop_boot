@@ -1,4 +1,5 @@
 import React from 'react';
+import AdminSideNav from "../../ui/nav/AdminSideNav";
 
 function AdminProductSales() {
     /*
@@ -13,6 +14,22 @@ function AdminProductSales() {
         테이블 하단에는 상품명 검색과 페이징.
 
      */
+
+    return (
+        <div className="mypage">
+            <AdminSideNav
+                categoryStatus={'sales'}
+            />
+            <div className="admin-content">
+                <div className="admin-content-header">
+
+                </div>
+                <div className="admin-content-content">
+
+                </div>
+            </div>
+        </div>
+    )
 }
 
 export default AdminProductSales;

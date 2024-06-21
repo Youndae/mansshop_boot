@@ -126,8 +126,8 @@ function App() {
               <Route path='admin/order/all?page=:page&keyword=:keyword&type=:type' element={<AdminAllOrder />} />
 
               <Route path='admin/qna/product' element={<AdminProductQnA />} />
-              <Route path='admin/qna/product?page=:page' element={<AdminProductQnA />} />
-              <Route path='admin/qna/product?keyword=:keyword&page=:page' element={<AdminProductQnA />} />
+              <Route path='admin/qna/product?page=:page&list=:list' element={<AdminProductQnA />} />
+              <Route path='admin/qna/product?keyword=:keyword&page=:page&list=:list' element={<AdminProductQnA />} />
               <Route path='admin/qna/product/:qnaId' element={<AdminProductQnADetail />} />
               <Route path='admin/qna/member' element={<AdminMemberQnA />} />
               <Route path='admin/qna/member?page=:page' element={<AdminMemberQnA />} />

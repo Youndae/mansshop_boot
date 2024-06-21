@@ -34,5 +34,9 @@ public class ProductQnA {
     @CreationTimestamp
     private LocalDate createdAt;
 
-    private int productQnAStat;
+    private boolean productQnAStat;
+
+    public void setProductQnAStat(boolean productQnAStat) {
+        this.productQnAStat = productQnAStat;
+    }
 }

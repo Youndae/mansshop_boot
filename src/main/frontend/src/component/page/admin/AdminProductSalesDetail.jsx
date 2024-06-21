@@ -1,4 +1,5 @@
 import React from 'react';
+import AdminSideNav from "../../ui/nav/AdminSideNav";
 
 function AdminProductSalesDetail() {
     /*
@@ -8,6 +9,22 @@ function AdminProductSalesDetail() {
         총 판매량
         옵션별 판매량과 총 매출을 출력.
      */
+
+    return (
+        <div className="mypage">
+            <AdminSideNav
+                categoryStatus={'sales'}
+            />
+            <div className="admin-content">
+                <div className="admin-content-header">
+
+                </div>
+                <div className="admin-content-content">
+
+                </div>
+            </div>
+        </div>
+    )
 }
 
 export default AdminProductSalesDetail;

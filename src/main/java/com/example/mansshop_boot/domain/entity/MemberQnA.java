@@ -40,11 +40,15 @@ public class MemberQnA {
     @CreationTimestamp
     private LocalDate updatedAt;
 
-    private int memberQnAStat;
+    private boolean memberQnAStat;
 
     public void setModifyData(MemberQnAModifyDTO modifyDTO, QnAClassification qnaClassification) {
         this.qnAClassification = qnaClassification;
         this.memberQnATitle = modifyDTO.title();
         this.memberQnAContent = modifyDTO.content();
+    }
+
+    public void setMemberQnAStat(boolean memberQnAStat) {
+        this.memberQnAStat = memberQnAStat;
     }
 }

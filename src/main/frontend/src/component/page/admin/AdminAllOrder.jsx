@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import AdminSideNav from "../../ui/nav/AdminSideNav";
 import {useDispatch, useSelector} from "react-redux";
 import {Link, useNavigate, useSearchParams} from "react-router-dom";
@@ -8,6 +8,8 @@ import {setMemberObject} from "../../../modules/loginModule";
 import Paging from "../../ui/Paging";
 
 import dayjs from "dayjs";
+import AdminOrderModal from "./modal/AdminOrderModal";
+import {numberComma} from "../../../modules/numberCommaModule";
 
 /*
         모든 주문 목록.
@@ -36,15 +38,18 @@ function AdminAllOrder() {
         activeNo: page,
     });
     const [keywordInput, setKeywordInput] = useState('');
-    const [detailData, setDetailData] = useState({
-        recipient : '',
-        uid: '',
-        orderDate: '',
+    const [modalOrderData, setModalOrderData] = useState({
+        orderId: 0,
+        recipient: '',
+        userId: '',
         phone: '',
-        addr: '',
-    });
-    const [detailProductData, setDetailProductData] = useState([]);
+        date: '',
+        address: '',
+        detailList: [],
+    })
     const [keywordSelectValue, setKeywordSelectValue] = useState('recipient');
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const modalRef = useRef(null);
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -83,9 +88,12 @@ function AdminAllOrder() {
     }
 
     const handleOnClick = (idx) => {
-        // const value = e.target.attribute;
-
         console.log('handleOnClick : ', idx);
+
+        console.log('handleOnClick data : ', data[idx]);
+
+        setModalOrderData(data[idx]);
+        setModalIsOpen(true);
     }
 
     const handlePageBtn = (e) => {
@@ -121,6 +129,15 @@ function AdminAllOrder() {
         setKeywordInput(e.target.value);
     }
 
+    const closeModal = (e) => {
+
+        if(modalIsOpen && modalRef.current && !modalRef.current.contains(e.target)){
+            setModalIsOpen(false);
+
+            document.body.style.cssText = '';
+        }
+    }
+
     return (
         <div className="mypage">
             <AdminSideNav
@@ -137,6 +154,7 @@ function AdminAllOrder() {
                             <th>사용자 아이디</th>
                             <th>연락처</th>
                             <th>주문일</th>
+                            <th>처리 상태</th>
                         </thead>
                         <tbody>
                             {data.map((bodyData, index) => {
@@ -146,11 +164,58 @@ function AdminAllOrder() {
                                         <td>{bodyData.userId}</td>
                                         <td>{bodyData.phone}</td>
                                         <td>{dayjs(bodyData.createdAt).format('YYYY-MM-DD HH:mm')}</td>
+                                        <td>{bodyData.orderStatus}</td>
                                     </tr>
                                 )
                             })}
                         </tbody>
                     </table>
+                    {modalIsOpen && (
+                        <AdminOrderModal
+                            closeModal={closeModal}
+                            modalRef={modalRef}
+                            render={() =>
+                                <>
+                                    <div className="admin-order-info">
+                                        <div className="form-group">
+                                            <label>받는 사람 : </label>
+                                            <span>{modalOrderData.recipient}</span>
+                                        </div>
+                                        <div className="form-group">
+                                            <label>사용자 아이디 : </label>
+                                            <span>{modalOrderData.userId}</span>
+                                        </div>
+                                        <div className="form-group">
+                                            <label>연락처 : </label>
+                                            <span>{modalOrderData.phone}</span>
+                                        </div>
+                                        <div className="form-group">
+                                            <label>주문일 : </label>
+                                            <span>{dayjs(modalOrderData.createdAt).format('YYYY-MM-DD dd요일 HH:mm')}</span>
+                                        </div>
+                                        <div className="form-group">
+                                            <label>배송지 : </label>
+                                            <span>{modalOrderData.address}</span>
+                                        </div>
+                                        <div className="form-group">
+                                            <label>배송 상태 : </label>
+                                            <span>{modalOrderData.orderStatus}</span>
+                                        </div>
+                                    </div>
+                                    <div className="admin-order-detail">
+                                        {modalOrderData.detailList.map((data, index) => {
+                                            return (
+                                                <ModalOrderDetail
+                                                    key={index}
+                                                    data={data}
+                                                />
+                                            )
+                                        })}
+                                    </div>
+                                </>
+                        }
+                        />
+                    )}
                     <div className="admin-search">
                         <select className="admin-order-search" value={searchType} onChange={handleSelectOnChange}>
                             <option value={'recipient'}>받는 사람</option>
@@ -165,6 +230,49 @@ function AdminAllOrder() {
                             onClickNext={handlePageNext}
                             className={'like-paging'}
                         />
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+function ModalOrderDetail(props) {
+    const { data } = props;
+    let reviewText = '미작성'
+    if(data.reviewStatus === 1)
+        reviewText = '작성'
+    else if(data.reviewStatus === 2)
+        reviewText = '삭제'
+
+    return (
+        <div className="admin-order-detail-form">
+            <h3>{data.productName}</h3>
+            <div className="admin-order-detail-info">
+                <div className="form-group">
+                    <label>분류 : </label>
+                    <span>{data.classification}</span>
+                </div>
+                <div className="detail-info-form-group">
+                    <div className="form-group">
+                        <label>사이즈 : </label>
+                        <span>{data.size}</span>
+                    </div>
+                    <div className="form-group">
+                        <label>컬러 : </label>
+                        <span>{data.color}</span>
+                    </div>
+                    <div className="form-group">
+                        <label>수량 : </label>
+                        <span>{data.count}</span>
+                    </div>
+                    <div className="form-group">
+                        <label>금액 : </label>
+                        <span>{numberComma(data.price)}</span>
+                    </div>
+                    <div className="form-group">
+                        <label>리뷰 작성 여부 : </label>
+                        <span>{reviewText}</span>
                     </div>
                 </div>
             </div>

@@ -1,7 +1,9 @@
 package com.example.mansshop_boot.repository;
 
+import com.example.mansshop_boot.domain.dto.admin.AdminQnAListResponseDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.MemberQnADTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.MemberQnAListDTO;
+import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.entity.MemberQnA;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,7 +11,9 @@ import org.springframework.data.domain.Pageable;
 public interface MemberQnADSLRepository {
     Page<MemberQnAListDTO> findAllByUserId(String userId, Pageable pageable);
 
-    MemberQnADTO findByIdAndUserId(long memberQnAId, String userId);
+    MemberQnADTO findByQnAId(long memberQnAId);
 
     MemberQnA findModifyDataByIdAndUserId(long qnaId, String userId);
+
+    Page<AdminQnAListResponseDTO> findAllByAdminMemberQnA(AdminPageDTO pageDTO, String listType, Pageable pageable);
 }

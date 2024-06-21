@@ -10,6 +10,7 @@ public record AdminOrderDTO(
         , String phone
         , LocalDateTime createdAt
         , String address
+        , int orderStatus
 ) {
     public AdminOrderResponseDTO toResponseDTO(List<AdminOrderDetailDTO> detailList){
         return AdminOrderResponseDTO.builder()
@@ -19,6 +20,7 @@ public record AdminOrderDTO(
                 .phone(phone)
                 .createdAt(createdAt)
                 .address(address)
+                .orderStatus(orderStatus)
                 .detailList(detailList)
                 .build();
     }

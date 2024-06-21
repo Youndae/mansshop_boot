@@ -42,7 +42,7 @@ class ProductQnARepositoryTest {
         String userId = "coco";
         long productQnAId = 1L;
 
-        MyPageProductQnADTO dto = productQnARepository.findByIdAndUserId(productQnAId, userId);
+        MyPageProductQnADTO dto = productQnARepository.findByQnAId(productQnAId);
 
         List<MyPageQnAReplyDTO> replyDTOList = productQnAReplyRepository.findAllByQnAId(productQnAId);
 
