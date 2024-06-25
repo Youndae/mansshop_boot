@@ -42,6 +42,8 @@ public class QProductOrder extends EntityPathBase<ProductOrder> {
 
     public final StringPath paymentType = createString("paymentType");
 
+    public final NumberPath<Integer> productCount = createNumber("productCount", Integer.class);
+
     public final SetPath<ProductOrderDetail, QProductOrderDetail> productOrderDetailSet = this.<ProductOrderDetail, QProductOrderDetail>createSet("productOrderDetailSet", ProductOrderDetail.class, QProductOrderDetail.class, PathInits.DIRECT2);
 
     public final StringPath recipient = createString("recipient");

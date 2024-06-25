@@ -606,4 +606,409 @@ public class AdminServiceImpl implements AdminService {
 
         return new PagingResponseDTO<>(responseContent, adminNickname);
     }
+
+    @Override
+    public ResponseDTO<AdminPeriodSalesResponseDTO> getPeriodSales(int term) {
+        /*
+            content 리스트 조회
+            productOrderRepository.findPeriodList(dateTime);
+
+            해당연도의 총 매출
+            해당 연도의 판매량
+            해당 연도의 주문량
+
+            1. term 연도에 따른 LocalDateTime 값 생성
+            2. 리스트 조회(findPeriodList)
+            3. 1 ~ 12까지 반복문을 돌면서 content 리스트 생성 -> 프론트에서 따로 처리하지 않도록 하기 위해 백에서 모두 파싱해주고 넘긴다.
+                3-1. 반복문을 수행하면서 매출, 판매량, 주문량을 계속해서 ++
+            4. 반복문 종료 후 responseDTO 빌드
+            5. 반환
+
+            사용 DTO
+                조회와 리스트로 처리될 contentDTO
+                    int month
+                    long monthSales
+                    long monthDeliveryFee
+                    long monthSalesQuantity
+                    long monthOrderQuantity
+                반환될 responseDTO
+                    List<contentDTO>
+                    long yearSales
+                    long yearDeliveryFee
+                    long yearSalesQuantity
+                    long yearOrderQuantity
+         */
+
+
+        List<AdminPeriodSalesListDTO> selectList = productOrderRepository.findPeriodList(term);
+        List<AdminPeriodSalesListDTO> contentList = new ArrayList<>();
+        long yearSales = 0;
+        long yearSalesQuantity = 0;
+        long yearOrderQuantity = 0;
+
+
+        for(int i = 1; i < 13; i++){
+            AdminPeriodSalesListDTO content = new AdminPeriodSalesListDTO(i);
+
+            for(int j = 0; j < selectList.size(); j++) {
+                if(selectList.get(j).date() == i){
+                    content = selectList.get(j);
+
+                    yearSales += content.sales();
+                    yearSalesQuantity += content.salesQuantity();
+                    yearOrderQuantity += content.orderQuantity();
+
+                    selectList.remove(j);
+
+                    break;
+                }
+            }
+
+            contentList.add(content);
+        }
+
+
+
+        return new ResponseDTO<AdminPeriodSalesResponseDTO>(
+                new AdminPeriodSalesResponseDTO(
+                        contentList
+                        , yearSales
+                        , yearSalesQuantity
+                        , yearOrderQuantity
+                ),
+                new UserStatusDTO(adminNickname)
+        );
+    }
+
+    @Override
+    public ResponseDTO<AdminPeriodMonthDetailResponseDTO> getPeriodSalesDetail(String term) {
+
+        /*
+            term format = "YYYY-MM"
+
+            splice["YYYY", "MM"];
+            Integer.parseInt([0], [1]);
+
+            LocalDateTime create
+
+            응답할 데이터
+                월 매출
+                월 판매량
+                월 주문량
+                전년동월 매출 비교
+                전년동월 판매량 비교
+                전년동월 주문량 비교
+
+                List<?> 최고 판매량 상품. size = 5
+                    상품명
+                    판매량
+                    매출
+
+                List<?> 분류별 매출 정보(view table?)
+                    OUTER
+                    TOP
+                    PANTS
+                    SHOES
+                    BAGS
+                        매출
+                        판매량
+
+                List<?> 일별 매출 정보. size = 28 ~ 31
+                    날짜 ("YYYY-MM-DD")
+                    매출
+                    판매량
+
+            1. 월 정보 조회. group by로 통계만 필요. 전년동월 데이터 조회까지 2번 조회 요청.
+            2. productOrderDetail에서 productId를 기준으로 판매량 역순 정렬 limit 5
+            3.      ""               productId 를 통해 classification 테이블과 조인, 그 상태에서 group by로 통계
+            4. productOrder에서 createdAt을 기준으로 group by. 월별 조회와 동일하게 처리하되 조회 기준만 일별로 수정.
+
+            사용 DTO
+                responseDTO
+                    long monthSales
+                    long monthSalesQuantity
+                    long monthOrderQuantity
+                    long beforeYearComparison
+
+                    List<?> bestProduct
+                    List<?> classificationSalesList
+                    List<?> dailySalesList
+
+                return ResponseDTO
+         */
+
+        String[] termSplit = term.split("-");
+        int year = Integer.parseInt(termSplit[0]);
+        int month = Integer.parseInt(termSplit[1]);
+
+        LocalDateTime startDate = LocalDateTime.of(year, month, 1, 0, 0);
+        int lastDay = startDate.getMonth().length(startDate.toLocalDate().isLeapYear());
+        LocalDateTime endDate = LocalDateTime.of(
+                year
+                , month
+                , lastDay
+                , 0
+                , 0
+        );
+
+        AdminPeriodSalesStatisticsDTO monthStatistics = productOrderRepository.findPeriodStatistics(startDate, endDate);
+        List<AdminBestSalesProductDTO> bestProductList = productOrderDetailRepository.findPeriodBestProduct(startDate, endDate);
+        List<AdminPeriodClassificationDTO> classificationList = productOrderDetailRepository.findPeriodClassification(startDate, endDate);
+        List<Classification> classification = classificationRepository.findAll(Sort.by("classificationStep").descending());
+        List<AdminPeriodSalesListDTO> dailySalesList = productOrderRepository.findPeriodDailyList(startDate, endDate);
+
+        startDate = startDate.minusYears(1);
+        endDate = endDate.minusYears(1);
+
+        AdminPeriodSalesStatisticsDTO lastYearStatistics = productOrderRepository.findPeriodStatistics(startDate, endDate);
+
+        List<AdminPeriodClassificationDTO> classificationResponseDTO = new ArrayList<>();
+        for(int i = 0; i < classification.size(); i++) {
+            String id = classification.get(i).getId();
+            AdminPeriodClassificationDTO content = new AdminPeriodClassificationDTO(id, 0, 0);
+
+            for(int j = 0; j < classificationList.size(); j++) {
+                if(id.equals(classificationList.get(j).classification())){
+                    content = classificationList.get(j);
+                    break;
+                }
+            }
+
+            classificationResponseDTO.add(content);
+        }
+
+        List<AdminPeriodSalesListDTO> dailySalesResponseDTO = new ArrayList<>();
+
+        for(int i = 1; i <= lastDay; i++) {
+            int day = i;
+            AdminPeriodSalesListDTO content = new AdminPeriodSalesListDTO(day);
+
+            for(int j = 0; j < dailySalesList.size(); j++) {
+                if(day == dailySalesList.get(j).date()){
+                    content = dailySalesList.get(j);
+                    dailySalesList.remove(j);
+                    break;
+                }
+            }
+
+            dailySalesResponseDTO.add(content);
+        }
+
+        AdminPeriodMonthDetailResponseDTO responseContent = new AdminPeriodMonthDetailResponseDTO(
+                                                                    monthStatistics
+                                                                    , lastYearStatistics
+                                                                    , bestProductList
+                                                                    , classificationResponseDTO
+                                                                    , dailySalesResponseDTO
+                                                            );
+
+
+
+
+        return new ResponseDTO<AdminPeriodMonthDetailResponseDTO>(responseContent, new UserStatusDTO(adminNickname));
+    }
+
+    @Override
+    public ResponseDTO<AdminClassificationSalesResponseDTO> getSalesByClassification(String term, String classification) {
+
+        /*
+            상품 분류별 월 매출 정보 조회.
+
+            term = "YYYY-MM"
+
+            월별 상세와 마찬가지로 LocalDateTime 생성
+
+            해당 기간에 속하는 데이터 group by로 통계.
+            상품명을 기준으로 처리하되 option을 같이 조회.
+
+            조회 데이터
+                상품명
+                사이즈
+                컬러
+                판매량
+                매출
+
+            조회 이후 반복문으로 훑으면서 전체 매출과 판매량 연산 후 반환
+
+            사용 DTO
+                responseDTO
+                    String classification
+                    long totalSales
+                    long totalSalesQuantity
+                    List<?> productList
+                        String productName
+                        String size
+                        String color
+                        long productSales
+                        long productSalesQuantity
+
+                return ResponseDTO
+         */
+
+        String[] termSplit = term.split("-");
+        int year = Integer.parseInt(termSplit[0]);
+        int month = Integer.parseInt(termSplit[1]);
+
+        LocalDateTime startDate = LocalDateTime.of(year, month, 1, 0, 0);
+        int lastDay = startDate.getMonth().length(startDate.toLocalDate().isLeapYear());
+        LocalDateTime endDate = LocalDateTime.of(
+                year
+                , month
+                , lastDay
+                , 0
+                , 0
+        );
+
+        AdminClassificationSalesDTO classificationSalesDTO = productOrderDetailRepository.findPeriodClassificationSales(startDate, endDate, classification);
+        List<AdminClassificationSalesProductListDTO> productList = productOrderDetailRepository.findPeriodClassificationProductSales(startDate, endDate, classification);
+
+        AdminClassificationSalesResponseDTO responseContent = new AdminClassificationSalesResponseDTO(classification, classificationSalesDTO, productList);
+
+        return new ResponseDTO<AdminClassificationSalesResponseDTO>(responseContent, new UserStatusDTO(adminNickname));
+    }
+
+    @Override
+    public ResponseDTO<AdminPeriodSalesResponseDTO> getSalesByDay(String term) {
+
+        /*
+            일 매출 정보
+
+            월 매출 정보와 마찬가지로 출력.
+            일 매출에 대한 집계와 각 상품 분류별 집계를 반환.
+
+            term = "YYYY-MM-DD"
+
+            해당일의 데이터를 group by로 집계
+            상품 분류별 데이터를 집계
+
+            사용 DTO
+                responseDTO
+                    long totalSales
+                    long totalSalesQuantity
+                    long totalOrderQuantity
+
+                    List<?> classificationSalesList(월 매출 정보 반환시 사용한 DTO 재활용)
+                        classificationName
+                        classificationSales
+                        classificationSalesQuantity
+
+            return ResponseDTO
+         */
+        String[] termSplit = term.split("-");
+        int year = Integer.parseInt(termSplit[0]);
+        int month = Integer.parseInt(termSplit[1]);
+        int day = Integer.parseInt(termSplit[2]);
+
+        LocalDateTime startDate = LocalDateTime.of(year, month, day, 0, 0);
+        LocalDateTime endDate = LocalDateTime.of(year, month, day, 23, 59, 59, 999999999);
+
+        AdminClassificationSalesDTO salesDTO = productOrderRepository.findDailySales(startDate, endDate);
+        List<AdminPeriodClassificationDTO> classificationList = productOrderDetailRepository.findPeriodClassification(startDate, endDate);
+
+        return new ResponseDTO<>(
+                new AdminPeriodSalesResponseDTO(
+                        classificationList
+                        , salesDTO.sales()
+                        , salesDTO.salesQuantity()
+                        , salesDTO.orderQuantity()
+                )
+                , new UserStatusDTO(adminNickname)
+        );
+    }
+
+    @Override
+    public PagingResponseDTO<AdminDailySalesResponseDTO> getOrderListByDay(String term, int page) {
+
+        /*
+            해당 날짜의 주문 내역 조회
+
+            term = "YYYY-MM-DD"
+
+            해당 일의 모든 주문 내역 조회(ProductOrder)
+            조회된 내역의 id를 리스트화
+            리스트를 통해 ProductOrderDetail 조회
+
+            두 데이터를 매핑 후 전달.
+            매핑 시 판매량, 매출, 주문량, 카드 결제, 현금 결제 연산
+
+            사용 DTO
+                responseDTO
+                    long totalSales
+                    long totalSalesQuantity
+                    long totalOrderQuantity
+
+                    List<?> content(이것도 재활용할 DTO 있을듯?)
+                        long orderTotalPrice
+                        long deliveryFee
+                        String paymentType
+                        List<?> detailList(재활용 할 DTO가 있지 않을까?)
+                            productName
+                            size
+                            color
+                            count
+                            price
+                    pagingData
+
+            return PagingResponseDTO(새로 생성 필요)
+         */
+
+        String[] termSplit = term.split("-");
+        int year = Integer.parseInt(termSplit[0]);
+        int month = Integer.parseInt(termSplit[1]);
+        int day = Integer.parseInt(termSplit[2]);
+
+        LocalDateTime startDate = LocalDateTime.of(year, month, day, 0, 0);
+        LocalDateTime endDate = LocalDateTime.of(year, month, day, 23, 59, 59, 999999999);
+
+        Pageable pageable = PageRequest.of(page - 1
+                                        , 30
+                                        , Sort.by("createdAt").descending());
+
+        AdminClassificationSalesDTO salesDTO = productOrderRepository.findDailySales(startDate, endDate);
+        Page<ProductOrder> orderList = productOrderRepository.findAllByDay(startDate, endDate, pageable);
+        List<Long> orderIdList = new ArrayList<>();
+        orderList.forEach(data -> orderIdList.add(data.getId()));
+        List<ProductOrderDetail> orderDetailList = productOrderDetailRepository.findByOrderIds(orderIdList);
+
+        List<AdminDailySalesResponseDTO> content = new ArrayList<>();
+        List<AdminDailySalesDetailDTO> detailContent = new ArrayList<>();
+
+        for(int i = 0; i < orderList.getContent().size(); i++) {
+            ProductOrder productOrder = orderList.getContent().get(i);
+
+            for(int j = 0; j < orderDetailList.size(); j++) {
+                if(productOrder.getId() == orderDetailList.get(j).getProductOrder().getId()){
+                    ProductOrderDetail productOrderDetail = orderDetailList.get(j);
+                    detailContent.add(
+                            new AdminDailySalesDetailDTO(
+                                    productOrderDetail.getProduct().getProductName()
+                                    , productOrderDetail.getProductOption().getSize()
+                                    , productOrderDetail.getProductOption().getColor()
+                                    , productOrderDetail.getOrderDetailCount()
+                                    , productOrderDetail.getOrderDetailPrice()
+                            )
+                    );
+                }
+            }
+
+            content.add(
+                    new AdminDailySalesResponseDTO(
+                            productOrder.getOrderTotalPrice()
+                            , productOrder.getDeliveryFee()
+                            , productOrder.getPaymentType()
+                            , detailContent
+                    )
+            );
+            detailContent = new ArrayList<>();
+        }
+
+
+        return new PagingResponseDTO<AdminDailySalesResponseDTO>(
+                content
+                , orderList.isEmpty()
+                , orderList.getNumber()
+                , orderList.getTotalPages()
+                , adminNickname
+        );
+    }
 }

@@ -7,7 +7,9 @@ function AdminProductSalesDetail() {
 
         해당 상품의 총 매출
         총 판매량
-        옵션별 판매량과 총 매출을 출력.
+        옵션별 판매량과 매출을 출력.
+
+        당해, 전년 월별 판매량과 매출을 출력.
      */
 
     return (
