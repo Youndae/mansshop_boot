@@ -46,6 +46,8 @@ public class ProductOrder {
 
     private int orderStat;
 
+    private int productCount;
+
     @OneToMany(mappedBy = "productOrder", cascade = CascadeType.ALL)
     private final Set<ProductOrderDetail> productOrderDetailSet = new HashSet<>();
 

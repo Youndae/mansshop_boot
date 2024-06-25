@@ -60,4 +60,14 @@ public interface AdminService {
     String deleteQnAClassification(long classificationId);
 
     PagingResponseDTO<AdminMemberDTO> getMemberList(AdminPageDTO pageDTO);
+
+    ResponseDTO<AdminPeriodSalesResponseDTO> getPeriodSales(int term);
+
+    ResponseDTO<AdminPeriodMonthDetailResponseDTO> getPeriodSalesDetail(String term);
+
+    ResponseDTO<AdminClassificationSalesResponseDTO> getSalesByClassification(String term, String classification);
+
+    ResponseDTO<AdminPeriodSalesResponseDTO> getSalesByDay(String term);
+
+    PagingResponseDTO<AdminDailySalesResponseDTO> getOrderListByDay(String term, int page);
 }

@@ -417,30 +417,180 @@ public class AdminController {
         return null;
     }
 
-    @GetMapping("/sales/period/{page}/{term}")
-    public ResponseEntity<?> getPeriodSales(@PathVariable(name = "page") int page
-                                            , @PathVariable(name = "term") String term) {
+    /*
+        기간별 매출 리스트
+        연도별 출력으로 처리한다.
+        해당 연도의 모든 월 매출을 리스트화 해서 응답한다.
+     */
+    @GetMapping("/sales/period/{term}")
+    public ResponseEntity<ResponseDTO<AdminPeriodSalesResponseDTO>> getPeriodSales(@PathVariable(name = "term") int term) {
 
         /*
             기간별 매출.
-            term 값으로는
-            day, month, year가 전달.
+            term 값으로는 연도가 전달되어 온다.
+         */
+        /*
+            content : [
+                {
+                    term : 1 ~ 12,
+                    monthSales:
+                    monthDeliveryFee:
+                    monthSalesQuantity:
+                    monthOrderQuantity;
+                },
+                ...
+            ]
+            yearSales
+            yearDeliveryFee
+            yearSalesQuantity
+            yearOrderQuantity
 
          */
 
-        return null;
+        ResponseDTO<AdminPeriodSalesResponseDTO> responseDTO = adminService.getPeriodSales(term);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
-    @GetMapping("/sales/period/{date}")
-    public ResponseEntity<?> getPeriodSalesDetail(@PathVariable(name = "date") String date) {
+    /*
+        기간별 상세 페이지
+        해당월의 매출 정보를 전달.
+        YYYY-MM 형태로 Request
+     */
+
+    @GetMapping("sales/period/detail/{term}")
+    public ResponseEntity<ResponseDTO<AdminPeriodMonthDetailResponseDTO>> getPeriodSalesDetail(@PathVariable(name = "term") String term) {
 
         /*
-            어떻게 처리할지 보류상태.
-            전달되는 쿼리 스트링도 변경될수 있음.
+            long monthSales
+            long monthSalesQuantity
+            long monthOrderQuantity
+            long beforeYearComparison
+
+            List<?> bestProduct : [
+                {
+                    productName
+                    productSalesQuantity
+                    productSales
+                } * 5
+            ]
+
+            List<?> classificationSalesList : [
+                {
+                    classification
+                    classificationSales
+                    classificationSalesQuantity
+                },
+                ...
+            ]
+
+            List<?> dailySalesList: [
+                {
+                    day
+                    dailySalesQuantity
+                    dailySales
+                },
+                ...
+            ]
          */
 
-        return null;
+        ResponseDTO<AdminPeriodMonthDetailResponseDTO> responseDTO = adminService.getPeriodSalesDetail(term);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
+
+    /*
+        상품 분류별 월 매출 데이터 조회
+        해당 기간의 상품 분류에 해당하는 데이터의 상품명, 옵션, 수량, 금액을 전달한다.
+     */
+    @GetMapping("/sales/period/detail/classification")
+    public ResponseEntity<ResponseDTO<AdminClassificationSalesResponseDTO>> getSalesByClassification(@RequestParam(value = "term")String term
+                                                , @RequestParam(value = "classification") String classification) {
+        /*
+            classification
+            totalSales
+            totalSalesQuantity
+            List<?> productList : [
+                {
+                    productName
+                    productSalesQuantity
+                    productSales
+                },
+                ...
+            ]
+         */
+
+        ResponseDTO<AdminClassificationSalesResponseDTO> responseDTO = adminService.getSalesByClassification(term, classification);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
+    }
+
+    /*
+        일별 매출 데이터 조회
+        해당 일의 매출 데이터를 전달.
+     */
+    @GetMapping("/sales/period/detail/day")
+    public ResponseEntity<ResponseDTO<AdminPeriodSalesResponseDTO>> getSalesByDay(@RequestParam(value = "term") String term) {
+
+        /*
+            totalSales
+            totalSalesQuantity
+            totalOrderQuantity
+
+            List<?> classificationSalesList : [
+                {
+                    classification
+                    classificationSales
+                    classificationSalesQuantity
+                },
+                ...
+            ]
+         */
+
+        ResponseDTO<AdminPeriodSalesResponseDTO> responseDTO = adminService.getSalesByDay(term);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
+    }
+
+    /*
+        특정 날짜의 모든 주문 내역 조회
+        페이징으로 처리한다.
+        term으로 기간을 받는다.
+        단순하게 모든 주문 내역을 응답한다.
+     */
+    @GetMapping("/sales/period/order-list")
+    public ResponseEntity<PagingResponseDTO<AdminDailySalesResponseDTO>> getOrderListByDay(@RequestParam(value = "term") String term
+    , @RequestParam(value = "page") int page) {
+
+        /*
+            paging
+
+            content : [
+                orderTotalPrice
+                deliveryFee
+                paymentType
+                detailList: [
+                    {
+                        productName
+                        size
+                        color
+                        count
+                        price
+                    }
+                ]
+            ]
+         */
+
+        PagingResponseDTO<AdminDailySalesResponseDTO> responseDTO = adminService.getOrderListByDay(term, page);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
+    }
+
 
     @GetMapping("/sales/product/{keyword}/{page}")
     public ResponseEntity<?> getProductSales(@PathVariable(name = "keyword", required = false) String keyword

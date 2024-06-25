@@ -45,10 +45,9 @@ class MemberQnARepositoryTest {
     @Test
     @DisplayName("MemberQnADetail 조회. qnaId = 1")
     void getDetail() {
-        String userId = "coco";
         long memberQnAId = 1L;
 
-        MemberQnADTO qnaDTO = memberQnARepository.findByIdAndUserId(memberQnAId, userId);
+        MemberQnADTO qnaDTO = memberQnARepository.findByQnAId(memberQnAId);
         List<MyPageQnAReplyDTO> replyDTOList = memberQnAReplyRepository.findAllByQnAId(memberQnAId);
 
         String nickname = "코코에용";
