@@ -1,59 +1,86 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import AdminSideNav from "../../ui/nav/AdminSideNav";
+import {useDispatch, useSelector} from "react-redux";
+import {axiosInstance} from "../../../modules/customAxios";
+import {setMemberObject} from "../../../modules/loginModule";
+import {numberComma} from "../../../modules/numberCommaModule";
+import {useNavigate} from "react-router-dom";
 
+
+/*
+    기간별 매출.
+    가장 기본적으로 현재 년도의 월별 매출을 테이블 구조로 출력.
+    테이블 오른쪽 상단의 select box는 현재 년도 포함 3개 년도를 선택할 수 있도록 처리.
+
+    출력되는 월 매출의 정보로는
+    월 | 월매출 | 월 상품 출고량 | 월 주문량
+
+    테이블 하단에는 해당 연도의 연매출, 연 상품 출고량, 연 주문량을 출력.
+
+    테이블에서 월 데이터를 클릭하면 상세 페이지로 이동해 해당 월 매출을 좀 더 상세하게 확인할 수 있도록 한다.
+ */
 function AdminPeriodSales() {
-    /*
-        기간별 매출.
+    const loginStatus = useSelector((state) => state.member.loginStatus);
+    const [yearSalesData, setYearSalesData] = useState({
+        sales: 0,
+        salesQuantity: 0,
+        orderQuantity: 0,
+    });
+    const [data, setData] = useState([]);
+    const [selectYear, setSelectYear] = useState(0);
+    const [selectBoxData, setSelectBoxData] = useState([]);
 
-        월별 매출을 리스트로 보여준다.
-        단위는 연단위.
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
 
-        오른쪽 상단에서는 select box를 통해 5년까지의 매출을 확인할 수 있도록 처리.
-        리스트는 select box를 통한 선택된 해의 월 매출을 보여준다.
-        이때 매출이 없는 개월에 대해서는 0을 출력하도록 서버에서 데이터를 파싱해 전달하도록 한다.
+    useEffect(() => {
+        const currentDate = new Date();
+        let year = currentDate.getFullYear();
+        setSelectYear(year);
+        getSalesData(year);
 
-        하단에는 해당 년의 총 주문 건수와 총 판매량, 총 매출액을 출력하도록 한다.
+        const yearArr = [];
+        for(let i = 0; i < 3; i++)
+            yearArr.push(year--);
 
-        상세 페이지에서는 그 달의 상품 분류별 매출 및 판매량을 출력한다.
-        ex
-        YYYY년 MM월 매출 정보
-            월 매출액 : 000,000원
-            월 판매량 : 000,000개
-            월 주문량 : 000,000개
-            전년 대비 : +- 000,000원
+        setSelectBoxData(yearArr);
+    }, []);
 
-        가장 많이 판매된 상품 5개
-            상품명 판매량 매출
+    const getSalesData = async (year) => {
 
-        상품 분류 : OUTER 상세보기 버튼
-            총 판매량 : 000,000개
-            총 매출액 : 000,000원
-        ....
+        await axiosInstance.get(`admin/sales/period/${year}`)
+            .then(res => {
 
-        OUTER 상세 내역(Modal)
-            상품명 옵션 수량 가격
+                const content = res.data.content;
+                setYearSalesData({
+                    sales: content.sales,
+                    salesQuantity: content.salesQuantity,
+                    orderQuantity: content.orderQuantity,
+                });
 
-
-        일별 매출액 (table)
-        날짜 판매량 일매출 (클릭시 Modal을 통한 상세 정보)
-
-        YYYY년 MM월 DD일 매출 상세 내역 (버튼을 통한 당일 상세 주문 내역 페이지로 이동)
-            총 판매량
-            총 매출액
-            총 주문량
-            상품 출고량
-            상품 분류 : OUTER
-                총 판매량 : 000,000개
-                총 매출액 : 000,000원
-                총 판매 수량 : 000,000개
-            ....
+                setData(content.content);
 
 
+                const member = setMemberObject(res, loginStatus);
 
-        자세한 주문 내역을 보여주기 위해 새로운 컴포넌트 추가?
-        해당 컴포넌트에서는 해당 기간의 모든 주문 내역을 출력하도록 처리???
-        이때 주문 내역에 출력할 데이터로는 주문내역별로 묶어서 내부에 상품명, 옵션, 수량, 가격, 배송비, 총 결제액을 출력하도록 한다.
-     */
+                if(member !== undefined)
+                    dispatch(member);
+            })
+    }
+
+    const handleSelectOnChange = (e) => {
+        const year = e.target.value;
+
+        setSelectYear(year);
+        getSalesData(year);
+    }
+
+    const handleMonthOnClick = (month) => {
+        const yearMonth = `${selectYear}-${month}`;
+
+        navigate(`/admin/sales/period/${yearMonth}`);
+    }
+
 
     return (
         <div className="mypage">
@@ -62,10 +89,46 @@ function AdminPeriodSales() {
             />
             <div className="admin-content">
                 <div className="admin-content-header">
-
+                    <h1>기간별 매출</h1>
                 </div>
                 <div className="admin-content-content">
-
+                    <div className="admin-content-content-header admin-period-list-header">
+                        <h3>{selectYear}년 매출</h3>
+                        <select className={'admin-period-select-box'} value={selectYear} onChange={handleSelectOnChange}>
+                            {selectBoxData.map((year, index) => {
+                                return (
+                                    <option key={index} value={year}>{year}</option>
+                                )
+                            })}
+                        </select>
+                    </div>
+                    <table className="admin-content-table admin-period-table">
+                        <thead>
+                            <tr>
+                                <th>월</th>
+                                <th>매출</th>
+                                <th>상품 출고량</th>
+                                <th>주문량</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {data.map((monthSales, index) => {
+                                return (
+                                    <tr key={index} onClick={() => handleMonthOnClick(monthSales.date)}>
+                                        <td>{monthSales.date}</td>
+                                        <td>{numberComma(monthSales.sales)}</td>
+                                        <td>{numberComma(monthSales.salesQuantity)}</td>
+                                        <td>{numberComma(monthSales.orderQuantity)}</td>
+                                    </tr>
+                                )
+                            })}
+                        </tbody>
+                    </table>
+                    <div className="admin-content-year-sales">
+                        <p>{selectYear}년 매출 : {numberComma(yearSalesData.sales)}</p>
+                        <p>{selectYear}년 판매량 : {numberComma(yearSalesData.salesQuantity)}</p>
+                        <p>{selectYear}년 주문량 : {numberComma(yearSalesData.orderQuantity)}</p>
+                    </div>
                 </div>
             </div>
         </div>

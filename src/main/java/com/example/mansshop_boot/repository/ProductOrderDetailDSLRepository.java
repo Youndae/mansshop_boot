@@ -1,10 +1,7 @@
 package com.example.mansshop_boot.repository;
 
 
-import com.example.mansshop_boot.domain.dto.admin.AdminBestSalesProductDTO;
-import com.example.mansshop_boot.domain.dto.admin.AdminClassificationSalesDTO;
-import com.example.mansshop_boot.domain.dto.admin.AdminClassificationSalesProductListDTO;
-import com.example.mansshop_boot.domain.dto.admin.AdminPeriodClassificationDTO;
+import com.example.mansshop_boot.domain.dto.admin.*;
 import com.example.mansshop_boot.domain.dto.mypage.MyPageOrderDetailDTO;
 import com.example.mansshop_boot.domain.entity.ProductOrderDetail;
 
@@ -24,4 +21,7 @@ public interface ProductOrderDetailDSLRepository {
     List<AdminClassificationSalesProductListDTO> findPeriodClassificationProductSales(LocalDateTime startDate, LocalDateTime endDate, String classification);
 
     List<ProductOrderDetail> findByOrderIds(List<Long> orderIdList);
+
+    List<AdminProductSalesOptionDTO> getProductOptionSales(int year, int month, String productId);
+
 }

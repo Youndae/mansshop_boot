@@ -52,6 +52,7 @@ import AdminMember from "./component/page/admin/AdminMember";
 import AdminMemberDetail from "./component/page/admin/AdminMemberDetail";
 import AdminPeriodSales from "./component/page/admin/AdminPeriodSales";
 import AdminPeriodSalesDetail from "./component/page/admin/AdminPeriodSalesDetail";
+import AdminPeriodSalesDailyDetail from "./component/page/admin/AdminPeriodSalesDailyDetail";
 import AdminProductSales from "./component/page/admin/AdminProductSales";
 import AdminProductSalesDetail from "./component/page/admin/AdminProductSalesDetail";
 
@@ -141,8 +142,9 @@ function App() {
               <Route path='admin/member/:userId' element={<AdminMemberDetail />} />
 
               <Route path='admin/sales/period' element={<AdminPeriodSales />} />
-              <Route path='admin/sales/period?page=:page&term=:term' element={<AdminPeriodSales />} />
               <Route path='admin/sales/period/:date' element={<AdminPeriodSalesDetail />} />
+              <Route path='admin/sales/period/detail/daily/:selectDate' element={<AdminPeriodSalesDailyDetail/>} />
+              <Route path='admin/sales/period/detail/daily/:selectDate?page=:page' element={<AdminPeriodSalesDailyDetail/>} />
               <Route path='admin/sales/product' element={<AdminProductSales />} />
               <Route path='admin/sales/product?page=:page' element={<AdminProductSales />} />
               <Route path='admin/sales/product?keyword=:keyword&page=:page' element={<AdminProductSales />} />

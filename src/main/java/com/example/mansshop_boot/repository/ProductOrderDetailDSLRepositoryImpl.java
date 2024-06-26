@@ -1,13 +1,11 @@
 package com.example.mansshop_boot.repository;
 
-import com.example.mansshop_boot.domain.dto.admin.AdminBestSalesProductDTO;
-import com.example.mansshop_boot.domain.dto.admin.AdminClassificationSalesDTO;
-import com.example.mansshop_boot.domain.dto.admin.AdminClassificationSalesProductListDTO;
-import com.example.mansshop_boot.domain.dto.admin.AdminPeriodClassificationDTO;
+import com.example.mansshop_boot.domain.dto.admin.*;
 import com.example.mansshop_boot.domain.dto.mypage.MyPageOrderDetailDTO;
 import com.example.mansshop_boot.domain.entity.ProductOrderDetail;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -145,6 +143,7 @@ public class ProductOrderDetailDSLRepositoryImpl implements ProductOrderDetailDS
                 .innerJoin(productOrder)
                 .on(productOrderDetail.productOrder.id.eq(productOrder.id))
                 .where(productOrderDetail.product.id.startsWith(classification).and(productOrder.createdAt.between(startDate, endDate)))
+                .groupBy(product.productName)
                 .fetch();
     }
 
@@ -155,5 +154,37 @@ public class ProductOrderDetailDSLRepositoryImpl implements ProductOrderDetailDS
                 .where(productOrderDetail.productOrder.id.in(orderIdList))
                 .orderBy(productOrderDetail.productOrder.id.desc())
                 .fetch();
+    }
+
+    @Override
+    public List<AdminProductSalesOptionDTO> getProductOptionSales(int year, int month, String productId) {
+        return jpaQueryFactory.select(
+                Projections.constructor(
+                        AdminProductSalesOptionDTO.class
+                        , productOrder.createdAt.month().as("month")
+                        , productOption.id.as("optionId")
+                        , productOption.size
+                        , productOption.color
+                        , productOrderDetail.orderDetailPrice.longValue().sum().as("optionSales")
+                        , productOrderDetail.orderDetailCount.longValue().sum().as("optionSalesQuantity")
+                )
+        )
+                .from(productOrderDetail)
+                .innerJoin(productOrder)
+                .on(productOrderDetail.productOrder.id.eq(productOrder.id))
+                .innerJoin(productOption)
+                .on(productOrderDetail.productOption.id.eq(productOption.id))
+                .where(productOrderDetail.product.id.eq(productId).and(searchOption(year, month)))
+                .orderBy(productOrder.createdAt.month().asc(), productOption.id.asc())
+                .groupBy(productOrder.createdAt.month())
+                .groupBy(productOption.id)
+                .fetch();
+    }
+
+    public BooleanExpression searchOption(int year, int month) {
+        if(month == 0)
+            return productOrder.createdAt.year().eq(year);
+        else
+            return productOrder.createdAt.year().eq(year).and(productOrder.createdAt.month().eq(month));
     }
 }

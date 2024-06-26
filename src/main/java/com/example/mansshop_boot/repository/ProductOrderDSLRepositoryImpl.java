@@ -27,6 +27,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.example.mansshop_boot.domain.entity.QProductOrder.productOrder;
+import static com.example.mansshop_boot.domain.entity.QProduct.product;
+import static com.example.mansshop_boot.domain.entity.QProductOrderDetail.productOrderDetail;
 
 @Repository
 @RequiredArgsConstructor
@@ -239,5 +241,95 @@ public class ProductOrderDSLRepositoryImpl implements ProductOrderDSLRepository{
                                         .where(productOrder.createdAt.between(startDate, endDate));
 
         return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
+    }
+
+    @Override
+    public Page<AdminProductSalesListDTO> getProductSalesList(AdminPageDTO pageDTO, Pageable pageable) {
+
+        List<AdminProductSalesListDTO> list = jpaQueryFactory.select(
+                Projections.constructor(
+                        AdminProductSalesListDTO.class
+                        , product.classification.id.as("classification")
+                        , product.id.as("productId")
+                        , product.productName
+                        , productOrderDetail.orderDetailPrice.longValue().sum().as("sales")
+                        , product.productSales.as("salesQuantity")
+                )
+        )
+                .from(product)
+                .innerJoin(productOrderDetail)
+                .on(productOrderDetail.product.id.eq(product.id))
+                .where(searchSales(pageDTO))
+                .orderBy(product.classification.classificationStep.asc())
+                .groupBy(product.id)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        JPAQuery<Long> count = jpaQueryFactory.select(product.countDistinct())
+                                .from(product)
+                                .where(searchSales(pageDTO));
+
+
+        return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
+    }
+
+    public BooleanExpression searchSales(AdminPageDTO pageDTO) {
+        if(pageDTO.keyword() != null)
+            return product.productName.eq(pageDTO.keyword());
+        else
+            return null;
+    }
+
+    @Override
+    public AdminProductSalesDTO getProductSales(String productId) {
+        return jpaQueryFactory.select(
+                Projections.constructor(
+                        AdminProductSalesDTO.class
+                        , product.productName
+                        , productOrderDetail.orderDetailPrice.longValue().sum().as("sales")
+                        , product.productSales.as("salesQuantity")
+                )
+        )
+                .from(product)
+                .innerJoin(productOrderDetail)
+                .on(productOrderDetail.product.id.eq(product.id))
+                .where(product.id.eq(productId))
+                .fetchOne();
+    }
+
+    @Override
+    public AdminSalesDTO getProductPeriodSales(int year, String productId) {
+        return jpaQueryFactory.select(
+                Projections.constructor(
+                        AdminSalesDTO.class
+                        , productOrderDetail.orderDetailPrice.longValue().sum().as("sales")
+                        , productOrderDetail.orderDetailCount.longValue().sum().as("salesQuantity")
+                )
+        )
+                .from(productOrderDetail)
+                .innerJoin(productOrder)
+                .on(productOrderDetail.productOrder.id.eq(productOrder.id))
+                .where(productOrderDetail.product.id.eq(productId).and(productOrder.createdAt.year().eq(year)))
+                .fetchOne();
+    }
+
+    @Override
+    public List<AdminPeriodSalesListDTO> getProductMonthPeriodSales(LocalDateTime startDate, LocalDateTime endDate, String productId) {
+        return jpaQueryFactory.select(
+                Projections.constructor(
+                        AdminPeriodSalesListDTO.class
+                        , productOrder.createdAt.month().as("date")
+                        , productOrderDetail.orderDetailPrice.longValue().sum().as("sales")
+                        , productOrderDetail.orderDetailCount.longValue().sum().as("salesQuantity")
+                        , productOrder.id.countDistinct().as("orderQuantity")
+                )
+        )
+                .from(productOrder)
+                .innerJoin(productOrderDetail)
+                .on(productOrder.id.eq(productOrderDetail.productOrder.id))
+                .where(productOrder.createdAt.between(startDate, endDate).and(productOrderDetail.product.id.eq(productId)))
+                .groupBy(productOrder.createdAt.month())
+                .fetch();
     }
 }

@@ -43,6 +43,12 @@
     border-top: 1px solid lightgrey;
 }
 
+.admin-period-modal-content-table th, td {
+    padding: .75rem;
+    vertical-align: top;
+    border-top: 1px solid lightgrey;
+}
+
 .admin-search {
     display: flex;
     align-items: center;
@@ -398,4 +404,123 @@
     margin-right: 10px;
     width: 100px;
     height: 30px;
+}
+
+.admin-period-list-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5%;
+}
+
+.admin-content-year-sales {
+    margin-top: 10px;
+    font-weight: bold;
+    font-size: large;
+}
+
+.admin-period-table tr{
+    cursor: pointer;
+}
+
+.content-period-detail-month {
+    font-size: large;
+}
+
+.content-period-detail-month div {
+    margin-top: 10px;
+}
+
+.content-period-detail-month label {
+    font-weight: bold;
+}
+
+.content-period-detail-best-product {
+    margin-top: 10%;
+}
+
+.best-product-content {
+    border: 1px solid lightgrey;
+    margin-top: 10px;
+}
+
+.best-product-content .best-product-content-header {
+    font-weight: bold;
+    font-size: large;
+}
+
+.best-product-content div {
+    margin-top: 10px;
+    margin-left: 5px;
+}
+
+.content-period-detail-classification, .admin-period-detail-daily-header {
+    margin-top: 10%;
+    margin-bottom: 5%;
+}
+
+.classification-sales {
+    margin-top: 5%;
+    border: 1px solid lightgrey;
+}
+
+.classification-sales-header {
+    float: right;
+}
+
+.classification-sales-header button {
+    width: 60px;
+    height: 30px;
+    margin: 5px 5px 0 0;
+}
+
+.classification-sales .form-group {
+    margin: 5px 0 0 5px;
+}
+
+.admin-period-modal-content-sales {
+    margin-top: 5%;
+}
+
+.admin-period-modal-content-sales label {
+    font-weight: bold;
+}
+
+.admin-period-modal-table {
+    margin-top: 5%;
+    text-align: center;
+    border-collapse: collapse;
+}
+
+.admin-period-modal-content-table {
+    display: flex;
+    justify-content: center;
+}
+
+.admin-period-daily-header-btn {
+    margin-right: 5px;
+    width: 70px;
+    height: 30px;
+    float: right;
+}
+
+.daily-classification-sales {
+    width: 50%;
+    margin-left: 10px;
+}
+
+.admin-period-order-content {
+    border: 1px solid lightgrey;
+    padding: 5px;
+    margin-top: 5%;
+    width: 450px;
+}
+
+.admin-period-order-content-total {
+    font-weight: bold;
+    font-size: large;
+    margin-top: 5%;
+}
+
+.admin-period-order-content label {
+    font-weight: bold;
 }
