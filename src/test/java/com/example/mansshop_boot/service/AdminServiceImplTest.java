@@ -106,6 +106,8 @@ class AdminServiceImplTest {
         System.out.println("-----------------------------");
         response.content().optionTotalSales().forEach(v -> System.out.println("optionTotal : " + v));
         System.out.println("-----------------------------");
-        response.content().optionMonthSales().forEach(v -> System.out.println("option month : " + v));
+        response.content().optionYearSales().forEach(v -> System.out.println("option year : " + v));
+        System.out.println("-----------------------------");
+        response.content().optionLastYearSales().forEach(v -> System.out.println("option last year : " + v));
     }
 }

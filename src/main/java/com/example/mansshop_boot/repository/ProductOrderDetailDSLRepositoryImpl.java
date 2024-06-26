@@ -157,11 +157,10 @@ public class ProductOrderDetailDSLRepositoryImpl implements ProductOrderDetailDS
     }
 
     @Override
-    public List<AdminProductSalesOptionDTO> getProductOptionSales(int year, int month, String productId) {
-        return jpaQueryFactory.select(
+    public List<AdminProductSalesOptionDTO> getProductOptionSales(int year, String productId) {
+        /*return jpaQueryFactory.select(
                 Projections.constructor(
                         AdminProductSalesOptionDTO.class
-                        , productOrder.createdAt.month().as("month")
                         , productOption.id.as("optionId")
                         , productOption.size
                         , productOption.color
@@ -174,17 +173,36 @@ public class ProductOrderDetailDSLRepositoryImpl implements ProductOrderDetailDS
                 .on(productOrderDetail.productOrder.id.eq(productOrder.id))
                 .innerJoin(productOption)
                 .on(productOrderDetail.productOption.id.eq(productOption.id))
-                .where(productOrderDetail.product.id.eq(productId).and(searchOption(year, month)))
-                .orderBy(productOrder.createdAt.month().asc(), productOption.id.asc())
-                .groupBy(productOrder.createdAt.month())
+                .where(productOrderDetail.product.id.eq(productId).and(searchOption(year)))
+                .orderBy(productOption.id.asc())
+                .groupBy(productOption.id)
+                .fetch();*/
+
+        return jpaQueryFactory.select(
+                        Projections.constructor(
+                                AdminProductSalesOptionDTO.class
+                                , productOption.id.as("optionId")
+                                , productOption.size
+                                , productOption.color
+                                , productOrderDetail.orderDetailPrice.longValue().sum().as("optionSales")
+                                , productOrderDetail.orderDetailCount.longValue().sum().as("optionSalesQuantity")
+                        )
+                )
+                .from(productOption)
+                .leftJoin(productOrderDetail)
+                .on(productOption.id.eq(productOrderDetail.productOption.id))
+                .innerJoin(productOrder)
+                .on(productOrder.id.eq(productOrderDetail.productOrder.id))
+                .where(productOrderDetail.product.id.eq(productId).and(searchOption(year)))
+                .orderBy(productOption.id.asc())
                 .groupBy(productOption.id)
                 .fetch();
     }
 
-    public BooleanExpression searchOption(int year, int month) {
-        if(month == 0)
-            return productOrder.createdAt.year().eq(year);
+    public BooleanExpression searchOption(int year) {
+        if(year == 0)
+            return null;
         else
-            return productOrder.createdAt.year().eq(year).and(productOrder.createdAt.month().eq(month));
+            return productOrder.createdAt.year().eq(year);
     }
 }

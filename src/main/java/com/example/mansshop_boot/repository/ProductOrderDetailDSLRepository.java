@@ -22,6 +22,6 @@ public interface ProductOrderDetailDSLRepository {
 
     List<ProductOrderDetail> findByOrderIds(List<Long> orderIdList);
 
-    List<AdminProductSalesOptionDTO> getProductOptionSales(int year, int month, String productId);
+    List<AdminProductSalesOptionDTO> getProductOptionSales(int year, String productId);
 
 }
