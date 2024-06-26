@@ -809,7 +809,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public ResponseDTO<AdminClassificationSalesResponseDTO> getSalesByClassification(String term, String classification) {
+    public AdminClassificationSalesResponseDTO getSalesByClassification(String term, String classification) {
 
         /*
             상품 분류별 월 매출 정보 조회.
@@ -855,8 +855,10 @@ public class AdminServiceImpl implements AdminService {
                 year
                 , month
                 , lastDay
-                , 0
-                , 0
+                , 23
+                , 59
+                , 59
+                , 999999999
         );
 
         AdminClassificationSalesDTO classificationSalesDTO = productOrderDetailRepository.findPeriodClassificationSales(startDate, endDate, classification);
@@ -864,11 +866,11 @@ public class AdminServiceImpl implements AdminService {
 
         AdminClassificationSalesResponseDTO responseContent = new AdminClassificationSalesResponseDTO(classification, classificationSalesDTO, productList);
 
-        return new ResponseDTO<AdminClassificationSalesResponseDTO>(responseContent, new UserStatusDTO(adminNickname));
+        return responseContent;
     }
 
     @Override
-    public ResponseDTO<AdminPeriodSalesResponseDTO> getSalesByDay(String term) {
+    public AdminPeriodSalesResponseDTO getSalesByDay(String term) {
 
         /*
             일 매출 정보
@@ -905,19 +907,16 @@ public class AdminServiceImpl implements AdminService {
         AdminClassificationSalesDTO salesDTO = productOrderRepository.findDailySales(startDate, endDate);
         List<AdminPeriodClassificationDTO> classificationList = productOrderDetailRepository.findPeriodClassification(startDate, endDate);
 
-        return new ResponseDTO<>(
-                new AdminPeriodSalesResponseDTO(
+        return new AdminPeriodSalesResponseDTO(
                         classificationList
                         , salesDTO.sales()
                         , salesDTO.salesQuantity()
                         , salesDTO.orderQuantity()
-                )
-                , new UserStatusDTO(adminNickname)
-        );
+                );
     }
 
     @Override
-    public PagingResponseDTO<AdminDailySalesResponseDTO> getOrderListByDay(String term, int page) {
+    public PagingElementsResponseDTO<AdminDailySalesResponseDTO> getOrderListByDay(String term, int page) {
 
         /*
             해당 날짜의 주문 내역 조회
@@ -1003,12 +1002,106 @@ public class AdminServiceImpl implements AdminService {
         }
 
 
-        return new PagingResponseDTO<AdminDailySalesResponseDTO>(
+        return new PagingElementsResponseDTO<AdminDailySalesResponseDTO>(
                 content
                 , orderList.isEmpty()
                 , orderList.getNumber()
                 , orderList.getTotalPages()
+                , orderList.getTotalElements()
                 , adminNickname
+        );
+    }
+
+    @Override
+    public PagingElementsResponseDTO<AdminProductSalesListDTO> getProductSalesList(AdminPageDTO pageDTO) {
+
+
+        /*
+            list
+                classification
+                productId
+                productName
+                sales
+                salesQuantity
+
+            상품별로 조회.
+         */
+
+        Pageable pageable = PageRequest.of(pageDTO.page() - 1
+                                        , pageDTO.amount()
+                                        , Sort.by("classificationStep").ascending());
+
+        Page<AdminProductSalesListDTO> response = productOrderRepository.getProductSalesList(pageDTO, pageable);
+
+        return new PagingElementsResponseDTO<>(response, adminNickname);
+    }
+
+    @Override
+    public ResponseDTO<AdminProductSalesDetailDTO> getProductSalesDetail(String productId) {
+
+        /*
+            productName
+            totalSales
+            totalSalesQuantity
+            yearSales
+            yearSalesQuantity
+            lastYearComparison
+            lastYearSales
+            lastYearSalesQuantity
+            List<AdminPeriodSalesListDTO> monthSalesList
+                term
+                sales
+                salesQuantity
+                orderQuantity
+            List<AdminProductSalesOptionDTO> optionList
+                size
+                color
+                optionSales
+                optionSalesQuantity
+
+
+            productId 기준 집계. (name, sales, quantity)
+            전년도 집계.
+            월별 집계
+            옵션별 집계.
+         */
+
+        LocalDate date = LocalDate.now();
+        int year = date.getYear();
+        int month = date.getMonthValue();
+
+        LocalDateTime startDate = LocalDateTime.of(year, month, 1, 0, 0);
+        LocalDateTime endDate = LocalDateTime.of(
+                year
+                , month
+                , startDate.getMonth().length(startDate.toLocalDate().isLeapYear())
+                , 23
+                , 59
+                , 59
+                , 999999999
+        );
+
+
+
+        AdminProductSalesDTO totalSalesDTO = productOrderRepository.getProductSales(productId);
+        AdminSalesDTO yearSalesDTO = productOrderRepository.getProductPeriodSales(year, productId);
+        AdminSalesDTO lastYearSalesDTO = productOrderRepository.getProductPeriodSales(year - 1, productId);
+
+        List<AdminPeriodSalesListDTO> monthSalesDTO = productOrderRepository.getProductMonthPeriodSales(startDate, endDate, productId);
+        List<AdminProductSalesOptionDTO> optionTotalSalesList = productOrderDetailRepository.getProductOptionSales(year, 0, productId);
+        List<AdminProductSalesOptionDTO> optionSalesList = productOrderDetailRepository.getProductOptionSales(year, month, productId);
+
+
+        return new ResponseDTO<>(
+                new AdminProductSalesDetailDTO(
+                        totalSalesDTO
+                        , yearSalesDTO
+                        , lastYearSalesDTO
+                        , monthSalesDTO
+                        , optionTotalSalesList
+                        , optionSalesList
+                )
+                , new UserStatusDTO(adminNickname)
         );
     }
 }

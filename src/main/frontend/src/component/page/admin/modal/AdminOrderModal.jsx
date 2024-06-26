@@ -2,7 +2,7 @@ import React, {useEffect} from 'react';
 import { useNavigate } from "react-router-dom";
 
 function AdminOrderModal(props) {
-    const { closeModal, modalRef } = props;
+    const { closeModal, modalRef, modalHeader } = props;
 
     useEffect(() => {
         document.body.style.cssText= `
@@ -20,7 +20,7 @@ function AdminOrderModal(props) {
         <div className="modal-background">
             <div className="admin-modal-content" ref={modalRef}>
                 <div className="modal-content-header">
-                    <h1>주문 정보</h1>
+                    <h1>{modalHeader}</h1>
                 </div>
                 <div className="modal-content-content">
                     {props.render()}

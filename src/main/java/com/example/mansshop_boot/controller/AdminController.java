@@ -425,27 +425,6 @@ public class AdminController {
     @GetMapping("/sales/period/{term}")
     public ResponseEntity<ResponseDTO<AdminPeriodSalesResponseDTO>> getPeriodSales(@PathVariable(name = "term") int term) {
 
-        /*
-            기간별 매출.
-            term 값으로는 연도가 전달되어 온다.
-         */
-        /*
-            content : [
-                {
-                    term : 1 ~ 12,
-                    monthSales:
-                    monthDeliveryFee:
-                    monthSalesQuantity:
-                    monthOrderQuantity;
-                },
-                ...
-            ]
-            yearSales
-            yearDeliveryFee
-            yearSalesQuantity
-            yearOrderQuantity
-
-         */
 
         ResponseDTO<AdminPeriodSalesResponseDTO> responseDTO = adminService.getPeriodSales(term);
 
@@ -462,39 +441,6 @@ public class AdminController {
     @GetMapping("sales/period/detail/{term}")
     public ResponseEntity<ResponseDTO<AdminPeriodMonthDetailResponseDTO>> getPeriodSalesDetail(@PathVariable(name = "term") String term) {
 
-        /*
-            long monthSales
-            long monthSalesQuantity
-            long monthOrderQuantity
-            long beforeYearComparison
-
-            List<?> bestProduct : [
-                {
-                    productName
-                    productSalesQuantity
-                    productSales
-                } * 5
-            ]
-
-            List<?> classificationSalesList : [
-                {
-                    classification
-                    classificationSales
-                    classificationSalesQuantity
-                },
-                ...
-            ]
-
-            List<?> dailySalesList: [
-                {
-                    day
-                    dailySalesQuantity
-                    dailySales
-                },
-                ...
-            ]
-         */
-
         ResponseDTO<AdminPeriodMonthDetailResponseDTO> responseDTO = adminService.getPeriodSalesDetail(term);
 
         return ResponseEntity.status(HttpStatus.OK)
@@ -506,23 +452,10 @@ public class AdminController {
         해당 기간의 상품 분류에 해당하는 데이터의 상품명, 옵션, 수량, 금액을 전달한다.
      */
     @GetMapping("/sales/period/detail/classification")
-    public ResponseEntity<ResponseDTO<AdminClassificationSalesResponseDTO>> getSalesByClassification(@RequestParam(value = "term")String term
+    public ResponseEntity<AdminClassificationSalesResponseDTO> getSalesByClassification(@RequestParam(value = "term")String term
                                                 , @RequestParam(value = "classification") String classification) {
-        /*
-            classification
-            totalSales
-            totalSalesQuantity
-            List<?> productList : [
-                {
-                    productName
-                    productSalesQuantity
-                    productSales
-                },
-                ...
-            ]
-         */
 
-        ResponseDTO<AdminClassificationSalesResponseDTO> responseDTO = adminService.getSalesByClassification(term, classification);
+        AdminClassificationSalesResponseDTO responseDTO = adminService.getSalesByClassification(term, classification);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDTO);
@@ -533,7 +466,7 @@ public class AdminController {
         해당 일의 매출 데이터를 전달.
      */
     @GetMapping("/sales/period/detail/day")
-    public ResponseEntity<ResponseDTO<AdminPeriodSalesResponseDTO>> getSalesByDay(@RequestParam(value = "term") String term) {
+    public ResponseEntity<AdminPeriodSalesResponseDTO> getSalesByDay(@RequestParam(value = "term") String term) {
 
         /*
             totalSales
@@ -550,7 +483,7 @@ public class AdminController {
             ]
          */
 
-        ResponseDTO<AdminPeriodSalesResponseDTO> responseDTO = adminService.getSalesByDay(term);
+        AdminPeriodSalesResponseDTO responseDTO = adminService.getSalesByDay(term);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDTO);
@@ -563,8 +496,8 @@ public class AdminController {
         단순하게 모든 주문 내역을 응답한다.
      */
     @GetMapping("/sales/period/order-list")
-    public ResponseEntity<PagingResponseDTO<AdminDailySalesResponseDTO>> getOrderListByDay(@RequestParam(value = "term") String term
-    , @RequestParam(value = "page") int page) {
+    public ResponseEntity<PagingElementsResponseDTO<AdminDailySalesResponseDTO>> getOrderListByDay(@RequestParam(value = "term") String term
+                                                                                        , @RequestParam(value = "page") int page) {
 
         /*
             paging
@@ -585,7 +518,7 @@ public class AdminController {
             ]
          */
 
-        PagingResponseDTO<AdminDailySalesResponseDTO> responseDTO = adminService.getOrderListByDay(term, page);
+        PagingElementsResponseDTO<AdminDailySalesResponseDTO> responseDTO = adminService.getOrderListByDay(term, page);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDTO);
@@ -598,9 +531,21 @@ public class AdminController {
 
         /*
             상품별 매출
+
+            classification
+            productId
+            productName
+            sales
+            salesQuantity
+
          */
 
-        return null;
+        AdminPageDTO pageDTO = new AdminPageDTO(keyword, page);
+
+        PagingElementsResponseDTO<AdminProductSalesListDTO> responseDTO = adminService.getProductSalesList(pageDTO);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     @GetMapping("/sales/product/{productId}")
@@ -608,8 +553,29 @@ public class AdminController {
 
         /*
             상품 매출 상세
+
+            productName
+            sales
+            salesQuantity
+            lastYearComparison
+            lastYearSales
+            lastYearSalesQuantity
+            List<?> termList
+                term
+                sales
+                salesQuantity
+                orderQuantity
+            List<?> optionList
+                size
+                color
+                optionSales
+                optionSalesQuantity
          */
 
-        return null;
+        ResponseDTO<AdminProductSalesDetailDTO> responseDTO = adminService.getProductSalesDetail(productId);
+
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 }

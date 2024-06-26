@@ -29,4 +29,14 @@ public interface ProductOrderDSLRepository {
     AdminClassificationSalesDTO findDailySales(LocalDateTime startDate, LocalDateTime endDate);
 
     Page<ProductOrder> findAllByDay(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+
+    Page<AdminProductSalesListDTO> getProductSalesList(AdminPageDTO pageDTO, Pageable pageable);
+
+    AdminProductSalesDTO getProductSales(String productId);
+
+    AdminSalesDTO getProductPeriodSales(int year, String productId);
+
+    List<AdminPeriodSalesListDTO> getProductMonthPeriodSales(LocalDateTime startDate, LocalDateTime endDate, String productId);
+
+
 }

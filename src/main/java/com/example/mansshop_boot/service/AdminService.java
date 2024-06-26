@@ -65,9 +65,13 @@ public interface AdminService {
 
     ResponseDTO<AdminPeriodMonthDetailResponseDTO> getPeriodSalesDetail(String term);
 
-    ResponseDTO<AdminClassificationSalesResponseDTO> getSalesByClassification(String term, String classification);
+    AdminClassificationSalesResponseDTO getSalesByClassification(String term, String classification);
 
-    ResponseDTO<AdminPeriodSalesResponseDTO> getSalesByDay(String term);
+    AdminPeriodSalesResponseDTO getSalesByDay(String term);
 
-    PagingResponseDTO<AdminDailySalesResponseDTO> getOrderListByDay(String term, int page);
+    PagingElementsResponseDTO<AdminDailySalesResponseDTO> getOrderListByDay(String term, int page);
+
+    PagingElementsResponseDTO<AdminProductSalesListDTO> getProductSalesList(AdminPageDTO pageDTO);
+
+    ResponseDTO<AdminProductSalesDetailDTO> getProductSalesDetail(String productId);
 }
