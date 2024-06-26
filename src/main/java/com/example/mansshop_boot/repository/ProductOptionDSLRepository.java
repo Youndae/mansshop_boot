@@ -12,5 +12,7 @@ public interface ProductOptionDSLRepository {
 
     List<AdminProductOptionDTO> findAllByProductId(String productId);
 
-    List<ProductOption> findAllOptionByProductId(List<String> productIdList);
+    List<ProductOption> findAllOptionByProductIdList(List<String> productIdList);
+
+    List<ProductOption> findAllOptionByProductId(String productId);
 }

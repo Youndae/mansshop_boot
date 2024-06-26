@@ -55,10 +55,19 @@ public class ProductOptionDSLRepositoryImpl implements ProductOptionDSLRepositor
     }
 
     @Override
-    public List<ProductOption> findAllOptionByProductId(List<String> productIdList) {
+    public List<ProductOption> findAllOptionByProductIdList(List<String> productIdList) {
         return jpaQueryFactory.select(productOption)
                 .from(productOption)
                 .where(productOption.product.id.in(productIdList))
+                .fetch();
+    }
+
+    @Override
+    public List<ProductOption> findAllOptionByProductId(String productId) {
+        return jpaQueryFactory.select(productOption)
+                .from(productOption)
+                .where(productOption.product.id.eq(productId))
+                .orderBy(productOption.id.asc())
                 .fetch();
     }
 }

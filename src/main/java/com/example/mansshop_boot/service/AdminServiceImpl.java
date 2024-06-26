@@ -31,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -261,7 +262,7 @@ public class AdminServiceImpl implements AdminService {
         dataList.getContent().forEach(dto -> productIdList.add(dto.productId()));
 
 
-        List<ProductOption> optionList = productOptionRepository.findAllOptionByProductId(productIdList);
+        List<ProductOption> optionList = productOptionRepository.findAllOptionByProductIdList(productIdList);
 
         List<AdminProductStockDTO> responseContent = new ArrayList<>();
         List<AdminProductOptionStockDTO> responseOptionList = new ArrayList<>();
@@ -1061,9 +1062,13 @@ public class AdminServiceImpl implements AdminService {
 
 
             productId 기준 집계. (name, sales, quantity)
+            올해 집계
             전년도 집계.
             월별 집계
-            옵션별 집계.
+
+            옵션별 총 집계(월별 x)
+            옵션별 현재 년도 집계
+            옵션별 전년도 집계
          */
 
         LocalDate date = LocalDate.now();
@@ -1086,10 +1091,15 @@ public class AdminServiceImpl implements AdminService {
         AdminProductSalesDTO totalSalesDTO = productOrderRepository.getProductSales(productId);
         AdminSalesDTO yearSalesDTO = productOrderRepository.getProductPeriodSales(year, productId);
         AdminSalesDTO lastYearSalesDTO = productOrderRepository.getProductPeriodSales(year - 1, productId);
-
         List<AdminPeriodSalesListDTO> monthSalesDTO = productOrderRepository.getProductMonthPeriodSales(startDate, endDate, productId);
-        List<AdminProductSalesOptionDTO> optionTotalSalesList = productOrderDetailRepository.getProductOptionSales(year, 0, productId);
-        List<AdminProductSalesOptionDTO> optionSalesList = productOrderDetailRepository.getProductOptionSales(year, month, productId);
+        List<AdminProductSalesOptionDTO> optionTotalSalesList = productOrderDetailRepository.getProductOptionSales(0, productId);
+        List<AdminProductSalesOptionDTO> optionYearSalesList = productOrderDetailRepository.getProductOptionSales(year, productId);
+        List<AdminProductSalesOptionDTO> optionLastYearSalesList = productOrderDetailRepository.getProductOptionSales(year - 1, productId);
+        List<ProductOption> productOption = productOptionRepository.findAllOptionByProductId(productId);
+
+        optionTotalSalesList = optionDataMapping(optionTotalSalesList, productOption);
+        optionYearSalesList = optionDataMapping(optionYearSalesList, productOption);
+        optionLastYearSalesList = optionDataMapping(optionLastYearSalesList, productOption);
 
 
         return new ResponseDTO<>(
@@ -1099,9 +1109,39 @@ public class AdminServiceImpl implements AdminService {
                         , lastYearSalesDTO
                         , monthSalesDTO
                         , optionTotalSalesList
-                        , optionSalesList
+                        , optionYearSalesList
+                        , optionLastYearSalesList
                 )
                 , new UserStatusDTO(adminNickname)
         );
+    }
+
+    public List<AdminProductSalesOptionDTO> optionDataMapping(List<AdminProductSalesOptionDTO> optionList, List<ProductOption> productOption) {
+        List<AdminProductSalesOptionDTO> returnDTOList = new ArrayList<>();
+
+        if(productOption.size() != optionList.size()){
+            for(int i = 0; i < productOption.size(); i++){
+                ProductOption option = productOption.get(i);
+                AdminProductSalesOptionDTO optionDTO = new AdminProductSalesOptionDTO(
+                        option.getId()
+                        , option.getSize()
+                        , option.getColor()
+                        , 0
+                        , 0
+                );
+                for(int j = 0; j < optionList.size(); j++) {
+                    if(option.getId() == optionList.get(j).optionId()){
+                        optionDTO = optionList.get(j);
+                        break;
+                    }
+                }
+                returnDTOList.add(optionDTO);
+            }
+
+            return returnDTOList;
+        }else {
+            return optionList;
+        }
+
     }
 }

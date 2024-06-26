@@ -15,7 +15,8 @@ public record AdminProductSalesDetailDTO(
         , long lastYearSalesQuantity
         , List<AdminPeriodSalesListDTO> monthSales
         , List<AdminProductSalesOptionDTO> optionTotalSales
-        , List<AdminProductSalesOptionDTO> optionMonthSales
+        , List<AdminProductSalesOptionDTO> optionYearSales
+        , List<AdminProductSalesOptionDTO> optionLastYearSales
 
 ) {
 
@@ -24,7 +25,8 @@ public record AdminProductSalesDetailDTO(
                                     , AdminSalesDTO lastYearSalesDTO
                                     , List<AdminPeriodSalesListDTO> monthSales
                                     , List<AdminProductSalesOptionDTO> optionTotalSales
-                                    , List<AdminProductSalesOptionDTO> optionMonthSales){
+                                    , List<AdminProductSalesOptionDTO> optionYearSales
+                                    , List<AdminProductSalesOptionDTO> optionLastYearSales){
         this(
                 totalSalesDTO.productName()
                 , totalSalesDTO.totalSales()
@@ -36,7 +38,8 @@ public record AdminProductSalesDetailDTO(
                 , lastYearSalesDTO.salesQuantity()
                 , monthSales
                 , optionTotalSales
-                , optionMonthSales
+                , optionYearSales
+                , optionLastYearSales
         );
     }
 }
