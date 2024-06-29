@@ -11,6 +11,7 @@ import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.response.*;
 import com.example.mansshop_boot.domain.entity.*;
+import com.example.mansshop_boot.domain.enumuration.OrderStatus;
 import com.example.mansshop_boot.domain.enumuration.Result;
 import com.example.mansshop_boot.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -374,22 +375,12 @@ public class AdminServiceImpl implements AdminService {
         //select orderDetail orderIdList
         //mapping
 
-        log.info("AdminServiceImpl.getAllOrderList :: pageDTO : {}", pageDTO);
-
         Pageable pageable = PageRequest.of(pageDTO.page() - 1
                                         , pageDTO.amount()
                                         , Sort.by("createdAt").descending());
 
         Page<AdminOrderDTO> orderDTOList = productOrderRepository.findAllOrderList(pageDTO, pageable);
-
-        log.info("AdminServiceImpl.getAllOrderList :: orderDTOList : {}", orderDTOList);
-        log.info("AdminServiceImpl.getAllOrderList :: orderDTOList.getContent() : {}", orderDTOList.getContent());
-
         List<AdminOrderResponseDTO> responseContent = mappingOrderData(orderDTOList);
-
-        log.info("AdminServiceImpl.getAllOrderList :: responseContent : {}", responseContent);
-
-
 
         return new PagingResponseDTO<>(
                 responseContent
@@ -401,7 +392,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public PagingResponseDTO<AdminOrderResponseDTO> getNewOrderList(AdminOrderPageDTO pageDTO) {
+    public PagingElementsResponseDTO<AdminOrderResponseDTO> getNewOrderList(AdminOrderPageDTO pageDTO) {
 
         Pageable pageable = PageRequest.of(pageDTO.page() - 1
                 , pageDTO.amount()
@@ -420,11 +411,12 @@ public class AdminServiceImpl implements AdminService {
         Page<AdminOrderDTO> orderDTOList = productOrderRepository.findAllNewOrderList(pageDTO, todayLastOrderTime, pageable);
         List<AdminOrderResponseDTO> responseContent = mappingOrderData(orderDTOList);
 
-        return new PagingResponseDTO<>(
+        return new PagingElementsResponseDTO<>(
                 responseContent
                 , orderDTOList.isEmpty()
                 , orderDTOList.getNumber()
                 , orderDTOList.getTotalPages()
+                , orderDTOList.getTotalElements()
                 , adminNickname
         );
     }
@@ -432,7 +424,8 @@ public class AdminServiceImpl implements AdminService {
     private List<AdminOrderResponseDTO> mappingOrderData(Page<AdminOrderDTO> orderDTOList) {
         List<Long> orderIdList = new ArrayList<>();
         orderDTOList.getContent().forEach(dto -> orderIdList.add(dto.orderId()));
-        List<ProductOrderDetail> detailList = productOrderDetailRepository.findAllById(orderIdList);
+        List<ProductOrderDetail> detailList = productOrderDetailRepository.findByOrderIds(orderIdList);
+        detailList.forEach(v -> log.info("detailList : {}", v));
         List<AdminOrderDetailDTO> detailDTOList = new ArrayList<>();
         List<AdminOrderResponseDTO> responseContent = new ArrayList<>();
 
@@ -457,12 +450,29 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public PagingResponseDTO<AdminQnAListResponseDTO> getProductQnAList(AdminPageDTO pageDTO, String listType) {
+    public String orderPreparation(long orderId) {
+
+        ProductOrder productOrder = productOrderRepository.findById(orderId).orElseThrow(IllegalArgumentException::new);
+        productOrder.setOrderStat(OrderStatus.PREPARATION.getStatusStr());
+
+        productOrderRepository.save(productOrder);
+
+        return Result.OK.getResultKey();
+    }
+
+    @Override
+    public PagingResponseDTO<AdminQnAListResponseDTO> getProductQnAList(AdminOrderPageDTO pageDTO) {
 
         /*
             select *
             from productQnA
             where stat = 0
+
+
+            로컬은 아이디를 사용자가 알지만
+            oauth로그인은 사용자가 아이디를 모른다.
+            닉네임이랑 이름정도를 알게 될건데
+
 
             all
             where x
@@ -472,7 +482,7 @@ public class AdminServiceImpl implements AdminService {
                                             , pageDTO.amount()
                                             , Sort.by("createdAt").descending());
 
-        Page<AdminQnAListResponseDTO> responseDTO = productQnARepository.findAllByAdminProductQnA(pageDTO, listType, pageable);
+        Page<AdminQnAListResponseDTO> responseDTO = productQnARepository.findAllByAdminProductQnA(pageDTO, pageable);
 
 
         return new PagingResponseDTO<>(responseDTO, adminNickname);
@@ -512,13 +522,13 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public PagingResponseDTO<AdminQnAListResponseDTO> getMemberQnAList(AdminPageDTO pageDTO, String listType) {
+    public PagingResponseDTO<AdminQnAListResponseDTO> getMemberQnAList(AdminOrderPageDTO pageDTO) {
 
         Pageable pageable = PageRequest.of(pageDTO.page() - 1
                 , pageDTO.amount()
                 , Sort.by("createdAt").descending());
 
-        Page<AdminQnAListResponseDTO> responseDTO = memberQnARepository.findAllByAdminMemberQnA(pageDTO, listType, pageable);
+        Page<AdminQnAListResponseDTO> responseDTO = memberQnARepository.findAllByAdminMemberQnA(pageDTO, pageable);
 
 
         return new PagingResponseDTO<>(responseDTO, adminNickname);
@@ -597,7 +607,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public PagingResponseDTO<AdminMemberDTO> getMemberList(AdminPageDTO pageDTO) {
+    public PagingResponseDTO<AdminMemberDTO> getMemberList(AdminOrderPageDTO pageDTO) {
 
         Pageable pageable = PageRequest.of(pageDTO.page() - 1
                                         , pageDTO.amount()
@@ -606,6 +616,18 @@ public class AdminServiceImpl implements AdminService {
         Page<AdminMemberDTO> responseContent = memberRepository.findMember(pageDTO, pageable);
 
         return new PagingResponseDTO<>(responseContent, adminNickname);
+    }
+
+    @Override
+    public String postPoint(AdminPostPointDTO pointDTO) {
+
+        Member member = memberRepository.findById(pointDTO.userId()).orElseThrow(IllegalArgumentException::new);
+
+        member.setMemberPoint(pointDTO.point());
+
+        memberRepository.save(member);
+
+        return Result.OK.getResultKey();
     }
 
     @Override
@@ -1073,29 +1095,36 @@ public class AdminServiceImpl implements AdminService {
 
         LocalDate date = LocalDate.now();
         int year = date.getYear();
-        int month = date.getMonthValue();
 
-        LocalDateTime startDate = LocalDateTime.of(year, month, 1, 0, 0);
-        LocalDateTime endDate = LocalDateTime.of(
-                year
-                , month
-                , startDate.getMonth().length(startDate.toLocalDate().isLeapYear())
-                , 23
-                , 59
-                , 59
-                , 999999999
-        );
 
 
 
         AdminProductSalesDTO totalSalesDTO = productOrderRepository.getProductSales(productId);
         AdminSalesDTO yearSalesDTO = productOrderRepository.getProductPeriodSales(year, productId);
         AdminSalesDTO lastYearSalesDTO = productOrderRepository.getProductPeriodSales(year - 1, productId);
-        List<AdminPeriodSalesListDTO> monthSalesDTO = productOrderRepository.getProductMonthPeriodSales(startDate, endDate, productId);
+        List<AdminPeriodSalesListDTO> monthSalesDTO = productOrderRepository.getProductMonthPeriodSales(year, productId);
         List<AdminProductSalesOptionDTO> optionTotalSalesList = productOrderDetailRepository.getProductOptionSales(0, productId);
         List<AdminProductSalesOptionDTO> optionYearSalesList = productOrderDetailRepository.getProductOptionSales(year, productId);
         List<AdminProductSalesOptionDTO> optionLastYearSalesList = productOrderDetailRepository.getProductOptionSales(year - 1, productId);
         List<ProductOption> productOption = productOptionRepository.findAllOptionByProductId(productId);
+
+        // stream().filter()를 통한 방법, 반복문을 사용하는 방법
+        // 또 그 중에서 기존 리스트에 add 해준 뒤 정렬하는 방법들도 수행해봤으나 이게 제일 빠름.
+        // 찾으면 break 하는게 한몫 한다.
+        // 만약 여러 데이터를 찾는다면 비슷할듯.
+        List<AdminPeriodSalesListDTO> monthSalesMappingDTO = new ArrayList<>();
+        for(int i = 1; i < 13; i++) {
+            AdminPeriodSalesListDTO monthContent = new AdminPeriodSalesListDTO(i);
+
+            for(int j = 0; j < monthSalesDTO.size(); j++) {
+                if(i == monthSalesDTO.get(j).date()){
+                    monthContent = monthSalesDTO.get(j);
+                    break;
+                }
+            }
+
+            monthSalesMappingDTO.add(monthContent);
+        }
 
         optionTotalSalesList = optionDataMapping(optionTotalSalesList, productOption);
         optionYearSalesList = optionDataMapping(optionYearSalesList, productOption);
@@ -1107,7 +1136,7 @@ public class AdminServiceImpl implements AdminService {
                         totalSalesDTO
                         , yearSalesDTO
                         , lastYearSalesDTO
-                        , monthSalesDTO
+                        , monthSalesMappingDTO
                         , optionTotalSalesList
                         , optionYearSalesList
                         , optionLastYearSalesList

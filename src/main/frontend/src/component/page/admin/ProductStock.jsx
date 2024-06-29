@@ -3,7 +3,13 @@ import AdminSideNav from "../../ui/nav/AdminSideNav";
 import {useDispatch, useSelector} from "react-redux";
 import {Link, useNavigate, useSearchParams} from "react-router-dom";
 import {axiosInstance} from "../../../modules/customAxios";
-import {getClickNumber, getNextNumber, getPrevNumber, productDetailPagingObject} from "../../../modules/pagingModule";
+import {
+    getClickNumber,
+    getNextNumber,
+    getPrevNumber,
+    pageSubmit,
+    productDetailPagingObject, searchPageSubmit, searchSubmit
+} from "../../../modules/pagingModule";
 import {setMemberObject} from "../../../modules/loginModule";
 import Paging from "../../ui/Paging";
 
@@ -44,8 +50,11 @@ function ProductStock() {
     }, [page, keyword]);
 
     const getProductStock = async() => {
+        let url = `admin/product/stock?page=${page}`;
+        if(keyword !== null)
+            url += `&keyword=${keyword}`;
 
-        await axiosInstance.get(`admin/product/stock?keyword=${keyword}&page=${page}`)
+        await axiosInstance.get(url)
             .then(res => {
                 console.log('stock res : ', res);
 
@@ -85,9 +94,13 @@ function ProductStock() {
 
     const handlePagingSubmit = (pageNum) => {
         if(keyword == null)
-            navigate(`/admin/product/stock?page=${pageNum}`);
+            pageSubmit(pageNum, navigate);
         else
-            navigate(`/admin/product/stock?keyword=${keyword}&page=${pageNum}`);
+            searchPageSubmit(keyword, pageNum, navigate);
+        /*if(keyword == null)
+            navigate(`/admin/product/discount?page=${pageNum}`);
+        else
+            navigate(`/admin/product/discount?keyword=${keyword}&page=${pageNum}`);*/
     }
 
     const handleKeywordOnChange = (e) => {
@@ -95,7 +108,8 @@ function ProductStock() {
     }
 
     const handleSearchOnClick = async () => {
-        navigate(`/admin/product/stock?keyword=${keywordInput}`);
+        searchSubmit(keywordInput, navigate);
+        // navigate(`/admin/product/stock?keyword=${keywordInput}`);
     }
 
 
@@ -187,8 +201,7 @@ function StockBody(props) {
 
                 return (
                     <tr className="admin-stock-option">
-                        <td>option</td>
-                        <td>{optionText}</td>
+                        <td colSpan={2}>{optionText}</td>
                         <td>{optionData.optionStock}</td>
                         <td></td>
                         <td>{optionIsOpenText}</td>

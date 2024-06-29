@@ -155,7 +155,7 @@ function ReviewBtn(props) {
     const { reviewStat, orderStat, userType, productName, productId } = props;
     const navigate = useNavigate();
 
-    if(orderStat !== 2 || userType === 'none')
+    if(orderStat !== '배송 완료' || userType === 'none')
         return null;
 
     const handleReviewBtn = () => {
@@ -176,15 +176,15 @@ function ReviewBtn(props) {
 function OrderStatus(props) {
     const { orderStat } = props;
 
-    let orderText = '';
+    /*let orderText = '';
     if(orderStat === 0)
         orderText = '상품 준비중';
     else if(orderStat === 1)
         orderText = '배송중';
     else
-        orderText = '배송완료';
+        orderText = '배송완료';*/
 
-    const orderStatusText = `배송현황 : ${orderText}`;
+    const orderStatusText = `배송현황 : ${orderStat}`;
 
 
     return (

@@ -10,9 +10,11 @@ import java.util.List;
 public record ProductDetailDTO(
         String productId
         , String productName
-        , long productPrice
+        , int productPrice
         , String productImageName
         , boolean likeStat
+        , int discount
+        , int discountPrice
         , List<ProductOptionDTO> productOptionList
         , List<String> productThumbnailList
         , List<String> productInfoImageList

@@ -57,11 +57,10 @@ public class Member {
                 , Long memberPoint
                 , String phone
                 , LocalDate birth) {
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String phoneRegEx = "(\\d{3})(\\d{3,4})(\\d{4})";
 
         this.userId = userId;
-        this.userPw = userPw == null ? null : passwordEncoder.encode(userPw);
+        this.userPw = userPw == null ? null : encodePw(userPw);
         this.userName = userName;
         this.nickname = nickname;
         this.userEmail = userEmail;
@@ -77,6 +76,20 @@ public class Member {
 
     public void setUserEmail(String userEmail) {
         this.userEmail = userEmail;
+    }
+
+    public void setUserPw(String userPw) {
+        this.userPw = encodePw(userPw);
+    }
+
+    public void setMemberPoint(Long memberPoint) {
+        this.memberPoint = memberPoint;
+    }
+
+    private String encodePw(String userPw) {
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+        return passwordEncoder.encode(userPw);
     }
 
     public void patchUser(MyPageInfoPatchDTO patchDTO) {

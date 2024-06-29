@@ -6,6 +6,8 @@ public record MainListDTO(
         String productId
         , String productName
         , String thumbnail
-        , int productPrice
+        , int price
+        , int discount
+        , long stock
 ) {
 }

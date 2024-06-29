@@ -4,7 +4,13 @@ import {useDispatch, useSelector} from "react-redux";
 import {Link, useNavigate, useSearchParams} from "react-router-dom";
 import {axiosInstance} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
-import {getClickNumber, getNextNumber, getPrevNumber, productDetailPagingObject} from "../../../modules/pagingModule";
+import {
+    getClickNumber,
+    getNextNumber,
+    getPrevNumber,
+    pageSubmit,
+    productDetailPagingObject
+} from "../../../modules/pagingModule";
 import Paging from "../../ui/Paging";
 import DefaultBtn from "../../ui/DefaultBtn";
 
@@ -56,20 +62,23 @@ function MemberQnA() {
     }
 
     const handlePageBtn = (e) => {
-        handlePagingSubmit(getClickNumber(e));
+        pageSubmit(getClickNumber(e), navigate);
+        // handlePagingSubmit(getClickNumber(e));
     }
 
     const handlePagePrev = () => {
-        handlePagingSubmit(getPrevNumber(pagingData));
+        pageSubmit(getPrevNumber(pagingData), navigate);
+        // handlePagingSubmit(getPrevNumber(pagingData));
     }
 
     const handlePageNext = () => {
-        handlePagingSubmit(getNextNumber(pagingData));
+        pageSubmit(getNextNumber(pagingData));
+        // handlePagingSubmit(getNextNumber(pagingData));
     }
 
-    const handlePagingSubmit = (pageNum) => {
+    /*const handlePagingSubmit = (pageNum) => {
         navigate(`/my-page/qna/member?page=${pageNum}`);
-    }
+    }*/
 
     const handleInsertBtn = () => {
         navigate('/my-page/qna/member/write');

@@ -10,7 +10,7 @@ public record ProductQnAResponseDTO(
         , String writer
         , String qnaContent
         , LocalDate createdAt
-        , int productQnAStat
+        , boolean productQnAStat
         , List<ProductQnAReplyDTO> replyList
 ) {
     public ProductQnAResponseDTO(ProductQnADTO dto, List<ProductQnAReplyDTO> replyList){

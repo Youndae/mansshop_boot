@@ -14,11 +14,11 @@
     margin: 40px;
 }
 
-.side-nav-ul li {
+.side-nav-ul li, .side-nav-category-ul li {
     font-size: x-large;
 }
 
-.side-nav-ul li a {
+.side-nav-ul li a, .side-nav-category-ul li a {
     text-decoration: none;
     color: black;
 }
@@ -27,10 +27,14 @@
     width: 130px;
 }
 
-.side-nav-category-ul li, .admin-side-nav-category-ul li {
+.qna-nav-ul li, .admin-side-nav-category-ul li {
     font-size: large;
     margin-left: 15px;
     margin-top: 20px;
+}
+
+.side-nav-category-ul li {
+    width: 100px;
 }
 
 .admin-side-nav-category-ul {

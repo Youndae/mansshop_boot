@@ -4,7 +4,13 @@ import {useNavigate, useParams, useSearchParams} from "react-router-dom";
 import AdminSideNav from "../../ui/nav/AdminSideNav";
 import {axiosInstance} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
-import {getClickNumber, getNextNumber, getPrevNumber, productDetailPagingObject} from "../../../modules/pagingModule";
+import {
+    getClickNumber,
+    getNextNumber,
+    getPrevNumber,
+    pageSubmit,
+    productDetailPagingObject
+} from "../../../modules/pagingModule";
 import {numberComma} from "../../../modules/numberCommaModule";
 import Paging from "../../ui/Paging";
 
@@ -61,20 +67,23 @@ function AdminPeriodSalesDailyDetail() {
     }
 
     const handlePageBtn = (e) => {
-        handlePagingSubmit(getClickNumber(e));
+        pageSubmit(getClickNumber(e), navigate);
+        // handlePagingSubmit(getClickNumber(e));
     }
 
     const handlePagePrev = () => {
-        handlePagingSubmit(getPrevNumber(pagingData));
+        pageSubmit(getPrevNumber(pagingData), navigate);
+        // handlePagingSubmit(getPrevNumber(pagingData));
     }
 
     const handlePageNext = () => {
-        handlePagingSubmit(getNextNumber(pagingData));
+        pageSubmit(getNextNumber(pagingData));
+        // handlePagingSubmit(getNextNumber(pagingData));
     }
 
-    const handlePagingSubmit = (pageNum) => {
+    /*const handlePagingSubmit = (pageNum) => {
         navigate(`admin/sales/period/detail/daily/${selectDate}?page=${pageNum}`);
-    }
+    }*/
 
     return (
         <div className="mypage">

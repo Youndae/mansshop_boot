@@ -37,7 +37,7 @@ public class AdminController {
 
     @GetMapping("/product")
     public ResponseEntity<PagingResponseDTO<AdminProductListDTO>> getProductList(@RequestParam(name = "keyword", required = false) String keyword
-                                            , @RequestParam(name = "page") int page){
+                                                                                , @RequestParam(name = "page") int page){
         /*
             admin/product의 리스트 조회
          */
@@ -166,22 +166,36 @@ public class AdminController {
                 .body(responseDTO);
     }
 
-    @PostMapping("/product/classification")
-    public ResponseEntity<?> postProductClassification() {
+    @GetMapping("/order/all")
+    public ResponseEntity<?> getAllOrder(@RequestParam(name = "searchType", required = false) String searchType
+                                        , @RequestParam(value = "keyword", required = false) String keyword
+                                        , @RequestParam(name = "page", required = false) int page) {
 
-        /*
-            상품 분류 추가 및 제거.
-            제거를 감안해서 처리해야 함.
-         */
 
-        return null;
+        log.info("AdminController.getAllOrder :: keyword : {}", keyword);
+        log.info("AdminController.getAllOrder :: searchType : {}", searchType == null);
+
+
+        AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(keyword, searchType, page);
+
+        PagingResponseDTO<AdminOrderResponseDTO> responseDTO = adminService.getAllOrderList(pageDTO);
+
+        /*if(listType.equals("all"))
+            responseDTO = adminService.getAllOrderList(pageDTO);
+        else if(listType.equals("new"))
+            responseDTO = adminService.getNewOrderList(pageDTO);
+        else
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(null);*/
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
-    @GetMapping("/order/{type}")
-    public ResponseEntity<PagingResponseDTO<AdminOrderResponseDTO>> getNewOrder(@PathVariable(name = "type") String listType
-                                                                                , @RequestParam(name = "searchType", required = false) String searchType
-                                                                                , @RequestParam(name = "keyword", required = false) String keyword
-                                                                                , @RequestParam(name = "page", required = false) int page) {
+    @GetMapping("/order/new")
+    public ResponseEntity<?> getNewOrder(@RequestParam(name = "searchType", required = false) String searchType
+            , @RequestParam(name = "keyword", required = false) String keyword
+            , @RequestParam(name = "page", required = false) int page) {
 
         /*
             type = new -> 미처리 주문
@@ -190,15 +204,15 @@ public class AdminController {
 
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(keyword, searchType, page);
 
-        PagingResponseDTO<AdminOrderResponseDTO> responseDTO;
+        PagingElementsResponseDTO<AdminOrderResponseDTO> responseDTO = adminService.getNewOrderList(pageDTO);
 
-        if(listType.equals("all"))
+        /*if(listType.equals("all"))
             responseDTO = adminService.getAllOrderList(pageDTO);
         else if(listType.equals("new"))
             responseDTO = adminService.getNewOrderList(pageDTO);
         else
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(null);
+                    .body(null);*/
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDTO);
@@ -212,7 +226,10 @@ public class AdminController {
             상품 준비중으로 변경
          */
 
-        return null;
+        String responseMessage = adminService.orderPreparation(orderId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
     }
 
     @GetMapping("/qna/product")
@@ -224,9 +241,9 @@ public class AdminController {
             상품 문의 리스트
          */
 
-        AdminPageDTO pageDTO = new AdminPageDTO(keyword, page);
+        AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(keyword, listType, page);
 
-        PagingResponseDTO<AdminQnAListResponseDTO> responseDTO = adminService.getProductQnAList(pageDTO, listType);
+        PagingResponseDTO<AdminQnAListResponseDTO> responseDTO = adminService.getProductQnAList(pageDTO);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDTO);
@@ -290,9 +307,9 @@ public class AdminController {
             회원 문의 리스트
          */
 
-        AdminPageDTO pageDTO = new AdminPageDTO(keyword, page);
+        AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(keyword, listType, page);
 
-        PagingResponseDTO<AdminQnAListResponseDTO> responseDTO = adminService.getMemberQnAList(pageDTO, listType);
+        PagingResponseDTO<AdminQnAListResponseDTO> responseDTO = adminService.getMemberQnAList(pageDTO);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDTO);
@@ -393,13 +410,14 @@ public class AdminController {
 
     @GetMapping("/member")
     public ResponseEntity<PagingResponseDTO<AdminMemberDTO>> getMember(@RequestParam(name = "keyword", required = false) String keyword
-                                        , @RequestParam(name = "page") int page) {
+                                                                    , @RequestParam(name = "searchType", required = false) String searchType
+                                                                    , @RequestParam(name = "page") int page) {
 
         /*
             회원 목록
          */
 
-        AdminPageDTO pageDTO = new AdminPageDTO(keyword, page);
+        AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(keyword, searchType, page);
 
         PagingResponseDTO<AdminMemberDTO> responseDTO = adminService.getMemberList(pageDTO);
 
@@ -407,14 +425,16 @@ public class AdminController {
                 .body(responseDTO);
     }
 
-    @GetMapping("/member/{userId}")
-    public ResponseEntity<?> getMemberInfo(@PathVariable(name = "userId") String userId) {
-
+    @PatchMapping("/member/point")
+    public ResponseEntity<ResponseMessageDTO> postPoint(@RequestBody AdminPostPointDTO pointDTO){
         /*
-            회원 상세 정보
+            사용자에게 포인트 지급
          */
 
-        return null;
+        String responseMessage = adminService.postPoint(pointDTO);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
     }
 
     /*
@@ -424,7 +444,6 @@ public class AdminController {
      */
     @GetMapping("/sales/period/{term}")
     public ResponseEntity<ResponseDTO<AdminPeriodSalesResponseDTO>> getPeriodSales(@PathVariable(name = "term") int term) {
-
 
         ResponseDTO<AdminPeriodSalesResponseDTO> responseDTO = adminService.getPeriodSales(term);
 
@@ -525,9 +544,9 @@ public class AdminController {
     }
 
 
-    @GetMapping("/sales/product/{keyword}/{page}")
-    public ResponseEntity<?> getProductSales(@PathVariable(name = "keyword", required = false) String keyword
-                                            , @PathVariable(name = "page") int page) {
+    @GetMapping("/sales/product")
+    public ResponseEntity<?> getProductSales(@RequestParam(value = "keyword", required = false) String keyword
+                                            , @RequestParam(value = "page") int page) {
 
         /*
             상품별 매출
@@ -538,6 +557,8 @@ public class AdminController {
             sales
             salesQuantity
 
+            keyword 체크해보기.
+            자꾸 null이 아닌 "null"로 받는데 이유 찾아볼것.
          */
 
         AdminPageDTO pageDTO = new AdminPageDTO(keyword, page);
@@ -573,7 +594,6 @@ public class AdminController {
          */
 
         ResponseDTO<AdminProductSalesDetailDTO> responseDTO = adminService.getProductSalesDetail(productId);
-
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDTO);

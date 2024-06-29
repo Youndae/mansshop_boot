@@ -8,10 +8,10 @@ public record AdminOrderPageDTO(
 ) {
     public AdminOrderPageDTO(String keyword, String searchType, int page) {
         this(
-                keyword == null ? null : "%" + keyword + "%"
+                keyword
                 , searchType
                 , page
-                , 20
+                , 5
         );
 
     }

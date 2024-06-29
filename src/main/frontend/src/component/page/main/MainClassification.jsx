@@ -1,7 +1,13 @@
 import React, {useEffect, useState} from 'react';
 
 import { axiosInstance } from "../../../modules/customAxios";
-import { mainProductPagingObject, getClickNumber, getPrevNumber, getNextNumber } from "../../../modules/pagingModule";
+import {
+    mainProductPagingObject,
+    getClickNumber,
+    getPrevNumber,
+    getNextNumber,
+    pageSubmit
+} from "../../../modules/pagingModule";
 
 import MainContent from "../../ui/MainContent";
 import {useNavigate, useParams, useSearchParams} from "react-router-dom";
@@ -59,21 +65,24 @@ function MainClassification() {
             })
     }
 
-    const handleOnClickNumber = (e) => {
-        paginationNavigate(getClickNumber(e));
+    const handlePageBtn = (e) => {
+        pageSubmit(getClickNumber(e), navigate);
+        // handlePagingSubmit(getClickNumber(e));
     }
 
-    const handleOnClickPrev = () => {
-        paginationNavigate(getPrevNumber(pagingData));
+    const handlePagePrev = () => {
+        pageSubmit(getPrevNumber(pagingData), navigate);
+        // handlePagingSubmit(getPrevNumber(pagingData));
     }
 
-    const handleOnClickNext = () => {
-        paginationNavigate(getNextNumber(pagingData));
+    const handlePageNext = () => {
+        pageSubmit(getNextNumber(pagingData));
+        // handlePagingSubmit(getNextNumber(pagingData));
     }
 
-    const paginationNavigate = (clickNo) => {
+    /*const paginationNavigate = (clickNo) => {
         navigate(`?page=${clickNo}`);
-    }
+    }*/
 
     return (
         <>
@@ -83,9 +92,9 @@ function MainClassification() {
             />
             <Paging
                 pagingData={pagingData}
-                onClickNumber={handleOnClickNumber}
-                onClickPrev={handleOnClickPrev}
-                onClickNext={handleOnClickNext}
+                onClickNumber={handlePageBtn}
+                onClickPrev={handlePagePrev}
+                onClickNext={handlePageNext}
                 className={null}
             />
         </>

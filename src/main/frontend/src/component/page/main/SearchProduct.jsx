@@ -1,9 +1,15 @@
 import React, {useEffect, useState} from 'react';
 
 import { axiosInstance } from "../../../modules/customAxios";
-import {mainProductPagingObject} from "../../../modules/pagingModule";
+import {
+    getClickNumber,
+    getNextNumber,
+    getPrevNumber,
+    mainProductPagingObject,
+    pageSubmit, searchPageSubmit, searchSubmit
+} from "../../../modules/pagingModule";
 
-import {useSearchParams} from "react-router-dom";
+import {useNavigate, useSearchParams} from "react-router-dom";
 import Paging from "../../ui/Paging";
 import MainContent from "../../ui/MainContent";
 
@@ -21,6 +27,8 @@ function SearchProduct() {
         next: false,
         activeNo: page,
     });
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         getSearchProductList();
@@ -46,6 +54,26 @@ function SearchProduct() {
             })
     }
 
+    const handlePageBtn = (e) => {
+        handlePagingSubmit(getClickNumber(e));
+    }
+
+    const handlePagePrev = () => {
+        handlePagingSubmit(getPrevNumber(pagingData));
+    }
+
+    const handlePageNext = () => {
+        handlePagingSubmit(getNextNumber(pagingData));
+    }
+
+    const handlePagingSubmit = (pageNum) => {
+        searchPageSubmit(keyword, pageNum, navigate);
+        /*if(keyword == null)
+            navigate(`/admin/product/discount?page=${pageNum}`);
+        else
+            navigate(`/admin/product/discount?keyword=${keyword}&page=${pageNum}`);*/
+    }
+
     return (
         <>
             <MainContent
@@ -54,7 +82,9 @@ function SearchProduct() {
             />
             <Paging
                 pagingData={pagingData}
-                keywor={keyword}
+                onClickNumber={handlePageBtn}
+                onClickPrev={handlePagePrev}
+                onClickNext={handlePageNext}
             />
         </>
     )

@@ -6,24 +6,26 @@ import com.example.mansshop_boot.config.customException.exception.CustomBadCrede
 import com.example.mansshop_boot.config.customException.exception.CustomTokenStealingException;
 import com.example.mansshop_boot.config.jwt.JWTTokenProvider;
 import com.example.mansshop_boot.config.security.CustomUser;
-import com.example.mansshop_boot.domain.dto.member.JoinDTO;
-import com.example.mansshop_boot.domain.dto.member.LoginDTO;
-import com.example.mansshop_boot.domain.dto.member.LogoutDTO;
-import com.example.mansshop_boot.domain.dto.member.UserStatusDTO;
+import com.example.mansshop_boot.domain.dto.member.*;
 import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseUserStatusDTO;
 import com.example.mansshop_boot.domain.entity.Auth;
 import com.example.mansshop_boot.domain.entity.Member;
 import com.example.mansshop_boot.domain.enumuration.Result;
 import com.example.mansshop_boot.repository.MemberRepository;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -31,6 +33,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.WebUtils;
 
 import java.security.Principal;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +46,10 @@ public class MemberServiceImpl implements MemberService{
     private final JWTTokenProvider jwtTokenProvider;
 
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
+
+    private final StringRedisTemplate redisTemplate;
+
+    private final JavaMailSender javaMailSender;
 
     @Value("#{jwt['token.temporary.header']}")
     private String temporaryHeader;
@@ -61,17 +69,14 @@ public class MemberServiceImpl implements MemberService{
      * 로컬 회원가입
      */
     @Override
-    public ResponseEntity<?> joinProc(JoinDTO joinDTO) {
+    public String joinProc(JoinDTO joinDTO) {
 
         Member memberEntity = joinDTO.toEntity();
         memberEntity.addMemberAuth(new Auth().toMemberAuth());
 
         memberRepository.save(memberEntity);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(
-                        new ResponseMessageDTO(Result.OK.getResultKey())
-                );
+        return Result.OK.getResultKey();
     }
 
     /**
@@ -118,18 +123,16 @@ public class MemberServiceImpl implements MemberService{
      * Redis 데이터 및 Token Cookie 만료 기간 0으로 초기화해서 Response에 담아 반환
      */
     @Override
-    public ResponseEntity<?> logoutProc(LogoutDTO dto, HttpServletResponse response) {
+    public String logoutProc(LogoutDTO dto, HttpServletResponse response) {
 
         try{
             jwtTokenProvider.deleteRedisDataAndCookie(dto.userId(), dto.inoValue(), response);
 
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(new ResponseMessageDTO(Result.OK.getResultKey()));
+            return Result.OK.getResultKey();
         }catch (Exception e) {
             log.warn("logout delete Data Exception");
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
-                    .body(new ResponseMessageDTO(Result.FAIL.getResultKey()));
+            return Result.FAIL.getResultKey();
         }
     }
 
@@ -191,7 +194,7 @@ public class MemberServiceImpl implements MemberService{
     }
 
     @Override
-    public ResponseEntity<?> checkJoinId(String userId) {
+    public String checkJoinId(String userId) {
         Member member = memberRepository.findById(userId).orElse(null);
 
         String responseMessage = checkDuplicatedResponseMessage;
@@ -200,14 +203,11 @@ public class MemberServiceImpl implements MemberService{
             responseMessage = checkNoDuplicatesResponseMessage;
 
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(
-                        new ResponseMessageDTO(responseMessage)
-                );
+        return responseMessage;
     }
 
     @Override
-    public ResponseEntity<?> checkNickname(String nickname, Principal principal) {
+    public String checkNickname(String nickname, Principal principal) {
 
         Member member = memberRepository.findByNickname(nickname);
 
@@ -217,10 +217,114 @@ public class MemberServiceImpl implements MemberService{
             responseMessage = checkNoDuplicatesResponseMessage;
 
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(
-                        new ResponseMessageDTO(responseMessage)
-                );
+        return responseMessage;
     }
 
+    @Override
+    public UserSearchIdResponseDTO searchId(UserSearchDTO searchDTO) {
+
+        log.info("MemberServiceImpl.searchId :: searchDTO : {}", searchDTO);
+
+        String userId = memberRepository.searchId(searchDTO);
+        String message = "OK";
+        if(userId == null)
+            message = "not found";
+
+
+        return new UserSearchIdResponseDTO(userId, message);
+    }
+
+    @Override
+    public String searchPw(UserSearchPwDTO searchDTO) {
+
+        Long count = memberRepository.findByPassword(searchDTO);
+
+        if(count == 0)
+            return Result.NOTFOUND.getResultKey();
+
+        Random ran = new Random();
+        int certificationNo = ran.nextInt(899999) + 100001;
+
+        try{
+            ValueOperations<String, String> stringValueOperations = redisTemplate.opsForValue();;
+            stringValueOperations.set(searchDTO.userId(), String.valueOf(certificationNo), 6L, TimeUnit.MINUTES);
+
+            /*MimeMessage mailForm = createEmailForm(searchDTO.userEmail(), certificationNo);
+            javaMailSender.send(mailForm);*/
+
+            return Result.OK.getResultKey();
+        }catch (Exception e) {
+            log.warn("mail Send Exception");
+            e.printStackTrace();
+            return Result.FAIL.getResultKey();
+        }
+
+    }
+
+    /*@Value("${spring.mail.username}")
+    private String sender;*/
+
+    public MimeMessage createEmailForm(String userEmail, int certificationNo) throws MessagingException {
+        String mailTitle = "Man's Shop 비밀번호 변경";
+
+        MimeMessage message = javaMailSender.createMimeMessage();
+//        message.setFrom(sender);
+        message.addRecipients(MimeMessage.RecipientType.TO, userEmail);
+        message.setSubject(mailTitle);
+
+        String msgOfEmail="";
+        msgOfEmail += "<div style='margin:20px;'>";
+        msgOfEmail += "<h1> 안녕하세요 test 입니다. </h1>";
+        msgOfEmail += "<br>";
+        msgOfEmail += "<p>아래 코드를 입력해주세요<p>";
+        msgOfEmail += "<br>";
+        msgOfEmail += "<p>감사합니다.<p>";
+        msgOfEmail += "<br>";
+        msgOfEmail += "<div align='center' style='border:1px solid black; font-family:verdana';>";
+        msgOfEmail += "<h3 style='color:blue;'>회원가입 인증 코드입니다.</h3>";
+        msgOfEmail += "<div style='font-size:130%'>";
+        msgOfEmail += "CODE : <strong>";
+        msgOfEmail += certificationNo + "</strong><div><br/> ";
+        msgOfEmail += "</div>";
+
+        message.setText(msgOfEmail, "UTF-8", "html");
+
+        return message;
+    }
+
+    @Override
+    public String checkCertificationNo(UserCertificationDTO certificationDTO) {
+        String result = null;
+
+        try{
+            ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+            result = valueOperations.get(certificationDTO.userId());
+        }catch (Exception e) {
+            log.warn("certificationCheck Exception");
+            e.printStackTrace();
+            return Result.ERROR.getResultKey();
+        }
+
+        if(certificationDTO.certification().equals(result))
+            return Result.OK.getResultKey();
+
+        return Result.FAIL.getResultKey();
+    }
+
+    @Override
+    public String resetPw(UserResetPwDTO resetDTO) {
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+        String certificationValue = valueOperations.get(resetDTO.userId());
+        redisTemplate.delete(resetDTO.userId());
+
+        if(certificationValue == null || !certificationValue.equals(resetDTO.certification()))
+            return Result.FAIL.getResultKey();
+
+        Member member = memberRepository.findById(resetDTO.userId()).orElseThrow(IllegalAccessError::new);
+        member.setUserPw(resetDTO.userPw());
+
+        memberRepository.save(member);
+
+        return Result.OK.getResultKey();
+    }
 }

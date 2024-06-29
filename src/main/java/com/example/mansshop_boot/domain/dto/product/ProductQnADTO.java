@@ -9,6 +9,6 @@ public record ProductQnADTO(
         , String writer
         , String qnaContent
         , LocalDate createdAt
-        , int productQnAStat
+        , boolean productQnAStat
 ) {
 }

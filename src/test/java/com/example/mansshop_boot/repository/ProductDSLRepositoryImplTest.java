@@ -2,8 +2,10 @@ package com.example.mansshop_boot.repository;
 
 import com.example.mansshop_boot.domain.dto.admin.AdminProductListDTO;
 import com.example.mansshop_boot.domain.dto.main.MainListDTO;
+import com.example.mansshop_boot.domain.dto.main.MainListResponseDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.MemberPageDTO;
+import com.example.mansshop_boot.domain.dto.response.PagingResponseDTO;
 import com.example.mansshop_boot.domain.entity.Product;
 import com.example.mansshop_boot.domain.entity.ProductOption;
 import org.junit.jupiter.api.Assertions;
@@ -32,7 +34,7 @@ class ProductDSLRepositoryImplTest {
     @DisplayName("best list 조회")
     void bestList() {
         MemberPageDTO memberPageDTO = MemberPageDTO.builder()
-                .pageNum(null)
+                .pageNum(1)
                 .keyword(null)
                 .classification("BEST")
                 .build();
@@ -44,7 +46,7 @@ class ProductDSLRepositoryImplTest {
     @DisplayName("New list 조회")
     void newList() {
         MemberPageDTO memberPageDTO = MemberPageDTO.builder()
-                .pageNum(null)
+                .pageNum(1)
                 .keyword(null)
                 .classification("NEW")
                 .build();
@@ -56,7 +58,7 @@ class ProductDSLRepositoryImplTest {
     @DisplayName("Search keyword=토드백")
     void searchList() {
         MemberPageDTO memberPageDTO = MemberPageDTO.builder()
-                .pageNum(null)
+                .pageNum(1)
                 .keyword("토드백")
                 .classification(null)
                 .build();
@@ -153,4 +155,36 @@ class ProductDSLRepositoryImplTest {
 
     }
 
+    @Test
+    @DisplayName("베스트 상품 조회")
+    void bestProduct() {
+        MemberPageDTO pageDTO = MemberPageDTO.builder()
+                .pageNum(1)
+                .keyword(null)
+                .classification("BEST")
+                .build();
+
+        List<MainListDTO> listDto = productRepository.findListDefault(pageDTO);
+
+        listDto.forEach(System.out::println);
+    }
+
+    @Test
+    @DisplayName("OUTER 상품 검색")
+    void outerProduct() {
+        MemberPageDTO pageDTO = MemberPageDTO.builder()
+                .pageNum(1)
+                .keyword(null)
+                .classification("OUTER")
+                .build();
+
+        Pageable pageable =  PageRequest.of(pageDTO.pageNum() - 1
+                , pageDTO.mainProductAmount()
+                , Sort.by("createdAt").descending()
+        );
+
+        Page<MainListDTO> dto = productRepository.findListPageable(pageDTO, pageable);
+
+        System.out.println("size : " + dto.getContent().size());
+    }
 }

@@ -11,7 +11,7 @@ public record MyPageOrderDTO(
         long orderId
         , int orderTotalPrice
         , LocalDateTime orderDate
-        , int orderStat
+        , String orderStat
         , List<MyPageOrderDetailDTO> detail
 ) {
 }

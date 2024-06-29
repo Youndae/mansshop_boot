@@ -10,11 +10,11 @@ public record MemberPageDTO(
 ) {
 
     @Builder
-    public MemberPageDTO(Long pageNum
+    public MemberPageDTO(int pageNum
                         , String keyword
                         , String classification) {
         this(
-                pageNum == null ? 1 : pageNum.intValue()
+                pageNum
                 , 12
                 , keyword == null ? null : "%" + keyword + "%"
                 , classification

@@ -5,7 +5,7 @@ import DaumPostcode from "react-daum-postcode";
 
 import '../../css/order.css';
 
-import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
+import {axiosDefault, axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {numberComma} from "../../../modules/numberCommaModule";
 import DefaultBtn from "../../ui/DefaultBtn";
 
@@ -35,6 +35,8 @@ function Order() {
 
     const navigate = useNavigate();
 
+    const phoneRegEx = "(\\d{3})(\\d{3,4})(\\d{4})";
+
     useEffect(() => {
         if(state !== null) {
             setOrderProduct(state.orderProduct);
@@ -43,14 +45,78 @@ function Order() {
 
             if(state.totalPrice >= 100000)
                 setDeliveryFee(0);
+
+            const jquery = document.createElement("script");
+            jquery.src = "http://code.jquery.com/jquery-1.12.4.min.js";
+            const iamport = document.createElement('script');
+            iamport.src = "http://cdn.iamport.kr/js/iamport.payment-1.1.7.js";
+            document.head.appendChild(jquery);
+            document.head.appendChild(iamport);
+
+            return () => {
+                document.head.removeChild(jquery);
+                document.head.removeChild(iamport);
+            }
+        }else {
+            navigate('/error');
         }
     }, [state]);
+
+    const requestPay = () => {
+        const { IMP } = window;
+        IMP.init('imp78285136');
+
+        const price = totalPrice;
+        const name = orderData.recipient;
+        const phone = orderData.phone.replaceAll(phoneRegEx, "$1-$2-$3");
+        const payAddress = `${userAddress.address} ${userAddress.detail}`;
+        const postCode = userAddress.postCode;
+        let orderName = orderProduct[0].productName;
+        if(orderProduct.length > 1)
+            orderName = `${orderProduct[0].productName} 외 ${orderProduct.length - 1}건`;
+
+        IMP.request_pay({
+            pg: 'danal_tpay',
+            pay_method: 'card',
+            merchant_uid: new Date().getTime(),
+            name: orderName,
+            amount: price,
+            buyer_email: '',
+            buyer_name: name,
+            buyer_tel: phone,
+            buyer_addr: payAddress,
+            buyer_postcode: postCode,
+        }, async (res) => {
+            try{
+                const { data } = await axiosDefault.post(`payment/iamport/${res.imp_uid}`);
+
+                if(res.paid_amount === data.response.amount) {
+                    alert('결제 완료');
+                    await requestOrder();
+                }else {
+                    alert('결제 실패');
+                }
+            }catch (err) {
+                console.error('payment error : ', err);
+                alert('결제 오류');
+            }
+        })
+
+    }
 
     const handlePostCodeBtn = (e) => {
         setIsOpen(true);
     }
 
     const handleOrderSubmit = async () => {
+        if(paymentType === 'card')
+            requestPay();
+        else if(paymentType === 'cash')
+            await requestOrder();
+
+    }
+
+    const requestOrder = async () => {
         const addr = `${userAddress.postCode} ${userAddress.address} ${userAddress.detail}`;
         let productArr = [];
 
@@ -86,7 +152,6 @@ function Order() {
             .catch(err => {
                 console.error('productOrder axios error : ', err);
             })
-
     }
 
     const handleRadioSelect = (e) => {

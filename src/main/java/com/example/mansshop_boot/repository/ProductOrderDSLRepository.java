@@ -36,7 +36,7 @@ public interface ProductOrderDSLRepository {
 
     AdminSalesDTO getProductPeriodSales(int year, String productId);
 
-    List<AdminPeriodSalesListDTO> getProductMonthPeriodSales(LocalDateTime startDate, LocalDateTime endDate, String productId);
+    List<AdminPeriodSalesListDTO> getProductMonthPeriodSales(int year, String productId);
 
 
 }

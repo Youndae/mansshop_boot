@@ -218,15 +218,19 @@ public class MyPageServiceImpl implements MyPageService{
     @Override
     public ProductQnADetailDTO getProductQnADetail(long productQnAId, Principal principal){
         String userId = principalService.getUserIdByPrincipal(principal);
+        String nickname = principalService.getNicknameByPrincipal(principal);
 
-        MyPageProductQnADTO qnaDTO = productQnARepository.findByQnAId(productQnAId);
+        ProductQnA productQnA = productQnARepository.findById(productQnAId).orElseThrow(IllegalArgumentException::new);
 
-        if(qnaDTO == null || !qnaDTO.writer().equals(userId))
+        if(!productQnA.getMember().getUserId().equals(userId))
             throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
 
-        List<MyPageQnAReplyDTO> replyDTOList = productQnAReplyRepository.findAllByQnAId(productQnAId);
+        String writer = productQnA.getMember().getNickname() == null ?
+                                productQnA.getMember().getUserName() : productQnA.getMember().getNickname();
 
-        String nickname = principalService.getNicknameByPrincipal(principal);
+        MyPageProductQnADTO qnaDTO = new MyPageProductQnADTO(productQnA, writer);
+
+        List<MyPageQnAReplyDTO> replyDTOList = productQnAReplyRepository.findAllByQnAId(productQnAId);
 
         return new ProductQnADetailDTO(qnaDTO, replyDTOList, nickname);
     }
@@ -339,14 +343,21 @@ public class MyPageServiceImpl implements MyPageService{
     public MemberQnADetailDTO getMemberQnADetail(long memberQnAId, Principal principal) {
 
         String userId = principalService.getUserIdByPrincipal(principal);
+        String nickname = principalService.getNicknameByPrincipal(principal);
 
-        MemberQnADTO qnaDTO = memberQnARepository.findByQnAId(memberQnAId);
-        if(qnaDTO == null || !qnaDTO.writer().equals(userId))
+        MemberQnA memberQnA = memberQnARepository.findById(memberQnAId).orElseThrow(IllegalArgumentException::new);
+
+        if(!memberQnA.getMember().getUserId().equals(userId))
             throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
+
+        String writer = memberQnA.getMember().getNickname() == null ?
+                memberQnA.getMember().getUserName() : memberQnA.getMember().getNickname();
+
+        MemberQnADTO qnaDTO = new MemberQnADTO(memberQnA, writer);
 
         List<MyPageQnAReplyDTO> replyDTOList = memberQnAReplyRepository.findAllByQnAId(memberQnAId);
 
-        String nickname = principalService.getNicknameByPrincipal(principal);
+
 
         return new MemberQnADetailDTO(qnaDTO, replyDTOList, nickname);
     }

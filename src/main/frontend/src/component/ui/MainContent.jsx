@@ -10,6 +10,8 @@ function MainContent(props) {
     const { data, classification } = props;
     const [imageList, setImageList] = useState([]);
 
+    console.log('mainContent data : ', data);
+
     useEffect(() => {
         getImageDisplay();
     }, [data]);
@@ -33,7 +35,10 @@ function MainContent(props) {
                         productId: data[i].productId,
                         thumbnail: url,
                         productName: data[i].productName,
-                        productPrice: numberComma(data[i].productPrice),
+                        originPrice: numberComma(data[i].originPrice),
+                        discount: data[i].discount,
+                        discountPrice: numberComma(data[i].discountPrice),
+                        isSoldOut: data[i].isSoldOut
                     });
                 })
                 .catch(err => {
@@ -59,8 +64,7 @@ function MainContent(props) {
                                 </Link>
                             </div>
                             <div className="product-info">
-                                <span className="product-name">{image.productName}</span><br />
-                                <span className="product-price">{image.productPrice} 원</span>
+                                <ProductPrice data={image}/>
                             </div>
                         </div>
                     )
@@ -68,6 +72,34 @@ function MainContent(props) {
             </div>
         </div>
     )
+}
+
+function ProductPrice(props) {
+    const { data } = props;
+
+    let productName = <p className="product-name">{data.productName}</p>;
+    if(data.isSoldOut)
+        productName = <p className="product-name sold-out">{data.productName} (품절)</p>
+
+
+    if(data.discount === 0) {
+        return (
+            <>
+                {productName}
+                <p className="product-price">{data.originPrice}원</p>
+            </>
+
+        )
+    }else {
+        return (
+            <>
+                {productName}
+                <span className="discount-original-price">{data.originPrice}원</span>
+                <span className="discount-percent">{data.discount}%</span>
+                <span className="discount-price">{data.discountPrice}원</span>
+            </>
+        )
+    }
 }
 
 export default MainContent;

@@ -8,7 +8,13 @@ import AdminSideNav from "../../ui/nav/AdminSideNav";
 
 import "../../css/admin.css";
 import {setMemberObject} from "../../../modules/loginModule";
-import {getClickNumber, getNextNumber, getPrevNumber, productDetailPagingObject} from "../../../modules/pagingModule";
+import {
+    getClickNumber,
+    getNextNumber,
+    getPrevNumber,
+    pageSubmit,
+    productDetailPagingObject, searchPageSubmit, searchSubmit
+} from "../../../modules/pagingModule";
 import Paging from "../../ui/Paging";
 import {numberComma} from "../../../modules/numberCommaModule";
 import DefaultBtn from "../../ui/DefaultBtn";
@@ -56,8 +62,11 @@ function AdminProduct() {
     }, [page, keyword]);
 
     const getProductList = async () => {
+        let url = `admin/product?page=${page}`;
+        if(keyword !== null)
+            url += `&keyword=${keyword}`;
 
-        await axiosInstance.get(`admin/product?keyword=${keyword}&page=${page}`)
+        await axiosInstance.get(url)
             .then(res => {
                 console.log('productList res : ', res);
 
@@ -94,9 +103,13 @@ function AdminProduct() {
 
     const handlePagingSubmit = (pageNum) => {
         if(keyword == null)
-            navigate(`/admin/product?page=${pageNum}`);
+            pageSubmit(pageNum, navigate);
         else
-            navigate(`/admin/product?keyword=${keyword}&page=${pageNum}`);
+            searchPageSubmit(keyword, pageNum, navigate);
+        /*if(keyword == null)
+            navigate(`/admin/product/discount?page=${pageNum}`);
+        else
+            navigate(`/admin/product/discount?keyword=${keyword}&page=${pageNum}`);*/
     }
 
     const handleKeywordOnChange = (e) => {
@@ -104,7 +117,8 @@ function AdminProduct() {
     }
 
     const handleSearchOnClick = async () => {
-        navigate(`/admin/product?keyword=${keywordInput}`);
+        searchSubmit(keywordInput, navigate);
+        // navigate(`/admin/product?keyword=${keywordInput}`);
     }
 
     const handleAddBtnOnClick = () => {

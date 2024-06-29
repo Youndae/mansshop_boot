@@ -2,6 +2,11 @@ import axios from "axios";
 
 let tokenStealingAlertStatus = true;
 
+export const axiosDefault = axios.create({
+    baseURL: '/api',
+    withCredentials: true,
+})
+
 export const axiosInstance = axios.create({
     baseURL: '/api',
     withCredentials: true,
@@ -25,30 +30,7 @@ axiosInstance.interceptors.response.use(
         return res;
     },
     async (err) => {
-        if(err.response.status === 401){
-            // err.config._retry = true;
-            console.log('axios default response status is 401');
-
-            return axiosInstance.get(`reissue`)
-                .then(res => {
-                    window.localStorage.removeItem('Authorization');
-
-                    const authorization = res.headers['authorization'];
-                    window.localStorage.setItem('Authorization', authorization);
-
-                    return axiosInstance(err.config);
-                })
-                .catch(error => {
-                    console.log('token test error : ', error);
-                })
-        }else if(err.response.status === 800){
-            if(tokenStealingAlertStatus){
-                tokenStealingAlertStatus = false;
-                window.localStorage.removeItem('Authorization');
-                alert('로그인 정보에 문제가 발생해 로그아웃됩니다.\n문제가 계속된다면 관리자에게 문의해주세요.');
-                window.location.href='/';
-            }
-        }
+       errorHandling(err);
     }
 )
 
@@ -58,5 +40,47 @@ const getToken = () => {
 
 
 export const checkResponseMessageOk = (res) => {
-    return res.data.message === 'OK';
+
+    if(res.data.message === 'OK')
+        return true;
+    else{
+        alert('오류가 발생했습니다.\n문제가 계속된다면 관리자에게 문의해주세요');
+        return false;
+    }
+
+}
+
+export const errorHandling = (err) => {
+    const errorStatus = err.response.status;
+    const errorMessage = err.response.data.errorMessage;
+    console.log('error response : ', err.response);
+    if(errorStatus === 401){
+        //토큰 만료 응답
+
+        // err.config._retry = true;
+        console.log('axios default response status is 401');
+
+        return axiosInstance.get(`reissue`)
+            .then(res => {
+                window.localStorage.removeItem('Authorization');
+
+                const authorization = res.headers['authorization'];
+                window.localStorage.setItem('Authorization', authorization);
+
+                return axiosInstance(err.config);
+            })
+            .catch(error => {
+                console.log('token test error : ', error);
+            })
+    }else if(errorStatus === 800){
+        //토큰 탈취 응답
+        if(tokenStealingAlertStatus){
+            tokenStealingAlertStatus = false;
+            window.localStorage.removeItem('Authorization');
+            alert('로그인 정보에 문제가 발생해 로그아웃됩니다.\n문제가 계속된다면 관리자에게 문의해주세요.');
+            window.location.href='/';
+        }
+    }else if(errorStatus === 403 && errorMessage === 'AccessDeniedException') {
+        window.location.href='/error';
+    }
 }

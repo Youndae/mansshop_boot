@@ -6,6 +6,7 @@ import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;
 import com.example.mansshop_boot.domain.entity.ProductOrder;
+import com.example.mansshop_boot.domain.enumuration.OrderStatus;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.Projections;
@@ -100,7 +101,11 @@ public class ProductOrderDSLRepositoryImpl implements ProductOrderDSLRepository{
 
         List<AdminOrderDTO> list = jpaQueryFactory.select(getFindAllOrderListSelect())
                                                 .from(productOrder)
-                                                .where(productOrder.createdAt.lt(todayLastOrderTime))
+                                                .where(
+                                                        productOrder.createdAt.loe(todayLastOrderTime)
+                                                                .and(productOrder.orderStat.eq(OrderStatus.ORDER.getStatusStr()))
+                                                                .and(searchAdminOrder(pageDTO))
+                                                )
                                                 .orderBy(productOrder.createdAt.desc())
                                                 .offset(pageable.getOffset())
                                                 .limit(pageable.getPageSize())
@@ -108,7 +113,11 @@ public class ProductOrderDSLRepositoryImpl implements ProductOrderDSLRepository{
 
         JPAQuery<Long> count = jpaQueryFactory.select(productOrder.countDistinct())
                                             .from(productOrder)
-                                            .where(searchAdminOrder(pageDTO));
+                                            .where(
+                                                    productOrder.createdAt.loe(todayLastOrderTime)
+                                                            .and(productOrder.orderStat.eq(OrderStatus.ORDER.getStatusStr()))
+                                                            .and(searchAdminOrder(pageDTO))
+                                            );
 
         return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
     }
@@ -131,12 +140,14 @@ public class ProductOrderDSLRepositoryImpl implements ProductOrderDSLRepository{
     }
 
     public BooleanExpression searchAdminOrder(AdminOrderPageDTO pageDTO) {
-        if(pageDTO.searchType().equals("recipient"))
+        if(pageDTO.searchType() == null)
+            return null;
+        else if(pageDTO.searchType().equals("recipient"))
             return productOrder.recipient.eq(pageDTO.keyword());
         else if(pageDTO.searchType().equals("userId"))
             return productOrder.member.userId.eq(pageDTO.keyword());
-        else
-            return null;
+
+        return null;
     }
 
     @Override
@@ -315,7 +326,7 @@ public class ProductOrderDSLRepositoryImpl implements ProductOrderDSLRepository{
     }
 
     @Override
-    public List<AdminPeriodSalesListDTO> getProductMonthPeriodSales(LocalDateTime startDate, LocalDateTime endDate, String productId) {
+    public List<AdminPeriodSalesListDTO> getProductMonthPeriodSales(int year, String productId) {
         return jpaQueryFactory.select(
                 Projections.constructor(
                         AdminPeriodSalesListDTO.class
@@ -328,7 +339,7 @@ public class ProductOrderDSLRepositoryImpl implements ProductOrderDSLRepository{
                 .from(productOrder)
                 .innerJoin(productOrderDetail)
                 .on(productOrder.id.eq(productOrderDetail.productOrder.id))
-                .where(productOrder.createdAt.between(startDate, endDate).and(productOrderDetail.product.id.eq(productId)))
+                .where(productOrder.createdAt.year().eq(year).and(productOrderDetail.product.id.eq(productId)))
                 .groupBy(productOrder.createdAt.month())
                 .fetch();
     }

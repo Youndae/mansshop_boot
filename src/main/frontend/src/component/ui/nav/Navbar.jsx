@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {Link, useLocation, useNavigate} from "react-router-dom";
 
 import "../../css/header.css";
-import {axiosInstance } from "../../../modules/customAxios";
+import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {useDispatch, useSelector} from "react-redux";
 import {handleLocationPathToLogin} from "../../../modules/loginModule";
 
@@ -35,7 +35,7 @@ function Navbar() {
 
         await axiosInstance.post(`member/logout`)
             .then(res => {
-                if(res.data.message === 'success') {
+                if(checkResponseMessageOk(res)) {
                     window.localStorage.removeItem('Authorization');
                     navigate('/');
                 }else {
