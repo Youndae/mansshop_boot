@@ -261,7 +261,7 @@ function TotalPrice(props) {
 function CartDetail(props) {
     const { data, handleCountUp, handleCountDown, handleRemoveProduct, handleDisableCheckBox, handleSelectCheckBox, selectStatus } = props;
 
-    if(data === undefined){
+    if(data === null){
         return (
             <div className="content-data">
                 <h3>장바구니에 담긴 상품이 없습니다.</h3>

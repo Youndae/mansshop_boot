@@ -1,3 +1,11 @@
+@media (max-width: 1280px) {
+    .admin-content {
+        margin-left: 35%;
+        margin-top: 5%;
+        width: 30%;
+    }
+}
+
 @media (min-width: 1280px) {
     .admin-content {
         margin-left: 40%;
@@ -523,4 +531,41 @@
 
 .admin-period-order-content label {
     font-weight: bold;
+}
+
+.tr-pointer {
+    cursor: pointer;
+}
+
+.mt-5-p {
+    margin-top: 5px;
+}
+
+.mt-10-p {
+    margin-top: 10px;
+}
+
+.mt-5-pe {
+    margin-top: 5%;
+}
+
+.mt-10-pe {
+    margin-top: 10%;
+}
+
+.b1-s-lg {
+    border: 1px solid lightgrey;
+}
+
+.order-preparation-btn {
+    width: 100px;
+    height: 30px;
+}
+
+.admin-order-detail-check-btn {
+    display: ruby-text;
+}
+
+.admin-search input {
+    margin-left: 5px;
 }

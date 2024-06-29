@@ -35,9 +35,11 @@ public interface AdminService {
 
     PagingResponseDTO<AdminOrderResponseDTO> getAllOrderList(AdminOrderPageDTO pageDTO);
 
-    PagingResponseDTO<AdminOrderResponseDTO> getNewOrderList(AdminOrderPageDTO pageDTO);
+    PagingElementsResponseDTO<AdminOrderResponseDTO> getNewOrderList(AdminOrderPageDTO pageDTO);
 
-    PagingResponseDTO<AdminQnAListResponseDTO> getProductQnAList(AdminPageDTO pageDTO, String listType);
+    String orderPreparation(long orderId);
+
+    PagingResponseDTO<AdminQnAListResponseDTO> getProductQnAList(AdminOrderPageDTO pageDTO);
 
     ProductQnADetailDTO getProductQnADetail(long qnaId);
 
@@ -45,7 +47,7 @@ public interface AdminService {
 
     String postProductQnAReply(QnAReplyInsertDTO insertDTO, Principal principal);
 
-    PagingResponseDTO<AdminQnAListResponseDTO> getMemberQnAList(AdminPageDTO pageDTO, String listType);
+    PagingResponseDTO<AdminQnAListResponseDTO> getMemberQnAList(AdminOrderPageDTO pageDTO);
 
     MemberQnADetailDTO getMemberQnADetail(long qnaId);
 
@@ -59,7 +61,9 @@ public interface AdminService {
 
     String deleteQnAClassification(long classificationId);
 
-    PagingResponseDTO<AdminMemberDTO> getMemberList(AdminPageDTO pageDTO);
+    PagingResponseDTO<AdminMemberDTO> getMemberList(AdminOrderPageDTO pageDTO);
+
+    String postPoint(AdminPostPointDTO pointDTO);
 
     ResponseDTO<AdminPeriodSalesResponseDTO> getPeriodSales(int term);
 

@@ -1,6 +1,9 @@
 package com.example.mansshop_boot.repository;
 
 import com.example.mansshop_boot.domain.dto.admin.AdminMemberDTO;
+import com.example.mansshop_boot.domain.dto.member.UserSearchDTO;
+import com.example.mansshop_boot.domain.dto.member.UserSearchPwDTO;
+import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.entity.Member;
 import com.querydsl.core.types.Projections;
@@ -29,17 +32,17 @@ public class MemberDSLRepositoryImpl implements MemberDSLRepository{
         return jpaQueryFactory.select(member)
                 .from(member)
                 .where(member.userId.eq(userId).and(member.provider.eq("local")))
-                .fetch()
-                .get(0);
+                .fetchOne();
     }
 
     @Override
-    public Page<AdminMemberDTO> findMember(AdminPageDTO pageDTO, Pageable pageable) {
+    public Page<AdminMemberDTO> findMember(AdminOrderPageDTO pageDTO, Pageable pageable) {
 
         List<AdminMemberDTO> list = jpaQueryFactory.select(
                 Projections.constructor(
                         AdminMemberDTO.class
                         , member.userId
+                        , member.userName
                         , member.nickname
                         , member.phone
                         , member.userEmail.as("email")
@@ -63,10 +66,46 @@ public class MemberDSLRepositoryImpl implements MemberDSLRepository{
         return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
     }
 
-    public BooleanExpression searchAdminMember(AdminPageDTO pageDTO) {
-        if(pageDTO.keyword() != null)
+    public BooleanExpression searchAdminMember(AdminOrderPageDTO pageDTO) {
+
+        if(pageDTO.keyword() == null)
+            return null;
+        else if(pageDTO.searchType().equals("userId"))
             return member.userId.eq(pageDTO.keyword());
+        else if(pageDTO.searchType().equals("userName"))
+            return member.userName.eq(pageDTO.keyword());
+        else if(pageDTO.searchType().equals("nickname"))
+            return member.nickname.eq(pageDTO.keyword());
 
         return null;
+    }
+
+    @Override
+    public String searchId(UserSearchDTO searchDTO) {
+        return jpaQueryFactory.select(member.userId)
+                .from(member)
+                .where(memberSearchId(searchDTO))
+                .fetchOne();
+    }
+
+    public BooleanExpression memberSearchId(UserSearchDTO searchDTO) {
+        if(searchDTO.userPhone() == null)
+            return member.userName.eq(searchDTO.userName()).and(member.userEmail.eq(searchDTO.userEmail()));
+        else if(searchDTO.userEmail() == null)
+            return member.userName.eq(searchDTO.userName()).and(member.phone.eq(searchDTO.userPhone()));
+
+        return member.userName.eq("");
+    }
+
+    @Override
+    public Long findByPassword(UserSearchPwDTO searchDTO) {
+        return jpaQueryFactory.select(member.countDistinct())
+                .from(member)
+                .where(
+                        member.userId.eq(searchDTO.userId())
+                                .and(member.userName.eq(searchDTO.userName()))
+                                .and(member.userEmail.eq(searchDTO.userEmail()))
+                )
+                .fetchOne();
     }
 }

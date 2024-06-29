@@ -93,18 +93,22 @@ public class ProductServiceImpl implements ProductService{
 
         UserStatusDTO userStatus = new UserStatusDTO(uid);
 
+        int discountPrice = (int) (product.getProductPrice() * (1 - ((double) product.getProductDiscount() / 100)));
+
         return ProductDetailDTO.builder()
                 .productId(product.getId())
                 .productName(product.getProductName())
                 .productPrice(product.getProductPrice())
                 .productImageName(product.getThumbnail())
+                .likeStat(likeStat)
+                .discount(product.getProductDiscount())
+                .discountPrice(discountPrice)
                 .productOptionList(productOption)
                 .productThumbnailList(productThumbnailList)
                 .productInfoImageList(productInfoImageList)
                 .productReviewList(productReview)
                 .productQnAList(productQnA)
                 .userStatus(userStatus)
-                .likeStat(likeStat)
                 .build();
     }
 

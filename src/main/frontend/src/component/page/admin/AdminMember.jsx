@@ -4,7 +4,13 @@ import Paging from "../../ui/Paging";
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useSearchParams} from "react-router-dom";
 import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
-import {getClickNumber, getNextNumber, getPrevNumber, productDetailPagingObject} from "../../../modules/pagingModule";
+import {
+    getClickNumber,
+    getNextNumber,
+    getPrevNumber,
+    pageSubmit,
+    productDetailPagingObject, searchTypePageSubmit, searchTypeSubmit
+} from "../../../modules/pagingModule";
 import {setMemberObject} from "../../../modules/loginModule";
 import AdminOrderModal from "./modal/AdminOrderModal";
 import DefaultBtn from "../../ui/DefaultBtn";
@@ -36,6 +42,7 @@ function AdminMember() {
     const [params] = useSearchParams();
     const page = params.get('page') == null ? 1 : params.get('page');
     const keyword = params.get('keyword');
+    const searchType = params.get('type') == null ? 'userId' : params.get('type');
     const [data, setData] = useState([]);
     const [pagingData, setPagingData] = useState({
         startPage: 0,
@@ -47,6 +54,7 @@ function AdminMember() {
     const [keywordInput, setKeywordInput] = useState('');
     const [modalData, setModalData] = useState({
         userId: '',
+        userName: '',
         nickname: '',
         phone: '',
         email: '',
@@ -55,6 +63,7 @@ function AdminMember() {
         createdAt: '',
     })
     const [pointValue, setPointValue] = useState(0);
+    const [keywordSelectValue, setKeywordSelectValue] = useState('');
 
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const modalRef = useRef(null);
@@ -63,13 +72,18 @@ function AdminMember() {
     const navigate = useNavigate();
 
     useEffect(() => {
+        setKeywordSelectValue(searchType);
         getMemberList();
-    }, [page, keyword]);
+    }, [page, keyword, searchType]);
 
     const getMemberList = async () => {
+        let url = `admin/member?page=${page}`;
+        if(keyword !== null)
+            url += `&keyword=${keyword}&searchType=${searchType}`;
 
-        await axiosInstance.get(`admin/member?page=${page}&keyword=${keyword}`)
+        await axiosInstance.get(url)
             .then(res => {
+                console.log('res : ', res);
                 setData(res.data.content);
 
                 const pagingObject = productDetailPagingObject(page, res.data.totalPages);
@@ -113,13 +127,13 @@ function AdminMember() {
 
     const handlePagingSubmit = (pageNum) => {
         if(keyword == null)
-            navigate(`/admin/order/all?page=${pageNum}`);
+            pageSubmit(pageNum, navigate);
         else
-            navigate(`/admin/order/all?keyword=${keyword}&page=${pageNum}`);
+            searchTypePageSubmit(searchType, keyword, pageNum, navigate);
     }
 
-    const handleSearchOnClick = async () => {
-        navigate(`/admin/order/all?keyword=${keywordInput}`);
+    const handleSearchOnClick = () => {
+        searchTypeSubmit(keywordSelectValue, keywordInput, navigate);
     }
 
     const handleKeywordOnChange = (e) => {
@@ -141,7 +155,7 @@ function AdminMember() {
 
     const handlePostPoint = async () => {
         const uid = modalData.userId;
-
+        console.log('postpoint');
 
         await axiosInstance.patch(`admin/member/point`, {
             userId: uid,
@@ -172,6 +186,12 @@ function AdminMember() {
         navigate(`/admin/qna/member?keyword=${uid}&page=1`)
     }
 
+    const handleSelectOnChange = (e) => {
+        const value = e.target.value;
+
+        setKeywordSelectValue(value);
+    }
+
     return (
         <div className="mypage">
             <AdminSideNav
@@ -185,6 +205,7 @@ function AdminMember() {
                     <table className="admin-content-table">
                         <thead>
                             <th>아이디</th>
+                            <th>이름</th>
                             <th>닉네임</th>
                             <th>가입일</th>
                         </thead>
@@ -193,6 +214,7 @@ function AdminMember() {
                                 return (
                                     <tr key={index} onClick={() => handleOnClick(value.userId)} className={'admin-order-body-tr'}>
                                         <td>{value.userId}</td>
+                                        <td>{value.userName}</td>
                                         <td>{value.nickname}</td>
                                         <td>{value.createdAt}</td>
                                     </tr>
@@ -244,7 +266,7 @@ function AdminMember() {
                                                 <DefaultBtn
                                                     btnText={'지급'}
                                                     className={'member-point-btn'}
-                                                    onclick={handlePostPoint}
+                                                    onClick={handlePostPoint}
                                                 />
                                             </div>
                                         </div>
@@ -271,6 +293,11 @@ function AdminMember() {
                         />
                     )}
                     <div className="admin-search">
+                        <select className="admin-order-search" value={keywordSelectValue} onChange={handleSelectOnChange}>
+                            <option value={'userId'}>아이디</option>
+                            <option value={'userName'}>이름</option>
+                            <option value={'nickname'}>닉네임</option>
+                        </select>
                         <input type={'text'} onChange={handleKeywordOnChange} value={keywordInput}/>
                         <img alt={''} src={"https://as1.ftcdn.net/v2/jpg/03/25/73/68/1000_F_325736897_lyouuiCkWI59SZAPGPLZ5OWQjw2Gw4qY.jpg"} onClick={handleSearchOnClick}/>
                         <Paging

@@ -53,11 +53,16 @@ public class ProductDSLRepositoryImpl implements ProductDSLRepository{
                                 , product.id.as("productId")
                                 , product.productName
                                 , product.thumbnail
-                                , product.productPrice
+                                , product.productPrice.as("price")
+                                , product.productDiscount.as("discount")
+                                , productOption.stock.longValue().sum().as("stock")
                         )
                 )
                 .from(product)
+                .innerJoin(productOption)
+                .on(product.id.eq(productOption.product.id))
                 .orderBy(defaultListOrderBy(pageDTO.classification()))
+                .groupBy(product.id)
                 .limit(pageDTO.mainProductAmount())
                 .fetch();
 
@@ -75,16 +80,21 @@ public class ProductDSLRepositoryImpl implements ProductDSLRepository{
                                 , product.id.as("productId")
                                 , product.productName
                                 , product.thumbnail
-                                , product.productPrice
+                                , product.productPrice.as("price")
+                                , product.productDiscount.as("discount")
+                                , productOption.stock.longValue().sum().as("stock")
                         )
                 )
                 .from(product)
+                .innerJoin(productOption)
+                .on(product.id.eq(productOption.product.id))
                 .where(
                         searchType(pageDTO.classification(), pageDTO.keyword())
                 )
+                .groupBy(product.id)
                 .orderBy(defaultListOrderBy(pageDTO.classification()))
-                .offset((pageDTO.pageNum() - 1) * pageDTO.mainProductAmount())
-                .limit(pageDTO.mainProductAmount())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
                 .fetch();
 
         JPAQuery<Long> count = jpaQueryFactory.select(product.countDistinct())

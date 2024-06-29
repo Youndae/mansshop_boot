@@ -59,6 +59,15 @@ ul {
     float: left;
 }
 
+.product-price .original-price {
+    text-decoration: line-through;
+    font-size: x-large;
+}
+
+.product-price .discount-value {
+    font-size: x-large;
+}
+
 .product-detail-option-detail span {
     font-weight: 100;
     font-size: xx-large;
@@ -283,3 +292,4 @@ select#product-detail-option-select-box {
 .product-detail-content {
     text-align: center;
 }
+

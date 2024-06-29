@@ -1,6 +1,7 @@
 package com.example.mansshop_boot.controller;
 
 import com.example.mansshop_boot.domain.dto.main.MainListDTO;
+import com.example.mansshop_boot.domain.dto.main.MainListResponseDTO;
 import com.example.mansshop_boot.domain.dto.mypage.MemberOrderDTO;
 import com.example.mansshop_boot.domain.dto.mypage.MyPageOrderDTO;
 import com.example.mansshop_boot.domain.dto.pageable.MemberPageDTO;
@@ -38,7 +39,7 @@ public class MainController {
     private final MyPageService myPageService;
 
     @GetMapping({"/", "/new"})
-    public ResponseEntity<ResponseListDTO<MainListDTO>> mainList(HttpServletRequest request
+    public ResponseEntity<ResponseListDTO<MainListResponseDTO>> mainList(HttpServletRequest request
                                     , Principal principal) {
 
         String requestURI = request.getRequestURI();
@@ -47,20 +48,20 @@ public class MainController {
         classification = classification.equals("") ? "BEST" : classification;
 
         MemberPageDTO memberPageDTO = MemberPageDTO.builder()
-                                                    .pageNum(null)
+                                                    .pageNum(1)
                                                     .keyword(null)
                                                     .classification(classification)
                                                     .build();
 
-        ResponseListDTO<MainListDTO> responseDTO = mainService.getBestAndNewList(memberPageDTO, principal);
+        ResponseListDTO<MainListResponseDTO> responseDTO = mainService.getBestAndNewList(memberPageDTO, principal);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDTO);
     }
 
     @GetMapping("/{classification}")
-    public ResponseEntity<PagingResponseDTO<MainListDTO>> mainClassificationList(@PathVariable(name = "classification") String classification
-                                                            , @RequestParam(name = "page", required = false) Long page
+    public ResponseEntity<PagingResponseDTO<MainListResponseDTO>> mainClassificationList(@PathVariable(name = "classification") String classification
+                                                            , @RequestParam(name = "page") int page
                                                             , Principal principal){
 
         MemberPageDTO memberPageDTO = MemberPageDTO.builder()
@@ -69,15 +70,15 @@ public class MainController {
                                                 .classification(classification)
                                                 .build();
 
-        PagingResponseDTO<MainListDTO> responseDTO = mainService.getClassificationAndSearchList(memberPageDTO, principal);
+        PagingResponseDTO<MainListResponseDTO> responseDTO = mainService.getClassificationAndSearchList(memberPageDTO, principal);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDTO);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<PagingResponseDTO<MainListDTO>> searchList(@RequestParam(name = "page", required = false) Long page
-                                                                    , @RequestParam(name = "keyword", required = false) String keyword
+    public ResponseEntity<PagingResponseDTO<MainListResponseDTO>> searchList(@RequestParam(name = "page") int page
+                                                                    , @RequestParam(name = "keyword") String keyword
                                                                     , Principal principal){
 
         MemberPageDTO memberPageDTO = MemberPageDTO.builder()
@@ -86,7 +87,7 @@ public class MainController {
                                                 .classification(null)
                                                 .build();
 
-        PagingResponseDTO<MainListDTO> responseDTO = mainService.getClassificationAndSearchList(memberPageDTO, principal);
+        PagingResponseDTO<MainListResponseDTO> responseDTO = mainService.getClassificationAndSearchList(memberPageDTO, principal);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDTO);

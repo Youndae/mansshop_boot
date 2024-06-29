@@ -36,7 +36,7 @@ public class QProductOrder extends EntityPathBase<ProductOrder> {
 
     public final StringPath orderPhone = createString("orderPhone");
 
-    public final NumberPath<Integer> orderStat = createNumber("orderStat", Integer.class);
+    public final StringPath orderStat = createString("orderStat");
 
     public final NumberPath<Integer> orderTotalPrice = createNumber("orderTotalPrice", Integer.class);
 

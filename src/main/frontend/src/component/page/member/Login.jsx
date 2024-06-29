@@ -3,42 +3,61 @@ import {useNavigate, useLocation} from 'react-router-dom';
 import { useDispatch } from "react-redux";
 
 import "../../css/member.css";
-import {axiosInstance} from "../../../modules/customAxios";
+import {axiosDefault, errorHandling} from "../../../modules/customAxios";
 import {setMember} from "../../../modules/member";
 import DefaultBtn from "../../ui/DefaultBtn";
+
+const loginFailMessage = 'BadCredentialsException';
 
 function Login() {
     const [userData, setUserData] = useState({
         userId: '',
         userPw: '',
     });
+    const [loginRequestStatus, setLoginRequestStatus] = useState('');
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { state } = useLocation();
 
+    //여기서는 에러 핸들링이 BadCredentials를 제외하고는 없는데
+    // 403 발생 시 Overlap Status를 수정해 출력하도록 해야 하므로 axiosDefault로 처리.
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        await axiosInstance.post(`member/login`, {
-            userId: userData.userId,
-            userPw: userData.userPw,
-        }, {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-            .then(res => {
-                const authorization = res.headers['authorization'];
-                window.localStorage.setItem('Authorization', authorization);
-
-                dispatch(setMember(res.data.userStatus));
-
-                navigate(state);
+        if(userData.userId === ''){
+            setLoginRequestStatus('id');
+        }else if(userData.userPw === '') {
+            setLoginRequestStatus('pw');
+        }else{
+            await axiosDefault.post(`member/login`, {
+                userId: userData.userId,
+                userPw: userData.userPw,
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             })
-            .catch(err => {
-                console.error('login err : ', err);
-            })
+                .then(res => {
+                    console.log('success : ', res);
+                    const authorization = res.headers['authorization'];
+                    window.localStorage.setItem('Authorization', authorization);
+
+                    dispatch(setMember(res.data.userStatus));
+
+                    navigate(state);
+                })
+                .catch(err => {
+                    const errStatus = err.response.status;
+                    const errMessage = err.response.data.errorMessage;
+
+                    if(errStatus === 403 && errMessage === loginFailMessage){
+                        setLoginRequestStatus('fail');
+                    }else {
+                        errorHandling(err);
+                    }
+                })
+        }
     }
 
     const handleChange = (e) => {
@@ -53,11 +72,11 @@ function Login() {
     }
 
     const handleSearchId = () => {
-        navigate('/searchId');
+        navigate('/search-id');
     }
 
     const handleSearchPw = () => {
-        navigate('/searchPw');
+        navigate('/search-pw');
     }
 
     const handleOAuth = (e) => {
@@ -85,6 +104,9 @@ function Login() {
                 <div className="form-group">
                     <input type="password" className="form-control" name={'userPw'} placeholder={'비밀번호'} onChange={handleChange} value={userData.userPw}/>
                 </div>
+                <LoginOverlap
+                    status={loginRequestStatus}
+                />
                 <div className="login-form-btn-area">
                     <div className="login-btn">
                         <DefaultBtn className={'login-btn'} onClick={handleSubmit} btnText={'Login'}/>
@@ -118,6 +140,24 @@ function Login() {
                     </div>
                 </div>
             </div>
+        </div>
+    )
+}
+
+function LoginOverlap(props) {
+    const { status } = props;
+    let text = '';
+    if(status === 'id'){
+        text = '아이디를 입력해주세요';
+    }else if(status === 'pw') {
+        text = '비밀번호를 입력해주세요';
+    }else if(status === 'fail') {
+        text = '아이디 또는 비밀번호가 일치하지 않습니다.';
+    }
+
+    return (
+        <div className="login-overlap">
+            <span>{text}</span>
         </div>
     )
 }

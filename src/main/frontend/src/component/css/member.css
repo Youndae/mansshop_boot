@@ -104,28 +104,27 @@
 
 /* searchId */
 
-.search-radio-area {
-    margin-bottom: 1%;
+.search-id-form input, span{
+    margin: 10px 0 0 1%;
+    height: 20px;
 }
 
-.form-group {
-    margin-bottom: 1%;
+.search-id-overlap {
+    margin-top: 10px;
 }
 
-.search-id-form input {
-    width: 195px;
-    text-align: center;
+.not-found-overlap {
+    color: red;
 }
 
-.search-pw-form input {
-    width: 195px;
-    text-align: center;
+.certification-timer-btn {
+    margin-left: 10px;
+    width: 70px;
+    height: 25px;
 }
 
-.btn-area {
-    margin-top: 1%;
-}
-
-.btn-area button {
-    margin-left: 1%;
+.search-info button {
+    width: 100px;
+    height: 30px;
+    margin: 10px;
 }

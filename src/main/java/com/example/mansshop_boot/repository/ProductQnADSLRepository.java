@@ -3,6 +3,7 @@ package com.example.mansshop_boot.repository;
 import com.example.mansshop_boot.domain.dto.admin.AdminQnAListResponseDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.MyPageProductQnADTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.ProductQnAListDTO;
+import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.product.ProductQnADTO;
 import org.springframework.data.domain.Page;
@@ -15,5 +16,5 @@ public interface ProductQnADSLRepository {
 
     MyPageProductQnADTO findByQnAId(long productQnAId);
 
-    Page<AdminQnAListResponseDTO> findAllByAdminProductQnA(AdminPageDTO pageDTO, String listType, Pageable pageable);
+    Page<AdminQnAListResponseDTO> findAllByAdminProductQnA(AdminOrderPageDTO pageDTO, Pageable pageable);
 }

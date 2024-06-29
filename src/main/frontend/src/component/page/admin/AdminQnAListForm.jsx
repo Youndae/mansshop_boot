@@ -1,6 +1,13 @@
 import React from "react";
 import Paging from "../../ui/Paging";
-import {getClickNumber, getNextNumber, getPrevNumber, pagingSubmit, searchSubmit} from "../../../modules/pagingModule";
+import {
+    getClickNumber,
+    getNextNumber,
+    getPrevNumber,
+    pagingSubmit,
+    searchSubmit, searchTypePageSubmit, searchTypeSubmit,
+    typePageSubmit
+} from "../../../modules/pagingModule";
 import {useNavigate} from "react-router-dom";
 
 function AdminQnAListForm(props) {
@@ -21,11 +28,19 @@ function AdminQnAListForm(props) {
     }
 
     const handlePagingSubmit = (pageNum) => {
-        pagingSubmit(pageNum, keyword, typeSelectData, navigate);
+        if(keyword === null)
+            typePageSubmit(typeSelectData, pageNum, navigate);
+        else
+            searchTypePageSubmit(typeSelectData, pageNum, navigate);
+
+
+
+        // pagingSubmit(pageNum, keyword, typeSelectData, navigate);
     }
 
     const handleSearchOnClick = async () => {
-        searchSubmit(keywordInput, navigate);
+        searchTypeSubmit('all', keywordInput, navigate);
+        // searchSubmit(keywordInput, navigate);
     }
 
     return (

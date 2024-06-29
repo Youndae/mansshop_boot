@@ -3,7 +3,13 @@ import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxio
 import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import {Link, useNavigate, useSearchParams} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
-import {getClickNumber, getNextNumber, getPrevNumber, productDetailPagingObject} from "../../../modules/pagingModule";
+import {
+    getClickNumber,
+    getNextNumber,
+    getPrevNumber,
+    pageSubmit,
+    productDetailPagingObject
+} from "../../../modules/pagingModule";
 import {setMemberObject} from "../../../modules/loginModule";
 import Paging from "../../ui/Paging";
 import {numberComma} from "../../../modules/numberCommaModule";
@@ -59,20 +65,23 @@ function LikeProduct() {
     }
 
     const handlePageBtn = (e) => {
-        handlePagingSubmit(getClickNumber(e));
+        pageSubmit(getClickNumber(e), navigate);
+        // handlePagingSubmit(getClickNumber(e));
     }
 
     const handlePagePrev = () => {
-        handlePagingSubmit(getPrevNumber(pagingData));
+        pageSubmit(getPrevNumber(pagingData), navigate);
+        // handlePagingSubmit(getPrevNumber(pagingData));
     }
 
     const handlePageNext = () => {
-        handlePagingSubmit(getNextNumber(pagingData));
+        pageSubmit(getNextNumber(pagingData));
+        // handlePagingSubmit(getNextNumber(pagingData));
     }
 
-    const handlePagingSubmit = (pageNum) => {
+    /*const handlePagingSubmit = (pageNum) => {
         navigate(`/my-page/like?page=${pageNum}`);
-    }
+    }*/
 
     const handleRemoveProductLike = async (e) => {
         const productId = e.target.name;
@@ -93,7 +102,7 @@ function LikeProduct() {
             <MyPageSideNav
                 qnaStat={false}
             />
-            <div className="mypage-content">
+            <div className="mypage-content test-div">
                 <div className="mypage-like-header">
                     <h1>관심 상품</h1>
                 </div>

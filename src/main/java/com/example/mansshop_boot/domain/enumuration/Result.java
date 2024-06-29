@@ -11,7 +11,9 @@ public enum Result {
     , TOKEN_EXPIRATION("token expiration")
     , WRONG_TOKEN("wrong token")
     , OK("OK")
-    , FAIL("FAIL");
+    , FAIL("FAIL")
+    , ERROR("error")
+    , NOTFOUND("not found");
 
     private final String resultKey;
 }

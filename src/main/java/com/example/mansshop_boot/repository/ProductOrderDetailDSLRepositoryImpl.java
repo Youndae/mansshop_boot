@@ -53,8 +53,9 @@ public class ProductOrderDetailDSLRepositoryImpl implements ProductOrderDetailDS
                 .innerJoin(productOption)
                 .on(productOrderDetail.productOption.id.eq(productOption.id))
                 .innerJoin(product)
-                .on(productOption.product.id.eq(product.id))
+                .on(productOrderDetail.product.id.eq(product.id))
                 .where(productOrderDetail.productOrder.id.in(orderIdList))
+                .orderBy(productOrderDetail.product.id.asc())
                 .fetch();
     }
 

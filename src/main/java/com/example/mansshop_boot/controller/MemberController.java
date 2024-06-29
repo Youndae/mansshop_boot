@@ -2,10 +2,11 @@ package com.example.mansshop_boot.controller;
 
 import com.example.mansshop_boot.config.customException.ErrorCode;
 import com.example.mansshop_boot.config.customException.exception.CustomAccessDeniedException;
-import com.example.mansshop_boot.domain.dto.member.JoinDTO;
-import com.example.mansshop_boot.domain.dto.member.LoginDTO;
-import com.example.mansshop_boot.domain.dto.member.LogoutDTO;
+import com.example.mansshop_boot.config.customException.exception.CustomBadCredentialsException;
+import com.example.mansshop_boot.domain.dto.member.*;
+import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseUserStatusDTO;
+import com.example.mansshop_boot.domain.enumuration.Result;
 import com.example.mansshop_boot.service.MemberService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -61,7 +62,12 @@ public class MemberController {
                     .userId(principal.getName())
                     .build();
 
-            return memberService.logoutProc(dto, response);
+            String responseMessage = memberService.logoutProc(dto, response);
+
+
+
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ResponseMessageDTO(responseMessage));
         }catch (Exception e) {
             log.info("logout createDTO Exception");
             e.printStackTrace();
@@ -74,7 +80,10 @@ public class MemberController {
     @PostMapping("/join")
     public ResponseEntity<?> joinProc(@RequestBody JoinDTO joinDTO) {
 
-        return memberService.joinProc(joinDTO);
+        String responseMessage = memberService.joinProc(joinDTO);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
     }
 
 
@@ -89,13 +98,19 @@ public class MemberController {
     @GetMapping("/check-id")
     public ResponseEntity<?> checkJoinId(@RequestParam("userId") String userId) {
 
-        return memberService.checkJoinId(userId);
+        String responseMessage = memberService.checkJoinId(userId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
     }
 
     @GetMapping("/check-nickname")
     public ResponseEntity<?> checkNickname(@RequestParam("nickname") String nickname, Principal principal) {
 
-        return memberService.checkNickname(nickname, principal);
+        String responseMessage = memberService.checkNickname(nickname, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
     }
 
     @GetMapping("/check-login")
@@ -105,4 +120,50 @@ public class MemberController {
                             .body(principal != null);
     }
 
+
+    @GetMapping("/search-id")
+    public ResponseEntity<UserSearchIdResponseDTO> searchId(@RequestParam(name = "userName") String userName
+                                    , @RequestParam(name = "userPhone", required = false) String userPhone
+                                    , @RequestParam(name = "userEmail", required = false) String userEmail) {
+
+        UserSearchDTO searchDTO = new UserSearchDTO(userName, userPhone, userEmail);
+
+        UserSearchIdResponseDTO responseDTO = memberService.searchId(searchDTO);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
+    }
+
+    @GetMapping("/search-pw")
+    public ResponseEntity<ResponseMessageDTO> searchPw(@RequestParam(name = "id") String userId
+                                                        , @RequestParam(name = "name") String userName
+                                                        , @RequestParam(name = "email") String userEmail) {
+
+        UserSearchPwDTO searchDTO = new UserSearchPwDTO(userId, userName, userEmail);
+
+        String responseMessage = memberService.searchPw(searchDTO);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
+    }
+
+    @PostMapping("/certification")
+    public ResponseEntity<ResponseMessageDTO> checkCertification(@RequestBody UserCertificationDTO certificationDTO) {
+
+        String responseMessage = memberService.checkCertificationNo(certificationDTO);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
+    }
+
+    @PatchMapping("/reset-pw")
+    public ResponseEntity<ResponseMessageDTO> resetPassword(@RequestBody UserResetPwDTO resetDTO) {
+        log.info("MemberController.resetPassword :: dto : {}", resetDTO);
+
+
+        String responseMessage = memberService.resetPw(resetDTO);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
+    }
 }

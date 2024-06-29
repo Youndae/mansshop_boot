@@ -3,12 +3,14 @@ package com.example.mansshop_boot.repository;
 import com.example.mansshop_boot.domain.dto.admin.AdminBestSalesProductDTO;
 import com.example.mansshop_boot.domain.dto.admin.AdminClassificationSalesDTO;
 import com.example.mansshop_boot.domain.dto.admin.AdminPeriodClassificationDTO;
+import com.example.mansshop_boot.domain.dto.mypage.MyPageOrderDetailDTO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,5 +44,4 @@ class ProductOrderDetailDSLRepositoryImplTest {
 
         list.forEach(System.out::println);
     }
-
 }

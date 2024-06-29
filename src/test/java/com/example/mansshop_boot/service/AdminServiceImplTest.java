@@ -2,6 +2,7 @@ package com.example.mansshop_boot.service;
 
 import com.example.mansshop_boot.domain.dto.admin.*;
 import com.example.mansshop_boot.domain.dto.member.UserStatusDTO;
+import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.response.PagingElementsResponseDTO;
 import com.example.mansshop_boot.domain.dto.response.PagingResponseDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseDTO;
@@ -109,5 +110,16 @@ class AdminServiceImplTest {
         response.content().optionYearSales().forEach(v -> System.out.println("option year : " + v));
         System.out.println("-----------------------------");
         response.content().optionLastYearSales().forEach(v -> System.out.println("option last year : " + v));
+    }
+
+
+    @Test
+    @DisplayName("미처리 주문 조회")
+    void newOrderList() {
+        AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(null, null, 1);
+
+        PagingElementsResponseDTO<AdminOrderResponseDTO> response = adminService.getNewOrderList(pageDTO);
+
+        response.content().forEach(System.out::println);
     }
 }

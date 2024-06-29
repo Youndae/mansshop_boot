@@ -1,8 +1,6 @@
 package com.example.mansshop_boot.service;
 
-import com.example.mansshop_boot.domain.dto.member.JoinDTO;
-import com.example.mansshop_boot.domain.dto.member.LoginDTO;
-import com.example.mansshop_boot.domain.dto.member.LogoutDTO;
+import com.example.mansshop_boot.domain.dto.member.*;
 import com.example.mansshop_boot.domain.dto.response.ResponseUserStatusDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,16 +10,23 @@ import java.security.Principal;
 
 public interface MemberService {
 
-    ResponseEntity<?> joinProc(JoinDTO joinDTO);
+    String joinProc(JoinDTO joinDTO);
 
     ResponseEntity<ResponseUserStatusDTO> loginProc(LoginDTO dto, HttpServletRequest request, HttpServletResponse response);
 
     ResponseEntity<?> oAuthUserIssueToken(HttpServletRequest request, HttpServletResponse response);
 
-    ResponseEntity<?> checkJoinId(String userId);
+    String checkJoinId(String userId);
 
-    ResponseEntity<?> checkNickname(String nickname, Principal principal);
+    String checkNickname(String nickname, Principal principal);
 
-    ResponseEntity<?> logoutProc(LogoutDTO dto, HttpServletResponse response);
+    String logoutProc(LogoutDTO dto, HttpServletResponse response);
 
+    UserSearchIdResponseDTO searchId(UserSearchDTO searchDTO);
+
+    String searchPw(UserSearchPwDTO searchDTO);
+
+    String checkCertificationNo(UserCertificationDTO certificationDTO);
+
+    String resetPw(UserResetPwDTO resetDTO);
 }

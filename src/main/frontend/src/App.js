@@ -15,6 +15,11 @@ import SearchProduct from "./component/page/main/SearchProduct";
 import Login from './component/page/member/Login';
 import Join from './component/page/member/Join';
 import Oauth from "./component/page/member/Oauth";
+import SearchId from "./component/page/member/SearchId";
+import SearchPw from "./component/page/member/SearchPw";
+import ResetPassword from "./component/page/member/ResetPassword";
+
+
 import ProductDetail from "./component/page/product/ProductDetail";
 import Cart from "./component/page/cart/Cart";
 import Order from "./component/page/order/Order";
@@ -49,13 +54,13 @@ import AdminMemberQnA from "./component/page/admin/AdminMemberQnA";
 import AdminMemberQnADetail from "./component/page/admin/AdminMemberQnADetail";
 import AdminQnAClassification from "./component/page/admin/AdminQnAClassification";
 import AdminMember from "./component/page/admin/AdminMember";
-import AdminMemberDetail from "./component/page/admin/AdminMemberDetail";
 import AdminPeriodSales from "./component/page/admin/AdminPeriodSales";
 import AdminPeriodSalesDetail from "./component/page/admin/AdminPeriodSalesDetail";
 import AdminPeriodSalesDailyDetail from "./component/page/admin/AdminPeriodSalesDailyDetail";
 import AdminProductSales from "./component/page/admin/AdminProductSales";
 import AdminProductSalesDetail from "./component/page/admin/AdminProductSalesDetail";
 
+import Error from "./component/ui/Error";
 
 
 
@@ -77,6 +82,9 @@ function App() {
               <Route path='login' element={<Login />} />
               <Route path='join' element={<Join />} />
               <Route path="oAuth" element={<Oauth />} />
+              <Route path='search-id' element={<SearchId />}/>
+              <Route path='search-pw' element={<SearchPw />}/>
+              <Route path='reset-pw' element={<ResetPassword />} />
 
               <Route path='cart' element={<Cart />} />
               <Route path='productOrder' element={<Order />}/>
@@ -89,8 +97,10 @@ function App() {
               <Route path='my-page/order' element={<MyPageOrder />} />
               <Route path='my-page/order?term=:term' element={<MyPageOrder />} />
               <Route path='my-page/order?term=:term&page=:page' element={<MyPageOrder />} />
+
               <Route path='my-page/like' element={<LikeProduct />}/>
               <Route path='my-page/like?page=:page' element={<LikeProduct />} />
+
               <Route path='my-page/qna/product' element={<MyPageProductQnA />} />
               <Route path='my-page/qna/product?page=:page' element={<MyPageProductQnA />} />
               <Route path='my-page/qna/product/detail/:qnaId' element={<MyPageProductQnADetail />}/>
@@ -99,10 +109,12 @@ function App() {
               <Route path='my-page/qna/member/detail/:qnaId' element={<MemberQnADetail />}/>
               <Route path='my-page/qna/member/write' element={<MemberQnAWrite />}/>
               <Route path='my-page/qna/member/update/:qnaId' element={<MemberQnAModify />}/>
+
               <Route path='my-page/review' element={<MyPageReview />} />
               <Route path='my-page/review?page=:page' element={<MyPageReview />} />
               <Route path='my-page/review/write' element={<MyPageReviewWrite />} />
               <Route path='my-page/review/modify/:reviewId' element={<MyPageReviewModify />} />
+
               <Route path='my-page/info' element={<MyPageUpdateInfo />} />
 
 
@@ -117,29 +129,34 @@ function App() {
               <Route path='admin/product/stock?keyword=:keyword&page=:page' element={<ProductStock />}/>
               <Route path='admin/product/discount' element={<AdminDiscount />}/>
               <Route path='admin/product/discount?page=:page' element={<AdminDiscount />}/>
+              <Route path='admin/product/discount?keyword=:keyword' element={<AdminDiscount />}/>
               <Route path='admin/product/discount?keyword=:keyword&page=:page' element={<AdminDiscount />}/>
               <Route path='admin/product/discount/setting' element={<ProductDiscount />}/>
 
               <Route path='admin/order' element={<AdminOrder />} />
               <Route path='admin/order?page=:page' element={<AdminOrder />} />
+              <Route path='admin/order?type=:type&keyword=:keyword' element={<AdminOrder />} />
+              <Route path='admin/order?type=:type&keyword=:keyword&page=:page' element={<AdminOrder />} />
               <Route path='admin/order/all' element={<AdminAllOrder />} />
               <Route path='admin/order/all?page=:page' element={<AdminAllOrder />} />
-              <Route path='admin/order/all?page=:page&keyword=:keyword&type=:type' element={<AdminAllOrder />} />
+              <Route path='admin/order/all?type=:type&keyword=:keyword' element={<AdminAllOrder />} />
+              <Route path='admin/order/all?type=:type&keyword=:keyword&page=:page' element={<AdminAllOrder />} />
 
               <Route path='admin/qna/product' element={<AdminProductQnA />} />
-              <Route path='admin/qna/product?page=:page&list=:list' element={<AdminProductQnA />} />
-              <Route path='admin/qna/product?keyword=:keyword&page=:page&list=:list' element={<AdminProductQnA />} />
+              <Route path='admin/qna/product?type=:type&page=:page' element={<AdminProductQnA />} />
+              <Route path='admin/qna/product?type=:type&keyword=:keyword&page=:page' element={<AdminProductQnA />} />
               <Route path='admin/qna/product/:qnaId' element={<AdminProductQnADetail />} />
               <Route path='admin/qna/member' element={<AdminMemberQnA />} />
-              <Route path='admin/qna/member?page=:page' element={<AdminMemberQnA />} />
-              <Route path='admin/qna/member?keyword=:keyword&page=:page' element={<AdminMemberQnA />} />
+              <Route path='admin/qna/member?type=:type&page=:page' element={<AdminMemberQnA />} />
+              <Route path='admin/qna/member?type=:type&keyword=:keyword&page=:page' element={<AdminMemberQnA />} />
               <Route path='admin/qna/member/:qnaId' element={<AdminMemberQnADetail />} />
               <Route path='admin/qna/classification' element={<AdminQnAClassification />} />
 
               <Route path='admin/member' element={<AdminMember />} />
               <Route path='admin/member?page=:page' element={<AdminMember />} />
-              <Route path='admin/member?keyword=:keyword&page=:page' element={<AdminMember />} />
-              <Route path='admin/member/:userId' element={<AdminMemberDetail />} />
+              <Route path='admin/member?type=:type&keyword=:keyword' element={<AdminMember />} />
+              <Route path='admin/member?type=:type&keyword=:keyword&page=:page' element={<AdminMember />} />
+
 
               <Route path='admin/sales/period' element={<AdminPeriodSales />} />
               <Route path='admin/sales/period/:date' element={<AdminPeriodSalesDetail />} />
@@ -149,6 +166,9 @@ function App() {
               <Route path='admin/sales/product?page=:page' element={<AdminProductSales />} />
               <Route path='admin/sales/product?keyword=:keyword&page=:page' element={<AdminProductSales />} />
               <Route path='admin/sales/product/:productId' element={<AdminProductSalesDetail />} />
+
+              <Route path='/error' element={<Error />}/>
+              <Route path='/*' element={<Error />}/>
             </Routes>
           </div>
       </BrowserRouter>

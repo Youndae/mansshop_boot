@@ -4,7 +4,13 @@ import {Link, useNavigate, useSearchParams} from "react-router-dom";
 import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
 import MyPageSideNav from "../../ui/nav/MyPageSideNav";
-import {getClickNumber, getNextNumber, getPrevNumber, productDetailPagingObject} from "../../../modules/pagingModule";
+import {
+    getClickNumber,
+    getNextNumber,
+    getPrevNumber,
+    pageSubmit,
+    productDetailPagingObject
+} from "../../../modules/pagingModule";
 import Paging from "../../ui/Paging";
 import Image from "../../ui/Image";
 import MyPageModal from "./MyPageModal";
@@ -61,20 +67,23 @@ function MyPageReview() {
     }
 
     const handlePageBtn = (e) => {
-        handlePagingSubmit(getClickNumber(e));
+        pageSubmit(getClickNumber(e), navigate);
+        // handlePagingSubmit(getClickNumber(e));
     }
 
     const handlePagePrev = () => {
-        handlePagingSubmit(getPrevNumber(pagingData));
+        pageSubmit(getPrevNumber(pagingData), navigate);
+        // handlePagingSubmit(getPrevNumber(pagingData));
     }
 
     const handlePageNext = () => {
-        handlePagingSubmit(getNextNumber(pagingData));
+        pageSubmit(getNextNumber(pagingData));
+        // handlePagingSubmit(getNextNumber(pagingData));
     }
 
-    const handlePagingSubmit = (pageNum) => {
+    /*const handlePagingSubmit = (pageNum) => {
         navigate(`/my-page/review?page=${pageNum}`);
-    }
+    }*/
 
     const handleDeleteReview = async (e) => {
         if(window.confirm('리뷰를 삭제하시겠습니까?\n삭제 이후 재작성은 불가합니다.')){

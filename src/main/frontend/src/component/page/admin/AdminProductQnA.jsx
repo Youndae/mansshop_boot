@@ -32,7 +32,7 @@ function AdminProductQnA() {
     const [params] = useSearchParams();
     const page = params.get('page') == null ? 1 : params.get('page');
     const keyword = params.get('keyword');
-    const list = params.get('list') == null ? 'new' : params.get('list');
+    const list = params.get('type') == null ? 'new' : params.get('type');
     const [data, setData] = useState([]);
     const [pagingData, setPagingData] = useState({
         startPage: 0,
@@ -66,7 +66,12 @@ function AdminProductQnA() {
     }
 
     const getProductQnA = async (page, keyword, typeSelectData) => {
-        await axiosInstance.get(`admin/qna/product?page=${page}&keyword=${keyword}&type=${typeSelectData}`)
+        let url = `admin/qna/product?page=${page}&type=${typeSelectData}`;
+        if(keyword !== null)
+            url += `&keyword=${keyword}`;
+
+
+        await axiosInstance.get(url)
             .then(res => {
                 console.log('adminProductQnA get res : ', res);
 

@@ -3,6 +3,7 @@ package com.example.mansshop_boot.repository;
 import com.example.mansshop_boot.domain.dto.admin.AdminQnAListResponseDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.MyPageProductQnADTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.ProductQnAListDTO;
+import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.product.ProductQnADTO;
 import com.querydsl.core.types.Projections;
@@ -114,7 +115,7 @@ public class ProductQnADSLRepositoryImpl implements ProductQnADSLRepository{
     }
 
     @Override
-    public Page<AdminQnAListResponseDTO> findAllByAdminProductQnA(AdminPageDTO pageDTO, String listType, Pageable pageable) {
+    public Page<AdminQnAListResponseDTO> findAllByAdminProductQnA(AdminOrderPageDTO pageDTO, Pageable pageable) {
 
         List<AdminQnAListResponseDTO> list = jpaQueryFactory.select(
                 Projections.constructor(
@@ -134,7 +135,7 @@ public class ProductQnADSLRepositoryImpl implements ProductQnADSLRepository{
                 .from(productQnA)
                 .innerJoin(product)
                 .on(productQnA.product.id.eq(product.id))
-                .where(adminProductQnASearch(pageDTO, listType))
+                .where(adminProductQnASearch(pageDTO))
                 .orderBy(productQnA.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -142,20 +143,21 @@ public class ProductQnADSLRepositoryImpl implements ProductQnADSLRepository{
 
         JPAQuery<Long> count = jpaQueryFactory.select(productQnA.countDistinct())
                                         .from(productQnA)
-                                        .where(adminProductQnASearch(pageDTO, listType));
+                                        .where(adminProductQnASearch(pageDTO));
 
         return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
     }
 
-    public BooleanExpression adminProductQnASearch(AdminPageDTO pageDTO, String listType) {
-        if(listType.equals("new")){
+    public BooleanExpression adminProductQnASearch(AdminOrderPageDTO pageDTO) {
+
+        if(pageDTO.searchType().equals("new")){
             if(pageDTO.keyword() != null)
-                return productQnA.member.userId.eq(pageDTO.keyword()).and(productQnA.productQnAStat.isFalse());
+                return productQnA.member.nickname.eq(pageDTO.keyword()).and(productQnA.productQnAStat.isFalse());
             else
                 return productQnA.productQnAStat.isFalse();
-        }else if(listType.equals("all")){
+        }else if(pageDTO.searchType().equals("all")){
             if(pageDTO.keyword() != null)
-                return productQnA.member.userId.eq(pageDTO.keyword());
+                return productQnA.member.nickname.eq(pageDTO.keyword());
         }
 
         return null;

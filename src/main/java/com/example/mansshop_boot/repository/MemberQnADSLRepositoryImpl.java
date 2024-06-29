@@ -3,6 +3,7 @@ package com.example.mansshop_boot.repository;
 import com.example.mansshop_boot.domain.dto.admin.AdminQnAListResponseDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.MemberQnADTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.MemberQnAListDTO;
+import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.entity.MemberQnA;
 import com.querydsl.core.types.Projections;
@@ -93,7 +94,7 @@ public class MemberQnADSLRepositoryImpl implements MemberQnADSLRepository{
     }
 
     @Override
-    public Page<AdminQnAListResponseDTO> findAllByAdminMemberQnA(AdminPageDTO pageDTO, String listType, Pageable pageable) {
+    public Page<AdminQnAListResponseDTO> findAllByAdminMemberQnA(AdminOrderPageDTO pageDTO, Pageable pageable) {
 
         List<AdminQnAListResponseDTO> list = jpaQueryFactory.select(
                                                 Projections.constructor(
@@ -113,7 +114,7 @@ public class MemberQnADSLRepositoryImpl implements MemberQnADSLRepository{
                                         .from(memberQnA)
                                         .innerJoin(qnAClassification)
                                         .on(memberQnA.qnAClassification.id.eq(qnAClassification.id))
-                                        .where(adminMemberQnASearch(pageDTO, listType))
+                                        .where(adminMemberQnASearch(pageDTO))
                                         .orderBy(memberQnA.updatedAt.desc())
                                         .offset(pageable.getOffset())
                                         .limit(pageable.getPageSize())
@@ -121,20 +122,20 @@ public class MemberQnADSLRepositoryImpl implements MemberQnADSLRepository{
 
         JPAQuery<Long> count = jpaQueryFactory.select(memberQnA.countDistinct())
                                     .from(memberQnA)
-                                    .where(adminMemberQnASearch(pageDTO, listType));
+                                    .where(adminMemberQnASearch(pageDTO));
 
         return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
     }
 
-    public BooleanExpression adminMemberQnASearch(AdminPageDTO pageDTO, String listType){
-        if(listType.equals("new")){
+    public BooleanExpression adminMemberQnASearch(AdminOrderPageDTO pageDTO){
+        if(pageDTO.searchType().equals("new")){
             if(pageDTO.keyword() != null)
-                return memberQnA.member.userId.eq(pageDTO.keyword()).and(memberQnA.memberQnAStat.isFalse());
+                return memberQnA.member.nickname.eq(pageDTO.keyword()).and(memberQnA.memberQnAStat.isFalse());
             else
                 return memberQnA.memberQnAStat.isFalse();
-        }else if(listType.equals("all")) {
+        }else if(pageDTO.searchType().equals("all")) {
             if(pageDTO.keyword() != null)
-                return memberQnA.member.userId.eq(pageDTO.keyword());
+                return memberQnA.member.nickname.eq(pageDTO.keyword());
         }
 
         return null;

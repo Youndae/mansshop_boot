@@ -27,7 +27,6 @@ const PagingLiWrapper = styled.li`
  */
 function Paging(props) {
     const { pagingData, onClickNumber, onClickPrev, onClickNext, className } = props;
-
     let prevElem = null;
     let nextElem = null;
     const pagingNumberArr = [];

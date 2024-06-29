@@ -44,7 +44,7 @@ public class ProductOrder {
 
     private String paymentType;
 
-    private int orderStat;
+    private String orderStat;
 
     private int productCount;
 
@@ -56,5 +56,12 @@ public class ProductOrder {
         productOrderDetail.setProductOrder(this);
     }
 
+    public void setOrderStat(String orderStat) {
+        this.orderStat = orderStat;
+    }
+
+    public void setProductCount(int productCount) {
+        this.productCount = productCount;
+    }
 
 }

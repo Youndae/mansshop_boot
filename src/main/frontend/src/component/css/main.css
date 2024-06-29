@@ -36,3 +36,25 @@
     height: 100px;
     font-size: xxx-large;
 }
+
+.sold-out {
+    color: grey;
+}
+
+.product-info span {
+    margin-left: 5px;
+}
+
+.discount-original-price {
+    text-decoration: line-through;
+    color: grey;
+}
+
+.discount-percent {
+    color: grey;
+    font-size: smaller;
+}
+
+.error-page-content {
+    text-align: center;
+}

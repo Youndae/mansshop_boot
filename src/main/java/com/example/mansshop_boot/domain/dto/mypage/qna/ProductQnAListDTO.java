@@ -5,7 +5,7 @@ import java.time.LocalDate;
 public record ProductQnAListDTO(
         Long productQnAId
         , String productName
-        , int productQnAStat
+        , boolean productQnAStat
         , LocalDate createdAt
 ) {
 }

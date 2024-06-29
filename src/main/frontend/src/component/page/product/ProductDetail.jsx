@@ -29,6 +29,8 @@ function ProductDetail() {
         productName: '',
         productPrice: 0,
         productLikeStat: false,
+        discount: 0,
+        discountPrice: 0,
     });
     const [productOption, setProductOption] = useState([]);
     const [thumbnail, setThumbnail] = useState([]);
@@ -77,11 +79,15 @@ function ProductDetail() {
                 const productReview = res.data.productReviewList;
                 const productQnA = res.data.productQnAList;
 
+                console.log('res : ', res);
+
                 setProductData({
                     productId: productContent.productId,
                     productName: productContent.productName,
                     productPrice: productContent.productPrice,
                     productLikeStat: productContent.likeStat,
+                    discount: productContent.discount,
+                    discountPrice: productContent.discountPrice,
                 });
 
                 let thumbnailArr = [];
@@ -150,20 +156,20 @@ function ProductDetail() {
         arr.push({
             optionId: optionId,
             count: 1,
-            price: productData.productPrice,
+            price: productData.discountPrice,
             size: size,
             color: color,
         })
 
         setSelectOption(arr);
-        setTotalPrice(totalPrice + productData.productPrice);
+        setTotalPrice(totalPrice + productData.discountPrice);
     }
 
     const handleCountUp = (e) => {
         const idx = e.target.name;
 
         countUpDown(idx, 1);
-        setTotalPrice(totalPrice + productData.productPrice);
+        setTotalPrice(totalPrice + productData.discountPrice);
     }
 
     const handleCountDown = (e) => {
@@ -172,7 +178,7 @@ function ProductDetail() {
 
         if(count !== 1) {
             countUpDown(idx, -1);
-            setTotalPrice(totalPrice - productData.productPrice);
+            setTotalPrice(totalPrice - productData.discountPrice);
         }
     }
 
@@ -181,7 +187,7 @@ function ProductDetail() {
         selectOption[idx] = {
             optionId: selectOption[idx].optionId,
             count: selectOption[idx].count + count,
-            price: productData.productPrice * (selectOption[idx].count + count),
+            price: productData.discountPrice * (selectOption[idx].count + count),
             size: selectOption[idx].size,
             color: selectOption[idx].color,
         }
@@ -201,51 +207,59 @@ function ProductDetail() {
     }
 
     const handleBuyBtn = () => {
-        let orderProductArr = [];
+        if(selectOption.length === 0){
+            alert('상품 옵션을 선택해주세요');
+        }else {
+            let orderProductArr = [];
 
-        for(let i = 0; i < selectOption.length; i++) {
-            orderProductArr.push({
-                productId: productData.productId,
-                optionId: selectOption.optionId,
-                productName: productData.productName,
-                size: selectOption[i].size,
-                color: selectOption[i].color,
-                count: selectOption[i].count,
-                price: selectOption[i].price,
-            })
+            for(let i = 0; i < selectOption.length; i++) {
+                orderProductArr.push({
+                    productId: productData.productId,
+                    optionId: selectOption.optionId,
+                    productName: productData.productName,
+                    size: selectOption[i].size,
+                    color: selectOption[i].color,
+                    count: selectOption[i].count,
+                    price: selectOption[i].price,
+                })
+            }
+
+
+            navigate('/productOrder', {state : {
+                    orderProduct : orderProductArr,
+                    orderType: 'direct',
+                    totalPrice: totalPrice,
+                }}
+            );
         }
-
-
-        navigate('/productOrder', {state : {
-                orderProduct : orderProductArr,
-                orderType: 'direct',
-                totalPrice: totalPrice,
-            }}
-        );
     }
 
     const handleCartBtn = async () => {
 
-        let addList = [];
+        if(selectOption.length === 0){
+            alert('상품 옵션을 선택해주세요');
+        }else {
+            let addList = [];
 
-        for(let i = 0; i < selectOption.length; i++) {
-            addList.push({
-                optionId: selectOption[i].optionId,
-                count: selectOption[i].count,
-                price: selectOption[i].price,
-            })
+            for (let i = 0; i < selectOption.length; i++) {
+                addList.push({
+                    optionId: selectOption[i].optionId,
+                    count: selectOption[i].count,
+                    price: selectOption[i].price,
+                })
+            }
+
+            await axiosInstance.post(`cart/`, {addList})
+                .then(res => {
+                    console.log('addCart axios success : ', res);
+
+                    if (checkResponseMessageOk(res))
+                        alert('장바구니에 상품을 추가했습니다.');
+                })
+                .catch(err => {
+                    alert('오류가 발생했습니다.\n문제가 계속된다면 관리자에게 문의해주세요.');
+                })
         }
-
-        await axiosInstance.post(`cart/`, {addList})
-            .then(res => {
-                console.log('addCart axios success : ', res);
-
-                if(checkResponseMessageOk(res))
-                    alert('장바구니에 상품을 추가했습니다.');
-            })
-            .catch(err => {
-                alert('오류가 발생했습니다.\n문제가 계속된다면 관리자에게 문의해주세요.');
-            })
     }
 
     const handleLikeBtn = async () => {
@@ -417,7 +431,8 @@ function ProductDetail() {
                             </div>
                             <div className="product-price mgt-4">
                                 <label>가격</label>
-                                <span className="price">{numberComma(productData.productPrice)} 원</span>
+                                {/*<span className="price">{numberComma(productData.productPrice)} 원</span>*/}
+                                <ProductPrice productData={productData}/>
                             </div>
                             <ProductDetailSelect
                                 productOption={productOption}
@@ -624,10 +639,28 @@ function ProductDetail() {
     )
 }
 
+function ProductPrice(props) {
+    const { productData } = props;
+
+    if(productData.discount === 0){
+        return (
+            <span className="price">{numberComma(productData.productPrice)}원</span>
+        )
+    }else {
+        return (
+            <>
+                <span className="original-price">{numberComma(productData.productPrice)}</span>
+                <span className="discount-value">{productData.discount}%</span>
+                <span className="discount-Price">{numberComma(productData.discountPrice)}원</span>
+            </>
+        )
+    }
+}
+
 function ProductDetailSelect(props) {
     const { productOption, onChange } = props;
 
-    if(productOption.length === 1)
+    if(productOption.length === 0)
         return null;
     else {
         return (
@@ -651,7 +684,7 @@ function ProductDetailSelect(props) {
 
 function ProductDetailSelectOption(props) {
     const { productOption } = props;
-    let optionText = '';
+    let optionText = '단일 옵션';
     let valueText = `${productOption.optionId}`;
     const size = productOption.size;
     const sizeText = `사이즈 : ${size}`;
@@ -793,7 +826,7 @@ function QnA(props) {
     let statElem = '';
     const replyList = data.replyList;
 
-    if(data.productQnAStat === 1)
+    if(data.productQnAStat)
         statElem = <small className={'pull-right answer'}>답변완료</small>;
 
     if(replyList === []){

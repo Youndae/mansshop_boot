@@ -2,6 +2,7 @@ package com.example.mansshop_boot.domain.dto.order;
 
 import com.example.mansshop_boot.domain.entity.Member;
 import com.example.mansshop_boot.domain.entity.ProductOrder;
+import com.example.mansshop_boot.domain.enumuration.OrderStatus;
 
 import java.util.List;
 
@@ -15,6 +16,7 @@ public record PaymentDTO(
         , int totalPrice
         , String paymentType
         , String orderType
+        , int productCount
 ) {
 
     public ProductOrder toOrderEntity(String uid) {
@@ -31,6 +33,7 @@ public record PaymentDTO(
                 .orderTotalPrice(totalPrice)
                 .deliveryFee(deliveryFee)
                 .paymentType(paymentType)
+                .orderStat(OrderStatus.ORDER.getStatusStr())
                 .build();
     }
 }

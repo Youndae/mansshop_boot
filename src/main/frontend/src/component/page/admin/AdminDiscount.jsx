@@ -4,7 +4,13 @@ import {Link, useNavigate, useSearchParams} from "react-router-dom";
 import {axiosInstance} from "../../../modules/customAxios";
 import AdminSideNav from "../../ui/nav/AdminSideNav";
 import {setMemberObject} from "../../../modules/loginModule";
-import {getClickNumber, getNextNumber, getPrevNumber, productDetailPagingObject} from "../../../modules/pagingModule";
+import {
+    getClickNumber,
+    getNextNumber,
+    getPrevNumber,
+    pageSubmit,
+    productDetailPagingObject, searchPageSubmit, searchSubmit
+} from "../../../modules/pagingModule";
 import Paging from "../../ui/Paging";
 import {numberComma} from "../../../modules/numberCommaModule";
 import DefaultBtn from "../../ui/DefaultBtn";
@@ -80,9 +86,13 @@ function AdminDiscount() {
 
     const handlePagingSubmit = (pageNum) => {
         if(keyword == null)
+            pageSubmit(pageNum, navigate);
+        else
+            searchPageSubmit(keyword, pageNum, navigate);
+        /*if(keyword == null)
             navigate(`/admin/product/discount?page=${pageNum}`);
         else
-            navigate(`/admin/product/discount?keyword=${keyword}&page=${pageNum}`);
+            navigate(`/admin/product/discount?keyword=${keyword}&page=${pageNum}`);*/
     }
 
     const handleKeywordOnChange = (e) => {
@@ -90,7 +100,8 @@ function AdminDiscount() {
     }
 
     const handleSearchOnClick = async () => {
-        navigate(`/admin/product/discount?keyword=${keywordInput}`);
+        // navigate(`/admin/product/discount?keyword=${keywordInput}`);
+        searchSubmit(keywordInput, navigate);
     }
 
     return (

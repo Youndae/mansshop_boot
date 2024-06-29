@@ -1,13 +1,13 @@
 
 export const mainProductPagingObject = (pageNum, totalPages) => {
-    return createPagingObject(pageNum, 12, totalPages);
+    return createPagingObject(pageNum, 10, totalPages);
 }
 
 export const productDetailPagingObject = (pageNum, totalPages) => {
     return createPagingObject(pageNum, 10, totalPages);
 }
 
-const createPagingObject = (pageNum, elementSize,totalPages) => {
+const createPagingObject = (pageNum, elementSize, totalPages) => {
     let endPage = Number(Math.ceil(pageNum / elementSize) * elementSize);
     const startPage = endPage - 9;
     if(totalPages < endPage)
@@ -43,6 +43,29 @@ export const pagingSubmit = (page, keyword, list, navigate) => {
         navigate(`?keyword=${keyword}&page=${page}&list=${list}`)
 }
 
+
+
+
+export const pageSubmit = (page, navigate) => {
+    navigate(`?page=${page}`);
+}
+
 export const searchSubmit = (keyword, navigate) => {
-    navigate(`?keyword=${keyword}&list=all`);
+    navigate(`?keyword=${keyword}`);
+}
+
+export const typePageSubmit = (type, page, navigate) => {
+    navigate(`?type=${type}&page=${page}`);
+}
+
+export const searchTypeSubmit = (type, keyword, navigate) => {
+    navigate(`?type=${type}&keyword=${keyword}`);
+}
+
+export const searchPageSubmit = (keyword, page, navigate) => {
+    navigate(`?keyword=${keyword}&page=${page}`);
+}
+
+export const searchTypePageSubmit = (type, keyword, page, navigate) => {
+    navigate(`?type=${type}&keyword=${keyword}&page=${page}`);
 }

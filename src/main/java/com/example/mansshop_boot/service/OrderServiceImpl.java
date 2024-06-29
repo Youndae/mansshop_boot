@@ -60,7 +60,7 @@ public class OrderServiceImpl implements OrderService{
         ProductOrder productOrder = paymentDTO.toOrderEntity(cartMemberDTO.uid()); // 주문내역
         List<OrderProductDTO> orderProductList = paymentDTO.orderProduct();// 주문 내역 중 상품 옵션 정보 리스트
         List<Long> orderOptionIdList = new ArrayList<>();// 주문한 상품 옵션 아이디를 담아줄 리스트
-        int totalSalesRate = 0;// 총 판매량
+        int totalProductCount = 0;// 총 판매량
 
         //옵션 정보 리스트에서 각 객체를 OrderDetail Entity로 Entity화 해서 ProductOrder Entity에 담아준다.
         //주문한 옵션 번호는 추후 더 사용하기 때문에 리스트화 한다.
@@ -68,9 +68,9 @@ public class OrderServiceImpl implements OrderService{
         for(OrderProductDTO data : orderProductList) {
             productOrder.addDetail(data.toOrderDetailEntity());
             orderOptionIdList.add(data.optionId());
-            totalSalesRate += data.detailCount();
+            totalProductCount += data.detailCount();
         }
-
+        productOrder.setProductCount(totalProductCount);
         //주문 정보와 주문 상세정보를 같이 저장한다.
         productOrderRepository.save(productOrder);
 
@@ -101,30 +101,30 @@ public class OrderServiceImpl implements OrderService{
         //매출 데이터 정리
 
         //기간별(일별) 매출
-        PeriodSales periodSales = periodSalesRepository.findPeriodLastUpdate(); //가장 최근 일자의 데이터를 조회
+        /*PeriodSales periodSales = periodSalesRepository.findPeriodLastUpdate(); //가장 최근 일자의 데이터를 조회
         LocalDate now = LocalDate.now();//현재 날짜
 
         //두 날짜가 동일한 경우 조회된 Entity 데이터를 수정
         //동일하지 않은 경우 Entity를 새로 만들어서 저장
         if(periodSales != null && periodSales.getPeriod().equals(now)){
             periodSales.setSales(paymentDTO.totalPrice());
-            periodSales.setSalesRate(totalSalesRate);
+            periodSales.setSalesRate(totalProductCount);
         }else {
             periodSales = PeriodSales.builder()
                     .sales(paymentDTO.totalPrice())
-                    .salesRate(totalSalesRate)
+                    .salesRate(totalProductCount)
                     .build();
         }
 
-        periodSalesRepository.save(periodSales);
+        periodSalesRepository.save(periodSales);*/
 
 
         //상품별 매출, 상품 옵션 재고 관리
 
         //상품별 매출 리스트 조회. 주문내역에 해당하는 옵션 아이디 매출만 조회한다.
         //저장 또는 수정할 데이터를 담아줄 리스트를 새로 생성
-        List<ProductSales> productSalesDataList = productSalesRepository.findAllByOptionIds(orderOptionIdList);
-        List<ProductSales> productSalesSetList = new ArrayList<>();
+        /*List<ProductSales> productSalesDataList = productSalesRepository.findAllByOptionIds(orderOptionIdList);
+        List<ProductSales> productSalesSetList = new ArrayList<>();*/
 
         //상품 옵션 재고 수정을 위해 주문 내역에 해당하는 상품 옵션 데이터를 조회
         //저장 또는 수정할 데이터를 담아줄 리스트를 새로 생성
@@ -154,7 +154,7 @@ public class OrderServiceImpl implements OrderService{
             //상품별 매출 데이터 처리를 위해 해당 상품의 매출 데이터가 존재한다면 조회된 Entity를 수정해 리스트에 담아주고
             //존재하지 않는다면 Entity를 새로 생성해 리스트에 담아준다.
             //한번 수정이 발생할 때마다 다음 루프의 횟수를 줄이기 위해 조회 리스트에서 수정된 Entity 데이터를 지워나간다.
-            for(int j = 0; j < productSalesDataList.size(); j++) {
+            /*for(int j = 0; j < productSalesDataList.size(); j++) {
                 if(dto.optionId() == productSalesDataList.get(j).getOptionId()){
                     productSales = productSalesDataList.get(j);
                     productSales.setSales(dto.detailPrice());
@@ -163,9 +163,9 @@ public class OrderServiceImpl implements OrderService{
                     productSalesDataList.remove(j);
                     break;
                 }
-            }
+            }*/
 
-            if(productSales == null) {
+            /*if(productSales == null) {
                 productSales = ProductSales.builder()
                                     .sales(dto.detailPrice())
                                     .salesRate(dto.detailCount())
@@ -174,7 +174,7 @@ public class OrderServiceImpl implements OrderService{
                                     .build();
             }
 
-            productSalesSetList.add(productSales);
+            productSalesSetList.add(productSales);*/
 
             //상품 옵션 테이블에서 재고 수정을 위해 해당 옵션 상품 리스트를 반복문으로 돌리면서
             //조회된 Entity의 재고를 수정한 뒤 리스트에 담아준다.
@@ -193,7 +193,7 @@ public class OrderServiceImpl implements OrderService{
         }
 
         productOptionRepository.saveAll(productOptionSetList);
-        productSalesRepository.saveAll(productSalesSetList);
+//        productSalesRepository.saveAll(productSalesSetList);
 
         //상품 판매량 수정을 위해 해당되는 상품들을 조회.
         List<Product> productList = productRepository.findAllByIdList(productIdList);

@@ -9,10 +9,8 @@ import {useDispatch, useSelector} from "react-redux";
 import {setMemberObject} from "../../../modules/loginModule";
 import OrderListDetail from "../../ui/OrderListDetail";
 
-/*
-    페이징 추가해야함.
- */
-function MyPageOrder(props) {
+
+function MyPageOrder() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
     const [params] = useSearchParams();
     const page = params.get('page') === null ? 1 : params.get('page');
@@ -64,7 +62,7 @@ function MyPageOrder(props) {
     const handleSelectOnChange = (e) => {
         const selectTerm = e.target.value;
 
-        navigate(`/my-page/order?term=${selectTerm}`)
+        navigate(`?term=${selectTerm}`)
     }
 
     const handlePageBtn = (e) => {
@@ -80,7 +78,7 @@ function MyPageOrder(props) {
     }
 
     const handlePagingSubmit = (pageNum) => {
-        navigate(`/my-page/order?term=${term}&page=${pageNum}`);
+        navigate(`?term=${term}&page=${pageNum}`);
     }
 
     return (
