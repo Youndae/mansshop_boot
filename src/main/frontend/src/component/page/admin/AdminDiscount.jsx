@@ -48,7 +48,11 @@ function AdminDiscount() {
     }, [page, keyword]);
 
     const getDiscountProduct = async () => {
-        await axiosInstance.get(`admin/product/discount?keyword=${keyword}&page=${page}`)
+        let url = `admin/product/discount?page=${page}`;
+        if(keyword != null)
+            url = `admin/product/discount?page=${page}&keyword=${keyword}`;
+
+        await axiosInstance.get(url)
             .then(res => {
                 setData(res.data.content);
 

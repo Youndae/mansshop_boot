@@ -1,8 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {useLocation, useNavigate, useParams} from "react-router-dom";
 
-import dayjs from "dayjs";
-
 import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {getClickNumber, getNextNumber, getPrevNumber, productDetailPagingObject} from "../../../modules/pagingModule";
 import ProductDetailThumbnail from "../../ui/ProductDetailThumbnail";
@@ -215,7 +213,7 @@ function ProductDetail() {
             for(let i = 0; i < selectOption.length; i++) {
                 orderProductArr.push({
                     productId: productData.productId,
-                    optionId: selectOption.optionId,
+                    optionId: selectOption[i].optionId,
                     productName: productData.productName,
                     size: selectOption[i].size,
                     color: selectOption[i].color,
@@ -395,23 +393,31 @@ function ProductDetail() {
     }
 
     const handleQnASubmit = async () => {
-        const productId = productData.productId;
+        if(!loginStatus){
+            if(window.confirm('상품문의는 로그인시에만 가능합니다.\n로그인하시겠습니까?'))
+                navigate('/login');
+        }else {
+            const productId = productData.productId;
 
-        await axiosInstance.post(`my-page/qna/product`, {
-            productId: productId,
-            content: qnaInputValue,
-        }, {
-            headers: {'Content-Type' : 'application/json'}
-        })
-            .then(res => {
-                if(checkResponseMessageOk(res)){
-                    setQnAInputValue('');
-                    handleQnAPaging(1);
-                }
+            await axiosInstance.post(`product/qna`, {
+                productId: productId,
+                content: qnaInputValue,
+            }, {
+                headers: {'Content-Type' : 'application/json'}
             })
-            .catch(err => {
-                console.error('ProductDetail QnA submit error : ', err);
-            })
+                .then(res => {
+                    if(checkResponseMessageOk(res)){
+                        setQnAInputValue('');
+                        handleQnAPaging(1);
+                    }
+                })
+                .catch(err => {
+                    console.error('ProductDetail QnA submit error : ', err);
+                })
+        }
+
+
+
     }
 
 

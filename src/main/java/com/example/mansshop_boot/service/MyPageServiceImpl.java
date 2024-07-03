@@ -59,6 +59,8 @@ public class MyPageServiceImpl implements MyPageService{
 
     private final ProductRepository productRepository;
 
+    private final ProductOptionRepository productOptionRepository;
+
     @Override
     public PagingResponseDTO<MyPageOrderDTO> getOrderList(OrderPageDTO pageDTO, MemberOrderDTO memberOrderDTO) {
 
@@ -374,6 +376,9 @@ public class MyPageServiceImpl implements MyPageService{
                 .replyContent(insertDTO.content())
                 .build();
 
+        memberQnA.setMemberQnAStat(false);
+
+        memberQnARepository.save(memberQnA);
         memberQnAReplyRepository.save(memberQnAReply);
 
         return Result.OK.getResultKey();
@@ -514,14 +519,21 @@ public class MyPageServiceImpl implements MyPageService{
 
         Member member = memberRepository.findById(principal.getName()).orElseThrow(IllegalArgumentException::new);
         Product product = productRepository.findById(reviewDTO.productId()).orElseThrow(IllegalArgumentException::new);
+        ProductOption productOption = productOptionRepository.findById(reviewDTO.optionId()).orElseThrow(IllegalArgumentException::new);
 
         ProductReview productReview = ProductReview.builder()
                 .member(member)
                 .product(product)
                 .reviewContent(reviewDTO.content())
+                .productOption(productOption)
                 .build();
 
         productReviewRepository.save(productReview);
+
+        ProductOrderDetail productOrderDetail = productOrderDetailRepository.findById(reviewDTO.detailId()).orElseThrow(IllegalArgumentException::new);
+
+        productOrderDetail.setOrderReviewStatus(false);
+        productOrderDetailRepository.save(productOrderDetail);
 
 
         return Result.OK.getResultKey();

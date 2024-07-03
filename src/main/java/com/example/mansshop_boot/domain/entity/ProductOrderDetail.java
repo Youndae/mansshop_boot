@@ -33,10 +33,13 @@ public class ProductOrderDetail {
 
     private int orderDetailPrice;
 
-    private int orderReviewStatus;
+    private boolean orderReviewStatus;
 
     public void setProductOrder(ProductOrder productOrder) {
         this.productOrder = productOrder;
     }
 
+    public void setOrderReviewStatus(boolean orderReviewStatus) {
+        this.orderReviewStatus = orderReviewStatus;
+    }
 }

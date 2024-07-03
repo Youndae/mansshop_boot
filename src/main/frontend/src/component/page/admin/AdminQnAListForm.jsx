@@ -31,7 +31,7 @@ function AdminQnAListForm(props) {
         if(keyword === null)
             typePageSubmit(typeSelectData, pageNum, navigate);
         else
-            searchTypePageSubmit(typeSelectData, pageNum, navigate);
+            searchTypePageSubmit(typeSelectData, keyword, pageNum, navigate);
 
 
 

@@ -8,6 +8,8 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberPath;
+import com.querydsl.core.types.dsl.StringPath;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -37,6 +39,7 @@ public class ProductOrderDetailDSLRepositoryImpl implements ProductOrderDetailDS
                         MyPageOrderDetailDTO.class
                         , productOrder.id.as("orderId")
                         , product.id.as("productId")
+                        , productOrderDetail.productOption.id.as("optionId")
                         , productOrderDetail.id.as("detailId")
                         , product.productName
                         , productOption.size
@@ -59,7 +62,7 @@ public class ProductOrderDetailDSLRepositoryImpl implements ProductOrderDetailDS
                 .fetch();
     }
 
-    @Override
+    /*@Override
     public List<AdminBestSalesProductDTO> findPeriodBestProduct(LocalDateTime startDate, LocalDateTime endDate) {
 
         NumberPath<Long> aliasQuantity = Expressions.numberPath(Long.class, "productPeriodSalesQuantity");
@@ -104,6 +107,71 @@ public class ProductOrderDetailDSLRepositoryImpl implements ProductOrderDetailDS
                 .on(productOrderDetail.productOrder.id.eq(productOrder.id))
                 .where(productOrder.createdAt.between(startDate, endDate))
                 .groupBy(classification.id)
+                .fetch();
+
+        *//*
+            '11754326000','159441','OUTER'
+            '12618580000','169494','PANTS'
+            '12614718000','169321','BAGS'
+            '12622142000','169750','SHOES'
+            '12635601000','169554','TOP'
+
+         *//*
+    }*/
+
+    @Override
+    public List<AdminBestSalesProductDTO> findPeriodBestProduct(LocalDateTime startDate, LocalDateTime endDate) {
+
+        NumberPath<Long> aliasQuantity = Expressions.numberPath(Long.class, "productPeriodSalesQuantity");
+
+        return jpaQueryFactory.select(
+                        Projections.constructor(
+                                AdminBestSalesProductDTO.class
+                                , ExpressionUtils.as(
+                                        JPAExpressions.select(product.productName)
+                                                .from(product)
+                                                .where(productOrderDetail.product.id.eq(product.id))
+                                        , "productName"
+                                )
+                                , ExpressionUtils.as(productOrderDetail.orderDetailCount.longValue().sum(), aliasQuantity)
+                                , productOrderDetail.orderDetailPrice.longValue().sum().as("productPeriodSales")
+                        )
+                )
+                .from(productOrder)
+                .innerJoin(productOrderDetail)
+                .on(productOrderDetail.productOrder.id.eq(productOrder.id))
+                .where(productOrder.createdAt.between(startDate, endDate))
+                .groupBy(product.productName)
+                .orderBy(aliasQuantity.desc())
+                .limit(5)
+                .fetch();
+    }
+
+    @Override
+    public List<AdminPeriodClassificationDTO> findPeriodClassification(LocalDateTime startDate, LocalDateTime endDate) {
+
+        StringPath aliasClassification = Expressions.stringPath("classification");
+
+        return jpaQueryFactory.select(
+                        Projections.constructor(
+                                AdminPeriodClassificationDTO.class
+                                , ExpressionUtils.as(
+                                        JPAExpressions.select(product.classification.id)
+                                                .from(product)
+                                                .where(productOrderDetail.product.id.eq(product.id))
+                                        , aliasClassification
+                                )
+                                , productOrderDetail.orderDetailPrice.longValue().sum().as("classificationSales")
+                                , productOrderDetail.orderDetailCount.longValue().sum().as("classificationSalesQuantity")
+                        )
+                )
+                .from(productOrder)
+                .innerJoin(productOrderDetail)
+                .on(productOrder.id.eq(productOrderDetail.productOrder.id))
+                .innerJoin(product)
+                .on(productOrderDetail.product.id.eq(product.id))
+                .where(productOrder.createdAt.between(startDate, endDate))
+                .groupBy(aliasClassification)
                 .fetch();
     }
 

@@ -31,6 +31,10 @@ public class ProductReview {
 
     private String reviewContent;
 
+    @ManyToOne
+    @JoinColumn(name = "productOptionId")
+    private ProductOption productOption;
+
     @CreationTimestamp
     private LocalDate createdAt;
 

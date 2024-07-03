@@ -169,21 +169,28 @@ function AdminMember() {
 
     const handleMemberOrder = () => {
         const uid = modalData.userId;
-
+        modalClose();
         //회원 주문 정보 검색 페이지.
         navigate(`/admin/order/all?page=1&keyword=${uid}&type=userId`);
     }
 
     const handleMemberProductQnA = () => {
-        const uid = modalData.userId;
+        const uid = modalData.nickname;
+        modalClose();
         //회원 상품 문의 목록 검색
-        navigate(`/admin/qna/product?keyword=${uid}&page=1&list=all`);
+        navigate(`/admin/qna/product?type=all&keyword=${uid}&page=1`);
     }
 
     const handleMemberQnA = () => {
-        const uid = modalData.userId;
+        const uid = modalData.nickname;
+        modalClose();
         //회원 문의 내역 검색
-        navigate(`/admin/qna/member?keyword=${uid}&page=1`)
+        navigate(`/admin/qna/member?type=all&keyword=${uid}&page=1`)
+    }
+
+    const modalClose = () => {
+        setModalIsOpen(false);
+        document.body.style.cssText = '';
     }
 
     const handleSelectOnChange = (e) => {

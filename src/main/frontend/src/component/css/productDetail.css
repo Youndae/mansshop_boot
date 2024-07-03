@@ -150,15 +150,16 @@ select#product-detail-option-select-box {
     display: inline-flex;
 }
 
-.review-content-header strong {
+.review-content-header strong, .qna-content-header .qna-writer {
     font-weight: bold;
-    font-size: x-large;
-    width: 100px;
+    font-size: medium;
+    /*width: 100px;*/
+    margin-left: 5px;
 }
 
-.review-content-header small {
+.review-content-header small, .qna-content-header small {
     font-size: small;
-    padding: 12px 0 0 0;
+    padding: 0 0 0 10px;
 }
 
 .review-content-content {
@@ -203,16 +204,16 @@ select#product-detail-option-select-box {
     display: flex;
 }
 
-.qna-content-header strong {
+/*.qna-content-header strong {
     font-weight: bold;
     font-size: x-large;
     width: 100px;
-}
+}*/
 
-.qna-content-header small {
+/*.qna-content-header small {
     font-size: small;
     padding: 12px 10px 0 0;
-}
+}*/
 
 .qna-content-content {
     display: flex;

@@ -29,9 +29,14 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         String nickname = customOAuth2User.getNickname();
         jwtTokenProvider.createTemporaryToken(userId, response);
 
+        /*
+        실제 운영되는 서비스의 경우 사용자의 동의하에 필요한 정보를 모두 받을 수 있기 때문에 따로 입력 받을 필요가 없음.
+        만약 그 외 직접 받아야 하는 정보가 있다면 아래와 같이 처리해 쿼리 스트링 값에 따라 처리하도록 한다.
         if(nickname == null)
             response.sendRedirect("/oAuth?type=new");
         else
-            response.sendRedirect("/oAuth?type=old");
+        */
+
+        response.sendRedirect("/oAuth");
     }
 }

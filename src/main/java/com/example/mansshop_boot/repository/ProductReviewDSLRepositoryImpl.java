@@ -49,6 +49,7 @@ public class ProductReviewDSLRepositoryImpl implements ProductReviewDSLRepositor
                                             .on(productReview.id.eq(productReviewReply.productReview.id))
                                             .where(productReview.product.id.eq(productId))
                                             .orderBy(productReview.createdAt.desc())
+                                            .orderBy(productReview.id.desc())
                                             .offset(pageable.getOffset())
                                             .limit(pageable.getPageSize())
                                             .fetch();

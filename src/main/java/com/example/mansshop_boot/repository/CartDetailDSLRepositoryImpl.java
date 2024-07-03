@@ -64,4 +64,12 @@ public class CartDetailDSLRepositoryImpl implements CartDetailDSLRepository{
                 .where(cartDetail.cart.id.eq(cartId))
                 .fetch();
     }
+
+    @Override
+    public List<CartDetail> findAllCartDetailByCartIdAndOptionIds(long cartId, List<Long> optionIds) {
+        return jpaQueryFactory.select(cartDetail)
+                .from(cartDetail)
+                .where(cartDetail.cart.id.eq(cartId).and(cartDetail.productOption.id.in(optionIds)))
+                .fetch();
+    }
 }

@@ -179,7 +179,7 @@ function ProductOptionSales(props) {
                         }
                     }else {
                         if(option.color !== null) {
-                            optionText = `${sizeText}, ${colorText}`;
+                            optionText = `${sizeText} ${colorText}`;
                         }else {
                             optionText = sizeText;
                         }

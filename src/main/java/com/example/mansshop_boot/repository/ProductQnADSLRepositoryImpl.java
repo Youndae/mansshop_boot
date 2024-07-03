@@ -137,6 +137,7 @@ public class ProductQnADSLRepositoryImpl implements ProductQnADSLRepository{
                 .on(productQnA.product.id.eq(product.id))
                 .where(adminProductQnASearch(pageDTO))
                 .orderBy(productQnA.createdAt.desc())
+                .orderBy(productQnA.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();

@@ -116,6 +116,7 @@ public class MemberQnADSLRepositoryImpl implements MemberQnADSLRepository{
                                         .on(memberQnA.qnAClassification.id.eq(qnAClassification.id))
                                         .where(adminMemberQnASearch(pageDTO))
                                         .orderBy(memberQnA.updatedAt.desc())
+                                        .orderBy(memberQnA.id.desc())
                                         .offset(pageable.getOffset())
                                         .limit(pageable.getPageSize())
                                         .fetch();

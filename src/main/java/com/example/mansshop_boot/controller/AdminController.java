@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,7 +30,7 @@ import java.util.Map;
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
 @Slf4j
-//@PreAuthorize(value = "hasRole('ROLE_ADMIN')")
+@PreAuthorize(value = "hasRole('ROLE_ADMIN')")
 public class AdminController {
 
     private final AdminService adminService;
@@ -37,12 +39,23 @@ public class AdminController {
 
     @GetMapping("/product")
     public ResponseEntity<PagingResponseDTO<AdminProductListDTO>> getProductList(@RequestParam(name = "keyword", required = false) String keyword
-                                                                                , @RequestParam(name = "page") int page){
+                                                                                , @RequestParam(name = "page") int page
+                                                                                , Principal principal){
         /*
             admin/product의 리스트 조회
          */
 
+        SecurityContextHolder.getContext().getAuthentication().getAuthorities().forEach(v -> log.info("adminProduct Authorities : {}", v));
+
         PagingResponseDTO<AdminProductListDTO> responseDTO = adminService.getProductList(new AdminPageDTO(keyword, page));
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
+    }
+
+    @GetMapping("/product/classification")
+    public ResponseEntity<?> getProductClassification() {
+        ResponseListDTO<String> responseDTO = adminService.getClassification();
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDTO);
@@ -126,18 +139,6 @@ public class AdminController {
         AdminPageDTO pageDTO = new AdminPageDTO(keyword, page);
 
         PagingResponseDTO<AdminDiscountResponseDTO> responseDTO = adminService.getDiscountProduct(pageDTO);
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(responseDTO);
-    }
-
-    @GetMapping("/product/discount/classification")
-    public ResponseEntity<?> getDiscountClassification() {
-        /*
-            List<String> classification
-         */
-
-        ResponseListDTO<String> responseDTO = adminService.getClassification();
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDTO);

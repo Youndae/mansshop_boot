@@ -171,7 +171,9 @@ public class AdminServiceImpl implements AdminService {
 
         List<ProductOption> optionList = patchDTO.getProductOptionList(product);
         productOptionRepository.saveAll(optionList);
-        productOptionRepository.deleteAllById(deleteOptionList);
+
+        if(deleteOptionList != null)
+            productOptionRepository.deleteAllById(deleteOptionList);
 
         saveAndDeleteProductImage(product, imageDTO);
 
@@ -408,9 +410,18 @@ public class AdminServiceImpl implements AdminService {
                 , 0
         );
 
+        long start = System.currentTimeMillis();
         Page<AdminOrderDTO> orderDTOList = productOrderRepository.findAllNewOrderList(pageDTO, todayLastOrderTime, pageable);
+        long end = System.currentTimeMillis();
+        log.info("orderList select time : {}ms", (end - start));
+        long mappingStart = System.currentTimeMillis();
         List<AdminOrderResponseDTO> responseContent = mappingOrderData(orderDTOList);
+        end = System.currentTimeMillis();
+        log.info("data mapping time : {}ms", (end - mappingStart));
 
+
+        end = System.currentTimeMillis();
+        log.info("total time : {}ms", (end - start));
         return new PagingElementsResponseDTO<>(
                 responseContent
                 , orderDTOList.isEmpty()
@@ -425,7 +436,6 @@ public class AdminServiceImpl implements AdminService {
         List<Long> orderIdList = new ArrayList<>();
         orderDTOList.getContent().forEach(dto -> orderIdList.add(dto.orderId()));
         List<ProductOrderDetail> detailList = productOrderDetailRepository.findByOrderIds(orderIdList);
-        detailList.forEach(v -> log.info("detailList : {}", v));
         List<AdminOrderDetailDTO> detailDTOList = new ArrayList<>();
         List<AdminOrderResponseDTO> responseContent = new ArrayList<>();
 
@@ -774,16 +784,24 @@ public class AdminServiceImpl implements AdminService {
                 , 0
         );
 
-        AdminPeriodSalesStatisticsDTO monthStatistics = productOrderRepository.findPeriodStatistics(startDate, endDate);
-        List<AdminBestSalesProductDTO> bestProductList = productOrderDetailRepository.findPeriodBestProduct(startDate, endDate);
+        AdminPeriodSalesStatisticsDTO monthStatistics = productOrderRepository.findPeriodStatistics(startDate, endDate); // 1.505 Index -> createdAt 하는 경우 0.150 정도로 감소.
+
+//        List<AdminBestSalesProductDTO> bestProductList = productOrderDetailRepository.findPeriodBestProduct(startDate, endDate); //69.628
+        List<AdminBestSalesProductDTO> bestProductList = productOrderRepository.findPeriodBestProductOrder(startDate, endDate);
+
+//        List<AdminPeriodClassificationDTO> classificationList = productOrderDetailRepository.findPeriodClassification(startDate, endDate); // 68.692
         List<AdminPeriodClassificationDTO> classificationList = productOrderDetailRepository.findPeriodClassification(startDate, endDate);
-        List<Classification> classification = classificationRepository.findAll(Sort.by("classificationStep").descending());
-        List<AdminPeriodSalesListDTO> dailySalesList = productOrderRepository.findPeriodDailyList(startDate, endDate);
+
+        List<Classification> classification = classificationRepository.findAll(Sort.by("classificationStep").descending()); // 0.063
+
+        List<AdminPeriodSalesListDTO> dailySalesList = productOrderRepository.findPeriodDailyList(startDate, endDate); // 0.924
 
         startDate = startDate.minusYears(1);
         endDate = endDate.minusYears(1);
 
         AdminPeriodSalesStatisticsDTO lastYearStatistics = productOrderRepository.findPeriodStatistics(startDate, endDate);
+
+
 
         List<AdminPeriodClassificationDTO> classificationResponseDTO = new ArrayList<>();
         for(int i = 0; i < classification.size(); i++) {
@@ -824,9 +842,6 @@ public class AdminServiceImpl implements AdminService {
                                                                     , classificationResponseDTO
                                                                     , dailySalesResponseDTO
                                                             );
-
-
-
 
         return new ResponseDTO<AdminPeriodMonthDetailResponseDTO>(responseContent, new UserStatusDTO(adminNickname));
     }

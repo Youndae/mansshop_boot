@@ -24,6 +24,8 @@ function MyPageReviewWrite() {
         await axiosInstance.post(`my-page/review`, {
             productId: state.productId
             , content: inputData
+            , optionId: state.optionId
+            , detailId: state.detailId
         })
             .then(res => {
                 if(checkResponseMessageOk(res))

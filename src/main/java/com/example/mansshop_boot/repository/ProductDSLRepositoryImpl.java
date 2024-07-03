@@ -61,7 +61,9 @@ public class ProductDSLRepositoryImpl implements ProductDSLRepository{
                 .from(product)
                 .innerJoin(productOption)
                 .on(product.id.eq(productOption.product.id))
+                .where(product.isOpen.eq(true))
                 .orderBy(defaultListOrderBy(pageDTO.classification()))
+                .orderBy(product.id.desc())
                 .groupBy(product.id)
                 .limit(pageDTO.mainProductAmount())
                 .fetch();
@@ -89,10 +91,12 @@ public class ProductDSLRepositoryImpl implements ProductDSLRepository{
                 .innerJoin(productOption)
                 .on(product.id.eq(productOption.product.id))
                 .where(
-                        searchType(pageDTO.classification(), pageDTO.keyword())
+                        product.isOpen.eq(true)
+                                .and(searchType(pageDTO.classification(), pageDTO.keyword()))
                 )
                 .groupBy(product.id)
                 .orderBy(defaultListOrderBy(pageDTO.classification()))
+                .orderBy(product.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -100,7 +104,8 @@ public class ProductDSLRepositoryImpl implements ProductDSLRepository{
         JPAQuery<Long> count = jpaQueryFactory.select(product.countDistinct())
                 .from(product)
                 .where(
-                        searchType(pageDTO.classification(), pageDTO.keyword())
+                        product.isOpen.eq(true)
+                                .and(searchType(pageDTO.classification(), pageDTO.keyword()))
                 );
 
 

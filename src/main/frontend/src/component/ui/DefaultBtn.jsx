@@ -8,7 +8,7 @@ const Button = styled.button`
 `;
 
 function DefaultBtn(props) {
-    const { btnText, className, onClick, id, name, value } = props;
+    const { btnText, className, onClick, id, name, value, disable} = props;
 
     return (
         <Button

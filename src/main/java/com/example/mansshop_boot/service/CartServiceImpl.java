@@ -26,6 +26,7 @@ import org.springframework.web.util.WebUtils;
 
 import java.security.Principal;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -96,6 +97,7 @@ public class CartServiceImpl implements CartService{
                         , HttpServletResponse response
                         , Principal principal) {
         String cookieValue = null;
+        List<CartDetail> optionListDetail = new ArrayList<>();
 
         if(cartMemberDTO.uid().equals(nonUserId))
             cookieValue = cartMemberDTO.cartCookieValue() == null ? createAnonymousCookie(response) : cartMemberDTO.cartCookieValue();
@@ -111,18 +113,37 @@ public class CartServiceImpl implements CartService{
                             .member(member)
                             .cookieId(cookieValue)
                             .build();
+        }else {
+            List<Long> addOptionIdList = new ArrayList<>();
+            addList.forEach(v -> addOptionIdList.add(v.optionId()));
+            optionListDetail = cartDetailRepository.findAllCartDetailByCartIdAndOptionIds(cart.getId(), addOptionIdList);
         }
 
-        for(AddCartDTO detailValue : addList){
-            cart.addCartDetail(CartDetail.builder()
-                                .productOption(
-                                        productOptionRepository.findById(detailValue.optionId())
-                                                .orElseThrow(IllegalArgumentException::new)
-                                )
-                                .cartCount(detailValue.count())
-                                .cartPrice(detailValue.price())
-                                .build()
-                        );
+        for(AddCartDTO detailValue : addList) {
+            CartDetail addDetail = CartDetail.builder()
+                                            .productOption(
+                                                    productOptionRepository.findById(detailValue.optionId())
+                                                            .orElseThrow(IllegalArgumentException::new)
+                                            )
+                                            .cartCount(detailValue.count())
+                                            .cartPrice(detailValue.price())
+                                            .build();
+
+            if(!optionListDetail.isEmpty()) {
+                for(int i = 0; i < optionListDetail.size(); i++) {
+                    CartDetail listObject = optionListDetail.get(i);
+                    if(detailValue.optionId().equals(listObject.getProductOption().getId())){
+                        listObject.setCartCount(detailValue.count());
+                        listObject.setCartPrice(detailValue.price());
+
+                        addDetail = listObject;
+                        optionListDetail.remove(i);
+                        break;
+                    }
+                }
+            }
+
+            cart.addCartDetail(addDetail);
         }
 
         cartRepository.save(cart);

@@ -3,12 +3,14 @@ package com.example.mansshop_boot.config.security;
 import com.example.mansshop_boot.config.JWTAuthorizationFilter;
 import com.example.mansshop_boot.config.oAuth.CustomOAuth2SuccessHandler;
 import com.example.mansshop_boot.config.oAuth.CustomOAuth2UserService;
+import com.example.mansshop_boot.domain.enumuration.Role;
 import com.example.mansshop_boot.repository.MemberRepository;
 import com.example.mansshop_boot.config.jwt.JWTTokenProvider;
 import com.example.mansshop_boot.service.JWTTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -21,6 +23,7 @@ import org.springframework.web.filter.CorsFilter;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@EnableMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class SecurityConfig {
 
     private final CorsFilter corsFilter;
@@ -53,10 +56,12 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(registry ->
-                        registry.requestMatchers("/login/**", "/api/**", "/**")
+                /*.authorizeHttpRequests(registry ->
+                        registry.requestMatchers("/login/**", "/api/main/**", "/**")
                                 .permitAll()
-                );
+                                .requestMatchers("/api/admin/**").hasRole("ROLE_ADMIN")
+                                .anyRequest().authenticated()
+                )*/;
 
         http
                 .oauth2Login((oauth2) ->

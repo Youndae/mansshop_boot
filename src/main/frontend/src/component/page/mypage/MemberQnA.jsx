@@ -132,9 +132,9 @@ function MemberQnA() {
 }
 function ProductQnABody(props) {
     const { data } = props;
-    let qnaStatText = '답변 완료';
-    if(data.memberQnAStat === 0)
-        qnaStatText = '미답변';
+    let qnaStatText = '미답변';
+    if(data.memberQnAStat)
+        qnaStatText = '답변 완료';
 
     return (
         <tr>

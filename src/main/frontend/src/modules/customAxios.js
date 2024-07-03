@@ -1,6 +1,6 @@
 import axios from "axios";
 
-let tokenStealingAlertStatus = true;
+// let tokenStealingAlertStatus = true;
 
 export const axiosDefault = axios.create({
     baseURL: '/api',
@@ -30,12 +30,17 @@ axiosInstance.interceptors.response.use(
         return res;
     },
     async (err) => {
-       errorHandling(err);
+        console.log('axios interceptor response');
+       await errorHandling(err);
     }
 )
 
 const getToken = () => {
-    return window.localStorage.getItem('Authorization');
+
+    const token = window.localStorage.getItem('Authorization');
+    console.log('getToken : ', token);
+
+    return token;
 };
 
 
@@ -74,12 +79,16 @@ export const errorHandling = (err) => {
             })
     }else if(errorStatus === 800){
         //토큰 탈취 응답
-        if(tokenStealingAlertStatus){
+
+        window.localStorage.removeItem('Authorization');
+        alert('로그인 정보에 문제가 발생해 로그아웃됩니다.\n문제가 계속된다면 관리자에게 문의해주세요.');
+        window.location.href='/';
+        /*if(tokenStealingAlertStatus){
             tokenStealingAlertStatus = false;
             window.localStorage.removeItem('Authorization');
             alert('로그인 정보에 문제가 발생해 로그아웃됩니다.\n문제가 계속된다면 관리자에게 문의해주세요.');
             window.location.href='/';
-        }
+        }*/
     }else if(errorStatus === 403 && errorMessage === 'AccessDeniedException') {
         window.location.href='/error';
     }

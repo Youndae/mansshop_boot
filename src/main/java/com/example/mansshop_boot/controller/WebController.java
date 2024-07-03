@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
-public class WebController {
+public class WebController implements ErrorController{
 
     /*@GetMapping({
             "/", "/{classification}"
@@ -32,14 +32,16 @@ public class WebController {
     }*/
 
     @GetMapping({
-            "/", "/product/**"
-            , "/login", "/join", "/search-id", "/search-password", "/oAuth"
+            "", "/", "/product/**"
+            , "/login", "/join", "/search-id", "/search-password", "/oAuth", "/reset-pw"
             , "/new", "/search", "/category/**"
+            , "/cart", "/productOrder", "/order/**"
+            , "/my-page/**"
             , "/admin/**"
             , "/error"
     })
     public String index() {
-        return "forward:/index.html";
+        return "forward:index.html";
     }
 
 

@@ -10,7 +10,7 @@ public record AdminOrderDetailDTO(
         , String color
         , int count
         , int price
-        , int reviewStatus
+        , boolean reviewStatus
 ) {
 
     @Builder
@@ -22,7 +22,7 @@ public record AdminOrderDetailDTO(
                 , productOrderDetail.getProductOption().getColor()
                 , productOrderDetail.getOrderDetailCount()
                 , productOrderDetail.getOrderDetailPrice()
-                , productOrderDetail.getOrderReviewStatus()
+                , productOrderDetail.isOrderReviewStatus()
         );
     }
 }
