@@ -143,10 +143,7 @@ function Join() {
             //사용자 이름 입력 요청 overlap 출력 및 focus
             setNameCheck('empty');
             nameElem.current.focus();
-        }else if(userData.nickname === ''){
-            setNicknameCheck('empty');
-            nicknameElem.current.focus();
-        }else if(!checkInfo.nicknameCheckInfo) {
+        }else if(userData.nickname !== '' && !checkInfo.nicknameCheckInfo) {
             setNicknameCheck('notDuplicateCheck');
             nicknameElem.current.focus();
         }else if(!emailPattern.test(userEmail)) {

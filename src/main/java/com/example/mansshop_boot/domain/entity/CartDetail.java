@@ -44,4 +44,12 @@ public class CartDetail {
             this.cartPrice = cartPrice - productPrice;
         }
     }
+
+    public void setCartCount(int cartCount) {
+        this.cartCount = this.cartCount + cartCount;
+    }
+
+    public void setCartPrice(int cartPrice) {
+        this.cartPrice = this.cartPrice + cartPrice;
+    }
 }

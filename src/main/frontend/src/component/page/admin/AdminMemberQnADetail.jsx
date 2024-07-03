@@ -142,7 +142,11 @@ function AdminMemberQnADetail() {
 
     const handleCompleteBtn = async () => {
 
-        //답변 완료 상태로 변경.
+        await axiosInstance.patch(`admin/qna/member/${data.memberQnAId}`)
+            .then(res => {
+                if(checkResponseMessageOk(res))
+                    getMemberQnADetail();
+            })
     }
 
     return (

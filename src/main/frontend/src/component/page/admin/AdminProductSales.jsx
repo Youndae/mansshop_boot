@@ -12,6 +12,7 @@ import {
 } from "../../../modules/pagingModule";
 import {setMemberObject} from "../../../modules/loginModule";
 import Paging from "../../ui/Paging";
+import {numberComma} from "../../../modules/numberCommaModule";
 
 /*
         상품별 매출.
@@ -47,13 +48,20 @@ function AdminProductSales() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        setKeywordInput(keyword);
+        if(keyword !== null)
+            setKeywordInput(keyword);
+
         getProductSales();
     }, [page, keyword]);
 
     const getProductSales = async () => {
-        await axiosInstance.get(`admin/sales/product?page=${page}&keyword=${keyword}`)
+        let url = `admin/sales/product?page=${page}`;
+        if(keyword !== null)
+            url += `&keyword=${keyword}`;
+
+        await axiosInstance.get(url)
             .then(res => {
+                console.log('productSales res : ', res);
                 setData(res.data.content);
 
                 const pagingObject = productDetailPagingObject(page, res.data.totalPages);
@@ -135,8 +143,8 @@ function AdminProductSales() {
                                     <tr key={index} onClick={() => handleProductOnClick(product.productId)} className="tr-pointer">
                                         <td>{product.classification}</td>
                                         <td>{product.productName}</td>
-                                        <td>{product.sales}</td>
-                                        <td>{product.salesQuantity}</td>
+                                        <td>{numberComma(product.sales)}</td>
+                                        <td>{numberComma(product.salesQuantity)}</td>
                                     </tr>
                                 )
                             })}

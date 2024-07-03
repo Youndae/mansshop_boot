@@ -162,6 +162,7 @@ function MyPageProductQnADetail() {
                 handleInputSubmit={handleInputSubmit}
                 titleText={'상품 문의'}
                 handleDeleteBtn={handleDeleteBtn}
+                replyStatus={false}
             />
        </div>
     )

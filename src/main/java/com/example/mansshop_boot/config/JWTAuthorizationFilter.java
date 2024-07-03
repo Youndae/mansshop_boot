@@ -136,18 +136,13 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
                         username = claimByAccessToken;
                     }
                 }
-            }else if(accessToken == null && refreshToken == null) {
-                chain.doFilter(request, response);
-                return;
-            }else{
-                String decodeTokenClaim = null;
-
-                if (accessToken != null)
-                    decodeTokenClaim = jwtTokenProvider.decodeToken(accessToken.replace(tokenPrefix, ""));
-                else
-                    decodeTokenClaim = jwtTokenProvider.decodeToken(refreshToken.getValue().replace(tokenPrefix, ""));
+            }else if(accessToken != null && refreshToken == null){
+                String decodeTokenClaim = jwtTokenProvider.decodeToken(accessToken.replace(tokenPrefix, ""));
 
                 jwtTokenService.deleteTokenAndCookieAndThrowException(decodeTokenClaim, inoValue, response);
+                return;
+            }else {
+                chain.doFilter(request, response);
                 return;
             }
         }

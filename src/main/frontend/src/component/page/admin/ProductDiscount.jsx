@@ -76,7 +76,7 @@ function ProductDiscount() {
 
     const getClassification = async () => {
 
-        await axiosInstance.get(`admin/product/discount/classification`)
+        await axiosInstance.get(`admin/product/classification`)
             .then(res => {
                 setClassification(res.data.content);
 

@@ -11,7 +11,7 @@ public record AdminOrderPageDTO(
                 keyword
                 , searchType
                 , page
-                , 5
+                , 20
         );
 
     }

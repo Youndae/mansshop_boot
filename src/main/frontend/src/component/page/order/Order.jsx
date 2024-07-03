@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {useLocation, useNavigate} from "react-router-dom";
 
 import DaumPostcode from "react-daum-postcode";
@@ -32,10 +32,17 @@ function Order() {
         orderMemo: '',
     });
     const [deliveryFee, setDeliveryFee] = useState(3500);
+    const [addressOverlap, setAddressOverlap] = useState(true);
+    const [recipientOverlap, setRecipientOverlap] = useState(true);
+    const [phoneOverlap, setPhoneOverlap] = useState(''); // empty, inValid
+
+    const recipientRef = useRef(null);
+    const phoneRef = useRef(null);
 
     const navigate = useNavigate();
 
     const phoneRegEx = "(\\d{3})(\\d{3,4})(\\d{4})";
+    const phonePattern = /^01(?:0|1|6|9)([0-9]{3,4})([0-9]{4})$/;
 
     useEffect(() => {
         if(state !== null) {
@@ -109,10 +116,27 @@ function Order() {
     }
 
     const handleOrderSubmit = async () => {
-        if(paymentType === 'card')
-            requestPay();
-        else if(paymentType === 'cash')
-            await requestOrder();
+
+        if(userAddress.postCode === '') {
+            setAddressOverlap(false);
+        }else if(orderData.recipient === ''){
+            setRecipientOverlap(false);
+            recipientRef.current.focus();
+        }else if(orderData.phone === '') {
+            setPhoneOverlap('empty');
+            phoneRef.current.focus();
+        }else if(!phonePattern.test(orderData.phone)){
+            setPhoneOverlap('inValid');
+            phoneRef.current.focus();
+        }else {
+            if(paymentType === 'card')
+                requestPay();
+            else if(paymentType === 'cash'){
+                await requestOrder();
+            }
+
+        }
+
 
     }
 
@@ -144,14 +168,18 @@ function Order() {
             headers: {'Content-Type': 'application/json'}
         })
             .then(res => {
-                /*주문 결과 페이지 생성 후 연결*/
-                if(checkResponseMessageOk(res))
+
+                if(checkResponseMessageOk(res)){
+                    alert('주문이 완료되었습니다.');
                     navigate('/');
+                }
+
 
             })
             .catch(err => {
                 console.error('productOrder axios error : ', err);
             })
+
     }
 
     const handleRadioSelect = (e) => {
@@ -188,6 +216,7 @@ function Order() {
         });
 
         setIsOpen(false);
+        setAddressOverlap(true);
     }
 
     const handleClosed = (state) => {
@@ -210,6 +239,14 @@ function Order() {
             ...orderData,
             [e.target.name]: e.target.value,
         });
+
+        const name = e.target.name;
+
+        if(name === 'recipient')
+            setRecipientOverlap(true);
+        else if(name === 'phone')
+            setPhoneOverlap('');
+
     }
 
     if(state === null)
@@ -227,16 +264,22 @@ function Order() {
                                 <label>수령인</label>
                             </div>
                             <div className="form-content-input">
-                                <input type={'text'} name={'recipient'} onChange={handleOrderData} value={orderData.recipient}/>
+                                <input type={'text'} name={'recipient'} onChange={handleOrderData} value={orderData.recipient} ref={recipientRef}/>
                             </div>
+                            <RecipientOverlap
+                                status={recipientOverlap}
+                            />
                         </div>
                         <div className="form-content">
                             <div className="form-content-label">
                                 <label>연락처</label>
                             </div>
                             <div className="form-content-input">
-                                <input type={'text'} name={'phone'} value={orderData.phone} onChange={handleOrderData} placeholder={'-를 제외한 숫자만 입력'}/>
+                                <input type={'text'} name={'phone'} value={orderData.phone} onChange={handleOrderData} placeholder={'-를 제외한 숫자만 입력'} ref={phoneRef}/>
                             </div>
+                            <PhoneOverlap
+                                status={phoneOverlap}
+                            />
                         </div>
                         <div className="form-content">
                             <div className="form-content-label">
@@ -252,6 +295,9 @@ function Order() {
                             <div className="form-content-input-detail-address">
                                 <input type={'text'} name={'detailAddress'} value={userAddress.detail} onChange={handleAddressDetail} placeholder={'상세주소'}/>
                             </div>
+                            <AddrOverlap
+                                status={addressOverlap}
+                            />
                             {isOpen && (
                                 <div className={'form-postcode'}>
                                     <DaumPostcode
@@ -311,6 +357,56 @@ function Order() {
             </div>
         )
     }
+}
+
+function AddrOverlap(props) {
+    const { status } = props;
+    console.log('addr overlap : ', status);
+    if(!status){
+        return (
+            <OrderOverlap
+                text={'주소를 입력해주세요'}
+            />
+        )
+    }
+}
+
+function PhoneOverlap(props) {
+    const { status } = props;
+
+    if(status === 'empty'){
+        return (
+            <OrderOverlap
+                text={'연락처를 입력해주세요'}
+            />
+        )
+    }else if(status === 'inValid') {
+        return (
+            <OrderOverlap
+                text={'유효하지 않은 연락처입니다.'}
+            />
+        )
+    }
+}
+
+function RecipientOverlap(props) {
+    const { status } = props;
+
+    if(!status){
+        return (
+            <OrderOverlap
+                text={'받는사람을 입력해주세요'}
+            />
+        )
+    }
+}
+
+function OrderOverlap(props) {
+    const { text } = props;
+
+    return (
+        <span style={{color: "red"}}>{text}</span>
+    )
 }
 
 function OrderTotalPrice(props) {

@@ -268,11 +268,11 @@ function AdminPeriodSalesDetail() {
                                     <div className="admin-period-modal-content-sales">
                                         <div className="form-group">
                                             <label>매출 : </label>
-                                            <span>{classificationModalData.sales}</span>
+                                            <span>{numberComma(classificationModalData.sales)}</span>
                                         </div>
                                         <div className="form-group">
                                             <label>판매량 : </label>
-                                            <span>{classificationModalData.salesQuantity}</span>
+                                            <span>{numberComma(classificationModalData.salesQuantity)}</span>
                                         </div>
                                     </div>
                                     <div className="admin-period-modal-content-table">

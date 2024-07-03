@@ -16,6 +16,8 @@ function Best() {
     }, []);
 
     const getBestData = async() => {
+        console.log('best axios ');
+
         await axiosInstance.get('main/')
             .then(res => {
                 console.log('best res : ', res);

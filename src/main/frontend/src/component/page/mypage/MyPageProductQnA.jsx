@@ -123,9 +123,9 @@ function MyPageProductQnA() {
 
 function ProductQnABody(props) {
     const { data } = props;
-    let qnaStatText = '답변 완료';
-    if(data.productQnAStat === 0)
-        qnaStatText = '미답변';
+    let qnaStatText = '미답변';
+    if(data.productQnAStat)
+        qnaStatText = '답변 완료';
 
     return (
         <tr>

@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 
@@ -37,7 +38,7 @@ public class MemberQnA {
     @CreationTimestamp
     private LocalDate createdAt;
 
-    @CreationTimestamp
+    @UpdateTimestamp
     private LocalDate updatedAt;
 
     private boolean memberQnAStat;

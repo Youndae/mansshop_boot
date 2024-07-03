@@ -143,7 +143,11 @@ function AdminProductQnADetail() {
 
     const handleCompleteBtn = async () => {
 
-        //답변 완료 상태로 변경.
+        await axiosInstance.patch(`admin/qna/product/${data.productQnAId}`)
+            .then(res => {
+                if(checkResponseMessageOk(res))
+                    getProductQnADetail();
+            })
     }
 
     return (

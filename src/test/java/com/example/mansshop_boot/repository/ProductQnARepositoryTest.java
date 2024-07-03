@@ -37,10 +37,10 @@ class ProductQnARepositoryTest {
     }
 
     @Test
-    @DisplayName("ProductDetail 조회. qnaId = 1")
+    @DisplayName("ProductDetail 조회. qnaId = 1522")
     void getDetail() {
         String userId = "coco";
-        long productQnAId = 1L;
+        long productQnAId = 1522L;
 
         MyPageProductQnADTO dto = productQnARepository.findByQnAId(productQnAId);
 

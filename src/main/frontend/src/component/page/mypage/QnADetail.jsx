@@ -18,7 +18,10 @@ function QnADetail(props) {
         , type
         , handleDeleteBtn
         , handleCompleteBtn
+        , replyStatus
     } = props;
+
+    const replyInputStatus = replyStatus === undefined;
 
     const nickname = useSelector((state) => state.member.id);
 
@@ -54,10 +57,12 @@ function QnADetail(props) {
                         {data.qnaContent}
                     </p>
                 </div>
-                <div className="qna-reply-input">
-                    <textarea className="reply-input-textarea" onChange={handleInputOnChange} value={inputValue}>{inputValue}</textarea>
-                    <DefaultBtn onClick={handleInputSubmit} btnText={'작성'}/>
-                </div>
+                <ReplyInput
+                    status={replyInputStatus}
+                    handleInputOnChange={handleInputOnChange}
+                    inputValue={inputValue}
+                    handleInputSubmit={handleInputSubmit}
+                />
                 <div className="mypage-qna-content-reply">
                     {replyData.map((reply, index) => {
                         return (
@@ -78,6 +83,21 @@ function QnADetail(props) {
             </div>
         </div>
     )
+}
+
+function ReplyInput(props) {
+    const { status, handleInputOnChange, inputValue, handleInputSubmit } = props;
+
+    if(status){
+        return (
+            <div className="qna-reply-input">
+                <textarea className="reply-input-textarea" onChange={handleInputOnChange} value={inputValue}>{inputValue}</textarea>
+                <DefaultBtn onClick={handleInputSubmit} btnText={'작성'}/>
+            </div>
+        )
+    }else {
+        return null;
+    }
 }
 
 function HeaderBtn(props) {
@@ -107,9 +127,9 @@ function HeaderBtn(props) {
 
 function QnATitle(props) {
     const { data } = props;
-    let statusText = '답변 완료';
-    if(data.qnaStatus === 0)
-        statusText = '미답변';
+    let statusText = '미답변';
+    if(data.qnaStatus)
+        statusText = '답변 완료';
 
     return (
         <>

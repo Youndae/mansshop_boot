@@ -144,6 +144,8 @@ function OrderDetail(props) {
                         userType={userType}
                         productName={data.productName}
                         productId={data.productId}
+                        optionId={data.optionId}
+                        detailId={data.detailId}
                     />
                 </div>
             </div>
@@ -152,23 +154,25 @@ function OrderDetail(props) {
 }
 
 function ReviewBtn(props) {
-    const { reviewStat, orderStat, userType, productName, productId } = props;
+    const { reviewStat, orderStat, userType, productName, productId, optionId, detailId } = props;
     const navigate = useNavigate();
+
+    console.log('reviewStat : ', reviewStat);
 
     if(orderStat !== '배송 완료' || userType === 'none')
         return null;
 
     const handleReviewBtn = () => {
-        navigate('/my-page/review/write', {state : {productId: productId, productName: productName}});
+        navigate('/my-page/review/write', {state : {productId: productId, productName: productName, optionId: optionId, detailId: detailId}});
     }
 
-    if(reviewStat === 0) {
+    if(reviewStat) {
         return (
-            <button type={'button'} onClick={handleReviewBtn}>리뷰작성</button>
+            <button type={'button'} disabled={true}>리뷰작성완료</button>
         )
     }else {
         return (
-            <button type={'button'} disabled={true}>리뷰작성완료</button>
+            <button type={'button'} onClick={handleReviewBtn}>리뷰작성</button>
         )
     }
 }

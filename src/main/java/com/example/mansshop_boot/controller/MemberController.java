@@ -8,6 +8,7 @@ import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseUserStatusDTO;
 import com.example.mansshop_boot.domain.enumuration.Result;
 import com.example.mansshop_boot.service.MemberService;
+import com.example.mansshop_boot.service.PrincipalService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -40,6 +41,8 @@ public class MemberController {
     private String inoHeader;
 
     private final MemberService memberService;
+
+    private final PrincipalService principalService;
 
     @PostMapping("/login")
     public ResponseEntity<ResponseUserStatusDTO> loginProc(@RequestBody LoginDTO loginDTO
@@ -114,10 +117,15 @@ public class MemberController {
     }
 
     @GetMapping("/check-login")
-    public ResponseEntity<Boolean> checkLoginStatus(Principal principal) {
+    public ResponseEntity<ResponseUserStatusDTO> checkLoginStatus(Principal principal) {
+
+        String nickname = null;
+
+        if(principal != null)
+            nickname = principalService.getNicknameByPrincipal(principal);
 
         return ResponseEntity.status(HttpStatus.OK)
-                            .body(principal != null);
+                            .body(new ResponseUserStatusDTO(new UserStatusDTO(nickname)));
     }
 
 
@@ -158,8 +166,6 @@ public class MemberController {
 
     @PatchMapping("/reset-pw")
     public ResponseEntity<ResponseMessageDTO> resetPassword(@RequestBody UserResetPwDTO resetDTO) {
-        log.info("MemberController.resetPassword :: dto : {}", resetDTO);
-
 
         String responseMessage = memberService.resetPw(resetDTO);
 

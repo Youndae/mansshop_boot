@@ -206,12 +206,12 @@ function AddProduct() {
             <AddProductForm
                 productData={productData}
                 optionList={optionList}
-                headerText={'상품 수정'}
+                headerText={'상품 등록'}
                 handleProductOnChange={handleProductOnChange}
                 handleAddOption={handleAddOption}
                 handleRemoveOption={handleRemoveOption}
                 handleOptionOnChange={handleOptionOnChange}
-                submitBtnText={'수정'}
+                submitBtnText={'추가'}
                 handleSubmitOnClick={handleSubmitOnClick}
                 handleOptionRadioOnChange={handleOptionRadioOnChange}
                 firstThumbnail={[]}
