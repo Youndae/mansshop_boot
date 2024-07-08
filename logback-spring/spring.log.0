@@ -1,9 +1,0 @@
-[2024-05-27 21:58:41.990] - 25873 정보 [restartedMain] --- org.apache.catalina.core.StandardService: Starting service [Tomcat]
-[2024-05-27 21:58:41.993] - 25873 정보 [restartedMain] --- org.apache.catalina.core.StandardEngine: Starting Servlet engine: [Apache Tomcat/10.1.20]
-[2024-05-27 21:58:42.015] - 25873 정보 [restartedMain] --- org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]: Initializing Spring embedded WebApplicationContext
-[2024-05-27 21:58:42.096] - 25873 INFO [restartedMain] --- org.hibernate.jpa.internal.util.LogHelper: HHH000204: Processing PersistenceUnitInfo [name: default]
-[2024-05-27 21:58:42.115] - 25873 INFO [restartedMain] --- org.hibernate.Version: HHH000412: Hibernate ORM core version 6.4.4.Final
-[2024-05-27 21:58:42.128] - 25873 INFO [restartedMain] --- org.hibernate.cache.internal.RegionFactoryInitiator: HHH000026: Second-level cache disabled
-[2024-05-27 21:58:42.370] - 25873 WARN [restartedMain] --- org.hibernate.orm.deprecation: HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-[2024-05-27 21:58:42.781] - 25873 INFO [restartedMain] --- org.hibernate.engine.transaction.jta.platform.internal.JtaPlatformInitiator: HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-[2024-05-27 21:58:46.003] - 25873 정보 [http-nio-8080-exec-1] --- org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]: Initializing Spring DispatcherServlet 'dispatcherServlet'
