@@ -76,8 +76,6 @@ public class JWTTokenProvider {
     @Value("#{jwt['token.temporary.redis.expirationMinute']}")
     private Long temporaryRedisExpiration;
 
-
-
     private final StringRedisTemplate redisTemplate;
 
     /**
@@ -130,9 +128,7 @@ public class JWTTokenProvider {
      * 불일치한다면 토큰은 정상이기 때문에 탈취로 판단. redis 데이터 삭제 후 TOKEN_STEALING 반환
      */
     public String verifyAccessToken(String accessTokenValue, String inoValue) {
-        log.info("verifyAccessToken :: accessTokenValue : {}", accessTokenValue);
         String claimByUserId = getClaimByUserId(accessTokenValue, accessSecret);
-        log.info("verifyAccessToken :: claim : {}", claimByUserId);
         if(claimByUserId.equals(Result.WRONG_TOKEN.getResultKey())
                 || claimByUserId.equals(Result.TOKEN_EXPIRATION.getResultKey())) {
 
@@ -141,9 +137,6 @@ public class JWTTokenProvider {
 
         String redisKey = setRedisKey(redisAccessPrefix, inoValue, claimByUserId);
         String redisValue = getTokenValueToRedis(redisKey);
-
-        log.info("verify :: accessToken : {}", accessTokenValue);
-        log.info("verify :: redis Token : {}", redisValue);
 
         if(accessTokenValue.equals(redisValue))
             return claimByUserId;
@@ -274,11 +267,9 @@ public class JWTTokenProvider {
         long keyExpire = redisTemplate.getExpire(tokenKey);
 
         if(keyExpire == -2) {
-            log.info("RedisValue :: tokenkey : {}", tokenKey);
-            log.info("RedisValue :: key Expire");
             return null;
         }
-        log.info("RedisValue :: key not Expire");
+
         return redisTemplate.opsForValue().get(tokenKey);
     }
 
@@ -357,8 +348,6 @@ public class JWTTokenProvider {
     }
 
     public void setAccessTokenToResponseHeader(String accessToken, HttpServletResponse response){
-
-        log.info("setAccessToken Header :: responseHeader : {}", accessHeader);
 
         response.addHeader(accessHeader, accessToken);
     }

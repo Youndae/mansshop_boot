@@ -1,5 +1,4 @@
 import React, {useEffect} from 'react';
-import { useNavigate } from "react-router-dom";
 
 function AdminOrderModal(props) {
     const { closeModal, modalRef, modalHeader } = props;
@@ -11,7 +10,6 @@ function AdminOrderModal(props) {
             overflow-y: scroll;
             width: 100%;
         `;
-
 
         document.addEventListener('mousedown', closeModal);
     }, []);

@@ -1,22 +1,13 @@
 import React, {useEffect, useRef, useState} from 'react';
-import AdminSideNav from "../../ui/nav/AdminSideNav";
 import {useDispatch, useSelector} from "react-redux";
-import {Link, useNavigate, useSearchParams} from "react-router-dom";
+import {useNavigate, useSearchParams} from "react-router-dom";
 import {axiosInstance} from "../../../modules/customAxios";
-import {
-    getClickNumber,
-    getNextNumber,
-    getPrevNumber,
-    pageSubmit,
-    productDetailPagingObject, searchTypePageSubmit, searchTypeSubmit
-} from "../../../modules/pagingModule";
+import { productDetailPagingObject } from "../../../modules/pagingModule";
 import {setMemberObject} from "../../../modules/loginModule";
-import Paging from "../../ui/Paging";
 
 import dayjs from "dayjs";
-import AdminOrderModal from "./modal/AdminOrderModal";
-import {numberComma} from "../../../modules/numberCommaModule";
-import DefaultBtn from "../../ui/DefaultBtn";
+
+import AdminSideNav from "../../ui/nav/AdminSideNav";
 import AdminOrderListForm from "./AdminOrderListForm";
 import AdminOrderModalDetail from "./modal/AdminOrderModalDetail";
 
@@ -31,13 +22,14 @@ import AdminOrderModalDetail from "./modal/AdminOrderModalDetail";
         클릭시 OrderModal을 통해 주문 정보를 확인할 수 있지만 버튼은 활성화 시키지 않는다.
 
         추후 매니저 권한으로 접근할 수 있는 컴포넌트로 처리하기 위함.
-     */
+ */
 function AdminAllOrder() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
     const [params] = useSearchParams();
     const page = params.get('page') == null ? 1 : params.get('page');
     const keyword = params.get('keyword');
     const searchType = params.get('type');
+
     const [data, setData] = useState([]);
     const [pagingData, setPagingData] = useState({
         startPage: 0,
@@ -59,24 +51,22 @@ function AdminAllOrder() {
     })
     const [keywordSelectValue, setKeywordSelectValue] = useState('recipient');
     const [modalIsOpen, setModalIsOpen] = useState(false);
+
     const modalRef = useRef(null);
 
     const dispatch = useDispatch();
-    const navigate = useNavigate();
 
     useEffect(() => {
         getOrderList();
     }, [page, keyword, searchType]);
 
     const getOrderList = async () => {
-
         let url = `admin/order/all?page=${page}`;
         if(keyword !== null)
             url += `&keyword=${keyword}&searchType=${searchType}`;
 
         await axiosInstance.get(url)
             .then(res => {
-
                 setData(res.data.content);
 
                 const pagingObject = productDetailPagingObject(page, res.data.totalPages);
@@ -94,43 +84,12 @@ function AdminAllOrder() {
                 if(member !== undefined)
                     dispatch(member);
             })
-            .catch(err => {
-                console.error('all Order axios get Error : ', err);
-            })
     }
 
     const handleOnClick = (idx) => {
-
         setModalOrderData(data[idx]);
         setModalIsOpen(true);
     }
-
-    /*const handlePageBtn = (e) => {
-        handlePagingSubmit(getClickNumber(e));
-    }
-
-    const handlePagePrev = () => {
-        handlePagingSubmit(getPrevNumber(pagingData));
-    }
-
-    const handlePageNext = () => {
-        handlePagingSubmit(getNextNumber(pagingData));
-    }
-
-    const handlePagingSubmit = (pageNum) => {
-        if(keyword == null)
-            pageSubmit(pageNum, navigate);
-        else
-            searchTypePageSubmit(keywordSelectValue, keyword, pageNum, navigate);
-    }
-
-    const handleSearchOnClick = () => {
-        searchTypeSubmit(keywordSelectValue, keywordInput, navigate);
-    }*/
-
-    /*const handleSearchOnClick = async () => {
-        navigate(`?keyword=${keywordInput}&type=${keywordSelectValue}`);
-    }*/
 
     const handleSelectOnChange = (e) => {
         const value = e.target.value;

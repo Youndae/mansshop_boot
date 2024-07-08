@@ -6,5 +6,4 @@ import java.util.List;
 
 public interface ProductReviewReplyDSLRepository {
 
-    List<ProductReviewReply> getReplyList(List<Long> reviewIdList);
 }

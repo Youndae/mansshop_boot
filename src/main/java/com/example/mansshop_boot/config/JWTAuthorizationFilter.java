@@ -35,37 +35,32 @@ import java.util.Collection;
  * inoToken = 다중 로그인 허용을 위한 디바이스 식별 번호
  * 정상적으로 로그인한 사용자라면 무조건 존재해야 하기 때문에 조건문으로 가장 먼저 확인.
  *
- * if(세가지 토큰이 모두 존재한다면)
- *      if(AccessToken과 RefreshToken의 prefix를 확인했을 때 정상이 아니라면)
- *          더이상 진행하지 않음
- *      else
- *          AcessToken 검증
+ * if(ino != null){
+ *     if(accessToken != null && refreshToken != null){
+ *         정상적인 로그인 사용자의 요청.
+ *         토큰 검증 진행.
+ *         반환값에 따라 정상이면 이후 처리 진행
+ *          검증이 안되는 잘못된 토큰이거나 탈취라고 판단되는 토큰인 경우 모든 토큰을 삭제 처리 후 응답 반환
+ *     }else if(accessToken != null && refreshToken == null) {
+ *         refreshToken만 없는 경우는 발생할 수 없기 때문에 탈취로 판단
+ *     }else {
+ *         두 토큰이 모두 존재하지 않거나 RefreshToken만 존재한다면
+ *         AccessToken의 만료 또는 새로고침으로 인한 AccessToken 누락일 수 있으므로 검증을 진행하지 않고 이후 처리 진행.
+ *         AccessToken이 없다면 권한 처리가 안되기 때문에 문제가 발생할 여지는 없다고 판단.
+ *     }
+ * }else {
+ *     ino가 없다면 아무런 검증도 진행하지 않고 이후 처리 진행.
+ *     권한 처리를 하기 위한 조건이 username != null이기 때문에 권한 관리도 되지 않는 비 로그인이라고 판단.
+ *     또한 ino가 존재하지 않는다면 권한이 필요하지 않은 기능만 사용이 가능하거나 탈취인지 검증할 수도 없기 때문에 모든 과정을 생략.
+ * }
  *
- *          if(AccessToken 검증 결과로 잘못된 토큰이나 탈취된 토큰이 응답된다면)
- *              응답 이전 Redis 데이터를 삭제 한 뒤 응답하기 때문에
- *              응답 쿠키를 새로 만들어 반환함으로써 ino와 refreshToken이 삭제되도록 처리.
- *              클라이언트에 토큰 탈취 응답(status code = 800)
- *          else if(토큰 만료 응답이라면)
- *              if(요청 URI가 재발급 요청이라면)
- *                  더이상 검증하지 않고 넘겨 컨트롤러에서 대응하도록 처리
- *              else
- *                  클라이언트에 만료 응답 반환
- *          else
- *              토큰 검증 응답이 정상이므로 username 변수에 token claim을 담아줌
- *       else if(ino는 존재하지만 두 토큰이 null이라면)
- *          장기간 미접속으로 인한 두 토큰의 소실일 수 있기도 하고 사용자 아이디를 알아낼 수 없기 때문에 검증하지 않고 넘김
- *       else
- *          두 토큰 중 하나만 존재하기 때문에 탈취로 판단.
- *          존재하는 하나의 토큰을 decode해 claim을 알아내고 redis 데이터와 쿠키 삭제 처리 후 클라이언트에 탈취 응답
- *
- * if(username != null)
- *      username이 null이 아니라면 토큰 검증이 정상적으로 처리된 경우이기 때문에 데이터베이스에서 해당 사용자의 정보를 조회.
- *      가입 경로를 의미하는 provider를 통해 local, OAuth2 로그인을 구분하여 처리 후 Authentication 객체 생성.
- *      권한 관리를 Spring security에 맡기기 위해 SecurityContextHolder에 권한을 set
+ * if(username != null){
+ *     username이 Null이 아닌 경우는 검증이 정상적으로 이루어진 경우.
+ *     로컬 로그인인지 OAuth2 로그인인지에 따라 사용자 아이디와 권한을 CustomUser를 통해 찾아내고 해당 정보를 통해 Authentication 객체 생성.
+ *     권한 관리를 위해 SecurityContextHolder에 set.
+ * }
  *
  */
-
-
 
 @Component
 @RequiredArgsConstructor
@@ -96,17 +91,10 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
                                     , HttpServletResponse response
                                     , FilterChain chain) throws ServletException, IOException {
 
-        log.warn("AuthorizationFilter :: requestURI : {}", request.getRequestURI());
-
-
         String accessToken = request.getHeader(accessHeader);
         Cookie refreshToken = WebUtils.getCookie(request, refreshHeader);
         Cookie inoToken = WebUtils.getCookie(request, inoHeader);
         String username = null; // Authentication 객체 생성 시 필요한 사용자 아이디
-
-        log.warn("AuthorizationFilter :: accessToken : {}", accessToken);
-        log.warn("AuthorizationFilter :: refreshToken : {}", refreshToken == null ? null : refreshToken.getValue());
-        log.warn("AuthorizationFilter :: inoToken : {}", inoToken == null ? null : inoToken.getValue());
 
         if(inoToken != null){
             String inoValue = inoToken.getValue();
@@ -120,7 +108,7 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
                     return;
                 }else {
                     String claimByAccessToken = jwtTokenProvider.verifyAccessToken(accessTokenValue, inoValue);
-                    log.info("accessToken verify result : {}", claimByAccessToken);
+
                     if(claimByAccessToken.equals(Result.WRONG_TOKEN.getResultKey())
                         || claimByAccessToken.equals(Result.TOKEN_STEALING.getResultKey())){
                         jwtTokenService.deleteCookieAndThrowException(response);

@@ -1,7 +1,7 @@
 package com.example.mansshop_boot.controller;
 
 import com.example.mansshop_boot.domain.dto.cart.CartMemberDTO;
-import com.example.mansshop_boot.domain.dto.order.PaymentDTO;
+import com.example.mansshop_boot.domain.dto.order.in.PaymentDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
 import com.example.mansshop_boot.service.CartService;
 import com.example.mansshop_boot.service.OrderService;
@@ -27,6 +27,14 @@ public class OrderController {
 
     private final CartService cartService;
 
+    /**
+     *
+     * @param paymentDTO
+     * @param request
+     * @param principal
+     *
+     * 결제 완료 이후 주문 정보 처리
+     */
     @PostMapping("/")
     public ResponseEntity<?> payment(@RequestBody PaymentDTO paymentDTO
                                     , HttpServletRequest request

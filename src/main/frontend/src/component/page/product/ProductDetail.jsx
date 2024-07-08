@@ -1,17 +1,22 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {useLocation, useNavigate, useParams} from "react-router-dom";
-
-import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
-import {getClickNumber, getNextNumber, getPrevNumber, productDetailPagingObject} from "../../../modules/pagingModule";
-import ProductDetailThumbnail from "../../ui/ProductDetailThumbnail";
-
-import '../../css/productDetail.css';
-import Paging from "../../ui/Paging";
-import {handleLocationPathToLogin, setMemberObject} from "../../../modules/loginModule";
 import {useDispatch, useSelector} from "react-redux";
+
+import {axiosDefault, axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
+import {getClickNumber,
+        getNextNumber,
+        getPrevNumber,
+        productDetailPagingObject
+} from "../../../modules/pagingModule";
+import {handleLocationPathToLogin, setMemberObject} from "../../../modules/loginModule";
+import {numberComma} from "../../../modules/numberCommaModule";
+
+import ProductDetailThumbnail from "../../ui/ProductDetailThumbnail";
+import Paging from "../../ui/Paging";
 import Image from "../../ui/Image";
 import DefaultBtn from "../../ui/DefaultBtn";
-import {numberComma} from "../../../modules/numberCommaModule";
+
+import '../../css/productDetail.css';
 
 /*
     바로구매, 장바구니, 관심상품 버튼 handling -> 컴포넌트 작성 이후 테스트
@@ -55,14 +60,13 @@ function ProductDetail() {
     const [totalPrice, setTotalPrice] = useState(0);
     const [qnaInputValue, setQnAInputValue] = useState('');
 
-    const navigate = useNavigate();
     const productInfoElem = useRef(null);
     const productReviewElem = useRef(null);
     const productQnAElem = useRef(null);
     const productOrderInfoElem = useRef(null);
     const { pathname } = useLocation();
 
-
+    const navigate = useNavigate();
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -73,11 +77,9 @@ function ProductDetail() {
 
         await axiosInstance.get(`product/${productId}`)
             .then(res => {
-                const productContent = res.data;
-                const productReview = res.data.productReviewList;
-                const productQnA = res.data.productQnAList;
-
-                console.log('res : ', res);
+                const productContent = res.data.content;
+                const productReview = res.data.content.productReviewList;
+                const productQnA = res.data.content.productQnAList;
 
                 setProductData({
                     productId: productContent.productId,
@@ -102,8 +104,8 @@ function ProductDetail() {
                 setThumbnail(thumbnailArr);
                 setInfoImage(productContent.productInfoImageList);
                 setProductOption(productContent.productOptionList);
-
                 setProductReview(productReview.content);
+
                 const reviewPagingObject = productDetailPagingObject(productReview.number + 1, productReview.totalPages);
                 setReviewPagingObject({
                     startPage: reviewPagingObject.startPage,
@@ -130,9 +132,6 @@ function ProductDetail() {
                 if(member !== undefined)
                     dispatch(member);
 
-            })
-            .catch(err => {
-                console.log('productDetail axios :: err : ', err);
             })
     }
 
@@ -222,7 +221,6 @@ function ProductDetail() {
                 })
             }
 
-
             navigate('/productOrder', {state : {
                     orderProduct : orderProductArr,
                     orderType: 'direct',
@@ -240,21 +238,21 @@ function ProductDetail() {
             let addList = [];
 
             for (let i = 0; i < selectOption.length; i++) {
+                const addPrice = Number(productData.productPrice * selectOption[i].count);
+
                 addList.push({
                     optionId: selectOption[i].optionId,
                     count: selectOption[i].count,
-                    price: selectOption[i].price,
+                    price: addPrice,
                 })
             }
 
-            await axiosInstance.post(`cart/`, {addList})
+            await axiosDefault.post(`cart/`, {addList})
                 .then(res => {
-                    console.log('addCart axios success : ', res);
-
                     if (checkResponseMessageOk(res))
                         alert('장바구니에 상품을 추가했습니다.');
                 })
-                .catch(err => {
+                .catch(() => {
                     alert('오류가 발생했습니다.\n문제가 계속된다면 관리자에게 문의해주세요.');
                 })
         }
@@ -268,7 +266,7 @@ function ProductDetail() {
             const pid = productData.productId;
             const likeStatus = productData.productLikeStat;
 
-            await axiosInstance.post(`product/like`, {
+            await axiosDefault.post(`product/like`, {
                 productId : pid,
             }, {
                 headers: {'Content-Type' : 'application/json'},
@@ -280,7 +278,7 @@ function ProductDetail() {
                         productLikeStat: !likeStatus,
                     });
                 })
-                .catch(err => {
+                .catch(() => {
                     alert('오류가 발생했습니다.\n문제가 계속된다면 관리자에게 문의해주세요.');
                 })
         }
@@ -290,7 +288,7 @@ function ProductDetail() {
         const pid = productData.productId;
         const likeStatus = productData.productLikeStat;
 
-        await axiosInstance.delete(`product/like/${pid}`)
+        await axiosDefault.delete(`product/like/${pid}`)
             .then(res => {
                 if(checkResponseMessageOk(res)) {
                     setProductData({
@@ -299,7 +297,7 @@ function ProductDetail() {
                     });
                 }
             })
-            .catch(err => {
+            .catch(() => {
                 alert('오류가 발생했습니다.\n문제가 계속된다면 관리자에게 문의해주세요.');
             })
     }
@@ -318,7 +316,6 @@ function ProductDetail() {
     }
 
     const handleReviewPagingClickNumber = (e) => {
-        console.log('review click number');
         handleReviewPaging(getClickNumber(e));
     }
 
@@ -347,13 +344,9 @@ function ProductDetail() {
                     totalElements: res.data.totalElements,
                 });
             })
-            .catch(err => {
-                console.log("review get axios error : ", err);
-            })
     }
 
     const handleQnAPagingClickNumber = (e) => {
-        console.log('qna paging number click');
         handleQnAPaging(getClickNumber(e));
     }
 
@@ -366,8 +359,7 @@ function ProductDetail() {
     }
 
     const handleQnAPaging = async (clickNo) => {
-        //axios.get QnA?page=
-        console.log('qna paging clickNo : ', clickNo);
+
         await axiosInstance.get(`product/${productId}/qna/${clickNo}`)
             .then(res => {
                 setProductQnA(res.data.content);
@@ -382,9 +374,6 @@ function ProductDetail() {
                     activeNo: pageNumber,
                     totalElements: res.data.totalElements,
                 })
-            })
-            .catch(err => {
-                console.log("productQnA get axios error : ", err);
             })
     }
 
@@ -411,15 +400,8 @@ function ProductDetail() {
                         handleQnAPaging(1);
                     }
                 })
-                .catch(err => {
-                    console.error('ProductDetail QnA submit error : ', err);
-                })
         }
-
-
-
     }
-
 
     return (
         <div className="product-detail-content">
@@ -437,7 +419,6 @@ function ProductDetail() {
                             </div>
                             <div className="product-price mgt-4">
                                 <label>가격</label>
-                                {/*<span className="price">{numberComma(productData.productPrice)} 원</span>*/}
                                 <ProductPrice productData={productData}/>
                             </div>
                             <ProductDetailSelect
@@ -497,7 +478,6 @@ function ProductDetail() {
                             </div>
                         )
                     })}
-                    {/*<ProductDetailInfoImage imageInfo={infoImage} />*/}
                 </div>
                 <div className="product-detail-review" ref={productReviewElem}>
                     <div className="product-detail-review-header">

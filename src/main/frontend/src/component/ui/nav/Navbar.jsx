@@ -1,19 +1,20 @@
 import React, {useEffect, useState} from 'react';
 import {Link, useLocation, useNavigate} from "react-router-dom";
-
-import "../../css/header.css";
-import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {useDispatch, useSelector} from "react-redux";
+
+import {axiosDefault, axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {handleLocationPathToLogin} from "../../../modules/loginModule";
 
+import "../../css/header.css";
 
 function Navbar() {
+    const loginStatus = useSelector((state) => state.member.loginStatus);
+    const { pathname } = useLocation();
+
     const [keyword, setKeyword] = useState('');
 
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const { pathname } = useLocation();
 
     const handleKeywordOnchange = (e) => {
         setKeyword(e.target.value);
@@ -25,25 +26,23 @@ function Navbar() {
 
     const handleLogoutBtn = async () => {
 
-        const body = {
-            type: 'isLoggedOut',
-            loginStatus: false,
-            id: null,
-        }
-
-        dispatch(body);
-
-        await axiosInstance.post(`member/logout`)
+        await axiosDefault.post(`member/logout`)
             .then(res => {
                 if(checkResponseMessageOk(res)) {
                     window.localStorage.removeItem('Authorization');
+                    const body = {
+                        type: 'isLoggedOut',
+                        loginStatus: false,
+                        id: null,
+                    }
+
+                    dispatch(body);
                     navigate('/');
                 }else {
                     alert('오류가 발생했습니다.\n문제가 계속되면 관리자에게 문의해주세요');
                 }
             })
-            .catch(err => {
-                const err_code = err.response.status;
+            .catch(() => {
                 alert('오류가 발생했습니다.\n문제가 계속되면 관리자에게 문의해주세요');
             })
     }

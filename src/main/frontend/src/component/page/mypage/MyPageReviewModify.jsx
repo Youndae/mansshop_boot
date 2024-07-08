@@ -1,15 +1,17 @@
 import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
+
 import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
+
 import MyPageSideNav from "../../ui/nav/MyPageSideNav";
-import DefaultBtn from "../../ui/DefaultBtn";
 import MyPageReviewWriteForm from "./MyPageReviewWriteForm";
 
 function MyPageReviewModify() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
     const { reviewId } = useParams();
+
     const [inputData, setInputData] = useState('');
     const [productName, setProductName] = useState('');
 
@@ -31,9 +33,6 @@ function MyPageReviewModify() {
                 if(member !== undefined)
                     dispatch(member);
             })
-            .catch(err => {
-                console.error('getModifyReview error : ', err);
-            })
     }
 
     const handleInputOnChange = (e) => {
@@ -48,9 +47,6 @@ function MyPageReviewModify() {
             .then(res => {
                 if(checkResponseMessageOk(res))
                     navigate('/my-page/review');
-            })
-            .catch(err => {
-                console.error('reviewModify error : ', err);
             })
     }
 

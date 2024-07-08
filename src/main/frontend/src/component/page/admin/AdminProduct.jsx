@@ -3,10 +3,6 @@ import {useDispatch, useSelector} from "react-redux";
 import {Link, useNavigate, useSearchParams} from "react-router-dom";
 
 import {axiosInstance} from "../../../modules/customAxios";
-
-import AdminSideNav from "../../ui/nav/AdminSideNav";
-
-import "../../css/admin.css";
 import {setMemberObject} from "../../../modules/loginModule";
 import {
     getClickNumber,
@@ -15,11 +11,13 @@ import {
     pageSubmit,
     productDetailPagingObject, searchPageSubmit, searchSubmit
 } from "../../../modules/pagingModule";
-import Paging from "../../ui/Paging";
 import {numberComma} from "../../../modules/numberCommaModule";
+
+import AdminSideNav from "../../ui/nav/AdminSideNav";
+import Paging from "../../ui/Paging";
 import DefaultBtn from "../../ui/DefaultBtn";
 
-
+import "../../css/admin.css";
 
 /*
         상품 리스트를 출력하고
@@ -41,6 +39,7 @@ function AdminProduct() {
     const [params] = useSearchParams();
     const page = params.get('page') == null ? 1 : params.get('page');
     const keyword = params.get('keyword');
+
     const [data, setData] = useState([]);
     const [pagingData, setPagingData] = useState({
         startPage: 0,
@@ -54,10 +53,8 @@ function AdminProduct() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    console.log('adminProduct keyword : ', keyword);
-
     useEffect(() => {
-        setKeywordInput(keyword);
+        setKeywordInput(keyword == null ? '' : keyword);
         getProductList();
     }, [page, keyword]);
 
@@ -68,8 +65,6 @@ function AdminProduct() {
 
         await axiosInstance.get(url)
             .then(res => {
-                console.log('productList res : ', res);
-
                 setData(res.data.content);
 
                 const pagingObject = productDetailPagingObject(page, res.data.totalPages);
@@ -106,10 +101,6 @@ function AdminProduct() {
             pageSubmit(pageNum, navigate);
         else
             searchPageSubmit(keyword, pageNum, navigate);
-        /*if(keyword == null)
-            navigate(`/admin/product/discount?page=${pageNum}`);
-        else
-            navigate(`/admin/product/discount?keyword=${keyword}&page=${pageNum}`);*/
     }
 
     const handleKeywordOnChange = (e) => {
@@ -118,7 +109,6 @@ function AdminProduct() {
 
     const handleSearchOnClick = async () => {
         searchSubmit(keywordInput, navigate);
-        // navigate(`/admin/product?keyword=${keywordInput}`);
     }
 
     const handleAddBtnOnClick = () => {

@@ -2,18 +2,20 @@ package com.example.mansshop_boot.service;
 
 import com.example.mansshop_boot.config.customException.ErrorCode;
 import com.example.mansshop_boot.config.customException.exception.CustomAccessDeniedException;
-import com.example.mansshop_boot.domain.dto.member.UserStatusDTO;
 import com.example.mansshop_boot.domain.dto.mypage.*;
+import com.example.mansshop_boot.domain.dto.mypage.in.MyPageInfoPatchDTO;
+import com.example.mansshop_boot.domain.dto.mypage.in.MyPagePatchReviewDTO;
+import com.example.mansshop_boot.domain.dto.mypage.in.MyPagePostReviewDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.*;
-import com.example.mansshop_boot.domain.dto.mypage.qna.req.MemberQnAInsertDTO;
-import com.example.mansshop_boot.domain.dto.mypage.qna.req.MemberQnAModifyDTO;
-import com.example.mansshop_boot.domain.dto.mypage.qna.req.QnAReplyDTO;
-import com.example.mansshop_boot.domain.dto.mypage.qna.req.QnAReplyInsertDTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.in.MemberQnAInsertDTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.in.MemberQnAModifyDTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyDTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyInsertDTO;
 import com.example.mansshop_boot.domain.dto.pageable.LikePageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;
-import com.example.mansshop_boot.domain.dto.response.PagingResponseDTO;
-import com.example.mansshop_boot.domain.dto.response.ResponseDTO;
+import com.example.mansshop_boot.domain.dto.pageable.PagingMappingDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseIdDTO;
+import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
 import com.example.mansshop_boot.domain.entity.*;
 import com.example.mansshop_boot.domain.enumuration.MailSuffix;
 import com.example.mansshop_boot.domain.enumuration.Result;
@@ -61,59 +63,34 @@ public class MyPageServiceImpl implements MyPageService{
 
     private final ProductOptionRepository productOptionRepository;
 
+    /**
+     *
+     * @param pageDTO
+     * @param memberOrderDTO
+     *
+     * 주문 목록 조회.
+     * OrderPageDTO에서는 term을 같이 받는데 3, 6, 12, all 네가지로 받는다.
+     * 각 개월수를 의미.
+     * 해당 개월수에 맞는 데이터 리스트를 조회.
+     *
+     * 주문 테이블과 주문 상세 테이블은 데이터가 빠르게 쌓이기 때문에 페이징을 직접 처리.
+     */
     @Override
-    public PagingResponseDTO<MyPageOrderDTO> getOrderList(OrderPageDTO pageDTO, MemberOrderDTO memberOrderDTO) {
-
-        /*
-            data
-
-            pageable,
-            content : [
-                        {
-                            orderId
-                            orderTotalPrice
-                            orderCreatedAt
-                            orderStat
-                            detail : [
-                                        {
-                                            orderId
-                                            detailId
-                                            productName
-                                            size
-                                            color
-                                            detailCount
-                                            detailPrice
-                                            reviewStatus
-                                            thumbnail
-                                        }
-                            ]
-                        }
-            ]
-         */
-
-        /*
-            둘다 orderId 기준 역정렬 해서 가져올 것.
-         */
-
+    public PagingListDTO<MyPageOrderDTO> getOrderList(OrderPageDTO pageDTO, MemberOrderDTO memberOrderDTO) {
         Pageable pageable = PageRequest.of(pageDTO.pageNum() - 1
                                             , pageDTO.orderAmount()
                                             , Sort.by("orderId").descending());
 
         Page<ProductOrder> order = productOrderRepository.findByUserId(memberOrderDTO, pageDTO, pageable);
-        List<Long> orderIdList = new ArrayList<>();
-        order.getContent().forEach(val -> orderIdList.add(val.getId()));
-
+        List<Long> orderIdList = order.getContent().stream().map(ProductOrder::getId).toList();
         List<MyPageOrderDetailDTO> detailDTOList = productOrderDetailRepository.findByDetailList(orderIdList);
         List<MyPageOrderDTO> contentList = new ArrayList<>();
-        List<MyPageOrderDetailDTO> orderDetailList = new ArrayList<>();
+
         for(ProductOrder data : order.getContent()){
             long orderId = data.getId();
-
-            for(int i = 0; i < detailDTOList.size(); i++) {
-                if(orderId == detailDTOList.get(i).orderId())
-                    orderDetailList.add(detailDTOList.get(i));
-            }
-
+            List<MyPageOrderDetailDTO> orderDetailList = detailDTOList.stream()
+                                                        .filter(dto -> orderId == dto.orderId())
+                                                        .toList();
             contentList.add(
                     MyPageOrderDTO.builder()
                             .orderId(orderId)
@@ -123,35 +100,28 @@ public class MyPageServiceImpl implements MyPageService{
                             .detail(orderDetailList)
                             .build()
             );
-
-            orderDetailList = new ArrayList<>();
         }
 
-        String nickname = principalService.getNicknameByUserId(memberOrderDTO.userId());
+        PagingMappingDTO pagingMappingDTO = PagingMappingDTO.builder()
+                                                    .empty(order.isEmpty())
+                                                    .number(order.getNumber())
+                                                    .totalPages(order.getTotalPages())
+                                                    .totalElements(order.getTotalElements())
+                                                    .build();
 
-        return new PagingResponseDTO<>(
-                contentList
-                , order.isEmpty()
-                , order.getNumber()
-                , order.getTotalPages()
-                , nickname
-        );
+        return new PagingListDTO<>(contentList, pagingMappingDTO);
     }
 
 
-    /*
-        필요 데이터
-
-        likeId
-        productName
-        productPrice
-        thumbnail
-        stock
-        productId
-        createdAt
+    /**
+     *
+     * @param pageDTO
+     * @param principal
+     *
+     * 관심목록 조회
      */
     @Override
-    public PagingResponseDTO<ProductLikeDTO> getLikeList(LikePageDTO pageDTO, Principal principal) {
+    public Page<ProductLikeDTO> getLikeList(LikePageDTO pageDTO, Principal principal) {
         String userId = null;
 
         try{
@@ -159,7 +129,6 @@ public class MyPageServiceImpl implements MyPageService{
         }catch (Exception e) {
             log.info("MyPageService.getLikeList :: principal Error");
             e.printStackTrace();
-
             throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
         }
 
@@ -167,27 +136,19 @@ public class MyPageServiceImpl implements MyPageService{
                                             , pageDTO.likeAmount()
                                             , Sort.by("createdAt").descending());
 
-        Page<ProductLikeDTO> dto = productLikeRepository.findByUserId(pageDTO, userId, pageable);
-
-        String nickname = principalService.getNicknameByPrincipal(principal);
-
-        return new PagingResponseDTO<>(dto, nickname);
+        return productLikeRepository.findByUserId(pageDTO, userId, pageable);
     }
 
-    /*
-        content : [
-            {
-                productQnAId
-                productName
-                productQnAStat
-                createdAt
-            },
-            { }...
-        ],
-        totalPages
+    /**
+     *
+     * @param pageDTO
+     * @param principal
+     *
+     * 작성한 상품 문의 목록 조회
+     *
      */
     @Override
-    public PagingResponseDTO<ProductQnAListDTO> getProductQnAList(MyPagePageDTO pageDTO, Principal principal) {
+    public Page<ProductQnAListDTO> getProductQnAList(MyPagePageDTO pageDTO, Principal principal) {
 
         String userId = principalService.getUserIdByPrincipal(principal);
 
@@ -195,81 +156,51 @@ public class MyPageServiceImpl implements MyPageService{
                                             , pageDTO.amount()
                                             , Sort.by("id").descending());
 
-        Page<ProductQnAListDTO> dto = productQnARepository.findByUserId(userId, pageable);
-
-        String nickname = principalService.getNicknameByPrincipal(principal);
-
-        return new PagingResponseDTO<>(dto, nickname);
+        return productQnARepository.findByUserId(userId, pageable);
     }
 
-    /*
-        productQnAId
-        , productName
-        , writer
-        , qnaContent
-        , createdAt
-        , productQnAStat
-        , reply : [
-                    {
-                        writer
-                        , replyContent
-                        , updatedAt
-                    }
-                ]
+    /**
+     *
+     * @param productQnAId
+     * @param principal
+     *
+     * 상품 목록 상세 정보 조회.
+     * 작성자와 요청자가 다른 경우 AccessDeniedException을 반환
      */
     @Override
     public ProductQnADetailDTO getProductQnADetail(long productQnAId, Principal principal){
-        String userId = principalService.getUserIdByPrincipal(principal);
-        String nickname = principalService.getNicknameByPrincipal(principal);
+        String uid = principalService.getNicknameByPrincipal(principal);
 
-        ProductQnA productQnA = productQnARepository.findById(productQnAId).orElseThrow(IllegalArgumentException::new);
+        ProductQnADetailDTO dto = getProductQnADetailData(productQnAId);
 
-        if(!productQnA.getMember().getUserId().equals(userId))
+        if(!dto.writer().equals(uid))
             throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
 
-        String writer = productQnA.getMember().getNickname() == null ?
-                                productQnA.getMember().getUserName() : productQnA.getMember().getNickname();
-
-        MyPageProductQnADTO qnaDTO = new MyPageProductQnADTO(productQnA, writer);
-
-        List<MyPageQnAReplyDTO> replyDTOList = productQnAReplyRepository.findAllByQnAId(productQnAId);
-
-        return new ProductQnADetailDTO(qnaDTO, replyDTOList, nickname);
+        return dto;
     }
 
+    /**
+     *
+     * @param qnaId
+     *
+     * 상품 문의와 답변 조회.
+     * Admin에서도 해당 메소드를 호출.
+     */
     @Override
-    public String postProductQnAReply(QnAReplyInsertDTO insertDTO, Principal principal) {
+    public ProductQnADetailDTO getProductQnADetailData(long qnaId) {
+        MyPageProductQnADTO qnaDTO = productQnARepository.findByQnAId(qnaId);
+        List<MyPageQnAReplyDTO> replyDTOList = productQnAReplyRepository.findAllByQnAId(qnaId);
 
-        Member member = memberRepository.findById(principal.getName()).orElseThrow(IllegalArgumentException::new);
-        ProductQnA productQnA = productQnARepository.findById(insertDTO.qnaId()).orElseThrow(IllegalArgumentException::new);
-
-        ProductQnAReply productQnAReply = ProductQnAReply.builder()
-                .member(member)
-                .productQnA(productQnA)
-                .replyContent(insertDTO.content())
-                .build();
-
-        productQnAReplyRepository.save(productQnAReply);
-
-        return Result.OK.getResultKey();
+        return new ProductQnADetailDTO(qnaDTO, replyDTOList);
     }
 
-    @Override
-    public String patchProductQnAReply(QnAReplyDTO replyDTO, Principal principal) {
-
-        ProductQnAReply qnaReplyEntity = productQnAReplyRepository.findById(replyDTO.replyId()).orElseThrow(IllegalArgumentException::new);
-        String userId = principalService.getUserIdByPrincipal(principal);
-
-        if(!qnaReplyEntity.getMember().getUserId().equals(userId))
-            throw new IllegalArgumentException();
-
-        qnaReplyEntity.setReplyContent(replyDTO.content());
-
-        productQnAReplyRepository.save(qnaReplyEntity);
-
-        return Result.OK.getResultKey();
-    }
-
+    /**
+     *
+     * @param qnaId
+     * @param principal
+     *
+     * 상품 문의 삭제 처리
+     */
     @Override
     public String deleteProductQnA(long qnaId, Principal principal) {
 
@@ -285,15 +216,15 @@ public class MyPageServiceImpl implements MyPageService{
         return Result.OK.getResultKey();
     }
 
-    /*
-        memberQnAId
-        , writer
-        , memberQnAStat
-        , qnaClassificationName
-        , updatedAt
+    /**
+     *
+     * @param pageDTO
+     * @param principal
+     *
+     * 회원 문의 목록 조회
      */
     @Override
-    public PagingResponseDTO<MemberQnAListDTO> getMemberQnAList(MyPagePageDTO pageDTO, Principal principal) {
+    public Page<MemberQnAListDTO> getMemberQnAList(MyPagePageDTO pageDTO, Principal principal) {
 
         String userId = principalService.getUserIdByPrincipal(principal);
 
@@ -301,15 +232,18 @@ public class MyPageServiceImpl implements MyPageService{
                                             , pageDTO.amount()
                                             , Sort.by("id").descending());
 
-        Page<MemberQnAListDTO> dto = memberQnARepository.findAllByUserId(userId, pageable);
-
-        String nickname = principalService.getNicknameByPrincipal(principal);
-
-        return new PagingResponseDTO<>(dto, nickname);
+        return memberQnARepository.findAllByUserId(userId, pageable);
     }
 
+    /**
+     *
+     * @param insertDTO
+     * @param principal
+     *
+     * 회원 문의 작성
+     */
     @Override
-    public ResponseIdDTO postMemberQnA(MemberQnAInsertDTO insertDTO, Principal principal) {
+    public Long postMemberQnA(MemberQnAInsertDTO insertDTO, Principal principal) {
 
         Member member = memberRepository.findById(principal.getName()).orElseThrow(IllegalArgumentException::new);
         QnAClassification qnAClassification = qnAClassificationRepository.findById(insertDTO.classificationId()).orElseThrow(IllegalArgumentException::new);
@@ -321,49 +255,52 @@ public class MyPageServiceImpl implements MyPageService{
                 .memberQnAContent(insertDTO.content())
                 .build();
 
-        long id = memberQnARepository.save(memberQnA).getId();
-
-        return new ResponseIdDTO(id);
+        return memberQnARepository.save(memberQnA).getId();
     }
 
-    /*
-        memberQnAId
-        , qnaClassificationName
-        , writer
-        , qnaContent
-        , updatedAt
-        , memberQnAStat
-        , reply : [
-                    {
-                        writer
-                        , replyContent
-                        , updatedAt
-                    }
-                ]
+    /**
+     *
+     * @param memberQnAId
+     * @param principal
+     *
+     * 회원문의 상세 데이터 조회
+     * 작성자와 요청자가 일치하지 않으면 AccessDeniedException 응답
      */
     @Override
     public MemberQnADetailDTO getMemberQnADetail(long memberQnAId, Principal principal) {
-
-        String userId = principalService.getUserIdByPrincipal(principal);
-        String nickname = principalService.getNicknameByPrincipal(principal);
-
-        MemberQnA memberQnA = memberQnARepository.findById(memberQnAId).orElseThrow(IllegalArgumentException::new);
-
-        if(!memberQnA.getMember().getUserId().equals(userId))
+        String uid = principalService.getNicknameByPrincipal(principal);
+        MemberQnADetailDTO dto = getMemberQnADetailData(memberQnAId);
+        if(!dto.writer().equals(uid))
             throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
 
-        String writer = memberQnA.getMember().getNickname() == null ?
-                memberQnA.getMember().getUserName() : memberQnA.getMember().getNickname();
-
-        MemberQnADTO qnaDTO = new MemberQnADTO(memberQnA, writer);
-
-        List<MyPageQnAReplyDTO> replyDTOList = memberQnAReplyRepository.findAllByQnAId(memberQnAId);
-
-
-
-        return new MemberQnADetailDTO(qnaDTO, replyDTOList, nickname);
+        return dto;
     }
 
+    /**
+     *
+     * @param qnaId
+     *
+     * 회원문의 상세 데이터와 답변 리스트 반환
+     * 상품문의와 마찬가지로 Admin에서도 이 메소드 호출.
+     */
+    @Override
+    public MemberQnADetailDTO getMemberQnADetailData(long qnaId) {
+        MemberQnADTO qnaDTO = memberQnARepository.findByQnAId(qnaId);
+
+        List<MyPageQnAReplyDTO> replyDTOList = memberQnAReplyRepository.findAllByQnAId(qnaId);
+
+        return new MemberQnADetailDTO(qnaDTO, replyDTOList);
+    }
+
+    /**
+     *
+     * @param insertDTO
+     * @param principal
+     *
+     * 회원 문의 답변 작성.
+     * 관리자가 답변을 달아서 답변 완료 처리가 되었더라도 사용자가 재 답변을 작성하는 경우
+     * 미답변으로 수정한다.
+     */
     @Override
     public String postMemberQnAReply(QnAReplyInsertDTO insertDTO, Principal principal) {
 
@@ -384,6 +321,13 @@ public class MyPageServiceImpl implements MyPageService{
         return Result.OK.getResultKey();
     }
 
+    /**
+     *
+     * @param replyDTO
+     * @param principal
+     *
+     * 회원 문의 답변 수정
+     */
     @Override
     public String patchMemberQnAReply(QnAReplyDTO replyDTO, Principal principal) {
 
@@ -391,7 +335,7 @@ public class MyPageServiceImpl implements MyPageService{
         String userId = principalService.getUserIdByPrincipal(principal);
 
         if(!memberQnAReplyEntity.getMember().getUserId().equals(userId))
-            throw new IllegalArgumentException();
+            throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
 
         memberQnAReplyEntity.setReplyContent(replyDTO.content());
 
@@ -400,85 +344,104 @@ public class MyPageServiceImpl implements MyPageService{
         return Result.OK.getResultKey();
     }
 
+    /**
+     *
+     * @param qnaId
+     * @param principal
+     *
+     * 회원 문의 수정을 위한 상세 데이터 조회
+     *
+     */
     @Override
-    public ResponseDTO<MemberQnAModifyDataDTO> getModifyData(long qnaId, Principal principal) {
+    public MemberQnAModifyDataDTO getModifyData(long qnaId, Principal principal) {
 
         String userId = principalService.getUserIdByPrincipal(principal);
 
         MemberQnA memberQnA = memberQnARepository.findModifyDataByIdAndUserId(qnaId, userId);
         List<QnAClassification> qnaClassification = qnAClassificationRepository.findAll();
-        List<QnAClassificationDTO> classificationDTO = new ArrayList<>();
-        qnaClassification.forEach(v ->
-                classificationDTO.add(
-                        QnAClassificationDTO.builder()
-                                .id(v.getId())
-                                .name(v.getQnaClassificationName())
-                                .build()
-                )
-        );
+        List<QnAClassificationDTO> classificationDTO = qnaClassification.stream()
+                                                            .map(entity -> QnAClassificationDTO.builder()
+                                                                    .id(entity.getId())
+                                                                    .name(entity.getQnaClassificationName())
+                                                                    .build())
+                                                            .toList();
 
-        MemberQnAModifyDataDTO modifyDataDTO = new MemberQnAModifyDataDTO(memberQnA, classificationDTO);
-        String nickname = principalService.getNicknameByPrincipal(principal);
-
-        return new ResponseDTO<>(modifyDataDTO, new UserStatusDTO(nickname));
+        return new MemberQnAModifyDataDTO(memberQnA, classificationDTO);
     }
 
+    /**
+     *
+     * @param modifyDTO
+     * @param principal
+     *
+     * 회원 문의 수정.
+     * 수정 처리 이전 해당 문의를 조회. 작성자와 요청자가 다르면 AccessDeniedException 응답
+     *
+     */
     @Override
     public String patchMemberQnA(MemberQnAModifyDTO modifyDTO, Principal principal) {
-
         MemberQnA memberQnA = memberQnARepository.findById(modifyDTO.qnaId()).orElseThrow(IllegalArgumentException::new);
         String userId = principalService.getUserIdByPrincipal(principal);
 
         if(!memberQnA.getMember().getUserId().equals(userId))
-            throw new IllegalArgumentException();
+            throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
 
         QnAClassification qnAClassification = qnAClassificationRepository.findById(modifyDTO.classificationId()).orElseThrow(IllegalArgumentException::new);
-
         memberQnA.setModifyData(modifyDTO, qnAClassification);
-
         memberQnARepository.save(memberQnA);
 
         return Result.OK.getResultKey();
     }
 
+    /**
+     *
+     * @param qnaId
+     * @param principal
+     *
+     * 회원 문의 삭제 처리.
+     * 작성자와 요청자가 일치해야 삭제 처리.
+     */
     @Override
     public String deleteMemberQnA(long qnaId, Principal principal) {
         String userId = principalService.getUserIdByPrincipal(principal);
-
         MemberQnA memberQnA = memberQnARepository.findById(qnaId).orElseThrow(IllegalArgumentException::new);
 
         if(!memberQnA.getMember().getUserId().equals(userId))
-            throw new IllegalArgumentException();
+            throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
 
         memberQnARepository.deleteById(qnaId);
 
         return Result.OK.getResultKey();
     }
 
+    /**
+     *
+     * @param principal
+     *
+     * 회원 문의 분류 목록 조회
+     */
     @Override
-    public QnAClassificationResponseDTO getQnAClassification(Principal principal) {
+    public List<QnAClassificationDTO> getQnAClassification(Principal principal) {
 
         List<QnAClassification> classificationList = qnAClassificationRepository.findAll();
-        List<QnAClassificationDTO> dtoList = new ArrayList<>();
-        classificationList.forEach(v ->
-                dtoList.add(
-                        QnAClassificationDTO.builder()
-                                .id(v.getId())
-                                .name(v.getQnaClassificationName())
-                                .build()
-                )
-        );
 
-        return QnAClassificationResponseDTO.builder()
-                .classificationList(dtoList)
-                .userStatus(
-                        new UserStatusDTO(principalService.getNicknameByPrincipal(principal))
-                )
-                .build();
+        return classificationList.stream()
+                                .map(entity -> QnAClassificationDTO.builder()
+                                            .id(entity.getId())
+                                            .name(entity.getQnaClassificationName())
+                                            .build()
+                                ).toList();
     }
 
+    /**
+     *
+     * @param pageDTO
+     * @param principal
+     *
+     * 작성한 리뷰 목록 조회
+     */
     @Override
-    public PagingResponseDTO<MyPageReviewDTO> getReview(MyPagePageDTO pageDTO, Principal principal) {
+    public Page<MyPageReviewDTO> getReview(MyPagePageDTO pageDTO, Principal principal) {
 
         Pageable pageable = PageRequest.of(pageDTO.pageNum() - 1
                                             , pageDTO.amount()
@@ -486,41 +449,44 @@ public class MyPageServiceImpl implements MyPageService{
 
         String userId = principalService.getUserIdByPrincipal(principal);
 
-        Page<MyPageReviewDTO> dto = productReviewRepository.findAllByUserId(userId, pageable);
-
-        String nickname = principalService.getNicknameByPrincipal(principal);
-
-        return new PagingResponseDTO<>(dto, nickname);
+        return productReviewRepository.findAllByUserId(userId, pageable);
     }
 
+    /**
+     *
+     * @param reviewId
+     * @param principal
+     *
+     * 리뷰 수정을 위한 리뷰 상세 데이터 조회.
+     * 작성자와 요청자가 일치하지 않으면 AccessDeniedException 응답
+     */
     @Override
-    public ResponseDTO<MyPagePatchReviewDataDTO> getPatchReview(long reviewId, Principal principal) {
-
+    public MyPagePatchReviewDataDTO getPatchReview(long reviewId, Principal principal) {
         String userId = principalService.getUserIdByPrincipal(principal);
-
         ProductReview productReview = productReviewRepository.findById(reviewId).orElseThrow(IllegalArgumentException::new);
 
         if(!productReview.getMember().getUserId().equals(userId))
             throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
 
-        MyPagePatchReviewDataDTO dto = MyPagePatchReviewDataDTO.builder()
-                                            .reviewId(productReview.getId())
-                                            .content(productReview.getReviewContent())
-                                            .productName(productReview.getProduct().getProductName())
-                                            .build();
-
-        String nickname = principalService.getNicknameByPrincipal(principal);
-
-        return new ResponseDTO<>(dto, new UserStatusDTO(nickname));
+        return MyPagePatchReviewDataDTO.builder()
+                                        .reviewId(productReview.getId())
+                                        .content(productReview.getReviewContent())
+                                        .productName(productReview.getProduct().getProductName())
+                                        .build();
     }
 
+    /**
+     *
+     * @param reviewDTO
+     * @param principal
+     *
+     * 리뷰 작성 처리.
+     */
     @Override
     public String postReview(MyPagePostReviewDTO reviewDTO, Principal principal) {
-
         Member member = memberRepository.findById(principal.getName()).orElseThrow(IllegalArgumentException::new);
         Product product = productRepository.findById(reviewDTO.productId()).orElseThrow(IllegalArgumentException::new);
         ProductOption productOption = productOptionRepository.findById(reviewDTO.optionId()).orElseThrow(IllegalArgumentException::new);
-
         ProductReview productReview = ProductReview.builder()
                 .member(member)
                 .product(product)
@@ -529,39 +495,46 @@ public class MyPageServiceImpl implements MyPageService{
                 .build();
 
         productReviewRepository.save(productReview);
-
         ProductOrderDetail productOrderDetail = productOrderDetailRepository.findById(reviewDTO.detailId()).orElseThrow(IllegalArgumentException::new);
-
-        productOrderDetail.setOrderReviewStatus(false);
+        productOrderDetail.setOrderReviewStatus(true);
         productOrderDetailRepository.save(productOrderDetail);
-
 
         return Result.OK.getResultKey();
     }
 
+    /**
+     *
+     * @param reviewDTO
+     * @param principal
+     *
+     * 리뷰 수정 처리.
+     * 작성자와 요청자가 일치하지 않으면 AccessDeniedException 응답
+     */
     @Override
     public String patchReview(MyPagePatchReviewDTO reviewDTO, Principal principal) {
-
         ProductReview productReview = productReviewRepository.findById(reviewDTO.reviewId()).orElseThrow(IllegalArgumentException::new);
-
         String userId = principalService.getUserIdByPrincipal(principal);
 
         if(!productReview.getMember().getUserId().equals(userId))
             throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
 
         productReview.setReviewContent(reviewDTO.content());
-
         productReviewRepository.save(productReview);
-
 
         return Result.OK.getResultKey();
     }
 
+    /**
+     *
+     * @param reviewId
+     * @param principal
+     *
+     * 리뷰 삭제 처리.
+     * 작성자와 요청자가 일치하지 않으면 AccessDeniedException 응답
+     */
     @Override
     public String deleteReview(long reviewId, Principal principal) {
-
         ProductReview productReview = productReviewRepository.findById(reviewId).orElseThrow(IllegalArgumentException::new);
-
         String userId = principalService.getUserIdByPrincipal(principal);
 
         if(!productReview.getMember().getUserId().equals(userId))
@@ -576,38 +549,42 @@ public class MyPageServiceImpl implements MyPageService{
         suffix를 enum 타입과 비교해서 처리하는 방법으로 구분하고 해당하는 값을 type으로 반환.
         직접 입력의 경우 어떻게 처리할 지 고민 필요.
      */
+
+    /**
+     *
+     * @param principal
+     *
+     * 정보 수정을 위한 사용자 정보 조회.
+     */
     @Override
-    public ResponseDTO<MyPageInfoDTO> getInfo(Principal principal) {
-
+    public MyPageInfoDTO getInfo(Principal principal) {
         Member member = memberRepository.findById(principal.getName()).orElseThrow(IllegalArgumentException::new);
-
         String[] splitMail = member.getUserEmail().split("@");
-
         String mailSuffix = splitMail[1].substring(0, splitMail[1].indexOf('.'));
         String type = MailSuffix.findSuffixType(mailSuffix);
 
-        MyPageInfoDTO infoDTO = MyPageInfoDTO.builder()
-                .nickname(member.getNickname())
-                .phone(member.getPhone().replaceAll("-", ""))
-                .mailPrefix(splitMail[0])
-                .mailSuffix(splitMail[1])
-                .mailType(type)
-                .build();
-
-        return new ResponseDTO<>(infoDTO, new UserStatusDTO(member.getNickname()));
+        return MyPageInfoDTO.builder()
+                            .nickname(member.getNickname())
+                            .phone(member.getPhone().replaceAll("-", ""))
+                            .mailPrefix(splitMail[0])
+                            .mailSuffix(splitMail[1])
+                            .mailType(type)
+                            .build();
     }
 
+    /**
+     *
+     * @param infoDTO
+     * @param principal
+     *
+     * 사용자 정보 수정 처리
+     */
     @Override
     public String patchInfo(MyPageInfoPatchDTO infoDTO, Principal principal) {
-
         Member member = memberRepository.findById(principal.getName()).orElseThrow(IllegalArgumentException::new);
 
-        System.out.println("MyPageService.patchInfo :: infoDTO : " + infoDTO);
-
         member.patchUser(infoDTO);
-
         memberRepository.save(member);
-
 
         return Result.OK.getResultKey();
     }

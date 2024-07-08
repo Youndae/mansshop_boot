@@ -23,10 +23,8 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        log.info("OAuth2 successHandler");
         CustomOAuth2User customOAuth2User = (CustomOAuth2User) authentication.getPrincipal();
         String userId = customOAuth2User.getUserId();
-        String nickname = customOAuth2User.getNickname();
         jwtTokenProvider.createTemporaryToken(userId, response);
 
         /*

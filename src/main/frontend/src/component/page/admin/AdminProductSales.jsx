@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
-import AdminSideNav from "../../ui/nav/AdminSideNav";
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useSearchParams} from "react-router-dom";
+
 import {axiosInstance} from "../../../modules/customAxios";
 import {
     getClickNumber,
@@ -11,8 +11,11 @@ import {
     productDetailPagingObject, searchPageSubmit, searchSubmit
 } from "../../../modules/pagingModule";
 import {setMemberObject} from "../../../modules/loginModule";
-import Paging from "../../ui/Paging";
 import {numberComma} from "../../../modules/numberCommaModule";
+
+import AdminSideNav from "../../ui/nav/AdminSideNav";
+import Paging from "../../ui/Paging";
+
 
 /*
         상품별 매출.
@@ -34,6 +37,7 @@ function AdminProductSales() {
     const [params] = useSearchParams();
     const page = params.get('page') == null ? 1 : params.get('page');
     const keyword = params.get('keyword');
+
     const [data, setData] = useState([]);
     const [pagingData, setPagingData] = useState({
         startPage: 0,
@@ -61,7 +65,6 @@ function AdminProductSales() {
 
         await axiosInstance.get(url)
             .then(res => {
-                console.log('productSales res : ', res);
                 setData(res.data.content);
 
                 const pagingObject = productDetailPagingObject(page, res.data.totalPages);
@@ -98,10 +101,6 @@ function AdminProductSales() {
             pageSubmit(pageNum, navigate);
         else
             searchPageSubmit(keyword, pageNum, navigate);
-        /*if(keyword == null)
-            navigate(`/admin/product/discount?page=${pageNum}`);
-        else
-            navigate(`/admin/product/discount?keyword=${keyword}&page=${pageNum}`);*/
     }
 
     const handleKeywordOnChange = (e) => {
@@ -110,7 +109,6 @@ function AdminProductSales() {
 
     const handleSearchOnClick = async () => {
         searchSubmit(keywordInput, navigate);
-        // navigate(`/admin/product?keyword=${keywordInput}`);
     }
 
     const handleProductOnClick = (productId) => {

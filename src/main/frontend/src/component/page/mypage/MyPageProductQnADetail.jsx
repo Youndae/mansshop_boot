@@ -1,14 +1,17 @@
 import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
+
 import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
+
 import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import QnADetail from "./QnADetail";
 
 function MyPageProductQnADetail() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
     const { qnaId } = useParams();
+
     const [data, setData] = useState({
         productQnAId: ''
         , title: ''
@@ -61,9 +64,6 @@ function MyPageProductQnADetail() {
                 if(member !== undefined)
                     dispatch(member);
             })
-            .catch(err => {
-                console.error('productQnA error : ', err);
-            })
     }
 
     const handleReplyModifyOpen = (e) => {
@@ -109,9 +109,6 @@ function MyPageProductQnADetail() {
                 if(checkResponseMessageOk(res))
                     getProductQnADetail();
             })
-            .catch(err => {
-                console.error('modifyReply Error : ', err);
-            })
     }
 
     const handleInputOnChange = (e) => {
@@ -127,9 +124,6 @@ function MyPageProductQnADetail() {
                 if(checkResponseMessageOk(res))
                     getProductQnADetail();
             })
-            .catch(err => {
-                console.error('productQnADetail input submit error : ', err);
-            })
     }
 
     const handleDeleteBtn = async () => {
@@ -138,9 +132,6 @@ function MyPageProductQnADetail() {
             .then(res => {
                 if(checkResponseMessageOk(res))
                     navigate('/my-page/qna/product')
-            })
-            .catch(err => {
-                console.error('productQnA delete error : ', err);
             })
     }
 

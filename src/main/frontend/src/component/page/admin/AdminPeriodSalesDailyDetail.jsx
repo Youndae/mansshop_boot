@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useParams, useSearchParams} from "react-router-dom";
-import AdminSideNav from "../../ui/nav/AdminSideNav";
+
 import {axiosInstance} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
 import {
@@ -12,6 +12,8 @@ import {
     productDetailPagingObject
 } from "../../../modules/pagingModule";
 import {numberComma} from "../../../modules/numberCommaModule";
+
+import AdminSideNav from "../../ui/nav/AdminSideNav";
 import Paging from "../../ui/Paging";
 
 /*
@@ -24,6 +26,7 @@ function AdminPeriodSalesDailyDetail() {
     const { selectDate } = useParams();
     const [params] = useSearchParams();
     const page = params.get('page') == null ? 1 : params.get('page');
+
     const [pagingData, setPagingData] = useState({
         startPage: 0,
         endPage: 0,
@@ -45,7 +48,6 @@ function AdminPeriodSalesDailyDetail() {
 
         await axiosInstance.get(`admin/sales/period/order-list?term=${selectDate}&page=${page}`)
             .then(res => {
-
                 setData(res.data.content);
 
                 const pagingObject = productDetailPagingObject(page, res.data.totalPages);
@@ -68,22 +70,15 @@ function AdminPeriodSalesDailyDetail() {
 
     const handlePageBtn = (e) => {
         pageSubmit(getClickNumber(e), navigate);
-        // handlePagingSubmit(getClickNumber(e));
     }
 
     const handlePagePrev = () => {
         pageSubmit(getPrevNumber(pagingData), navigate);
-        // handlePagingSubmit(getPrevNumber(pagingData));
     }
 
     const handlePageNext = () => {
         pageSubmit(getNextNumber(pagingData));
-        // handlePagingSubmit(getNextNumber(pagingData));
     }
-
-    /*const handlePagingSubmit = (pageNum) => {
-        navigate(`admin/sales/period/detail/daily/${selectDate}?page=${pageNum}`);
-    }*/
 
     return (
         <div className="mypage">

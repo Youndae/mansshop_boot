@@ -1,11 +1,12 @@
 import React, {useState, useEffect} from 'react';
-import AdminSideNav from "../../ui/nav/AdminSideNav";
 import {useDispatch, useSelector} from "react-redux";
+import {useNavigate} from "react-router-dom";
+
 import {axiosInstance} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
 import {numberComma} from "../../../modules/numberCommaModule";
-import {useNavigate} from "react-router-dom";
 
+import AdminSideNav from "../../ui/nav/AdminSideNav";
 
 /*
     기간별 매출.
@@ -21,6 +22,7 @@ import {useNavigate} from "react-router-dom";
  */
 function AdminPeriodSales() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
+
     const [yearSalesData, setYearSalesData] = useState({
         sales: 0,
         salesQuantity: 0,
@@ -50,7 +52,6 @@ function AdminPeriodSales() {
 
         await axiosInstance.get(`admin/sales/period/${year}`)
             .then(res => {
-
                 const content = res.data.content;
                 setYearSalesData({
                     sales: content.sales,
@@ -59,7 +60,6 @@ function AdminPeriodSales() {
                 });
 
                 setData(content.content);
-
 
                 const member = setMemberObject(res, loginStatus);
 
@@ -80,7 +80,6 @@ function AdminPeriodSales() {
 
         navigate(`/admin/sales/period/${yearMonth}`);
     }
-
 
     return (
         <div className="mypage">

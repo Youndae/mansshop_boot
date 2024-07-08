@@ -1,13 +1,16 @@
 import React, {useEffect, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
+
 import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
+
 import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import MemberQnAWriteForm from "../../ui/MemberQnAWriteForm";
 
 function MemberQnAModify() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
+
     const [inputData, setInputData] = useState({
         title: '',
         content: '',
@@ -26,7 +29,6 @@ function MemberQnAModify() {
     const getPatchData = async () => {
         await axiosInstance.get(`my-page/qna/member/modify/${qnaId}`)
             .then(res => {
-                console.log('memberqna modify res : ', res);
                 setInputData({
                     title: res.data.content.qnaTitle,
                     content: res.data.content.qnaContent
@@ -40,9 +42,6 @@ function MemberQnAModify() {
                 if(member !== undefined)
                     dispatch(member);
             })
-            .catch(err => {
-                console.error('memberQnA getPatch Error : ', err);
-            })
     }
 
     const handleSubmit = async () => {
@@ -54,13 +53,8 @@ function MemberQnAModify() {
             classificationId: classificationId,
         })
             .then(res => {
-                console.log('member qna patch res : ', res);
-
                 if(checkResponseMessageOk(res))
                     navigate(`/my-page/qna/member/detail/${qnaId}`);
-            })
-            .catch(err => {
-                console.error('member qna post Error : ', err);
             })
     }
 

@@ -1,7 +1,9 @@
 import React, {useEffect, useRef, useState} from 'react';
-import DefaultBtn from "../../ui/DefaultBtn";
-import {axiosDefault, axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {useNavigate} from "react-router-dom";
+
+import {axiosDefault, axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
+
+import DefaultBtn from "../../ui/DefaultBtn";
 
 function SearchPw() {
     const [data, setData] = useState({
@@ -76,8 +78,7 @@ function SearchPw() {
             }else {
                 await axiosInstance.get(`member/search-pw?id=${data.userId}&name=${data.username}&email=${email}`)
                     .then(res => {
-                        console.log('res : ', res);
-                        if(res.data.message === 'OK'){
+                        if(checkResponseMessageOk(res)){
                             //인증번호 입력 페이지로 전환
                             setCertificationStatus(true);
                             setOverlapStatus('');
@@ -126,7 +127,6 @@ function SearchPw() {
 
     const handleTimerReset = () => {
         setTimer(300);
-
     }
 
     const handleSearchId = () => {

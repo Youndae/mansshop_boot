@@ -22,19 +22,6 @@ function DefaultBtn(props) {
             {btnText}
         </Button>
     )
-
-    /*return (
-        <button
-            id={id}
-            name={name}
-            type={'button'}
-            className={className}
-            onClick={onClick}
-            value={value}
-        >
-            {btnText}
-        </button>
-    )*/
 }
 
 export default DefaultBtn;

@@ -1,7 +1,7 @@
 import React, {useRef, useState} from 'react';
 import {useNavigate} from "react-router-dom";
-import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 
+import {axiosDefault, axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 
 import Overlap from "../../ui/Overlap";
 import DefaultBtn from "../../ui/DefaultBtn";
@@ -16,7 +16,6 @@ function Join() {
         phone: '',
         email: '',
     });
-
     const [idCheck, setIdCheck] = useState('');
     const [pwCheck, setPwCheck] = useState('');
     const [verifyPw, setVerifyPw] = useState('');
@@ -32,8 +31,6 @@ function Join() {
         day: 1,
     });
     const [lastDay, setLastDay] = useState(31);
-
-
     const [checkInfo, setCheckInfo] = useState({
         idCheckInfo: false,
         pwCheckInfo: false,
@@ -155,7 +152,7 @@ function Join() {
         }else {
             const userBirth = birth.year + '/' + birth.month + '/' + birth.day;
 
-            await axiosInstance.post(`member/join`, {
+            await axiosDefault.post(`member/join`, {
                 userId: userData.userId,
                 userPw: userData.userPw,
                 userName: userData.userName,
@@ -169,8 +166,7 @@ function Join() {
                         navigate('/login');
                     }
                 })
-                .catch(err => {
-                    console.error('join error ', err);
+                .catch(() => {
                     alert('오류가 발생했습니다.\n문제가 계속된다면 관리자에게 문의해주세요');
                 })
 

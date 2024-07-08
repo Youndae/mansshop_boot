@@ -1,12 +1,15 @@
 import React, {useEffect, useState} from 'react';
 import {useLocation, useNavigate} from "react-router-dom";
+
 import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
+
 import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import MyPageReviewWriteForm from "./MyPageReviewWriteForm";
 
 function MyPageReviewWrite() {
     const location = useLocation();
     const state = location.state;
+
     const [productName, setProductName] = useState('');
     const [inputData, setInputData] = useState('');
 
@@ -30,9 +33,6 @@ function MyPageReviewWrite() {
             .then(res => {
                 if(checkResponseMessageOk(res))
                     navigate('/my-page/review');
-            })
-            .catch(err => {
-                console.error('review post error : ', err);
             })
     }
 

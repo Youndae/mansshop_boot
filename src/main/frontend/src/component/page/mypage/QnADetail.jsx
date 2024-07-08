@@ -1,7 +1,8 @@
 import React from "react";
 import {useNavigate} from "react-router-dom";
-import DefaultBtn from "../../ui/DefaultBtn";
 import {useSelector} from "react-redux";
+
+import DefaultBtn from "../../ui/DefaultBtn";
 
 function QnADetail(props) {
     const { data
@@ -22,14 +23,12 @@ function QnADetail(props) {
     } = props;
 
     const replyInputStatus = replyStatus === undefined;
-
     const nickname = useSelector((state) => state.member.id);
 
     const navigate = useNavigate();
 
     const handleModifyBtn = () => {
         const qnaId = data.memberQnAId;
-
         navigate(`/my-page/qna/member/update/${qnaId}`);
     }
 

@@ -13,7 +13,7 @@ import java.util.List;
 
 public interface CartService {
 
-    ResponseListDTO<CartDetailDTO> getCartList(CartMemberDTO cartMemberDTO);
+    List<CartDetailDTO> getCartList(CartMemberDTO cartMemberDTO);
 
     String addCart(List<AddCartDTO> addList, CartMemberDTO cartMemberDTO, HttpServletResponse response, Principal principal);
 

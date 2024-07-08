@@ -1,6 +1,10 @@
 package com.example.mansshop_boot.service;
 
 import com.example.mansshop_boot.domain.dto.member.*;
+import com.example.mansshop_boot.domain.dto.member.in.JoinDTO;
+import com.example.mansshop_boot.domain.dto.member.in.LoginDTO;
+import com.example.mansshop_boot.domain.dto.member.in.UserCertificationDTO;
+import com.example.mansshop_boot.domain.dto.member.in.UserResetPwDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseUserStatusDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

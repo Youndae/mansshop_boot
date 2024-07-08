@@ -1,27 +1,20 @@
 package com.example.mansshop_boot.service;
 
 import com.example.mansshop_boot.domain.dto.admin.*;
-import com.example.mansshop_boot.domain.dto.member.UserStatusDTO;
+import com.example.mansshop_boot.domain.dto.cart.CartDetailDTO;
+import com.example.mansshop_boot.domain.dto.cart.CartMemberDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
-import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
-import com.example.mansshop_boot.domain.dto.response.PagingElementsResponseDTO;
-import com.example.mansshop_boot.domain.dto.response.PagingResponseDTO;
-import com.example.mansshop_boot.domain.dto.response.ResponseDTO;
+import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
 import com.example.mansshop_boot.repository.ProductOrderDetailRepository;
 import com.example.mansshop_boot.repository.ProductOrderRepository;
+import com.example.mansshop_boot.repository.ProductRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
-import java.time.LocalDateTime;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class AdminServiceImplTest {
@@ -41,7 +34,7 @@ class AdminServiceImplTest {
 
 
         ProductOrderDetailRepository.findByOrderIds = 0.185
-        ProductOrderDetailRepository.findByOrderIds = 186
+        ProductOrderDetailRepository.findByOrderIds = 0.186
         AdminServiceImpl.getNewOrderList = 0.849
         ProductOrderRepository.findPeriodList = 0.728
         AdminService.getPeriodSales = 0.730
@@ -56,30 +49,18 @@ class AdminServiceImplTest {
     @Autowired
     private ProductOrderRepository productOrderRepository;
 
-   /* @Test
-    @DisplayName("월 매출의 베스트 상품, 분류별 매출 정보")
-    void timeCheck() {
+    @Autowired
+    private ProductRepository productRepository;
 
-        LocalDateTime startDate = LocalDateTime.of(2024, 6, 1, 0, 0);
-        LocalDateTime endDate = LocalDateTime.of(2024, 6, 30, 23, 59);
+    @Autowired
+    private CartService cartService;
 
-        long totalStart = System.currentTimeMillis();
-
-        long start = System.currentTimeMillis();
-        List<AdminBestSalesProductDTO> bestProductList = productOrderRepository.findPeriodBestProductOrder(startDate, endDate);
-        long end = System.currentTimeMillis();
-        System.out.println("bestProduct Time : " + (end - start) + "ms");
-
-        start = System.currentTimeMillis();
-        List<AdminPeriodClassificationDTO> classificationList = productOrderDetailRepository.findPeriodClassification(startDate, endDate);
-        end = System.currentTimeMillis();
-        System.out.println("classification Time : " + (end - start) + "ms");
-
-
-        long totalEnd = System.currentTimeMillis();
-
-        System.out.println("Total Time : " + (totalEnd- totalStart) + "ms");
-    }*/
+    @Test
+    void cartTest() {
+        CartMemberDTO memberDTO = new CartMemberDTO("coco", null);
+        List<CartDetailDTO> dto = cartService.getCartList(memberDTO);
+        dto.forEach(System.out::println);
+    }
 
     @Test
     @DisplayName("전달받은 연도의 월별 매출 정보를 조회")
@@ -87,14 +68,12 @@ class AdminServiceImplTest {
         int term = 2024;
 
         int resultLength = 12;
-        UserStatusDTO resultUserStatus = new UserStatusDTO("관리자");
 
-        ResponseDTO<AdminPeriodSalesResponseDTO> dto = adminService.getPeriodSales(term);
+        AdminPeriodSalesResponseDTO dto = adminService.getPeriodSales(term);
 
-        Assertions.assertEquals(resultLength, dto.content().content().size());
-        Assertions.assertEquals(resultUserStatus, dto.userStatus());
+        Assertions.assertEquals(resultLength, dto.content().size());
 
-        dto.content().content().forEach(System.out::println);
+        dto.content().forEach(System.out::println);
 
     }
 
@@ -112,8 +91,7 @@ class AdminServiceImplTest {
          */
         String term = "2024-06";
 
-        ResponseDTO<AdminPeriodMonthDetailResponseDTO> dto = adminService.getPeriodSalesDetail(term);
-        AdminPeriodMonthDetailResponseDTO content = dto.content();
+        AdminPeriodMonthDetailResponseDTO content = adminService.getPeriodSalesDetail(term);
         List<AdminBestSalesProductDTO> bestProduct = content.bestProduct();
         List<AdminPeriodClassificationDTO> classificationSales = content.classificationSales();
         List<AdminPeriodSalesListDTO> dailySales = content.dailySales();
@@ -160,7 +138,7 @@ class AdminServiceImplTest {
         String term = "2024-06-20";
         int page = 1;
 
-        PagingElementsResponseDTO<AdminDailySalesResponseDTO> dto = adminService.getOrderListByDay(term, page);
+        PagingListDTO<AdminDailySalesResponseDTO> dto = adminService.getOrderListByDay(term, page);
         dto.content().forEach(System.out::println);
 
     }
@@ -170,14 +148,14 @@ class AdminServiceImplTest {
     void getProductSalesDetail() {
         String productId = "OUTER20210630113546";
 
-        ResponseDTO<AdminProductSalesDetailDTO> response = adminService.getProductSalesDetail(productId);
-        response.content().monthSales().forEach(v -> System.out.println("month sales : " + v));
+        AdminProductSalesDetailDTO response = adminService.getProductSalesDetail(productId);
+        response.monthSales().forEach(v -> System.out.println("month sales : " + v));
         System.out.println("-----------------------------");
-        response.content().optionTotalSales().forEach(v -> System.out.println("optionTotal : " + v));
+        response.optionTotalSales().forEach(v -> System.out.println("optionTotal : " + v));
         System.out.println("-----------------------------");
-        response.content().optionYearSales().forEach(v -> System.out.println("option year : " + v));
+        response.optionYearSales().forEach(v -> System.out.println("option year : " + v));
         System.out.println("-----------------------------");
-        response.content().optionLastYearSales().forEach(v -> System.out.println("option last year : " + v));
+        response.optionLastYearSales().forEach(v -> System.out.println("option last year : " + v));
     }
 
 
@@ -186,7 +164,7 @@ class AdminServiceImplTest {
     void newOrderList() {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(null, null, 1);
 
-        PagingElementsResponseDTO<AdminOrderResponseDTO> response = adminService.getNewOrderList(pageDTO);
+        PagingListDTO<AdminOrderResponseDTO> response = adminService.getNewOrderList(pageDTO);
 
         response.content().forEach(System.out::println);
     }

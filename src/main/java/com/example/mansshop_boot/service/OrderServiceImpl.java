@@ -1,20 +1,16 @@
 package com.example.mansshop_boot.service;
 
 import com.example.mansshop_boot.domain.dto.cart.CartMemberDTO;
-import com.example.mansshop_boot.domain.dto.order.OrderProductDTO;
-import com.example.mansshop_boot.domain.dto.order.PaymentDTO;
-import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
+import com.example.mansshop_boot.domain.dto.order.in.OrderProductDTO;
+import com.example.mansshop_boot.domain.dto.order.in.PaymentDTO;
 import com.example.mansshop_boot.domain.entity.*;
 import com.example.mansshop_boot.domain.enumuration.Result;
 import com.example.mansshop_boot.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,10 +26,6 @@ public class OrderServiceImpl implements OrderService{
     private final CartDetailRepository cartDetailRepository;
 
     private final CartRepository cartRepository;
-
-    private final PeriodSalesRepository periodSalesRepository;
-
-    private final ProductSalesRepository productSalesRepository;
 
     private final ProductOptionRepository productOptionRepository;
 
@@ -81,12 +73,24 @@ public class OrderServiceImpl implements OrderService{
             //장바구니의 모든 상품을 구매한 것이기 때문에 장바구니 데이터 자체를 삭제하도록 하기 위함.
             Long cartId = cartRepository.findIdByUserId(cartMemberDTO);
             List<CartDetail> cartDetailList = cartDetailRepository.findAllCartDetailByCartId(cartId);
-            List<Long> deleteCartDetailIdList = new ArrayList<>();
+
+            //장바구니 상세 데이터(cartDetailList)와 주문 상품 옵션 리스트(orderOptionList)에서 ProductOption의 id가 일치하는 것을 리스트화
+            List<Long> deleteCartDetailIdList = cartDetailList.stream()
+                    .filter(cartDetail ->
+                            orderOptionIdList.contains(
+                                    cartDetail.getProductOption()
+                                            .getId()
+                            )
+                    )
+                    .map(CartDetail::getId)
+                    .toList();
+
+//            List<Long> deleteCartDetailIdList = new ArrayList<>();
 
             //조회한 장바구니 상세 정보와 옵션 아이디 리스트를 비교하면서 일치하는 경우 삭제 리스트에 장바구니 상세 아이디를 담는다.
-            for(CartDetail data : cartDetailList)
+            /*for(CartDetail data : cartDetailList)
                 if(orderOptionIdList.contains(data.getProductOption().getId()))
-                    deleteCartDetailIdList.add(data.getId());
+                    deleteCartDetailIdList.add(data.getId());*/
 
             //담아준 삭제해야 할 상세 데이터 크기와 사용자의 장바구니 상세 데이터 리스트 크기가 같다면 전체 구매라고 판단해 장바구니를 삭제한다.
             //장바구니와 장바구니 상세는 delete cascade 상태이기 때문에 장바구니 데이터만 삭제하도록 한다.
@@ -97,34 +101,6 @@ public class OrderServiceImpl implements OrderService{
                 cartDetailRepository.deleteAllById(deleteCartDetailIdList);
 
         }
-
-        //매출 데이터 정리
-
-        //기간별(일별) 매출
-        /*PeriodSales periodSales = periodSalesRepository.findPeriodLastUpdate(); //가장 최근 일자의 데이터를 조회
-        LocalDate now = LocalDate.now();//현재 날짜
-
-        //두 날짜가 동일한 경우 조회된 Entity 데이터를 수정
-        //동일하지 않은 경우 Entity를 새로 만들어서 저장
-        if(periodSales != null && periodSales.getPeriod().equals(now)){
-            periodSales.setSales(paymentDTO.totalPrice());
-            periodSales.setSalesRate(totalProductCount);
-        }else {
-            periodSales = PeriodSales.builder()
-                    .sales(paymentDTO.totalPrice())
-                    .salesRate(totalProductCount)
-                    .build();
-        }
-
-        periodSalesRepository.save(periodSales);*/
-
-
-        //상품별 매출, 상품 옵션 재고 관리
-
-        //상품별 매출 리스트 조회. 주문내역에 해당하는 옵션 아이디 매출만 조회한다.
-        //저장 또는 수정할 데이터를 담아줄 리스트를 새로 생성
-        /*List<ProductSales> productSalesDataList = productSalesRepository.findAllByOptionIds(orderOptionIdList);
-        List<ProductSales> productSalesSetList = new ArrayList<>();*/
 
         //상품 옵션 재고 수정을 위해 주문 내역에 해당하는 상품 옵션 데이터를 조회
         //저장 또는 수정할 데이터를 담아줄 리스트를 새로 생성
@@ -149,33 +125,6 @@ public class OrderServiceImpl implements OrderService{
             if(!productIdList.contains(dto.productId()))
                 productIdList.add(dto.productId());
 
-            ProductSales productSales = null;
-
-            //상품별 매출 데이터 처리를 위해 해당 상품의 매출 데이터가 존재한다면 조회된 Entity를 수정해 리스트에 담아주고
-            //존재하지 않는다면 Entity를 새로 생성해 리스트에 담아준다.
-            //한번 수정이 발생할 때마다 다음 루프의 횟수를 줄이기 위해 조회 리스트에서 수정된 Entity 데이터를 지워나간다.
-            /*for(int j = 0; j < productSalesDataList.size(); j++) {
-                if(dto.optionId() == productSalesDataList.get(j).getOptionId()){
-                    productSales = productSalesDataList.get(j);
-                    productSales.setSales(dto.detailPrice());
-                    productSales.setSalesRate(dto.detailCount());
-
-                    productSalesDataList.remove(j);
-                    break;
-                }
-            }*/
-
-            /*if(productSales == null) {
-                productSales = ProductSales.builder()
-                                    .sales(dto.detailPrice())
-                                    .salesRate(dto.detailCount())
-                                    .productName(dto.productName())
-                                    .optionId(dto.optionId())
-                                    .build();
-            }
-
-            productSalesSetList.add(productSales);*/
-
             //상품 옵션 테이블에서 재고 수정을 위해 해당 옵션 상품 리스트를 반복문으로 돌리면서
             //조회된 Entity의 재고를 수정한 뒤 리스트에 담아준다.
             //한번 수정이 발생할 때마다 다음 루프의 횟수를 줄이기 위해 리스트 데이터를 지워나간다.
@@ -193,7 +142,6 @@ public class OrderServiceImpl implements OrderService{
         }
 
         productOptionRepository.saveAll(productOptionSetList);
-//        productSalesRepository.saveAll(productSalesSetList);
 
         //상품 판매량 수정을 위해 해당되는 상품들을 조회.
         List<Product> productList = productRepository.findAllByIdList(productIdList);

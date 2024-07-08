@@ -22,4 +22,8 @@ public class ProductInfoImage {
     private Product product;
 
     private String imageName;
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
 }

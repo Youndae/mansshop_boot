@@ -1,7 +1,8 @@
 import React, {useEffect} from 'react';
-import styled from "styled-components";
-import DefaultBtn from "../../ui/DefaultBtn";
 import {useNavigate} from "react-router-dom";
+import styled from "styled-components";
+
+import DefaultBtn from "../../ui/DefaultBtn";
 
 const ModalContent = styled.div`
     width: 500px;
@@ -42,7 +43,6 @@ function MyPageModal(props) {
             overflow-y: scroll;
             width: 100%;
         `;
-
 
         document.addEventListener('mousedown', closeModal);
     }, []);

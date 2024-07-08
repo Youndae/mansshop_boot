@@ -1,8 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
+
 import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
+
 import AdminSideNav from "../../ui/nav/AdminSideNav";
 import QnADetail from "../mypage/QnADetail";
 
@@ -21,6 +23,7 @@ import QnADetail from "../mypage/QnADetail";
 function AdminMemberQnADetail() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
     const { qnaId } = useParams();
+
     const [data, setData] = useState({
         memberQnAId: ''
         , title: ''
@@ -117,9 +120,6 @@ function AdminMemberQnADetail() {
                 if(checkResponseMessageOk(res))
                     getMemberQnADetail();
             })
-            .catch(err => {
-                console.error('modifyReply Error : ', err);
-            })
     }
 
     const handleInputOnChange = (e) => {
@@ -134,9 +134,6 @@ function AdminMemberQnADetail() {
             .then(res => {
                 if(checkResponseMessageOk(res))
                     getMemberQnADetail();
-            })
-            .catch(err => {
-                console.error('productQnADetail input submit error : ', err);
             })
     }
 

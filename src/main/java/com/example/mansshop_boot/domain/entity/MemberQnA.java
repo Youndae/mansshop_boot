@@ -1,6 +1,6 @@
 package com.example.mansshop_boot.domain.entity;
 
-import com.example.mansshop_boot.domain.dto.mypage.qna.req.MemberQnAModifyDTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.in.MemberQnAModifyDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

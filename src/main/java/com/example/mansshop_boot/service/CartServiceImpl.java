@@ -4,8 +4,6 @@ import com.example.mansshop_boot.config.customException.ErrorCode;
 import com.example.mansshop_boot.config.customException.exception.CustomNotFoundException;
 import com.example.mansshop_boot.config.jwt.JWTTokenProvider;
 import com.example.mansshop_boot.domain.dto.cart.*;
-import com.example.mansshop_boot.domain.dto.member.UserStatusDTO;
-import com.example.mansshop_boot.domain.dto.response.ResponseListDTO;
 import com.example.mansshop_boot.domain.entity.Cart;
 import com.example.mansshop_boot.domain.entity.CartDetail;
 import com.example.mansshop_boot.domain.entity.Member;
@@ -55,41 +53,43 @@ public class CartServiceImpl implements CartService{
     private final CartDetailRepository cartDetailRepository;
 
 
-    /*
-        출력에 필요한 정보
-
-        상품 대표 썸네일
-        상풍명
-        옵션 [
-            사이즈
-            컬러
-            수량
-            금액
-         ]
-
-
+    /**
+     *
+     * @param cartMemberDTO
+     *
+     * 회원의 장바구니 리스트 조회
+     * 데이터가 존재하지 않는 경우 오류를 발생시킬 것이 아니라 Null을 반환해 상품이 없다는 문구를 출력하도록 처리.
      */
     @Override
-    public ResponseListDTO<CartDetailDTO> getCartList(CartMemberDTO cartMemberDTO) {
+    public List<CartDetailDTO> getCartList(CartMemberDTO cartMemberDTO) {
         Long userCartId = cartRepository.findIdByUserId(cartMemberDTO);
 
         if(userCartId == null)
-            return new ResponseListDTO<>(null, new UserStatusDTO(cartMemberDTO.uid()));
+            return null;
 
-        List<CartDetailDTO> cartDetailList = cartDetailRepository.findAllByCartId(userCartId);
-
-        return new ResponseListDTO<>(cartDetailList, new UserStatusDTO(cartMemberDTO.uid()));
+        return cartDetailRepository.findAllByCartId(userCartId);
     }
 
-    /*
-            cart에 데이터가 없다면
-            cart build 후 cartDetail 을 set 해준 뒤
-            cartrepository.save()를 한다.
-
-            cart 데이터가 존재한다면
-            cartDetail 데이터만 리스트화 해서 CartDetailRepository.save()를 한다.
-
-         */
+    /**
+     *
+     * @param addList
+     * @param cartMemberDTO
+     * @param response
+     * @param principal
+     *
+     * 장바구니 추가 기능.
+     *
+     * 회원, 비회원 모두 사용이 가능하다.
+     * 회원은 아이디, 비회원은 'Anonymous'라는 아이디와 발급받은 장바구니 쿠키값이 들어가 구분할 수 있도록 한다.
+     * 회원의 경우 쿠키 데이터는 들어가지 않는다.
+     *
+     * CartMemberDTO에 담긴 상태로 서비스에 넘어오며 컨트롤러에서 CartMemberDTO를 생성한 뒤 담아서 보낸다.
+     *
+     * 장바구니에 데이터가 하나도 없는 경우 Cart 테이블에 데이터가 존재하지 않기 때문에 Cart Entity를 새로 build 해주고 상품 데이터를 담아 save 처리.
+     *
+     * Cart 테이블에 데이터가 존재한다면 같은 상품의 경우 수량만 증가시켜주기 위해 추가하고자 하는 데이터가 장바구니 상세 데이터에 존재하는지 체크하고
+     * 조건에 따라 처리한다.
+     */
     @Override
     @Transactional(rollbackFor = RuntimeException.class)
     public String addCart(List<AddCartDTO> addList
@@ -114,8 +114,7 @@ public class CartServiceImpl implements CartService{
                             .cookieId(cookieValue)
                             .build();
         }else {
-            List<Long> addOptionIdList = new ArrayList<>();
-            addList.forEach(v -> addOptionIdList.add(v.optionId()));
+            List<Long> addOptionIdList = addList.stream().map(AddCartDTO::optionId).toList();
             optionListDetail = cartDetailRepository.findAllCartDetailByCartIdAndOptionIds(cart.getId(), addOptionIdList);
         }
 
@@ -151,8 +150,14 @@ public class CartServiceImpl implements CartService{
         return Result.OK.getResultKey();
     }
 
-    /*
-        장바구니 전체 삭제 버튼 기능
+    /**
+     *
+     * @param cartMemberDTO
+     * @param response
+     *
+     * 장바구니 내 상품 전체 삭제.
+     * '상세 데이터가 존재하지 않는 Cart 테이블은 존재하지 않는다' 라고 설계했기 때문에
+     * Cart 데이터 자체를 삭제. Cascade 설정으로 인해 상세 데이터까지 같이 삭제처리된다.
      */
     @Override
     @Transactional(rollbackFor = RuntimeException.class)
@@ -165,6 +170,13 @@ public class CartServiceImpl implements CartService{
         return Result.OK.getResultKey();
     }
 
+    /**
+     *
+     * @param cartMemberDTO
+     * @param cartDetailId
+     *
+     * 장바구니 내 상품의 수량 증가.
+     */
     @Override
     public String countUp(CartMemberDTO cartMemberDTO, long cartDetailId) {
         Cart cart = cartRepository.findByUserIdAndCookieValue(cartMemberDTO);
@@ -181,6 +193,13 @@ public class CartServiceImpl implements CartService{
         return Result.OK.getResultKey();
     }
 
+    /**
+     *
+     * @param cartMemberDTO
+     * @param cartDetailId
+     *
+     * 장바구니 내 상품의 수량 감소
+     */
     @Override
     public String countDown(CartMemberDTO cartMemberDTO, long cartDetailId) {
         Cart cart = cartRepository.findByUserIdAndCookieValue(cartMemberDTO);
@@ -196,10 +215,16 @@ public class CartServiceImpl implements CartService{
         return Result.OK.getResultKey();
     }
 
-    /*
-            장바구니 선택 삭제 기능
-            선택 목록이 전체일 경우도 감안해야 함.
-         */
+    /**
+     *
+     * @param cartMemberDTO
+     * @param deleteCartDetailId
+     *
+     * 장바구니 내 선택 상품의 삭제 처리.
+     *
+     * 버튼은 선택 상품 버튼이지만 전체 선택이 되어있는 경우를 감안해 저장된 데이터의 크기를 조회.
+     * 동일하다면 Cart 데이터를 제거하고 그렇지 않다면 상세 데이터만 제거한다.
+     */
     @Override
     public String deleteCartSelect(CartMemberDTO cartMemberDTO, List<Long> deleteCartDetailId) {
 
@@ -215,6 +240,12 @@ public class CartServiceImpl implements CartService{
         return Result.OK.getResultKey();
     }
 
+    /**
+     *
+     * @param response
+     *
+     * 비회원의 장바구니 쿠키 생성
+     */
     private String createAnonymousCookie(HttpServletResponse response) {
         String cookieValue = UUID.randomUUID().toString().replace("-", "");
 
@@ -223,6 +254,14 @@ public class CartServiceImpl implements CartService{
         return cookieValue;
     }
 
+    /**
+     *
+     * @param cookieValue
+     * @param response
+     *
+     * 장바구니 쿠키를 응답쿠키에 담는다.
+     * 만료기간은 7일.
+     */
     private void setCartCookie(String cookieValue, HttpServletResponse response) {
         tokenProvider.setTokenCookie(
                 cartCookieHeader

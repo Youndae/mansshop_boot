@@ -67,15 +67,4 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
                                 .build()
                 );
     }
-
-
-    @ExceptionHandler(HttpClientErrorException.NotFound.class)
-    public void notFound(Exception e) {
-        log.info("clientError not found");
-    }
-
-    @ExceptionHandler(ChangeSetPersister.NotFoundException.class)
-    public void persisterNotFound(Exception e) {
-        log.info("persister NotFound");
-    }
 }

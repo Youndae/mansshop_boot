@@ -1,11 +1,14 @@
 import React, {useState, useRef} from 'react';
 import {useLocation, useNavigate} from "react-router-dom";
-import DefaultBtn from "../../ui/DefaultBtn";
+
 import {axiosDefault, checkResponseMessageOk} from "../../../modules/customAxios";
+
+import DefaultBtn from "../../ui/DefaultBtn";
 
 function ResetPassword() {
     const location = useLocation();
     const state = location.state;
+
     const [password, setPassword] = useState({
         password: '',
         checkPassword: '',
@@ -116,8 +119,6 @@ function ResetPassword() {
 
 function PwOverlap(props) {
     const { check, status } = props;
-
-    console.log('check : ', check);
 
     let text = '';
 

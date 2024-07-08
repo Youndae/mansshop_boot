@@ -14,7 +14,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -22,7 +21,6 @@ import static com.example.mansshop_boot.domain.entity.QProductOrderDetail.produc
 import static com.example.mansshop_boot.domain.entity.QProduct.product;
 import static com.example.mansshop_boot.domain.entity.QProductOption.productOption;
 import static com.example.mansshop_boot.domain.entity.QProductOrder.productOrder;
-import static com.example.mansshop_boot.domain.entity.QClassification.classification;
 
 
 @Repository
@@ -61,63 +59,6 @@ public class ProductOrderDetailDSLRepositoryImpl implements ProductOrderDetailDS
                 .orderBy(productOrderDetail.product.id.asc())
                 .fetch();
     }
-
-    /*@Override
-    public List<AdminBestSalesProductDTO> findPeriodBestProduct(LocalDateTime startDate, LocalDateTime endDate) {
-
-        NumberPath<Long> aliasQuantity = Expressions.numberPath(Long.class, "productPeriodSalesQuantity");
-
-        return jpaQueryFactory.select(
-                Projections.constructor(
-                        AdminBestSalesProductDTO.class
-                        , product.productName
-                        , ExpressionUtils.as(productOrderDetail.orderDetailCount.longValue().sum(), aliasQuantity)
-                        , productOrderDetail.orderDetailPrice.longValue().sum().as("productPeriodSales")
-                )
-        )
-                .from(productOrderDetail)
-                .innerJoin(product)
-                .on(productOrderDetail.product.id.eq(product.id))
-                .innerJoin(productOrder)
-                .on(productOrderDetail.productOrder.id.eq(productOrder.id))
-                .where(productOrder.createdAt.between(startDate, endDate))
-                .groupBy(product.productName)
-                .orderBy(aliasQuantity.desc())
-                .limit(5)
-                .fetch();
-    }
-
-    @Override
-    public List<AdminPeriodClassificationDTO> findPeriodClassification(LocalDateTime startDate, LocalDateTime endDate) {
-
-        return jpaQueryFactory.select(
-                Projections.constructor(
-                        AdminPeriodClassificationDTO.class
-                        , classification.id.as("classification")
-                        , productOrderDetail.orderDetailPrice.longValue().sum().as("classificationSales")
-                        , productOrderDetail.orderDetailCount.longValue().sum().as("classificationSalesQuantity")
-                )
-        )
-                .from(productOrderDetail)
-                .innerJoin(product)
-                .on(productOrderDetail.product.id.eq(product.id))
-                .innerJoin(classification)
-                .on(product.classification.id.eq(classification.id))
-                .innerJoin(productOrder)
-                .on(productOrderDetail.productOrder.id.eq(productOrder.id))
-                .where(productOrder.createdAt.between(startDate, endDate))
-                .groupBy(classification.id)
-                .fetch();
-
-        *//*
-            '11754326000','159441','OUTER'
-            '12618580000','169494','PANTS'
-            '12614718000','169321','BAGS'
-            '12622142000','169750','SHOES'
-            '12635601000','169554','TOP'
-
-         *//*
-    }*/
 
     @Override
     public List<AdminBestSalesProductDTO> findPeriodBestProduct(LocalDateTime startDate, LocalDateTime endDate) {
@@ -227,25 +168,6 @@ public class ProductOrderDetailDSLRepositoryImpl implements ProductOrderDetailDS
 
     @Override
     public List<AdminProductSalesOptionDTO> getProductOptionSales(int year, String productId) {
-        /*return jpaQueryFactory.select(
-                Projections.constructor(
-                        AdminProductSalesOptionDTO.class
-                        , productOption.id.as("optionId")
-                        , productOption.size
-                        , productOption.color
-                        , productOrderDetail.orderDetailPrice.longValue().sum().as("optionSales")
-                        , productOrderDetail.orderDetailCount.longValue().sum().as("optionSalesQuantity")
-                )
-        )
-                .from(productOrderDetail)
-                .innerJoin(productOrder)
-                .on(productOrderDetail.productOrder.id.eq(productOrder.id))
-                .innerJoin(productOption)
-                .on(productOrderDetail.productOption.id.eq(productOption.id))
-                .where(productOrderDetail.product.id.eq(productId).and(searchOption(year)))
-                .orderBy(productOption.id.asc())
-                .groupBy(productOption.id)
-                .fetch();*/
 
         return jpaQueryFactory.select(
                         Projections.constructor(

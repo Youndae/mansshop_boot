@@ -1,17 +1,18 @@
 import React from 'react';
-import {numberComma} from "../../../modules/numberCommaModule";
-import dayjs from "dayjs";
-import AdminOrderModal from "./modal/AdminOrderModal";
-import Paging from "../../ui/Paging";
+import {useNavigate} from "react-router-dom";
+
 import {
     getClickNumber,
     getNextNumber,
     getPrevNumber,
     pageSubmit,
     searchTypePageSubmit, searchTypeSubmit,
-    typePageSubmit
 } from "../../../modules/pagingModule";
-import {useNavigate} from "react-router-dom";
+
+import dayjs from "dayjs";
+
+import AdminOrderModal from "./modal/AdminOrderModal";
+import Paging from "../../ui/Paging";
 
 function AdminOrderListForm(props) {
     const { header
@@ -53,8 +54,6 @@ function AdminOrderListForm(props) {
     const handleSearchOnClick = () => {
         searchTypeSubmit(keywordSelectValue, keywordInput, navigate);
     }
-
-
 
     return (
         <div className="admin-content">

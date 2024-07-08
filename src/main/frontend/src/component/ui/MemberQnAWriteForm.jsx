@@ -2,7 +2,6 @@ import React from "react";
 
 function MemberQnAWriteForm(props) {
     const { inputData, classificationId, classification, handleInputOnChange, handleSelectOnChange, handleSubmit, btnText } = props;
-    console.log('qna writeForm classificationId : ', classificationId);
 
     return (
         <div className="mypage-qna-content">

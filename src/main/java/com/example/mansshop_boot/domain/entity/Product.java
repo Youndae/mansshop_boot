@@ -1,6 +1,6 @@
 package com.example.mansshop_boot.domain.entity;
 
-import com.example.mansshop_boot.domain.dto.admin.AdminProductPatchDTO;
+import com.example.mansshop_boot.domain.dto.admin.in.AdminProductPatchDTO;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -42,6 +42,30 @@ public class Product {
 
     @UpdateTimestamp
     private LocalDate updatedAt;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private final Set<ProductOption> productOptionSet = new HashSet<>();
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private final Set<ProductThumbnail> productThumbnailSet = new HashSet<>();
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private final Set<ProductInfoImage> productInfoImageSet = new HashSet<>();
+
+    public void addProductOption(ProductOption productOption) {
+        productOptionSet.add(productOption);
+        productOption.setProduct(this);
+    }
+
+    public void addProductThumbnail(ProductThumbnail productThumbnail) {
+        productThumbnailSet.add(productThumbnail);
+        productThumbnail.setProduct(this);
+    }
+
+    public void addProductInfoImage(ProductInfoImage productInfoImage) {
+        productInfoImageSet.add(productInfoImage);
+        productInfoImage.setProduct(this);
+    }
 
     public void setProductSales(long productSales) {
         this.productSales = productSales;

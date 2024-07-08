@@ -9,6 +9,8 @@ import com.example.mansshop_boot.domain.entity.MemberQnA;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 public interface MemberQnADSLRepository {
     Page<MemberQnAListDTO> findAllByUserId(String userId, Pageable pageable);
 
@@ -16,5 +18,7 @@ public interface MemberQnADSLRepository {
 
     MemberQnA findModifyDataByIdAndUserId(long qnaId, String userId);
 
-    Page<AdminQnAListResponseDTO> findAllByAdminMemberQnA(AdminOrderPageDTO pageDTO, Pageable pageable);
+    List<AdminQnAListResponseDTO> findAllByAdminMemberQnA(AdminOrderPageDTO pageDTO);
+
+    Long findAllByAdminMemberQnACount(AdminOrderPageDTO pageDTO);
 }

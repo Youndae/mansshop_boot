@@ -1,4 +1,6 @@
 import React, {useEffect, useState} from 'react';
+import {useNavigate, useParams, useSearchParams} from "react-router-dom";
+import {useDispatch, useSelector} from "react-redux";
 
 import { axiosInstance } from "../../../modules/customAxios";
 import {
@@ -8,20 +10,16 @@ import {
     getNextNumber,
     pageSubmit
 } from "../../../modules/pagingModule";
+import {setMemberObject} from "../../../modules/loginModule";
 
 import MainContent from "../../ui/MainContent";
-import {useNavigate, useParams, useSearchParams} from "react-router-dom";
 import Paging from "../../ui/Paging";
-import {useDispatch, useSelector} from "react-redux";
-import {setMemberObject} from "../../../modules/loginModule";
 
 function MainClassification() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
     const { classification } = useParams();
     const [params] = useSearchParams();
     const page = params.get('page') == null ? 1 : params.get('page');
-
-    const dispatch = useDispatch();
 
     const [data, setData] = useState([]);
     const [pagingData, setPagingData] = useState({
@@ -32,6 +30,7 @@ function MainClassification() {
         activeNo: page,
     });
 
+    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -41,7 +40,6 @@ function MainClassification() {
     const getClassificationList = async() => {
         await axiosInstance.get(`/main/${classification}?page=${page}`)
             .then(res => {
-                console.log('Main classification res : ', res);
                 setData(res.data.content);
 
                 const pagingObject = mainProductPagingObject(page, res.data.totalPages);
@@ -60,29 +58,19 @@ function MainClassification() {
                     dispatch(member);
 
             })
-            .catch(err => {
-                console.error('classification error : ', err);
-            })
     }
 
     const handlePageBtn = (e) => {
         pageSubmit(getClickNumber(e), navigate);
-        // handlePagingSubmit(getClickNumber(e));
     }
 
     const handlePagePrev = () => {
         pageSubmit(getPrevNumber(pagingData), navigate);
-        // handlePagingSubmit(getPrevNumber(pagingData));
     }
 
     const handlePageNext = () => {
         pageSubmit(getNextNumber(pagingData));
-        // handlePagingSubmit(getNextNumber(pagingData));
     }
-
-    /*const paginationNavigate = (clickNo) => {
-        navigate(`?page=${clickNo}`);
-    }*/
 
     return (
         <>

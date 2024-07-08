@@ -93,7 +93,7 @@ public class MemberQnADSLRepositoryImpl implements MemberQnADSLRepository{
                 .fetchOne();
     }
 
-    @Override
+    /*@Override
     public Page<AdminQnAListResponseDTO> findAllByAdminMemberQnA(AdminOrderPageDTO pageDTO, Pageable pageable) {
 
         List<AdminQnAListResponseDTO> list = jpaQueryFactory.select(
@@ -126,6 +126,43 @@ public class MemberQnADSLRepositoryImpl implements MemberQnADSLRepository{
                                     .where(adminMemberQnASearch(pageDTO));
 
         return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
+    }*/
+
+    @Override
+    public List<AdminQnAListResponseDTO> findAllByAdminMemberQnA(AdminOrderPageDTO pageDTO) {
+
+        return jpaQueryFactory.select(
+                        Projections.constructor(
+                                AdminQnAListResponseDTO.class
+                                , memberQnA.id.as("qnaId")
+                                , qnAClassification.qnaClassificationName.as("classification")
+                                , memberQnA.memberQnATitle.as("title")
+                                , new CaseBuilder()
+                                        .when(memberQnA.member.nickname.isNull())
+                                        .then(memberQnA.member.userName)
+                                        .otherwise(memberQnA.member.nickname)
+                                        .as("writer")
+                                , memberQnA.updatedAt.as("createdAt")
+                                , memberQnA.memberQnAStat.as("answerStatus")
+                        )
+                )
+                .from(memberQnA)
+                .innerJoin(qnAClassification)
+                .on(memberQnA.qnAClassification.id.eq(qnAClassification.id))
+                .where(adminMemberQnASearch(pageDTO))
+                .orderBy(memberQnA.updatedAt.desc())
+                .orderBy(memberQnA.id.desc())
+                .offset(pageDTO.offset())
+                .limit(pageDTO.amount())
+                .fetch();
+    }
+
+    @Override
+    public Long findAllByAdminMemberQnACount(AdminOrderPageDTO pageDTO) {
+        return jpaQueryFactory.select(memberQnA.countDistinct())
+                .from(memberQnA)
+                .where(adminMemberQnASearch(pageDTO))
+                .fetchOne();
     }
 
     public BooleanExpression adminMemberQnASearch(AdminOrderPageDTO pageDTO){

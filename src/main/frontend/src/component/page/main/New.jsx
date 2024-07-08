@@ -1,13 +1,14 @@
 import React, {useState, useEffect} from 'react';
+import {useDispatch, useSelector} from "react-redux";
 
 import { axiosInstance } from "../../../modules/customAxios";
+import {setMemberObject} from "../../../modules/loginModule";
 
 import MainContent from "../../ui/MainContent";
-import {useDispatch, useSelector} from "react-redux";
-import {setMemberObject} from "../../../modules/loginModule";
 
 function New() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
+
     const [data, setData] = useState([]);
 
     const dispatch = useDispatch();
@@ -26,9 +27,6 @@ function New() {
 
                 if(member !== undefined)
                     dispatch(member);
-            })
-            .catch(err => {
-                console.log('new page error : ', err);
             })
     }
 

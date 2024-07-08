@@ -55,13 +55,7 @@ public class SecurityConfig {
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                .logout(AbstractHttpConfigurer::disable)
-                /*.authorizeHttpRequests(registry ->
-                        registry.requestMatchers("/login/**", "/api/main/**", "/**")
-                                .permitAll()
-                                .requestMatchers("/api/admin/**").hasRole("ROLE_ADMIN")
-                                .anyRequest().authenticated()
-                )*/;
+                .logout(AbstractHttpConfigurer::disable);
 
         http
                 .oauth2Login((oauth2) ->

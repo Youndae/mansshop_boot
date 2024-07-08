@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
 import {Link, useNavigate, useSearchParams} from "react-router-dom";
+
 import {axiosInstance} from "../../../modules/customAxios";
-import AdminSideNav from "../../ui/nav/AdminSideNav";
 import {setMemberObject} from "../../../modules/loginModule";
 import {
     getClickNumber,
@@ -11,6 +11,8 @@ import {
     pageSubmit,
     productDetailPagingObject, searchPageSubmit, searchSubmit
 } from "../../../modules/pagingModule";
+
+import AdminSideNav from "../../ui/nav/AdminSideNav";
 import Paging from "../../ui/Paging";
 import {numberComma} from "../../../modules/numberCommaModule";
 import DefaultBtn from "../../ui/DefaultBtn";
@@ -29,6 +31,7 @@ function AdminDiscount() {
     const [params] = useSearchParams();
     const page = params.get('page') == null ? 1 : params.get('page');
     const keyword = params.get('keyword');
+
     const [data, setData] = useState([]);
     const [pagingData, setPagingData] = useState({
         startPage: 0,
@@ -55,7 +58,6 @@ function AdminDiscount() {
         await axiosInstance.get(url)
             .then(res => {
                 setData(res.data.content);
-
                 const pagingObject = productDetailPagingObject(page, res.data.totalPages);
 
                 setPagingData({
@@ -70,9 +72,6 @@ function AdminDiscount() {
 
                 if(member !== undefined)
                     dispatch(member);
-            })
-            .catch(err => {
-                console.error('discount Error : ', err);
             })
     }
 
@@ -93,10 +92,6 @@ function AdminDiscount() {
             pageSubmit(pageNum, navigate);
         else
             searchPageSubmit(keyword, pageNum, navigate);
-        /*if(keyword == null)
-            navigate(`/admin/product/discount?page=${pageNum}`);
-        else
-            navigate(`/admin/product/discount?keyword=${keyword}&page=${pageNum}`);*/
     }
 
     const handleKeywordOnChange = (e) => {
@@ -104,7 +99,6 @@ function AdminDiscount() {
     }
 
     const handleSearchOnClick = async () => {
-        // navigate(`/admin/product/discount?keyword=${keywordInput}`);
         searchSubmit(keywordInput, navigate);
     }
 

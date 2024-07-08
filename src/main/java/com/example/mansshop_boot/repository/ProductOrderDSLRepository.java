@@ -16,9 +16,13 @@ public interface ProductOrderDSLRepository {
 
     Page<ProductOrder> findByUserId(MemberOrderDTO memberOrderDTO, OrderPageDTO pageDTO, Pageable pageable);
 
-    Page<AdminOrderDTO> findAllOrderList(AdminOrderPageDTO pageDTO, Pageable pageable);
+    List<AdminOrderDTO> findAllOrderList(AdminOrderPageDTO pageDTO);
 
-    Page<AdminOrderDTO> findAllNewOrderList(AdminOrderPageDTO pageDTO, LocalDateTime todayLastOrderTime, Pageable pageable);
+    Long findAllOrderListCount(AdminOrderPageDTO pageDTO);
+
+    List<AdminOrderDTO> findAllNewOrderList(AdminOrderPageDTO pageDTO, LocalDateTime todayLastOrderTime);
+
+    Long findAllNewOrderListCount(AdminOrderPageDTO pageDTO, LocalDateTime todayLastOrderTime);
 
     List<AdminPeriodSalesListDTO> findPeriodList(int year);
 
@@ -38,7 +42,6 @@ public interface ProductOrderDSLRepository {
 
     List<AdminPeriodSalesListDTO> getProductMonthPeriodSales(int year, String productId);
 
-
-
     List<AdminBestSalesProductDTO> findPeriodBestProductOrder(LocalDateTime startDate, LocalDateTime endDate);
+
 }

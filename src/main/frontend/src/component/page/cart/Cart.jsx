@@ -1,19 +1,20 @@
 import React, {useEffect, useState} from 'react';
-import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {useDispatch, useSelector} from "react-redux";
-import {setMemberObject} from "../../../modules/loginModule";
-
-import '../../css/cart.css';
 import {useNavigate} from "react-router-dom";
 
+import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {numberComma} from "../../../modules/numberCommaModule";
+import {setMemberObject} from "../../../modules/loginModule";
+
 import Image from "../../ui/Image";
 import DefaultBtn from "../../ui/DefaultBtn";
 
+import '../../css/cart.css';
+
 function Cart() {
-    const [cartData, setCartData] = useState([]);
     const loginStatus = useSelector((state) => state.member.loginStatus);
-    const dispatch = useDispatch();
+
+    const [cartData, setCartData] = useState([]);
     const [selectValue, setSelectValue] = useState([{
         productId: '',
         cartDetailId: '',
@@ -21,10 +22,12 @@ function Cart() {
         color: '',
         count: '',
         price: '',
+        discount: 0,
         status: true,
     }]);
     const [totalPrice, setTotalPrice] = useState(0);
 
+    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -32,16 +35,12 @@ function Cart() {
     }, []);
 
     const getCartData = async () => {
-        await axiosInstance.get(`cart/`, {
-            headers: {
-                'Content-Type':  'application/json',
-            }
-        })
+        await axiosInstance.get(`cart/`)
             .then(res => {
                 setCartData(res.data.content);
 
                 const data = res.data.content;
-                if(data !== undefined ){
+                if(data !== null){
                     if(selectValue[0].cartDetailId === '') {
                         let selectArr = [];
                         for (let i = 0; i < data.length; i++) {
@@ -53,6 +52,7 @@ function Cart() {
                                 color: data[i].color,
                                 count: data[i].count,
                                 price: data[i].price,
+                                discount: data[i].discount,
                                 status: true
                             });
                         }
@@ -70,9 +70,6 @@ function Cart() {
 
                 if(member !== undefined)
                     dispatch(member);
-            })
-            .catch(err => {
-                console.log('cart error : ', err);
             })
     }
 
@@ -136,15 +133,10 @@ function Cart() {
     }
 
     const countRequest = async (reqUrl, data) => {
-        await axiosInstance.patch(`${reqUrl}/${data}`, {}, {
-            headers: {'Content-Type': 'application/json'}
-        })
+        await axiosInstance.patch(`${reqUrl}/${data}`, {})
             .then(res => {
                 if(checkResponseMessageOk(res))
                     getCartData();
-            })
-            .catch(err => {
-                console.error('count axios error : ', err);
             })
     }
 
@@ -156,9 +148,6 @@ function Cart() {
                         setTotalPrice(0);
                         getCartData();
                     }
-                })
-                .catch(err => {
-                    console.error('delete axios error : ', err);
                 })
         }else {
             await axiosInstance.delete(`${reqUrl}`, {
@@ -172,9 +161,6 @@ function Cart() {
                 .then(res => {
                     if(checkResponseMessageOk(res))
                         getCartData();
-                })
-                .catch(err => {
-                    console.error('delete axios error : ', err);
                 })
         }
     }
@@ -285,6 +271,10 @@ function CartDetail(props) {
                             productOption = `${productSize} ${productColor}`;
                     }
 
+                    let discountText = '';
+                    if(cart.discount !== 0)
+                        discountText = `-${cart.discount}%`;
+
                     return (
                         <div key={index} className="cart-data">
                             <div className="cart-data-header">
@@ -317,7 +307,7 @@ function CartDetail(props) {
                                         </div>
                                     </div>
                                     <div className="cart-price">
-                                        <p className={'cart-option-price'}>{numberComma(cart.price)} 원</p>
+                                        <p className={'cart-option-price'}><p className={'cart-option-price-discount'}>{discountText}</p>{numberComma(cart.price)} 원</p>
                                     </div>
                                 </div>
                             </div>

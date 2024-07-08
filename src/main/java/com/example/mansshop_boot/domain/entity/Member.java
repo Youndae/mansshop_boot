@@ -1,6 +1,6 @@
 package com.example.mansshop_boot.domain.entity;
 
-import com.example.mansshop_boot.domain.dto.mypage.MyPageInfoPatchDTO;
+import com.example.mansshop_boot.domain.dto.mypage.in.MyPageInfoPatchDTO;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

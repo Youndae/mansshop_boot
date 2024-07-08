@@ -1,14 +1,13 @@
 import React from 'react';
+
 import {numberComma} from "../../../../modules/numberCommaModule";
 
 function AdminOrderModalDetail(props) {
     const { data, orderStatus } = props;
 
     let reviewText = '미작성'
-    if(data.reviewStatus === 1)
+    if(data.reviewStatus)
         reviewText = '작성'
-    else if(data.reviewStatus === 2)
-        reviewText = '삭제'
 
     let reviewForm = '';
 

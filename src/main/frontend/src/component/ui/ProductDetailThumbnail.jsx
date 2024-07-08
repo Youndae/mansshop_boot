@@ -12,7 +12,6 @@ function ProductDetailThumbnail(props) {
     }, [imageName]);
 
     const getDisplayImage = async (imageName) => {
-
         let imageSrcArr = [];
 
         if(imageName.length !== 0){
@@ -30,9 +29,6 @@ function ProductDetailThumbnail(props) {
                         );
 
                         imageSrcArr.push(url);
-                    })
-                    .catch(err => {
-                        console.log('display axios err : ', err);
                     })
             }
 
