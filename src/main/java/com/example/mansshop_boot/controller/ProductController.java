@@ -1,15 +1,19 @@
 package com.example.mansshop_boot.controller;
 
-import com.example.mansshop_boot.domain.dto.product.ProductQnAPostDTO;
+import com.example.mansshop_boot.domain.dto.product.in.ProductQnAPostDTO;
 import com.example.mansshop_boot.domain.dto.pageable.ProductDetailPageDTO;
 import com.example.mansshop_boot.domain.dto.product.ProductDetailDTO;
-import com.example.mansshop_boot.domain.dto.product.ProductPageableDTO;
 import com.example.mansshop_boot.domain.dto.product.ProductQnAResponseDTO;
 import com.example.mansshop_boot.domain.dto.product.ProductReviewDTO;
+import com.example.mansshop_boot.domain.dto.response.PagingElementsResponseDTO;
+import com.example.mansshop_boot.domain.dto.response.ResponseDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
+import com.example.mansshop_boot.domain.dto.response.serviceResponse.ResponseWrappingDTO;
 import com.example.mansshop_boot.service.ProductService;
+import com.example.mansshop_boot.service.ResponseMappingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,6 +30,8 @@ public class ProductController {
 
     private final ProductService productService;
 
+    private final ResponseMappingService responseMappingService;
+
     /**
      *
      * @param productId
@@ -36,12 +42,10 @@ public class ProductController {
      * 상품에 대한 찜하기 상태가 필요하므로 Principal을 같이 받아줌.
      */
     @GetMapping("/{productId}")
-    public ResponseEntity<ProductDetailDTO> getDetail(@PathVariable(name = "productId") String productId, Principal principal) {
+    public ResponseEntity<ResponseDTO<?>> getDetail(@PathVariable(name = "productId") String productId, Principal principal) {
+        ResponseWrappingDTO<ProductDetailDTO> wrappingDTO = new ResponseWrappingDTO<>(productService.getDetail(productId, principal));
 
-        ProductDetailDTO responseDTO = productService.getDetail(productId, principal);
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(responseDTO);
+        return responseMappingService.mappingResponseDTO(wrappingDTO, principal);
     }
 
     /**
@@ -56,15 +60,13 @@ public class ProductController {
      *
      */
     @GetMapping("/{productId}/review/{page}")
-    public ResponseEntity<ProductPageableDTO<ProductReviewDTO>> getReview(@PathVariable(name = "productId") String productId
-                                                        , @PathVariable(name = "page") int page) {
-
+    public ResponseEntity<PagingElementsResponseDTO<?>> getReview(@PathVariable(name = "productId") String productId
+                                                        , @PathVariable(name = "page") int page
+                                                        , Principal principal) {
         ProductDetailPageDTO pageDTO = new ProductDetailPageDTO(page);
+        Page<ProductReviewDTO> responseDTO = productService.getDetailReview(pageDTO, productId);
 
-        ProductPageableDTO<ProductReviewDTO> responseDTO = productService.getDetailReview(pageDTO, productId);
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(responseDTO);
+        return responseMappingService.mappingPageableElementsResponseDTO(responseDTO, principal);
     }
 
     /**
@@ -77,17 +79,23 @@ public class ProductController {
      * 위 리뷰와 마찬가지로 첫페이지의 데이터가 아닌 페이징 기능을 위함
      */
     @GetMapping("/{productId}/qna/{page}")
-    public ResponseEntity<ProductPageableDTO<ProductQnAResponseDTO>> getQnA(@PathVariable(name = "productId") String productId
-                                                    , @PathVariable(name = "page") int page) {
-
+    public ResponseEntity<PagingElementsResponseDTO<?>> getQnA(@PathVariable(name = "productId") String productId
+                                                    , @PathVariable(name = "page") int page
+                                                    , Principal principal) {
         ProductDetailPageDTO pageDTO = new ProductDetailPageDTO(page);
+        Page<ProductQnAResponseDTO> responseDTO = productService.getDetailQnA(pageDTO, productId);
 
-        ProductPageableDTO<ProductQnAResponseDTO> responseDTO = productService.getDetailQnA(pageDTO, productId);
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(responseDTO);
+        return responseMappingService.mappingPageableElementsResponseDTO(responseDTO, principal);
     }
 
+    /**
+     *
+     * @param postDTO
+     * @param principal
+     *
+     * 상품 상세 페이지에서 상품 문의 작성
+     * 로그인한 사용자만 요청 가능
+     */
     @PostMapping("/qna")
     @PreAuthorize("hasAnyRole('ROLE_MEMBER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
     public ResponseEntity<?> postProductQnA(@RequestBody ProductQnAPostDTO postDTO, Principal principal) {

@@ -1,8 +1,14 @@
 import React, {useEffect, useState} from 'react';
 import {useLocation, useNavigate, useSearchParams} from "react-router-dom";
 import {useSelector} from "react-redux";
+
 import {axiosInstance} from "../../../modules/customAxios";
-import {getClickNumber, getNextNumber, getPrevNumber, productDetailPagingObject} from "../../../modules/pagingModule";
+import {
+    getClickNumber,
+    getNextNumber,
+    getPrevNumber,
+    productDetailPagingObject
+} from "../../../modules/pagingModule";
 
 import OrderListDetail from "../../ui/OrderListDetail";
 
@@ -13,8 +19,10 @@ function NonMemberOrderList() {
     const [params] = useSearchParams();
     const page = params.get('page') === null ? 1 : params.get('page');
     const term = params.get('term') === null ? 3 : params.get('term');
+
     const location = useLocation();
     const state = location.state;
+
     const [orderData, setOrderData] = useState([]);
     const [pagingData, setPagingData] = useState({
         startPage: 0,
@@ -23,8 +31,8 @@ function NonMemberOrderList() {
         next: false,
         activeNo: page,
     });
-    const userType = 'none';
 
+    const userType = 'none';
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -57,9 +65,6 @@ function NonMemberOrderList() {
 
                 setOrderData(res.data.content);
             })
-            .catch(err => {
-                console.error('non member order axios error : ', err);
-            })
     }
 
     const handleSelectOnChange = (e) => {
@@ -83,7 +88,6 @@ function NonMemberOrderList() {
     const handlePagingSubmit = (pageNum) => {
         navigate(`/order/detail?term=${term}&page=${pageNum}`, {state: { recipient : state.recipient, phone: state.phone}});
     }
-
 
     return (
         <div className="non-member-order">

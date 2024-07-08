@@ -1,7 +1,9 @@
 import React, {useState, useEffect} from 'react';
 import {useDispatch, useSelector} from "react-redux";
+
 import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
+
 import AdminSideNav from "../../ui/nav/AdminSideNav";
 import DefaultBtn from "../../ui/DefaultBtn";
 
@@ -11,6 +13,7 @@ import DefaultBtn from "../../ui/DefaultBtn";
 
 function AdminQnAClassification() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
+
     const [data, setData] = useState([]);
     const [inputStatus, setInputStatus] = useState(false);
     const [inputValue, setInputValue] = useState('');
@@ -35,7 +38,6 @@ function AdminQnAClassification() {
     }
 
     const handleAddBtn = () => {
-        console.log('addBtn');
         setInputStatus(!inputStatus);
     }
 
@@ -44,7 +46,7 @@ function AdminQnAClassification() {
     }
 
     const handleSubmit = async () => {
-        console.log('input value : ', inputValue);
+
         await axiosInstance.post(`admin/qna/classification`, {
             name: inputValue
         }, {

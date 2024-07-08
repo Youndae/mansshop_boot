@@ -1,13 +1,16 @@
 import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate} from "react-router-dom";
-import MyPageSideNav from "../../ui/nav/MyPageSideNav";
+
 import {axiosInstance} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
+
+import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import MemberQnAWriteForm from "../../ui/MemberQnAWriteForm";
 
 function MemberQnAWrite() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
+
     const [inputData, setInputData] = useState({
         title: '',
         content: '',
@@ -26,7 +29,6 @@ function MemberQnAWrite() {
 
         await axiosInstance.get('my-page/classification')
             .then(res => {
-                console.log('res : ', res);
                 setClassification(res.data.classificationList);
                 setClassificationId(res.data.classificationList[0].id);
 
@@ -34,9 +36,6 @@ function MemberQnAWrite() {
 
                 if(member !== undefined)
                     dispatch(member);
-            })
-            .catch(err => {
-                console.error('classification get Error : ', err);
             })
     }
 
@@ -48,12 +47,7 @@ function MemberQnAWrite() {
             classificationId: classificationId,
         })
             .then(res => {
-                console.log('member qna post res : ', res.data.id);
-
                 navigate(`/my-page/qna/member/detail/${res.data.id}`);
-            })
-            .catch(err => {
-                console.error('member qna post Error : ', err);
             })
     }
 
@@ -68,7 +62,6 @@ function MemberQnAWrite() {
             [e.target.name]: e.target.value,
         })
     }
-
 
     return (
         <div className="mypage">

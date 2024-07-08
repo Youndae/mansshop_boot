@@ -24,9 +24,6 @@ function Image(props) {
 
                 setImgSrc(url);
             })
-            .catch(err => {
-                console.error('orderDetail display axios error : ', err);
-            });
     }
 
     return (

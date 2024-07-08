@@ -12,6 +12,6 @@ public record OrderPageDTO(
     @Builder
     public OrderPageDTO(int pageNum, String term) {
 
-        this(pageNum, 10, term);
+        this(pageNum, 20, term);
     }
 }

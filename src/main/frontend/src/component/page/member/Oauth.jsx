@@ -1,6 +1,7 @@
 import React, {useEffect} from 'react';
-import {axiosInstance} from "../../../modules/customAxios";
 import {useNavigate, useSearchParams} from "react-router-dom";
+
+import {axiosInstance} from "../../../modules/customAxios";
 
 /*
     OAuth2 로그인의 경우 href 요청으로 인해 응답 body를 받을 수 없어서
@@ -19,7 +20,6 @@ function Oauth() {
 
     const tokenRequest = async () => {
 
-
         await axiosInstance.get('member/oAuth/token')
             .then(res => {
                 const authorization = res.headers.get('authorization');
@@ -27,9 +27,6 @@ function Oauth() {
 
                 const prevUrl = window.sessionStorage.getItem('prev');
                 navigate(prevUrl);
-            })
-            .catch(err => {
-                console.log('token request error : ', err);
             })
     }
 

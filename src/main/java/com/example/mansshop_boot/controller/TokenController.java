@@ -1,6 +1,6 @@
 package com.example.mansshop_boot.controller;
 
-import com.example.mansshop_boot.domain.dto.TokenDTO;
+import com.example.mansshop_boot.domain.dto.token.TokenDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
 import com.example.mansshop_boot.domain.enumuration.Result;
 import com.example.mansshop_boot.service.JWTTokenService;
@@ -37,13 +37,18 @@ public class TokenController {
 
     private final JWTTokenService tokenService;
 
+    /**
+     *
+     * @param request
+     * @param response
+     *
+     * 토큰 재발급 요청
+     */
     @GetMapping("/reissue")
     public ResponseEntity<ResponseMessageDTO> reIssueToken(HttpServletRequest request, HttpServletResponse response) {
         String accessToken = request.getHeader(accessHeader).replace(tokenPrefix, "");
         Cookie refreshToken = WebUtils.getCookie(request, refreshHeader);
         Cookie ino = WebUtils.getCookie(request, inoHeader);
-
-        log.info("reissue!!!!");
 
         TokenDTO tokenDTO = TokenDTO.builder()
                 .accessTokenValue(accessToken)
@@ -56,7 +61,6 @@ public class TokenController {
 
         if(responseMessage.equals(Result.FAIL.getResultKey()))
             status = HttpStatus.FORBIDDEN;
-
 
         return ResponseEntity.status(status)
                 .body(new ResponseMessageDTO(responseMessage));

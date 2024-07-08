@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
-import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import {useDispatch, useSelector} from "react-redux";
 import {Link, useNavigate, useSearchParams} from "react-router-dom";
+
 import {axiosInstance} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
 import {
@@ -11,6 +11,8 @@ import {
     pageSubmit,
     productDetailPagingObject
 } from "../../../modules/pagingModule";
+
+import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import Paging from "../../ui/Paging";
 import DefaultBtn from "../../ui/DefaultBtn";
 
@@ -18,6 +20,7 @@ function MemberQnA() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
     const [params] = useSearchParams();
     const page = params.get('page') == null ? 1 : params.get('page');
+
     const [pagingData, setPagingData] = useState({
         startPage: 0,
         endPage: 0,
@@ -38,7 +41,6 @@ function MemberQnA() {
 
         await axiosInstance.get(`my-page/qna/member/${page}`)
             .then(res => {
-                console.log('memberQnA res : ', res);
                 setQnAData(res.data.content);
 
                 const pagingObject = productDetailPagingObject(page, res.data.totalPages);
@@ -56,34 +58,23 @@ function MemberQnA() {
                 if(member !== undefined)
                     dispatch(member);
             })
-            .catch(err => {
-                console.error('productQnA error : ', err);
-            })
     }
 
     const handlePageBtn = (e) => {
         pageSubmit(getClickNumber(e), navigate);
-        // handlePagingSubmit(getClickNumber(e));
     }
 
     const handlePagePrev = () => {
         pageSubmit(getPrevNumber(pagingData), navigate);
-        // handlePagingSubmit(getPrevNumber(pagingData));
     }
 
     const handlePageNext = () => {
         pageSubmit(getNextNumber(pagingData));
-        // handlePagingSubmit(getNextNumber(pagingData));
     }
-
-    /*const handlePagingSubmit = (pageNum) => {
-        navigate(`/my-page/qna/member?page=${pageNum}`);
-    }*/
 
     const handleInsertBtn = () => {
         navigate('/my-page/qna/member/write');
     }
-
 
     return (
         <div className="mypage">

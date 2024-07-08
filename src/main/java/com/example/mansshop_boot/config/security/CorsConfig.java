@@ -24,7 +24,7 @@ public class CorsConfig {
 
         //개발중에만 사용.
         //통합 빌드 이후 필요없음.
-        config.addExposedHeader("Authorization");
+//        config.addExposedHeader("Authorization");
 
 
         source.registerCorsConfiguration("/**", config);

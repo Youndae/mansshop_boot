@@ -36,16 +36,6 @@ export const getNextNumber = (pagingData) => {
     return pagingData.endPage + 1;
 }
 
-export const pagingSubmit = (page, keyword, list, navigate) => {
-    if(keyword === null)
-        navigate(`?page=${page}`)
-    else
-        navigate(`?keyword=${keyword}&page=${page}&list=${list}`)
-}
-
-
-
-
 export const pageSubmit = (page, navigate) => {
     navigate(`?page=${page}`);
 }

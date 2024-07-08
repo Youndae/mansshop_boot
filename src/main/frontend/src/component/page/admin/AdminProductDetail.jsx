@@ -1,11 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
+
 import {axiosInstance} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
+import {numberComma} from "../../../modules/numberCommaModule";
+
 import AdminSideNav from "../../ui/nav/AdminSideNav";
 import DefaultBtn from "../../ui/DefaultBtn";
-import {numberComma} from "../../../modules/numberCommaModule";
 import Image from "../../ui/Image";
 
 /*
@@ -19,6 +21,7 @@ import Image from "../../ui/Image";
 function AdminProductDetail() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
     const { productId } = useParams();
+
     const [productData, setProductData] = useState({
         classification: '',
         productName: '',
@@ -44,7 +47,6 @@ function AdminProductDetail() {
 
         await axiosInstance.get(`admin/product/detail/${productId}`)
             .then(res => {
-                console.log('detail res : ', res);
                 const dataContent = res.data.content;
                 const disCountPrice = dataContent.price * (1 - dataContent.discount / 100);
 

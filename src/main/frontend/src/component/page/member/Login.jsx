@@ -2,10 +2,12 @@ import React, {useState} from 'react';
 import {useNavigate, useLocation} from 'react-router-dom';
 import { useDispatch } from "react-redux";
 
-import "../../css/member.css";
+
 import {axiosDefault, errorHandling} from "../../../modules/customAxios";
 import {setMember} from "../../../modules/member";
 import DefaultBtn from "../../ui/DefaultBtn";
+
+import "../../css/member.css";
 
 const loginFailMessage = 'BadCredentialsException';
 
@@ -39,7 +41,6 @@ function Login() {
                 }
             })
                 .then(res => {
-                    console.log('success : ', res);
                     const authorization = res.headers['authorization'];
                     window.localStorage.setItem('Authorization', authorization);
 

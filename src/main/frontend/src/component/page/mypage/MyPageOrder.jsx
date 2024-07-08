@@ -1,20 +1,26 @@
 import React, {useEffect, useState} from 'react';
-import {axiosInstance} from "../../../modules/customAxios";
-import MyPageSideNav from "../../ui/nav/MyPageSideNav";
-
-import '../../css/mypage.css';
-import {useNavigate, useSearchParams} from "react-router-dom";
-import {getClickNumber, getNextNumber, getPrevNumber, productDetailPagingObject} from "../../../modules/pagingModule";
 import {useDispatch, useSelector} from "react-redux";
+import {useNavigate, useSearchParams} from "react-router-dom";
+
 import {setMemberObject} from "../../../modules/loginModule";
+import {axiosInstance} from "../../../modules/customAxios";
+import {getClickNumber,
+        getNextNumber,
+        getPrevNumber,
+        productDetailPagingObject
+} from "../../../modules/pagingModule";
+
+import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import OrderListDetail from "../../ui/OrderListDetail";
 
+import '../../css/mypage.css';
 
 function MyPageOrder() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
     const [params] = useSearchParams();
     const page = params.get('page') === null ? 1 : params.get('page');
     const term = params.get('term') === null ? 3 : params.get('term');
+
     const [orderData, setOrderData] = useState([]);
     const [pagingData, setPagingData] = useState({
         startPage: 0,
@@ -24,10 +30,9 @@ function MyPageOrder() {
         activeNo: page,
     });
 
-    const dispatch = useDispatch();
     const userType = 'user';
+    const dispatch = useDispatch();
     const navigate = useNavigate();
-
 
     useEffect(() => {
         getOrderData(term);
@@ -53,9 +58,6 @@ function MyPageOrder() {
 
                 if(member !== undefined)
                     dispatch(member);
-            })
-            .catch(err => {
-                console.error('mypage order err : ', err);
             })
     }
 

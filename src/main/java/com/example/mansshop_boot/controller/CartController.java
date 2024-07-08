@@ -6,7 +6,9 @@ import com.example.mansshop_boot.domain.dto.cart.CartMemberDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseListDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
+import com.example.mansshop_boot.domain.enumuration.Result;
 import com.example.mansshop_boot.service.CartService;
+import com.example.mansshop_boot.service.ResponseMappingService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.LongStream;
 
 @RestController
 @RequestMapping("/api/cart")
@@ -32,21 +35,35 @@ public class CartController {
 
     private final CartService cartService;
 
-    //사용자 장바구니 목록
+    private final ResponseMappingService responseMappingService;
+
+    /**
+     *
+     * @param request
+     * @param principal
+     *
+     * 사용자의 장바구니 데이터 조회
+     */
     @GetMapping("/")
-    public ResponseEntity<ResponseListDTO<CartDetailDTO>> getCartList(HttpServletRequest request, Principal principal) {
+    public ResponseEntity<ResponseListDTO<?>> getCartList(HttpServletRequest request, Principal principal) {
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
 
         if(cartMemberDTO.uid() == null && cartMemberDTO.cartCookieValue() == null)
             return ResponseEntity.status(HttpStatus.OK).body(null);
 
-        ResponseListDTO<CartDetailDTO> responseDTO = cartService.getCartList(cartMemberDTO);
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(responseDTO);
+        List<CartDetailDTO> responseDTO = cartService.getCartList(cartMemberDTO);
+        return responseMappingService.mappingResponseListDTO(responseDTO, principal);
     }
 
-    //장바구니 상품 추가
+    /**
+     *
+     * @param addList
+     * @param request
+     * @param response
+     * @param principal
+     *
+     * 상품 상세 페이지에서 장바구니 담기
+     */
     @PostMapping("/")
     public ResponseEntity<ResponseMessageDTO> addCart(@RequestBody AddCartDTO addList, HttpServletRequest request, HttpServletResponse response, Principal principal) {
 
@@ -58,6 +75,14 @@ public class CartController {
                 .body(new ResponseMessageDTO(responseMessage));
     }
 
+    /**
+     *
+     * @param cartDetailId
+     * @param request
+     * @param principal
+     *
+     * 장바구니내 상품 수량 증가
+     */
     @PatchMapping("/count-up/{cartDetailId}")
     public ResponseEntity<ResponseMessageDTO> cartCountUp(@PathVariable(name = "cartDetailId") long cartDetailId, HttpServletRequest request, Principal principal) {
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
@@ -69,6 +94,14 @@ public class CartController {
                 .body(new ResponseMessageDTO(responseMessage));
     }
 
+    /**
+     *
+     * @param cartDetailId
+     * @param request
+     * @param principal
+     *
+     * 장바구니내 상품 수량 감소
+     */
     @PatchMapping("/count-down/{cartDetailId}")
     public ResponseEntity<ResponseMessageDTO> cartCountDown(@PathVariable(name = "cartDetailId") long cartDetailId, HttpServletRequest request, Principal principal) {
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
@@ -95,15 +128,20 @@ public class CartController {
         3. data: { ...reqData }
             이렇게 보내니 {0=5, 1=6, 2=7, 3=8} 형태로 전달되며 Map으로 매핑이 가능해진다.
      */
+
+    /**
+     *
+     * @param deleteSelectId
+     * @param request
+     * @param principal
+     *
+     * 장바구니 선택 상품 삭제
+     */
     @DeleteMapping("/select")
     public ResponseEntity<ResponseMessageDTO> deleteSelectCart(@RequestBody Map<String, Long> deleteSelectId, HttpServletRequest request, Principal principal) {
+
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
-
-        List<Long> cartDetailIdList = new ArrayList<>();
-        deleteSelectId.forEach((k, v) -> cartDetailIdList.add(v));
-
-        cartDetailIdList.forEach(v -> System.out.println("list : " + v));
-
+        List<Long> cartDetailIdList = deleteSelectId.values().stream().toList();
 
         String responseMessage = cartService.deleteCartSelect(cartMemberDTO, cartDetailIdList);
 
@@ -111,6 +149,14 @@ public class CartController {
                 .body(new ResponseMessageDTO(responseMessage));
     }
 
+    /**
+     *
+     * @param principal
+     * @param request
+     * @param response
+     *
+     * 장바구니 모든 상품 삭제
+     */
     @DeleteMapping("/all")
     public ResponseEntity<ResponseMessageDTO> deleteCart(Principal principal, HttpServletRequest request, HttpServletResponse response) {
 

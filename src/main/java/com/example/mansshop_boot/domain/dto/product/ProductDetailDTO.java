@@ -1,8 +1,6 @@
 package com.example.mansshop_boot.domain.dto.product;
 
-import com.example.mansshop_boot.domain.dto.member.UserStatusDTO;
 import lombok.Builder;
-import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -20,6 +18,5 @@ public record ProductDetailDTO(
         , List<String> productInfoImageList
         , ProductPageableDTO<ProductReviewDTO> productReviewList
         , ProductPageableDTO<ProductQnAResponseDTO> productQnAList
-        , UserStatusDTO userStatus
 ){
 }

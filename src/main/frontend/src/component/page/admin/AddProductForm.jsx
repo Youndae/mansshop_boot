@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+
 import DefaultBtn from "../../ui/DefaultBtn";
 import Image from "../../ui/Image";
 
@@ -246,36 +247,6 @@ function ProductClassification(props) {
             })}
         </select>
     )
-}
-
-function ToTheTop() {
-    const [toggleBtn, setToggleBtn] = useState(true);
-
-    const handleScroll = () => {
-        const { scrollY } = window;
-
-        console.log('handleScroll!!');
-
-        scrollY > 200 ? setToggleBtn(true) : setToggleBtn(false);
-    };
-
-    useEffect(() => {
-        window.addEventListener("scroll", handleScroll);
-
-        return () => {
-            window.removeEventListener("scroll", handleScroll);
-        }
-    }, []);
-
-    const handleTop = () => {
-        window.scrollTo({ top: 0, behavior: "smooth"});
-    }
-
-    return toggleBtn ? (
-        <div className="top-btn">
-            <button type={'button'} className="top-btn" onClick={handleTop} >맨위로!!!</button>
-        </div>
-    ) : null;
 }
 
 function FirstThumbnailPreview(props) {

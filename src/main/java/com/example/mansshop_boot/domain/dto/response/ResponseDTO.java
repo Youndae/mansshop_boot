@@ -1,9 +1,12 @@
 package com.example.mansshop_boot.domain.dto.response;
 
-import com.example.mansshop_boot.domain.dto.member.UserStatusDTO;
-
 public record ResponseDTO<T>(
         T content
         , UserStatusDTO userStatus
 ) {
+
+    public ResponseDTO(T content, UserStatusDTO userStatus) {
+        this.content = content;
+        this.userStatus = userStatus;
+    }
 }

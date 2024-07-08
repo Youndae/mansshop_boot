@@ -1,15 +1,16 @@
 import React, {useEffect, useRef, useState} from 'react';
-import AdminSideNav from "../../ui/nav/AdminSideNav";
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useSearchParams} from "react-router-dom";
-import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
-import {getClickNumber, getNextNumber, getPrevNumber, productDetailPagingObject} from "../../../modules/pagingModule";
-import {setMemberObject} from "../../../modules/loginModule";
-import dayjs from "dayjs";
-import AdminOrderModal from "./modal/AdminOrderModal";
-import DefaultBtn from "../../ui/DefaultBtn";
-import Paging from "../../ui/Paging";
+
 import {numberComma} from "../../../modules/numberCommaModule";
+import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
+import {productDetailPagingObject} from "../../../modules/pagingModule";
+import {setMemberObject} from "../../../modules/loginModule";
+
+import dayjs from "dayjs";
+
+import AdminSideNav from "../../ui/nav/AdminSideNav";
+import DefaultBtn from "../../ui/DefaultBtn";
 import AdminOrderListForm from "./AdminOrderListForm";
 import AdminOrderModalDetail from "./modal/AdminOrderModalDetail";
 
@@ -28,6 +29,7 @@ function AdminOrder() {
     const page = params.get('page') == null ? 1 : params.get('page');
     const keyword = params.get('keyword');
     const searchType = params.get('type') == null ? 'recipient' : params.get('type');
+
     const [data, setData] = useState([]);
     const [pagingData, setPagingData] = useState({
         startPage: 0,
@@ -50,10 +52,10 @@ function AdminOrder() {
     })
     const [keywordSelectValue, setKeywordSelectValue] = useState('');
     const [modalIsOpen, setModalIsOpen] = useState(false);
+
     const modalRef = useRef(null);
 
     const dispatch = useDispatch();
-    const navigate = useNavigate();
 
     useEffect(() => {
         setKeywordSelectValue(searchType);
@@ -67,8 +69,6 @@ function AdminOrder() {
 
         await axiosInstance.get(url)
             .then(res => {
-                //recipient, userId, phone, createdAt 구조.
-                //orderId 필요.
                 setData(res.data.content);
 
                 const pagingObject = productDetailPagingObject(page, res.data.totalPages);
@@ -87,20 +87,15 @@ function AdminOrder() {
                 if(member !== undefined)
                     dispatch(member);
             })
-            .catch(err => {
-                console.error('all Order axios get Error : ', err);
-            })
     }
 
     const handleOnClick = (idx) => {
-
         setModalOrderData(data[idx]);
         setModalIsOpen(true);
     }
 
     const handleSelectOnChange = (e) => {
         const value = e.target.value;
-
         setKeywordSelectValue(value);
     }
 
@@ -109,7 +104,6 @@ function AdminOrder() {
     }
 
     const closeModal = (e) => {
-
         if(modalIsOpen && modalRef.current && !modalRef.current.contains(e.target)){
             setModalIsOpen(false);
 

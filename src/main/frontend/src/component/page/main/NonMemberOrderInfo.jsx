@@ -2,14 +2,16 @@ import React, {useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from "react-router-dom";
 import {useSelector} from "react-redux";
 
-import '../../css/mypage.css';
 import DefaultBtn from "../../ui/DefaultBtn";
+
+import '../../css/mypage.css';
 
 function NonMemberOrderInfo() {
     const [params] = useSearchParams();
     const loginStatus = useSelector((state) => state.member.loginStatus);
     const page = params.get('page') === null ? 1 : params.get('page');
     const term = params.get('term') === null ? 3 : params.get('term');
+
     const [inputData, setInputData] = useState({
         recipient: '',
         phone: '',

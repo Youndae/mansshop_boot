@@ -9,6 +9,8 @@ import com.example.mansshop_boot.domain.dto.product.ProductQnADTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 public interface ProductQnADSLRepository {
     Page<ProductQnADTO> findByProductId(String productId, Pageable pageable);
 
@@ -16,5 +18,7 @@ public interface ProductQnADSLRepository {
 
     MyPageProductQnADTO findByQnAId(long productQnAId);
 
-    Page<AdminQnAListResponseDTO> findAllByAdminProductQnA(AdminOrderPageDTO pageDTO, Pageable pageable);
+    List<AdminQnAListResponseDTO> findAllByAdminProductQnA(AdminOrderPageDTO pageDTO);
+
+    Long findAllByAdminProductQnACount(AdminOrderPageDTO pageDTO);
 }

@@ -1,16 +1,12 @@
 import React, {useState, useEffect} from 'react';
-import AdminSideNav from "../../ui/nav/AdminSideNav";
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useSearchParams} from "react-router-dom";
+
 import {axiosInstance} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
-import {
-    getClickNumber,
-    getNextNumber,
-    getPrevNumber,
-    pagingSubmit,
-    productDetailPagingObject, searchSubmit
-} from "../../../modules/pagingModule";
+import {productDetailPagingObject} from "../../../modules/pagingModule";
+
+import AdminSideNav from "../../ui/nav/AdminSideNav";
 import AdminQnAListForm from "./AdminQnAListForm";
 
 /*
@@ -33,6 +29,7 @@ function AdminProductQnA() {
     const page = params.get('page') == null ? 1 : params.get('page');
     const keyword = params.get('keyword');
     const list = params.get('type') == null ? 'new' : params.get('type');
+
     const [data, setData] = useState([]);
     const [pagingData, setPagingData] = useState({
         startPage: 0,
@@ -70,11 +67,8 @@ function AdminProductQnA() {
         if(keyword !== null)
             url += `&keyword=${keyword}`;
 
-
         await axiosInstance.get(url)
             .then(res => {
-                console.log('adminProductQnA get res : ', res);
-
                 setData(res.data.content);
 
                 const pagingObject = productDetailPagingObject(page, res.data.totalPages);
@@ -94,35 +88,9 @@ function AdminProductQnA() {
             })
     }
 
-    /*const handlePageBtn = (e) => {
-        handlePagingSubmit(getClickNumber(e));
-    }
-
-    const handlePagePrev = () => {
-        handlePagingSubmit(getPrevNumber(pagingData));
-    }
-
-    const handlePageNext = () => {
-        handlePagingSubmit(getNextNumber(pagingData));
-    }
-
-    const handlePagingSubmit = (pageNum) => {
-        /!*if(keyword == null)
-            navigate(`/admin/qna/product?page=${pageNum}`);
-        else
-            navigate(`/admin/product?keyword=${keyword}&page=${pageNum}`);*!/
-
-        pagingSubmit(pageNum, keyword, typeSelectData, navigate);
-    }*/
-
     const handleKeywordOnChange = (e) => {
         setKeywordInput(e.target.value);
     }
-
-    /*const handleSearchOnClick = async () => {
-        // navigate(`/admin/product?keyword=${keywordInput}`);
-        searchSubmit(keywordInput, navigate);
-    }*/
 
     const handleSelectOnChange = (e) => {
         const value = e.target.value;

@@ -5,7 +5,8 @@ import lombok.Builder;
 import java.util.List;
 
 public record AdminProductDetailDTO(
-        String classification
+        String productId
+        , String classification
         , String productName
         , String firstThumbnail
         , List<String> thumbnailList
@@ -18,7 +19,8 @@ public record AdminProductDetailDTO(
 ) {
 
     @Builder
-    public AdminProductDetailDTO(String classification
+    public AdminProductDetailDTO(String productId
+                                , String classification
                                 , String productName
                                 , String firstThumbnail
                                 , List<String> thumbnailList
@@ -28,6 +30,7 @@ public record AdminProductDetailDTO(
                                 , boolean isOpen
                                 , long sales
                                 , int discount) {
+        this.productId = productId;
         this.classification = classification;
         this.productName = productName;
         this.firstThumbnail = firstThumbnail;

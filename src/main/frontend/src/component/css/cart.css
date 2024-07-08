@@ -107,6 +107,13 @@
     margin-top: 10px;
 }
 
+.cart-option-price-discount {
+    font-size: medium;
+    color: grey;
+}
+
+
+
 .cart-info span {
     font-size: large;
 }
@@ -116,4 +123,5 @@
     float: right;
     font-size: x-large;
     font-weight: bold;
+    width: 17%;
 }

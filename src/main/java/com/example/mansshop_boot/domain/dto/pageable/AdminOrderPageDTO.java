@@ -1,17 +1,21 @@
 package com.example.mansshop_boot.domain.dto.pageable;
 
+import com.example.mansshop_boot.domain.enumuration.PageAmount;
+
 public record AdminOrderPageDTO(
         String keyword
         , String searchType
         , int page
         , int amount
+        , long offset
 ) {
     public AdminOrderPageDTO(String keyword, String searchType, int page) {
         this(
                 keyword
                 , searchType
                 , page
-                , 20
+                , PageAmount.DEFAULT_AMOUNT.getAmount()
+                , (long) (page - 1) * PageAmount.DEFAULT_AMOUNT.getAmount()
         );
 
     }

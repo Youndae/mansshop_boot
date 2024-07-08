@@ -1,6 +1,7 @@
 package com.example.mansshop_boot.repository;
 
-import com.example.mansshop_boot.domain.dto.admin.AdminDiscountPatchDTO;
+import com.example.mansshop_boot.domain.dto.admin.AdminDiscountProductDTO;
+import com.example.mansshop_boot.domain.dto.admin.in.AdminDiscountPatchDTO;
 import com.example.mansshop_boot.domain.dto.admin.AdminProductListDTO;
 import com.example.mansshop_boot.domain.dto.admin.AdminProductStockDataDTO;
 import com.example.mansshop_boot.domain.dto.main.MainListDTO;
@@ -20,13 +21,18 @@ public interface ProductDSLRepository {
 
     List<Product> findAllByIdList(List<String> productIdList);
 
-    Page<AdminProductListDTO> findAdminProductList(AdminPageDTO pageDTO, Pageable pageable);
+    List<AdminProductListDTO> findAdminProductList(AdminPageDTO pageDTO);
 
-    Page<AdminProductStockDataDTO> findStockData(AdminPageDTO pageDTO, Pageable pageable);
+    Long findAdminProductListCount(AdminPageDTO pageDTO);
+
+    List<AdminProductStockDataDTO> findStockData(AdminPageDTO pageDTO);
+
+    Long findStockCount(AdminPageDTO pageDTO);
 
     Page<Product> getDiscountProduct(AdminPageDTO pageDTO, Pageable pageable);
 
-    List<Product> getProductByClassification(String classification);
+    List<AdminDiscountProductDTO> getProductByClassification(String classification);
 
     void patchProductDiscount(AdminDiscountPatchDTO patchDTO);
+
 }

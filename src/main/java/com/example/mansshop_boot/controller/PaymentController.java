@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 
+/**
+ * 아임포트 결제 API 처리를 위한 컨트롤러
+ */
 @RestController
 @RequestMapping("/api/payment")
 public class PaymentController {

@@ -1,10 +1,12 @@
 import React, {useState, useEffect, useRef} from 'react';
-import AdminSideNav from "../../ui/nav/AdminSideNav";
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
+
 import {axiosInstance} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
 import {numberComma} from "../../../modules/numberCommaModule";
+
+import AdminSideNav from "../../ui/nav/AdminSideNav";
 import DefaultBtn from "../../ui/DefaultBtn";
 import AdminOrderModal from "./modal/AdminOrderModal";
 
@@ -35,6 +37,7 @@ import AdminOrderModal from "./modal/AdminOrderModal";
 function AdminPeriodSalesDetail() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
     const { date } = useParams();
+
     const [monthSales, setMonthSales] = useState({
         sales: 0,
         salesQuantity: 0,
@@ -77,6 +80,7 @@ function AdminPeriodSalesDetail() {
 
         await axiosInstance.get(`admin/sales/period/detail/${date}`)
             .then(res => {
+                console.log('res : ', res);
                 const content = res.data.content;
                 setMonthSales({
                     sales: content.monthSales,
@@ -138,7 +142,6 @@ function AdminPeriodSalesDetail() {
     const closeDailyModal = (e) => {
         if(dailyModalIsOpen && dailyModalRef.current && !dailyModalRef.current.contains(e.target)){
             setDailyModalIsOpen(false);
-
             document.body.style.cssText = '';
         }
     }
@@ -146,7 +149,6 @@ function AdminPeriodSalesDetail() {
     const closeClassificationModal = (e) => {
         if(classificationModalIsOpen && classificationModalRef.current && !classificationModalRef.current.contains(e.target)){
             setClassificationModalIsOpen(false);
-
             document.body.style.cssText = '';
         }
     }
@@ -155,12 +157,10 @@ function AdminPeriodSalesDetail() {
         const selectDate = e.target.value;
 
         setDailyModalIsOpen(false);
-
         document.body.style.cssText = '';
 
         navigate(`/admin/sales/period/detail/daily/${selectDate}`);
     }
-
 
     return (
         <div className="mypage">

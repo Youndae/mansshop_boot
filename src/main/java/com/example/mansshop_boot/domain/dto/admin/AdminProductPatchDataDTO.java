@@ -1,7 +1,5 @@
 package com.example.mansshop_boot.domain.dto.admin;
 
-import com.example.mansshop_boot.domain.dto.member.UserStatusDTO;
-import com.example.mansshop_boot.domain.entity.Product;
 import lombok.Builder;
 
 import java.util.List;
@@ -18,29 +16,23 @@ public record AdminProductPatchDataDTO(
         , List<String> thumbnailList
         , List<String> infoImageList
         , List<String> classificationList
-        , UserStatusDTO userStatus
 ) {
 
     @Builder
-    public AdminProductPatchDataDTO(Product product
-                                    , List<AdminProductOptionDTO> optionList
-                                    , List<String> thumbnailList
-                                    , List<String> infoImageList
-                                    , List<String> classificationList
-                                    , String nickname) {
+    public AdminProductPatchDataDTO(AdminProductDetailDTO productDetailDTO
+                                    , List<String> classificationList) {
         this(
-                product.getId()
-                , product.getProductName()
-                , product.getClassification().getId()
-                , product.getThumbnail()
-                , product.getProductPrice()
-                , product.isOpen()
-                , product.getProductDiscount()
-                , optionList
-                , thumbnailList
-                , infoImageList
+                productDetailDTO.productId()
+                , productDetailDTO.productName()
+                , productDetailDTO.classification()
+                , productDetailDTO.firstThumbnail()
+                , productDetailDTO.price()
+                , productDetailDTO.isOpen()
+                , productDetailDTO.discount()
+                , productDetailDTO.optionList()
+                , productDetailDTO.thumbnailList()
+                , productDetailDTO.infoImageList()
                 , classificationList
-                , new UserStatusDTO(nickname)
         );
     }
 }

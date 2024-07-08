@@ -1,14 +1,17 @@
 import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
+
 import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
+
 import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import QnADetail from "./QnADetail";
 
 function MemberQnADetail() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
     const { qnaId } = useParams();
+
     const [data, setData] = useState({
         memberQnAId: ''
         , title: ''
@@ -32,8 +35,6 @@ function MemberQnADetail() {
 
         await axiosInstance.get(`my-page/qna/member/detail/${qnaId}`)
             .then(res => {
-                console.log('memberQnADetail res : ', res);
-
                 setData({
                     memberQnAId: res.data.memberQnAId
                     , title: `[${res.data.qnaClassification}] ${res.data.qnaTitle}`
@@ -62,9 +63,6 @@ function MemberQnADetail() {
 
                 if(member !== undefined)
                     dispatch(member);
-            })
-            .catch(err => {
-                console.error('productQnA error : ', err);
             })
     }
 
@@ -112,9 +110,6 @@ function MemberQnADetail() {
                 if(checkResponseMessageOk(res))
                     getMemberQnADetail();
             })
-            .catch(err => {
-                console.error('modifyReply Error : ', err);
-            })
     }
 
     const handleInputOnChange = (e) => {
@@ -130,9 +125,6 @@ function MemberQnADetail() {
                 if(checkResponseMessageOk(res))
                     getMemberQnADetail();
             })
-            .catch(err => {
-                console.error('productQnADetail input submit error : ', err);
-            })
     }
 
     const handleDeleteBtn = async () => {
@@ -141,9 +133,6 @@ function MemberQnADetail() {
             .then(res => {
                 if(checkResponseMessageOk(res))
                     navigate('/my-page/qna/member')
-            })
-            .catch(err => {
-                console.error('memberQnA delete error : ', err);
             })
     }
 

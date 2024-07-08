@@ -29,6 +29,8 @@ jwt.properties
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+!src/main/generated/
+!logback-spring/
 
 ### NetBeans ###
 /nbproject/private/
@@ -41,6 +43,5 @@ out/
 .vscode/
 
 
-!/logback-spring/
 *.log
 *.log.gz

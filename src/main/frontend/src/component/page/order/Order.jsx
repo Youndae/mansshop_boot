@@ -2,16 +2,17 @@ import React, {useEffect, useRef, useState} from 'react';
 import {useLocation, useNavigate} from "react-router-dom";
 
 import DaumPostcode from "react-daum-postcode";
-
-import '../../css/order.css';
-
 import {axiosDefault, axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {numberComma} from "../../../modules/numberCommaModule";
+
 import DefaultBtn from "../../ui/DefaultBtn";
+
+import '../../css/order.css';
 
 function Order() {
     const location = useLocation();
     const state = location.state;
+
     const [orderProduct, setOrderProduct] = useState([]);
     const [totalPrice, setTotalPrice] = useState(0);
     const [orderType, setOrderType] = useState('');
@@ -104,7 +105,6 @@ function Order() {
                     alert('결제 실패');
                 }
             }catch (err) {
-                console.error('payment error : ', err);
                 alert('결제 오류');
             }
         })
@@ -131,9 +131,8 @@ function Order() {
         }else {
             if(paymentType === 'card')
                 requestPay();
-            else if(paymentType === 'cash'){
+            else if(paymentType === 'cash')
                 await requestOrder();
-            }
 
         }
 
@@ -168,18 +167,11 @@ function Order() {
             headers: {'Content-Type': 'application/json'}
         })
             .then(res => {
-
                 if(checkResponseMessageOk(res)){
                     alert('주문이 완료되었습니다.');
                     navigate('/');
                 }
-
-
             })
-            .catch(err => {
-                console.error('productOrder axios error : ', err);
-            })
-
     }
 
     const handleRadioSelect = (e) => {
@@ -361,7 +353,7 @@ function Order() {
 
 function AddrOverlap(props) {
     const { status } = props;
-    console.log('addr overlap : ', status);
+
     if(!status){
         return (
             <OrderOverlap
@@ -444,7 +436,6 @@ function OrderTableBody(props) {
             optionText = sizeText;
         }
     }
-
 
     return (
         <tr>

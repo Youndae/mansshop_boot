@@ -1,9 +1,11 @@
 import React, {useState, useEffect} from 'react';
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useSearchParams} from "react-router-dom";
+
 import {axiosInstance} from "../../../modules/customAxios";
 import {productDetailPagingObject} from "../../../modules/pagingModule";
 import {setMemberObject} from "../../../modules/loginModule";
+
 import AdminSideNav from "../../ui/nav/AdminSideNav";
 import AdminQnAListForm from "./AdminQnAListForm";
 
@@ -20,13 +22,14 @@ import AdminQnAListForm from "./AdminQnAListForm";
 
         테이블 오른쪽 상단에는 상품 문의와 마찬가지로 select box를 통해 미답변, 전체를 택할 수 있게 한다.
 
-     */
+ */
 function AdminMemberQnA() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
     const [params] = useSearchParams();
     const page = params.get('page') == null ? 1 : params.get('page');
     const keyword = params.get('keyword');
     const list = params.get('type') == null ? 'new' : params.get('type');
+
     const [data, setData] = useState([]);
     const [pagingData, setPagingData] = useState({
         startPage: 0,
@@ -119,7 +122,6 @@ function AdminMemberQnA() {
             />
         </div>
     )
-
 }
 
 export default AdminMemberQnA;

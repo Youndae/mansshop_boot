@@ -1,6 +1,7 @@
 package com.example.mansshop_boot.repository;
 
-import com.example.mansshop_boot.domain.dto.admin.AdminDiscountPatchDTO;
+import com.example.mansshop_boot.domain.dto.admin.AdminDiscountProductDTO;
+import com.example.mansshop_boot.domain.dto.admin.in.AdminDiscountPatchDTO;
 import com.example.mansshop_boot.domain.dto.admin.AdminProductListDTO;
 import com.example.mansshop_boot.domain.dto.admin.AdminProductStockDataDTO;
 import com.example.mansshop_boot.domain.dto.main.MainListDTO;
@@ -160,7 +161,7 @@ public class ProductDSLRepositoryImpl implements ProductDSLRepository{
                 .fetch();
     }
 
-    @Override
+    /*@Override
     public Page<AdminProductListDTO> findAdminProductList(AdminPageDTO pageDTO, Pageable pageable) {
 
         List<AdminProductListDTO> list = jpaQueryFactory.select(
@@ -184,12 +185,45 @@ public class ProductDSLRepositoryImpl implements ProductDSLRepository{
                 .orderBy(product.createdAt.desc())
                 .fetch();
 
-        JPAQuery<Long> count = jpaQueryFactory.select(product.countDistinct())
+        JPAQuery<Long> count = jpaQueryFactory.select(product.id.countDistinct())
                                 .from(product)
                                 .where(adminProductSearch(pageDTO));
 
 
         return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
+    }*/
+
+    @Override
+    public List<AdminProductListDTO> findAdminProductList(AdminPageDTO pageDTO) {
+
+        return jpaQueryFactory.select(
+                        Projections.constructor(
+                                AdminProductListDTO.class
+                                , product.id.as("productId")
+                                , product.classification.id.as("classification")
+                                , product.productName
+                                , productOption.stock.sum().as("stock")
+                                , productOption.id.count().as("optionCount")
+                                , product.productPrice.as("price")
+                        )
+                )
+                .from(product)
+                .innerJoin(productOption)
+                .on(product.id.eq(productOption.product.id))
+                .where(adminProductSearch(pageDTO))
+                .groupBy(product.id)
+                .offset(pageDTO.offset())
+                .limit(pageDTO.amount())
+                .orderBy(product.createdAt.desc())
+                .fetch();
+    }
+
+    @Override
+    public Long findAdminProductListCount(AdminPageDTO pageDTO) {
+        return jpaQueryFactory.select(product.id.countDistinct())
+                .from(product)
+                .where(adminProductSearch(pageDTO))
+                .fetchOne();
     }
 
     private BooleanExpression adminProductSearch(AdminPageDTO pageDTO) {
@@ -200,7 +234,7 @@ public class ProductDSLRepositoryImpl implements ProductDSLRepository{
         }
     }
 
-    @Override
+    /*@Override
     public Page<AdminProductStockDataDTO> findStockData(AdminPageDTO pageDTO, Pageable pageable) {
 
         NumberPath<Integer> aliasSum = Expressions.numberPath(Integer.class, "totalStock");
@@ -232,6 +266,42 @@ public class ProductDSLRepositoryImpl implements ProductDSLRepository{
                                                 .where(adminProductSearch(pageDTO));
 
         return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
+    }*/
+
+    @Override
+    public List<AdminProductStockDataDTO> findStockData(AdminPageDTO pageDTO) {
+
+        NumberPath<Integer> aliasSum = Expressions.numberPath(Integer.class, "totalStock");
+
+        return jpaQueryFactory.select(
+                        Projections.constructor(
+                                AdminProductStockDataDTO.class
+                                , product.id.as("productId")
+                                , product.classification.id.as("classification")
+                                , product.productName
+                                , ExpressionUtils.as(
+                                        JPAExpressions.select(productOption.stock.sum())
+                                                .from(productOption)
+                                                .where(productOption.product.id.eq(product.id))
+                                                .groupBy(product.id), aliasSum
+                                )
+                                , product.isOpen.as("isOpen")
+                        )
+                )
+                .from(product)
+                .where(adminProductSearch(pageDTO))
+                .orderBy(aliasSum.asc())
+                .offset(pageDTO.offset())
+                .limit(pageDTO.amount())
+                .fetch();
+    }
+
+    @Override
+    public Long findStockCount(AdminPageDTO pageDTO) {
+        return jpaQueryFactory.select(product.countDistinct())
+                .from(product)
+                .where(adminProductSearch(pageDTO))
+                .fetchOne();
     }
 
     @Override
@@ -253,8 +323,15 @@ public class ProductDSLRepositoryImpl implements ProductDSLRepository{
     }
 
     @Override
-    public List<Product> getProductByClassification(String classification) {
-        return jpaQueryFactory.select(product)
+    public List<AdminDiscountProductDTO> getProductByClassification(String classification) {
+        return jpaQueryFactory.select(
+                    Projections.constructor(
+                            AdminDiscountProductDTO.class
+                            , product.id.as("productId")
+                            , product.productName.as("productName")
+                            , product.productPrice.as("productPrice")
+                    )
+                )
                 .from(product)
                 .where(product.classification.id.eq(classification))
                 .fetch();

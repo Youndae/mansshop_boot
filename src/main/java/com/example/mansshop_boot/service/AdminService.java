@@ -1,81 +1,83 @@
 package com.example.mansshop_boot.service;
 
 import com.example.mansshop_boot.domain.dto.admin.*;
-import com.example.mansshop_boot.domain.dto.mypage.qna.MemberQnADetailDTO;
-import com.example.mansshop_boot.domain.dto.mypage.qna.ProductQnADetailDTO;
-import com.example.mansshop_boot.domain.dto.mypage.qna.req.QnAReplyInsertDTO;
+import com.example.mansshop_boot.domain.dto.admin.in.AdminDiscountPatchDTO;
+import com.example.mansshop_boot.domain.dto.admin.in.AdminPostPointDTO;
+import com.example.mansshop_boot.domain.dto.admin.in.AdminProductImageDTO;
+import com.example.mansshop_boot.domain.dto.admin.in.AdminProductPatchDTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyDTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyInsertDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
-import com.example.mansshop_boot.domain.dto.response.*;
+import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
+import org.springframework.data.domain.Page;
 
 import java.security.Principal;
 import java.util.List;
 
 public interface AdminService {
 
-    PagingResponseDTO<AdminProductListDTO> getProductList(AdminPageDTO pageDTO);
+    PagingListDTO<AdminProductListDTO> getProductList(AdminPageDTO pageDTO);
 
-    ResponseDTO<AdminProductDetailDTO> getProductDetail(String productId);
+    List<String> getClassification();
+
+    AdminProductDetailDTO getProductDetail(String productId);
 
     AdminProductPatchDataDTO getPatchProductData(String productId, Principal principal);
 
-    ResponseIdDTO<String> postProduct(AdminProductPatchDTO patchDTO, AdminProductImageDTO imageDTO);
+    String postProduct(AdminProductPatchDTO patchDTO, AdminProductImageDTO imageDTO);
 
-    ResponseIdDTO<String> patchProduct(String productId, List<Long> deleteOptionList, AdminProductPatchDTO patchDTO, AdminProductImageDTO imageDTO);
+    String patchProduct(String productId, List<Long> deleteOptionList, AdminProductPatchDTO patchDTO, AdminProductImageDTO imageDTO);
 
-    PagingResponseDTO<AdminProductStockDTO> getProductStock(AdminPageDTO pageDTO);
+    PagingListDTO<AdminProductStockDTO> getProductStock(AdminPageDTO pageDTO);
 
-    PagingResponseDTO<AdminDiscountResponseDTO> getDiscountProduct(AdminPageDTO pageDTO);
+    PagingListDTO<AdminDiscountResponseDTO> getDiscountProduct(AdminPageDTO pageDTO);
 
-    ResponseListDTO<String> getClassification();
+    List<AdminDiscountProductDTO> getSelectDiscountProduct(String classification);
 
-    ResponseListDTO<AdminDiscountProductDTO> getSelectDiscountProduct(String classification);
+    String patchDiscountProduct(AdminDiscountPatchDTO patchDTO);
 
-    ResponseMessageDTO patchDiscountProduct(AdminDiscountPatchDTO patchDTO);
+    PagingListDTO<AdminOrderResponseDTO> getAllOrderList(AdminOrderPageDTO pageDTO);
 
-    PagingResponseDTO<AdminOrderResponseDTO> getAllOrderList(AdminOrderPageDTO pageDTO);
-
-    PagingElementsResponseDTO<AdminOrderResponseDTO> getNewOrderList(AdminOrderPageDTO pageDTO);
+    PagingListDTO<AdminOrderResponseDTO> getNewOrderList(AdminOrderPageDTO pageDTO);
 
     String orderPreparation(long orderId);
 
-    PagingResponseDTO<AdminQnAListResponseDTO> getProductQnAList(AdminOrderPageDTO pageDTO);
-
-    ProductQnADetailDTO getProductQnADetail(long qnaId);
+    PagingListDTO<AdminQnAListResponseDTO> getProductQnAList(AdminOrderPageDTO pageDTO);
 
     String patchProductQnAComplete(long qnaId);
 
     String postProductQnAReply(QnAReplyInsertDTO insertDTO, Principal principal);
 
-    PagingResponseDTO<AdminQnAListResponseDTO> getMemberQnAList(AdminOrderPageDTO pageDTO);
+    String patchProductQnAReply(QnAReplyDTO replyDTO, Principal principal);
 
-    MemberQnADetailDTO getMemberQnADetail(long qnaId);
+    PagingListDTO<AdminQnAListResponseDTO> getMemberQnAList(AdminOrderPageDTO pageDTO);
 
     String patchMemberQnAComplete(long qnaId);
 
     String postMemberQnAReply(QnAReplyInsertDTO insertDTO, Principal principal);
 
-    ResponseListDTO<AdminQnAClassificationDTO> getQnAClassification();
+    List<AdminQnAClassificationDTO> getQnAClassification();
 
     String postQnAClassification(String classificationName);
 
     String deleteQnAClassification(long classificationId);
 
-    PagingResponseDTO<AdminMemberDTO> getMemberList(AdminOrderPageDTO pageDTO);
+    Page<AdminMemberDTO> getMemberList(AdminOrderPageDTO pageDTO);
 
     String postPoint(AdminPostPointDTO pointDTO);
 
-    ResponseDTO<AdminPeriodSalesResponseDTO> getPeriodSales(int term);
+    AdminPeriodSalesResponseDTO getPeriodSales(int term);
 
-    ResponseDTO<AdminPeriodMonthDetailResponseDTO> getPeriodSalesDetail(String term);
+    AdminPeriodMonthDetailResponseDTO getPeriodSalesDetail(String term);
 
     AdminClassificationSalesResponseDTO getSalesByClassification(String term, String classification);
 
     AdminPeriodSalesResponseDTO getSalesByDay(String term);
 
-    PagingElementsResponseDTO<AdminDailySalesResponseDTO> getOrderListByDay(String term, int page);
+    PagingListDTO<AdminDailySalesResponseDTO> getOrderListByDay(String term, int page);
 
-    PagingElementsResponseDTO<AdminProductSalesListDTO> getProductSalesList(AdminPageDTO pageDTO);
+    Page<AdminProductSalesListDTO> getProductSalesList(AdminPageDTO pageDTO);
 
-    ResponseDTO<AdminProductSalesDetailDTO> getProductSalesDetail(String productId);
+    AdminProductSalesDetailDTO getProductSalesDetail(String productId);
 }

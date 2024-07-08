@@ -1,9 +1,9 @@
 import React, {useEffect, useRef, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {Link, useNavigate, useSearchParams} from "react-router-dom";
+
 import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
-import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import {
     getClickNumber,
     getNextNumber,
@@ -11,6 +11,8 @@ import {
     pageSubmit,
     productDetailPagingObject
 } from "../../../modules/pagingModule";
+
+import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import Paging from "../../ui/Paging";
 import Image from "../../ui/Image";
 import MyPageModal from "./MyPageModal";
@@ -19,6 +21,7 @@ function MyPageReview() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
     const [params] = useSearchParams();
     const page = params.get('page') == null ? 1 : params.get('page');
+
     const [pagingData, setPagingData] = useState({
         startPage: 0,
         endPage: 0,
@@ -31,7 +34,6 @@ function MyPageReview() {
     const [isOpen, setIsOpen] = useState(false);
     const modalRef = useRef(null);
 
-
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -43,7 +45,6 @@ function MyPageReview() {
 
         await axiosInstance.get(`my-page/review/${page}`)
             .then(res => {
-                console.log('myPage Review res : ', res);
                 setData(res.data.content);
 
                 const pagingObject = productDetailPagingObject(page, res.data.totalPages);
@@ -61,29 +62,19 @@ function MyPageReview() {
                 if(member !== undefined)
                     dispatch(member);
             })
-            .catch(err => {
-                console.error('productQnA error : ', err);
-            })
     }
 
     const handlePageBtn = (e) => {
         pageSubmit(getClickNumber(e), navigate);
-        // handlePagingSubmit(getClickNumber(e));
     }
 
     const handlePagePrev = () => {
         pageSubmit(getPrevNumber(pagingData), navigate);
-        // handlePagingSubmit(getPrevNumber(pagingData));
     }
 
     const handlePageNext = () => {
         pageSubmit(getNextNumber(pagingData));
-        // handlePagingSubmit(getNextNumber(pagingData));
     }
-
-    /*const handlePagingSubmit = (pageNum) => {
-        navigate(`/my-page/review?page=${pageNum}`);
-    }*/
 
     const handleDeleteReview = async (e) => {
         if(window.confirm('리뷰를 삭제하시겠습니까?\n삭제 이후 재작성은 불가합니다.')){
@@ -107,11 +98,8 @@ function MyPageReview() {
     const closeModal = (e) => {
         if(isOpen && modalRef.current && !modalRef.current.contains(e.target)){
             setIsOpen(false);
-
             document.body.style.cssText = '';
         }
-
-
     }
 
     return (
@@ -165,8 +153,6 @@ function ReviewListContent(props) {
 
     if(data.createdAt !== data.updatedAt)
         createdAt = `${data.createdAt} 작성, ${data.updatedAt} 수정`;
-
-
 
     return (
         <div className="mypage-like-data-detail">

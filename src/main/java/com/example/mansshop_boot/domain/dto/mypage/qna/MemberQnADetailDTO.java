@@ -1,7 +1,5 @@
 package com.example.mansshop_boot.domain.dto.mypage.qna;
 
-import com.example.mansshop_boot.domain.dto.member.UserStatusDTO;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -14,10 +12,9 @@ public record MemberQnADetailDTO(
         , LocalDate updatedAt
         , boolean memberQnAStat
         , List<MyPageQnAReplyDTO> replyList
-        , UserStatusDTO userStatus
 ) {
 
-    public MemberQnADetailDTO(MemberQnADTO memberQnADTO, List<MyPageQnAReplyDTO> replyList, String nickname) {
+    public MemberQnADetailDTO(MemberQnADTO memberQnADTO, List<MyPageQnAReplyDTO> replyList) {
         this(
                 memberQnADTO.memberQnAId()
                 , memberQnADTO.qnaClassification()
@@ -27,7 +24,6 @@ public record MemberQnADetailDTO(
                 , memberQnADTO.updatedAt()
                 , memberQnADTO.memberQnAStat()
                 , replyList
-                , new UserStatusDTO(nickname)
         );
     }
 }

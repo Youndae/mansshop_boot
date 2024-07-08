@@ -37,6 +37,7 @@ public class CartDetailDSLRepositoryImpl implements CartDetailDSLRepository{
                                 , productOption.color
                                 , cartDetail.cartCount.as("count")
                                 , cartDetail.cartPrice.as("price")
+                                , product.productDiscount.as("discount")
                         )
                 )
                 .from(cartDetail)

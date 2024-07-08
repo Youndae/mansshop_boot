@@ -1,8 +1,9 @@
-import React, {useEffect, useState} from 'react';
-import {numberComma} from "../../modules/numberCommaModule";
-import {axiosInstance} from "../../modules/customAxios";
-import Paging from "./Paging";
+import React from 'react';
 import {Link, useNavigate} from "react-router-dom";
+
+import {numberComma} from "../../modules/numberCommaModule";
+
+import Paging from "./Paging";
 import Image from "./Image";
 
 function OrderListDetail(props) {
@@ -51,7 +52,7 @@ function OrderListDetail(props) {
 
 function OrderList(props) {
     const { orderData, userType } = props;
-    console.log('orderList orderData : ', orderData);
+
     if(orderData.length === 0) {
         return (
             <div className="non-order-data-header">
@@ -118,9 +119,6 @@ function OrderDetail(props) {
 
     const optionText = `${sizeText}${colorText}`;
 
-    console.log('data : ', data);
-
-
     return (
         <div className="mypage-order-data-detail">
             <div className="mypage-order-data-header">
@@ -157,8 +155,6 @@ function ReviewBtn(props) {
     const { reviewStat, orderStat, userType, productName, productId, optionId, detailId } = props;
     const navigate = useNavigate();
 
-    console.log('reviewStat : ', reviewStat);
-
     if(orderStat !== '배송 완료' || userType === 'none')
         return null;
 
@@ -180,16 +176,7 @@ function ReviewBtn(props) {
 function OrderStatus(props) {
     const { orderStat } = props;
 
-    /*let orderText = '';
-    if(orderStat === 0)
-        orderText = '상품 준비중';
-    else if(orderStat === 1)
-        orderText = '배송중';
-    else
-        orderText = '배송완료';*/
-
     const orderStatusText = `배송현황 : ${orderStat}`;
-
 
     return (
         <span>{orderStatusText}</span>

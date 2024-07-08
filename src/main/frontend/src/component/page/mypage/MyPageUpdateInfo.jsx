@@ -1,13 +1,16 @@
 import React, {useEffect, useRef, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
-import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
+
+import {axiosDefault, axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
+
 import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import DefaultBtn from "../../ui/DefaultBtn";
 import Overlap from "../../ui/Overlap";
 
 function MyPageUpdateInfo() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
+
     const [userData, setUserData] = useState({
         nickname: '',
         phone: '',
@@ -20,11 +23,11 @@ function MyPageUpdateInfo() {
     const [emailSuffix, setEmailSuffix] = useState(``);
     const [nicknameCheckInfo, setNicknameCheckInfo] = useState(false);
 
-    const dispatch = useDispatch();
-
     const nicknameElem = useRef(null);
     const phoneElem = useRef(null);
     const mailElem = useRef(null);
+
+    const dispatch = useDispatch();
 
     const emailPattern = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
     const phonePattern = /^01(?:0|1|6|9)([0-9]{3,4})([0-9]{4})$/;
@@ -40,7 +43,6 @@ function MyPageUpdateInfo() {
 
         await axiosInstance.get(`my-page/info`)
             .then(res => {
-                console.log('myPage get info res : ', res);
                 const contentData = res.data.content;
 
                 setUserData({
@@ -57,9 +59,6 @@ function MyPageUpdateInfo() {
 
                 if(member !== undefined)
                     dispatch(member);
-            })
-            .catch(err => {
-                console.error('productQnA error : ', err);
             })
     }
 
@@ -99,9 +98,6 @@ function MyPageUpdateInfo() {
                     }
 
                 })
-                .catch(() => {
-                    setNicknameCheck('err');
-                })
         }
     }
 
@@ -131,8 +127,6 @@ function MyPageUpdateInfo() {
     const handleSubmit = async () => {
         const userEmail = userData.email + '@' + emailSuffix;
 
-        console.log('userEmail : ', userEmail);
-
         if(!nicknameCheckInfo && userData.nickname !== '') {
             setNicknameCheck('notDuplicateCheck');
             nicknameElem.current.focus();
@@ -144,7 +138,7 @@ function MyPageUpdateInfo() {
             phoneElem.current.focus();
         }else {
 
-            await axiosInstance.patch(`my-page/info`, {
+            await axiosDefault.patch(`my-page/info`, {
                 nickname: userData.nickname,
                 phone: userData.phone,
                 mail: userEmail,
@@ -155,15 +149,12 @@ function MyPageUpdateInfo() {
                         getUserInfo();
                     }
                 })
-                .catch(err => {
-                    console.error('join error ', err);
+                .catch(() => {
                     alert('오류가 발생했습니다.\n문제가 계속된다면 관리자에게 문의해주세요');
                 })
 
         }
     }
-
-    console.log('mailProvider Type : ', emailProvider);
 
     return (
         <div className="mypage">

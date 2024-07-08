@@ -3,8 +3,7 @@ package com.example.mansshop_boot.service;
 import com.example.mansshop_boot.config.customException.ErrorCode;
 import com.example.mansshop_boot.config.customException.exception.CustomAccessDeniedException;
 import com.example.mansshop_boot.config.customException.exception.CustomNotFoundException;
-import com.example.mansshop_boot.domain.dto.member.UserStatusDTO;
-import com.example.mansshop_boot.domain.dto.product.ProductQnAPostDTO;
+import com.example.mansshop_boot.domain.dto.product.in.ProductQnAPostDTO;
 import com.example.mansshop_boot.domain.dto.pageable.ProductDetailPageDTO;
 import com.example.mansshop_boot.domain.dto.product.*;
 import com.example.mansshop_boot.domain.entity.*;
@@ -87,11 +86,8 @@ public class ProductServiceImpl implements ProductService{
 
         ProductDetailPageDTO pageDTO = new ProductDetailPageDTO();
 
-        ProductPageableDTO<ProductReviewDTO> productReview = getDetailReview(pageDTO, productId);
-        ProductPageableDTO<ProductQnAResponseDTO> productQnA = getDetailQnA(pageDTO, productId);
-
-
-        UserStatusDTO userStatus = new UserStatusDTO(uid);
+        ProductPageableDTO<ProductReviewDTO> productReview = new ProductPageableDTO<>(getDetailReview(pageDTO, productId));
+        ProductPageableDTO<ProductQnAResponseDTO> productQnA = new ProductPageableDTO<>(getDetailQnA(pageDTO, productId));
 
         int discountPrice = (int) (product.getProductPrice() * (1 - ((double) product.getProductDiscount() / 100)));
 
@@ -108,7 +104,6 @@ public class ProductServiceImpl implements ProductService{
                 .productInfoImageList(productInfoImageList)
                 .productReviewList(productReview)
                 .productQnAList(productQnA)
-                .userStatus(userStatus)
                 .build();
     }
 
@@ -121,15 +116,13 @@ public class ProductServiceImpl implements ProductService{
      * 페이징 처리를 해야하기 때문에 기능 분리.
      */
     @Override
-    public ProductPageableDTO<ProductReviewDTO> getDetailReview(ProductDetailPageDTO pageDTO, String productId) {
+    public Page<ProductReviewDTO> getDetailReview(ProductDetailPageDTO pageDTO, String productId) {
         Pageable reviewPageable = PageRequest.of(pageDTO.pageNum() - 1
                                                     , pageDTO.reviewAmount()
                                                     , Sort.by("createdAt").descending()
                                                 );
 
-        Page<ProductReviewDTO> productReview = productReviewRepository.findByProductId(productId, reviewPageable);
-
-        return new ProductPageableDTO<>(productReview);
+        return productReviewRepository.findByProductId(productId, reviewPageable);
     }
 
     /**
@@ -148,17 +141,14 @@ public class ProductServiceImpl implements ProductService{
      * 처리 이후 ProductPageableDTO 객체 생성 및 반환
      */
     @Override
-    public ProductPageableDTO<ProductQnAResponseDTO> getDetailQnA(ProductDetailPageDTO pageDTO, String productId) {
+    public Page<ProductQnAResponseDTO> getDetailQnA(ProductDetailPageDTO pageDTO, String productId) {
         Pageable qnaPageable = PageRequest.of(pageDTO.pageNum() - 1
                                                 , pageDTO.qnaAmount()
                                                 , Sort.by("createdAt").descending()
                                             );
 
         Page<ProductQnADTO> productQnA = productQnARepository.findByProductId(productId, qnaPageable);
-
-        List<Long> qnaIdList = new ArrayList<>();
-        productQnA.getContent().forEach(v -> qnaIdList.add(v.qnaId()));
-
+        List<Long> qnaIdList = productQnA.getContent().stream().map(ProductQnADTO::qnaId).toList();
         List<ProductQnAResponseDTO> productQnADTOList = new ArrayList<>();
         List<ProductQnAReply> qnaReplyList = productQnAReplyRepository.getQnAReply(qnaIdList);
         int replyIdx = 0;
@@ -181,13 +171,11 @@ public class ProductServiceImpl implements ProductService{
             productQnADTOList.add(new ProductQnAResponseDTO(dto, replyList));
         }
 
-        Page<ProductQnAResponseDTO> qnaResponseDTO = new PageImpl<>(
-                productQnADTOList
-                , qnaPageable
-                , productQnA.getTotalElements()
-        );
-
-        return new ProductPageableDTO<>(qnaResponseDTO);
+        return new PageImpl<>(
+                            productQnADTOList
+                            , qnaPageable
+                            , productQnA.getTotalElements()
+                    );
     }
 
 
@@ -206,22 +194,9 @@ public class ProductServiceImpl implements ProductService{
      */
     @Override
     public String likeProduct(String productId, Principal principal) {
+        ProductLike productLike = setLikeProduct(productId, principal);
 
-        if(principal == null)
-            throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
-
-        Member member = memberRepository.findById(principal.getName()).orElse(null);
-        Product product = productRepository.findById(productId).orElse(null);
-
-        if(member == null || product == null)
-            throw new CustomNotFoundException(ErrorCode.NOT_FOUND, ErrorCode.NOT_FOUND.getMessage());
-
-        productLikeRepository.save(
-                                    ProductLike.builder()
-                                            .member(member)
-                                            .product(product)
-                                            .build()
-                            );
+        productLikeRepository.save(productLike);
 
         return Result.OK.getResultKey();
     }
@@ -234,11 +209,26 @@ public class ProductServiceImpl implements ProductService{
      *
      * likeProduct Method 와 동일한 처리.
      *
-     * save인지 delete인지의 차이.
+     * Repository에서 Entity를 받아 그 안의 Member.userId와 Product.id를 통해 일치하는 데이터를 찾아 삭제.
      */
     @Override
     public String deLikeProduct(String productId, Principal principal) {
+        ProductLike productLike = setLikeProduct(productId, principal);
 
+        productLikeRepository.deleteByUserIdAndProductId(productLike);
+
+        return Result.OK.getResultKey();
+    }
+
+    /**
+     *
+     * @param productId
+     * @param principal
+     *
+     * 상품 아이디와 Principal을 통해 Member Entity, Product Entity를 조회하고
+     * ProductLike Entity를 생성해 반환
+     */
+    public ProductLike setLikeProduct(String productId, Principal principal) {
         if(principal == null)
             throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
 
@@ -248,26 +238,25 @@ public class ProductServiceImpl implements ProductService{
         if(member == null || product == null)
             throw new CustomNotFoundException(ErrorCode.NOT_FOUND, ErrorCode.NOT_FOUND.getMessage());
 
-        productLikeRepository.deleteByUserIdAndProductId(
-                                        ProductLike.builder()
-                                                .member(member)
-                                                .product(product)
-                                                .build()
-                                );
-
-
-
-        return Result.OK.getResultKey();
+        return ProductLike.builder()
+                            .member(member)
+                            .product(product)
+                            .build();
     }
 
+    /**
+     *
+     * @param postDTO
+     * @param principal
+     *
+     * 상품 문의 작성
+     * 컨트롤러에서 PreAuthorize로 비 로그인한 사람을 걸러내기 때문에 Principal 체크는 따로 하지 않는다.
+     */
     @Override
     public String postProductQnA(ProductQnAPostDTO postDTO, Principal principal) {
-
         Member member = memberRepository.findById(principal.getName()).orElseThrow(IllegalArgumentException::new);
         Product product = productRepository.findById(postDTO.productId()).orElseThrow(IllegalArgumentException::new);
-
         ProductQnA productQnA = postDTO.toProductQnAEntity(member, product);
-
         productQnARepository.save(productQnA);
 
         return Result.OK.getResultKey();

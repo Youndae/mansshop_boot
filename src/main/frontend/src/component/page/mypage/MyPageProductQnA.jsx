@@ -1,10 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import {useDispatch, useSelector} from "react-redux";
 import {Link, useNavigate, useSearchParams} from "react-router-dom";
+
 import {axiosInstance} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
-import Paging from "../../ui/Paging";
 import {
     getClickNumber,
     getNextNumber,
@@ -13,10 +12,15 @@ import {
     productDetailPagingObject
 } from "../../../modules/pagingModule";
 
+import MyPageSideNav from "../../ui/nav/MyPageSideNav";
+import Paging from "../../ui/Paging";
+
+
 function MyPageProductQnA() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
     const [params] = useSearchParams();
     const page = params.get('page') == null ? 1 : params.get('page');
+
     const [pagingData, setPagingData] = useState({
         startPage: 0,
         endPage: 0,
@@ -36,8 +40,6 @@ function MyPageProductQnA() {
     const getProductQnA = async () => {
         await axiosInstance.get(`my-page/qna/product/${page}`)
             .then(res => {
-                console.log('productQnA res : ', res);
-
                 setQnAData(res.data.content);
 
                 const pagingObject = productDetailPagingObject(page, res.data.totalPages);
@@ -55,29 +57,19 @@ function MyPageProductQnA() {
                 if(member !== undefined)
                     dispatch(member);
             })
-            .catch(err => {
-                console.error('productQnA error : ', err);
-            })
     }
 
     const handlePageBtn = (e) => {
         pageSubmit(getClickNumber(e), navigate);
-        // handlePagingSubmit(getClickNumber(e));
     }
 
     const handlePagePrev = () => {
         pageSubmit(getPrevNumber(pagingData), navigate);
-        // handlePagingSubmit(getPrevNumber(pagingData));
     }
 
     const handlePageNext = () => {
         pageSubmit(getNextNumber(pagingData));
-        // handlePagingSubmit(getNextNumber(pagingData));
     }
-
-    /*const handlePagingSubmit = (pageNum) => {
-        navigate(`/my-page/qna/product?page=${pageNum}`);
-    }*/
 
     return (
         <div className="mypage">

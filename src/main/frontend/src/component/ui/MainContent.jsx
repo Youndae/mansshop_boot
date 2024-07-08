@@ -1,16 +1,14 @@
 import React, {useEffect, useState} from 'react';
+import {Link} from "react-router-dom";
 
 import { axiosInstance } from "../../modules/customAxios";
+import {numberComma} from "../../modules/numberCommaModule";
 
 import '../css/main.css';
-import {Link} from "react-router-dom";
-import {numberComma} from "../../modules/numberCommaModule";
 
 function MainContent(props) {
     const { data, classification } = props;
     const [imageList, setImageList] = useState([]);
-
-    console.log('mainContent data : ', data);
 
     useEffect(() => {
         getImageDisplay();
@@ -20,7 +18,6 @@ function MainContent(props) {
         const imageArr = [];
         for(let i = 0; i < data.length; i++){
             const thumb = data[i].thumbnail;
-
 
             await axiosInstance.get(`main/display/${thumb}`, {
                 responseType: 'blob',
@@ -40,9 +37,6 @@ function MainContent(props) {
                         discountPrice: numberComma(data[i].discountPrice),
                         isSoldOut: data[i].isSoldOut
                     });
-                })
-                .catch(err => {
-                    console.error('display request error : ', err);
                 })
         }
 
@@ -80,7 +74,6 @@ function ProductPrice(props) {
     let productName = <p className="product-name">{data.productName}</p>;
     if(data.isSoldOut)
         productName = <p className="product-name sold-out">{data.productName} (품절)</p>
-
 
     if(data.discount === 0) {
         return (

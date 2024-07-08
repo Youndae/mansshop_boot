@@ -114,7 +114,7 @@ public class ProductQnADSLRepositoryImpl implements ProductQnADSLRepository{
                 .fetchOne();
     }
 
-    @Override
+    /*@Override
     public Page<AdminQnAListResponseDTO> findAllByAdminProductQnA(AdminOrderPageDTO pageDTO, Pageable pageable) {
 
         List<AdminQnAListResponseDTO> list = jpaQueryFactory.select(
@@ -147,6 +147,44 @@ public class ProductQnADSLRepositoryImpl implements ProductQnADSLRepository{
                                         .where(adminProductQnASearch(pageDTO));
 
         return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
+    }*/
+
+    @Override
+    public List<AdminQnAListResponseDTO> findAllByAdminProductQnA(AdminOrderPageDTO pageDTO) {
+
+        return jpaQueryFactory.select(
+                        Projections.constructor(
+                                AdminQnAListResponseDTO.class
+                                , productQnA.id.as("qnaId")
+                                , product.classification.id.as("classification")
+                                , product.productName.as("title")
+                                , new CaseBuilder()
+                                        .when(productQnA.member.nickname.isNull())
+                                        .then(productQnA.member.userName)
+                                        .otherwise(productQnA.member.nickname)
+                                        .as("writer")
+                                , productQnA.createdAt
+                                , productQnA.productQnAStat
+                        )
+                )
+                .from(productQnA)
+                .innerJoin(product)
+                .on(productQnA.product.id.eq(product.id))
+                .where(adminProductQnASearch(pageDTO))
+                .orderBy(productQnA.createdAt.desc())
+                .orderBy(productQnA.id.desc())
+                .offset(pageDTO.offset())
+                .limit(pageDTO.amount())
+                .fetch();
+    }
+
+    @Override
+    public Long findAllByAdminProductQnACount(AdminOrderPageDTO pageDTO) {
+
+        return jpaQueryFactory.select(productQnA.countDistinct())
+                .from(productQnA)
+                .where(adminProductQnASearch(pageDTO))
+                .fetchOne();
     }
 
     public BooleanExpression adminProductQnASearch(AdminOrderPageDTO pageDTO) {

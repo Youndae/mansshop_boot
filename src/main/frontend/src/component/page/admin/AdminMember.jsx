@@ -1,8 +1,7 @@
 import React, {useState, useEffect, useRef} from 'react';
-import AdminSideNav from "../../ui/nav/AdminSideNav";
-import Paging from "../../ui/Paging";
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useSearchParams} from "react-router-dom";
+
 import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {
     getClickNumber,
@@ -12,6 +11,9 @@ import {
     productDetailPagingObject, searchTypePageSubmit, searchTypeSubmit
 } from "../../../modules/pagingModule";
 import {setMemberObject} from "../../../modules/loginModule";
+
+import AdminSideNav from "../../ui/nav/AdminSideNav";
+import Paging from "../../ui/Paging";
 import AdminOrderModal from "./modal/AdminOrderModal";
 import DefaultBtn from "../../ui/DefaultBtn";
 
@@ -43,6 +45,7 @@ function AdminMember() {
     const page = params.get('page') == null ? 1 : params.get('page');
     const keyword = params.get('keyword');
     const searchType = params.get('type') == null ? 'userId' : params.get('type');
+
     const [data, setData] = useState([]);
     const [pagingData, setPagingData] = useState({
         startPage: 0,
@@ -64,8 +67,8 @@ function AdminMember() {
     })
     const [pointValue, setPointValue] = useState(0);
     const [keywordSelectValue, setKeywordSelectValue] = useState('');
-
     const [modalIsOpen, setModalIsOpen] = useState(false);
+
     const modalRef = useRef(null);
 
     const dispatch = useDispatch();
@@ -83,9 +86,7 @@ function AdminMember() {
 
         await axiosInstance.get(url)
             .then(res => {
-                console.log('res : ', res);
                 setData(res.data.content);
-
                 const pagingObject = productDetailPagingObject(page, res.data.totalPages);
 
                 setPagingData({
@@ -141,7 +142,6 @@ function AdminMember() {
     }
 
     const closeModal = (e) => {
-
         if(modalIsOpen && modalRef.current && !modalRef.current.contains(e.target)){
             setModalIsOpen(false);
 
@@ -155,7 +155,6 @@ function AdminMember() {
 
     const handlePostPoint = async () => {
         const uid = modalData.userId;
-        console.log('postpoint');
 
         await axiosInstance.patch(`admin/member/point`, {
             userId: uid,
@@ -220,7 +219,7 @@ function AdminMember() {
                             {data.map((value, index) => {
                                 return (
                                     <tr key={index} onClick={() => handleOnClick(value.userId)} className={'admin-order-body-tr'}>
-                                        <td>{value.userId}</td>
+                                        <td>{value.userId.length > 15 ? `${value.userId.slice(0, 15)}...` : value.userId}</td>
                                         <td>{value.userName}</td>
                                         <td>{value.nickname}</td>
                                         <td>{value.createdAt}</td>

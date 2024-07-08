@@ -7,8 +7,13 @@ import com.example.mansshop_boot.config.customException.exception.CustomTokenSte
 import com.example.mansshop_boot.config.jwt.JWTTokenProvider;
 import com.example.mansshop_boot.config.security.CustomUser;
 import com.example.mansshop_boot.domain.dto.member.*;
+import com.example.mansshop_boot.domain.dto.member.in.JoinDTO;
+import com.example.mansshop_boot.domain.dto.member.in.LoginDTO;
+import com.example.mansshop_boot.domain.dto.member.in.UserCertificationDTO;
+import com.example.mansshop_boot.domain.dto.member.in.UserResetPwDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseUserStatusDTO;
+import com.example.mansshop_boot.domain.dto.response.UserStatusDTO;
 import com.example.mansshop_boot.domain.entity.Auth;
 import com.example.mansshop_boot.domain.entity.Member;
 import com.example.mansshop_boot.domain.enumuration.Result;
@@ -57,9 +62,11 @@ public class MemberServiceImpl implements MemberService{
     @Value("#{jwt['cookie.ino.header']}")
     private String inoHeader;
 
-    private static String checkDuplicatedResponseMessage = "duplicated";
+    //중복 메세지
+    private static final String checkDuplicatedResponseMessage = "duplicated";
 
-    private static String checkNoDuplicatesResponseMessage = "No duplicates";
+    //중복되지 않음 메세지
+    private static final String checkNoDuplicatesResponseMessage = "No duplicates";
 
     /**
      *
@@ -193,6 +200,12 @@ public class MemberServiceImpl implements MemberService{
         return true;
     }
 
+    /**
+     *
+     * @param userId
+     *
+     * 회원가입 시 아이디 중복 체크
+     */
     @Override
     public String checkJoinId(String userId) {
         Member member = memberRepository.findById(userId).orElse(null);
@@ -206,6 +219,13 @@ public class MemberServiceImpl implements MemberService{
         return responseMessage;
     }
 
+    /**
+     *
+     * @param nickname
+     * @param principal
+     *
+     * 회원가입 또는 정보 수정 시 닉네임 중복 체크
+     */
     @Override
     public String checkNickname(String nickname, Principal principal) {
 
@@ -220,20 +240,31 @@ public class MemberServiceImpl implements MemberService{
         return responseMessage;
     }
 
+    /**
+     *
+     * @param searchDTO
+     *
+     * 아이디 찾기
+     */
     @Override
     public UserSearchIdResponseDTO searchId(UserSearchDTO searchDTO) {
-
-        log.info("MemberServiceImpl.searchId :: searchDTO : {}", searchDTO);
-
         String userId = memberRepository.searchId(searchDTO);
-        String message = "OK";
+        String message = Result.OK.getResultKey();
         if(userId == null)
-            message = "not found";
+            message = Result.NOTFOUND.getResultKey();
 
 
         return new UserSearchIdResponseDTO(userId, message);
     }
 
+    /**
+     *
+     * @param searchDTO
+     *
+     * 비밀번호 찾기
+     * 사용자가 입력한 아이디, 이름, 이메일에 일치하는 데이터가 있다면 숫자 6자리의 인증번호를 Redis에 저장 및 이메일 전송 이후 OK 반환
+     * 없다면 FAIL 반환
+     */
     @Override
     public String searchPw(UserSearchPwDTO searchDTO) {
 
@@ -249,8 +280,8 @@ public class MemberServiceImpl implements MemberService{
             ValueOperations<String, String> stringValueOperations = redisTemplate.opsForValue();;
             stringValueOperations.set(searchDTO.userId(), String.valueOf(certificationNo), 6L, TimeUnit.MINUTES);
 
-            /*MimeMessage mailForm = createEmailForm(searchDTO.userEmail(), certificationNo);
-            javaMailSender.send(mailForm);*/
+            MimeMessage mailForm = createEmailForm(searchDTO.userEmail(), certificationNo);
+            javaMailSender.send(mailForm);
 
             return Result.OK.getResultKey();
         }catch (Exception e) {
@@ -261,9 +292,13 @@ public class MemberServiceImpl implements MemberService{
 
     }
 
-    /*@Value("${spring.mail.username}")
-    private String sender;*/
-
+    /**
+     *
+     * @param userEmail
+     * @param certificationNo
+     *
+     * 인증번호 메일 전송 폼
+     */
     public MimeMessage createEmailForm(String userEmail, int certificationNo) throws MessagingException {
         String mailTitle = "Man's Shop 비밀번호 변경";
 
@@ -292,6 +327,13 @@ public class MemberServiceImpl implements MemberService{
         return message;
     }
 
+    /**
+     *
+     * @param certificationDTO
+     *
+     * 인증번호 확인
+     * 비밀번호 변경 시 인증번호를 한번 더 확인하기 때문에 Redis 데이터와 검증만 하고 삭제하지 않는다.
+     */
     @Override
     public String checkCertificationNo(UserCertificationDTO certificationDTO) {
         String result = null;
@@ -311,6 +353,16 @@ public class MemberServiceImpl implements MemberService{
         return Result.FAIL.getResultKey();
     }
 
+    /**
+     *
+     * @param resetDTO
+     *
+     * 비밀번호 변경
+     * 클라이언트에서 인증번호를 같이 담아 요청.
+     * 인증번호가 일치하지 않는다면 FAIL을 반환한다.
+     *
+     * 일치한다면 비밀번호를 수정.
+     */
     @Override
     public String resetPw(UserResetPwDTO resetDTO) {
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();

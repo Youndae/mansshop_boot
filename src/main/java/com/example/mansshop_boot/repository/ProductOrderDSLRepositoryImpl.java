@@ -78,48 +78,51 @@ public class ProductOrderDSLRepositoryImpl implements ProductOrderDSLRepository{
     }
 
     @Override
-    public Page<AdminOrderDTO> findAllOrderList(AdminOrderPageDTO pageDTO, Pageable pageable) {
+    public List<AdminOrderDTO> findAllOrderList(AdminOrderPageDTO pageDTO) {
 
-        List<AdminOrderDTO> list = jpaQueryFactory.select(getFindAllOrderListSelect())
-                                                .from(productOrder)
-                                                .where(searchAdminOrder(pageDTO))
-                                                .orderBy(productOrder.createdAt.desc())
-                                                .offset(pageable.getOffset())
-                                                .limit(pageable.getPageSize())
-                                                .fetch();
-
-        JPAQuery<Long> count = jpaQueryFactory.select(productOrder.countDistinct())
-                                            .from(productOrder)
-                                            .where(searchAdminOrder(pageDTO));
-
-
-        return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
+        return jpaQueryFactory.select(getFindAllOrderListSelect())
+                .from(productOrder)
+                .where(searchAdminOrder(pageDTO))
+                .orderBy(productOrder.createdAt.desc())
+                .offset(pageDTO.offset())
+                .limit(pageDTO.amount())
+                .fetch();
     }
 
     @Override
-    public Page<AdminOrderDTO> findAllNewOrderList(AdminOrderPageDTO pageDTO, LocalDateTime todayLastOrderTime, Pageable pageable) {
+    public Long findAllOrderListCount(AdminOrderPageDTO pageDTO) {
+        return jpaQueryFactory.select(productOrder.countDistinct())
+                .from(productOrder)
+                .where(searchAdminOrder(pageDTO))
+                .fetchOne();
+    }
 
-        List<AdminOrderDTO> list = jpaQueryFactory.select(getFindAllOrderListSelect())
-                                                .from(productOrder)
-                                                .where(
-                                                        productOrder.createdAt.loe(todayLastOrderTime)
-                                                                .and(productOrder.orderStat.eq(OrderStatus.ORDER.getStatusStr()))
-                                                                .and(searchAdminOrder(pageDTO))
-                                                )
-                                                .orderBy(productOrder.createdAt.desc())
-                                                .offset(pageable.getOffset())
-                                                .limit(pageable.getPageSize())
-                                                .fetch();
+    @Override
+    public List<AdminOrderDTO> findAllNewOrderList(AdminOrderPageDTO pageDTO, LocalDateTime todayLastOrderTime) {
 
-        JPAQuery<Long> count = jpaQueryFactory.select(productOrder.id.countDistinct())
-                                            .from(productOrder)
-                                            .where(
-                                                    productOrder.createdAt.loe(todayLastOrderTime)
-                                                            .and(productOrder.orderStat.eq(OrderStatus.ORDER.getStatusStr()))
-                                                            .and(searchAdminOrder(pageDTO))
-                                            );
+        return jpaQueryFactory.select(getFindAllOrderListSelect())
+                .from(productOrder)
+                .where(
+                        productOrder.createdAt.loe(todayLastOrderTime)
+                                .and(productOrder.orderStat.eq(OrderStatus.ORDER.getStatusStr()))
+                                .and(searchAdminOrder(pageDTO))
+                )
+                .orderBy(productOrder.createdAt.desc())
+                .offset(pageDTO.offset())
+                .limit(pageDTO.amount())
+                .fetch();
+    }
 
-        return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
+    @Override
+    public Long findAllNewOrderListCount(AdminOrderPageDTO pageDTO, LocalDateTime todayLastOrderTime) {
+        return jpaQueryFactory.select(productOrder.id.countDistinct())
+                .from(productOrder)
+                .where(
+                        productOrder.createdAt.loe(todayLastOrderTime)
+                                .and(productOrder.orderStat.eq(OrderStatus.ORDER.getStatusStr()))
+                                .and(searchAdminOrder(pageDTO))
+                )
+                .fetchOne();
     }
 
     public Expression<AdminOrderDTO> getFindAllOrderListSelect() {
@@ -253,37 +256,6 @@ public class ProductOrderDSLRepositoryImpl implements ProductOrderDSLRepository{
 
         return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
     }
-
-    /*@Override
-    public Page<AdminProductSalesListDTO> getProductSalesList(AdminPageDTO pageDTO, Pageable pageable) {
-
-        List<AdminProductSalesListDTO> list = jpaQueryFactory.select(
-                Projections.constructor(
-                        AdminProductSalesListDTO.class
-                        , product.classification.id.as("classification")
-                        , product.id.as("productId")
-                        , product.productName
-                        , productOrderDetail.orderDetailPrice.longValue().sum().as("sales")
-                        , product.productSales.as("salesQuantity")
-                )
-        )
-                .from(product)
-                .innerJoin(productOrderDetail)
-                .on(productOrderDetail.product.id.eq(product.id))
-                .where(searchSales(pageDTO))
-                .orderBy(product.classification.classificationStep.asc())
-                .groupBy(product.id)
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
-
-        JPAQuery<Long> count = jpaQueryFactory.select(product.countDistinct())
-                                .from(product)
-                                .where(searchSales(pageDTO));
-
-
-        return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
-    }*/
 
     @Override
     public Page<AdminProductSalesListDTO> getProductSalesList(AdminPageDTO pageDTO, Pageable pageable) {

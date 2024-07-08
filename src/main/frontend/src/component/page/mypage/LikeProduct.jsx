@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from 'react';
-import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
-import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import {Link, useNavigate, useSearchParams} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
+
+import {axiosDefault, axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {
     getClickNumber,
     getNextNumber,
@@ -11,14 +11,17 @@ import {
     productDetailPagingObject
 } from "../../../modules/pagingModule";
 import {setMemberObject} from "../../../modules/loginModule";
-import Paging from "../../ui/Paging";
 import {numberComma} from "../../../modules/numberCommaModule";
+
+import MyPageSideNav from "../../ui/nav/MyPageSideNav";
+import Paging from "../../ui/Paging";
 import Image from "../../ui/Image";
 
 function LikeProduct() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
     const [params] = useSearchParams();
     const page = params.get('page') == null ? 1 : params.get('page');
+
     const [likeData, setLikeData] = useState([]);
     const [pagingData, setPagingData] = useState({
         startPage: 0,
@@ -27,7 +30,6 @@ function LikeProduct() {
         next: false,
         activeNo: page,
     });
-
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -40,8 +42,6 @@ function LikeProduct() {
 
         await axiosInstance.get(`my-page/like/${page}`)
             .then(res => {
-                console.log('like axios res : ', res);
-
                 const pagingObject = productDetailPagingObject(page, res.data.totalPages);
 
                 setPagingData({
@@ -59,40 +59,30 @@ function LikeProduct() {
                 if(member !== undefined)
                     dispatch(member);
             })
-            .catch(err => {
-                console.error('like axios error : ', err);
-            })
     }
 
     const handlePageBtn = (e) => {
         pageSubmit(getClickNumber(e), navigate);
-        // handlePagingSubmit(getClickNumber(e));
     }
 
     const handlePagePrev = () => {
         pageSubmit(getPrevNumber(pagingData), navigate);
-        // handlePagingSubmit(getPrevNumber(pagingData));
     }
 
     const handlePageNext = () => {
         pageSubmit(getNextNumber(pagingData));
-        // handlePagingSubmit(getNextNumber(pagingData));
     }
-
-    /*const handlePagingSubmit = (pageNum) => {
-        navigate(`/my-page/like?page=${pageNum}`);
-    }*/
 
     const handleRemoveProductLike = async (e) => {
         const productId = e.target.name;
 
-        await axiosInstance.delete(`product/de-like/${productId}`)
+        await axiosDefault.delete(`product/de-like/${productId}`)
             .then(res => {
                 if(checkResponseMessageOk(res)) {
                     getLikeProduct();
                 }
             })
-            .catch(err => {
+            .catch(() => {
                 alert('오류가 발생했습니다.\n문제가 계속된다면 관리자에게 문의해주세요.');
             })
     }

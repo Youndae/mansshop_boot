@@ -46,9 +46,7 @@ class ProductQnARepositoryTest {
 
         List<MyPageQnAReplyDTO> replyDTOList = productQnAReplyRepository.findAllByQnAId(productQnAId);
 
-        String nickname = "코코에용";
-
-        ProductQnADetailDTO response = new ProductQnADetailDTO(dto, replyDTOList, nickname);
+        ProductQnADetailDTO response = new ProductQnADetailDTO(dto, replyDTOList);
 
         System.out.println(response);
     }

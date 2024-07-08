@@ -63,8 +63,6 @@ import AdminProductSalesDetail from "./component/page/admin/AdminProductSalesDet
 import Error from "./component/ui/Error";
 
 
-
-
 function App() {
   return (
       <BrowserRouter>

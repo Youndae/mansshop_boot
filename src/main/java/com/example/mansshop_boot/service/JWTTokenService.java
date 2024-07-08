@@ -1,9 +1,8 @@
 package com.example.mansshop_boot.service;
 
 
-import com.example.mansshop_boot.domain.dto.TokenDTO;
+import com.example.mansshop_boot.domain.dto.token.TokenDTO;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.ResponseEntity;
 
 public interface JWTTokenService {
 

@@ -3,12 +3,11 @@ import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
 
 import {axiosInstance} from "../../../modules/customAxios";
-
-import AdminSideNav from "../../ui/nav/AdminSideNav";
-import AddProductForm from "./AddProductForm";
 import {setMemberObject} from "../../../modules/loginModule";
 import {imageInputChange, imageValidation, setProductFormData} from "../../../modules/imageModule";
 
+import AdminSideNav from "../../ui/nav/AdminSideNav";
+import AddProductForm from "./AddProductForm";
 
 /*
         상품 수정 컴포넌트.
@@ -21,6 +20,7 @@ import {imageInputChange, imageValidation, setProductFormData} from "../../../mo
 function UpdateProduct() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
     const { productId } = useParams();
+
     const [productData, setProductData] = useState({
         classification: '',
         productName: '',
@@ -52,8 +52,8 @@ function UpdateProduct() {
     const getPatchData = async (productId) => {
         await axiosInstance.get(`admin/product/patch/${productId}`)
             .then(res => {
-                console.log('update res : ', res);
-                const content = res.data;
+                console.log('patch product res : ', res);
+                const content = res.data.content;
 
                 setProductData({
                     classification: content.classificationId,
@@ -75,15 +75,9 @@ function UpdateProduct() {
                 if(member !== undefined)
                     dispatch(member);
             })
-            .catch(err => {
-                console.error('getPatchProduct error : ', err);
-            })
     }
 
-
-
     const handleProductOnChange = (e) => {
-
         let value = e.target.value;
 
         if(e.target.name === 'price' || e.target.name === 'discount')
@@ -99,7 +93,6 @@ function UpdateProduct() {
 
     const handleOptionOnChange = (e) => {
         const idx = e.target.parentElement.parentElement.getAttribute('value');
-
         let value = e.target.value;
 
         if(e.target.name === 'optionStock')
@@ -156,64 +149,17 @@ function UpdateProduct() {
         setOptionList(optionArr);
     }
 
-    /*
-        req data
-        productId -> QueryString
-        formData
-            productData.productName
-            productData.classification
-            productData.price
-            productData.isOpen
-            productData.discount
-
-            optionList
-                optionId
-                size
-                color
-                optionStock
-                optionIsOpen
-            deleteOptionId[]
-
-            newFirstThumbnail
-            deleteFirstThumbnail
-            newThumbnail[]
-            deleteThumbnail[]
-            newInfoImage[]
-            deleteInfoImage[]
-
-
-       module getFormData()
-            productData
-            optionList
-            newFirstThumbnail
-            newThumbnail
-            newInfoImage
-
-       update FormData
-            deleteOptionId[]
-            deleteFirstThumbnail
-            deleteThumbnail[]
-            deleteInfoImage[]
-
-     */
     const handleSubmitOnClick = async (e) => {
         e.preventDefault();
 
-        console.log('productData : ', productData);
-
         let formData = setProductFormData(productData, optionList, newFirstThumbnail, newThumbnail, newInfoImage);
-
-
-        deleteOption.forEach(deleteOptionId => formData.append('deleteOptionList', deleteOptionId));
 
         if(deleteFirstThumbnail !== '')
             formData.append('deleteFirstThumbnail', deleteFirstThumbnail);
+
+        deleteOption.forEach(deleteOptionId => formData.append('deleteOptionList', deleteOptionId));
         deleteThumbnail.forEach(file => formData.append('deleteThumbnail', file));
         deleteInfoImage.forEach(file => formData.append('deleteInfoImage', file));
-
-        for(let key of formData.keys())
-            console.log(key, " : ", formData.get(key));
-
 
         await axiosInstance.patch(`admin/product/${productId}`, formData, {
             headers: {
@@ -221,12 +167,9 @@ function UpdateProduct() {
             }
         })
             .then(res => {
+                console.log('submit res : ', res);
                 navigate(`/admin/product/${res.data.id}`);
             })
-            .catch(err => {
-                console.error('patchProduct Error : ', err);
-            })
-
     }
 
     const handleSelectOnChange = (e) => {
@@ -263,23 +206,17 @@ function UpdateProduct() {
 
     const handleRemoveThumbnail = (e) => {
         const deleteIdx = e.target.value;
-
         const files = [...newThumbnail];
-
         files.splice(deleteIdx, 1);
-
         setNewThumbnail(files);
     }
 
     const handleRemoveOriginalThumbnail = (e) => {
         const deleteIdx = e.target.value;
-
         const files = [...thumbnail];
         const deleteFiles = [...deleteThumbnail];
         deleteFiles.push(files[deleteIdx]);
         files.splice(deleteIdx, 1);
-
-        console.log('handleRemoveOriginThumb :: deleteFilesArr : ', deleteFiles);
 
         setDeleteThumbnail(deleteFiles);
         setThumbnail(files);
@@ -294,18 +231,14 @@ function UpdateProduct() {
 
     const handleRemoveInfoImage = (e) => {
         const deleteIdx = e.target.value;
-
         const files = [...newInfoImage];
-
         files.splice(deleteIdx, 1);
-
         setNewInfoImage(files);
         setInfoImageLength(infoImageLength - 1);
     }
 
     const handleRemoveOriginalInfoImage = (e) => {
         const deleteIdx = e.target.value;
-
         const files = [...infoImage];
         const deleteFiles = [...deleteInfoImage];
         deleteFiles.push(files[deleteIdx]);

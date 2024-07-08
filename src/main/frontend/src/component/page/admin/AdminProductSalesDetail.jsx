@@ -1,11 +1,12 @@
 import React, {useState, useEffect} from 'react';
-import AdminSideNav from "../../ui/nav/AdminSideNav";
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
+
 import {axiosInstance} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
 import {numberComma} from "../../../modules/numberCommaModule";
 
+import AdminSideNav from "../../ui/nav/AdminSideNav";
 
 /*
         params로 productId를 받는다.
@@ -19,6 +20,7 @@ import {numberComma} from "../../../modules/numberCommaModule";
 function AdminProductSalesDetail() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
     const { productId } = useParams();
+
     const [detailData, setDetailData] = useState({
         productName: '',
         totalSales: 0,
@@ -36,7 +38,6 @@ function AdminProductSalesDetail() {
     const [optionLastYearSales, setOptionLastYearSales] = useState([]);
 
     const dispatch = useDispatch();
-    const navigate = useNavigate();
 
     useEffect(() => {
         getProductSalesDetail();
