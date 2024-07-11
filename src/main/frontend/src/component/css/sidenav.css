@@ -1,11 +1,11 @@
 .side-nav {
-    width: 170px;
+    width: 190px;
     margin: 5% 0 0 20%;
     position: fixed;
 }
 
 .side-nav-ul {
-    width: 170px;
+    width: 190px;
 }
 
 .side-nav li {
@@ -34,7 +34,7 @@
 }
 
 .side-nav-category-ul li {
-    width: 100px;
+    width: 110px;
 }
 
 .admin-side-nav-category-ul {

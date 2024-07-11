@@ -97,12 +97,16 @@
     float: right;
 }
 
+.order-data-info span {
+    width: 100%;
+}
+
 .order-data-info-content {
     font-size: large;
     font-weight: 500;
     height: 30px;
     align-content: center;
-    padding: 0 5px 0 5px;
+    padding: 5px;
 }
 
 .non-member-order {

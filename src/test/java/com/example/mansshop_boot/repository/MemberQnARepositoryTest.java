@@ -5,6 +5,7 @@ import com.example.mansshop_boot.domain.dto.mypage.qna.MemberQnADetailDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.MemberQnAListDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.MyPageQnAReplyDTO;
 import com.example.mansshop_boot.domain.dto.response.PagingResponseDTO;
+import com.example.mansshop_boot.domain.dto.response.UserStatusDTO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,7 @@ class MemberQnARepositoryTest {
 
         String nickname = "코코에용";
 
-        PagingResponseDTO<MemberQnAListDTO> response = new PagingResponseDTO<>(dto, nickname);
+        PagingResponseDTO<MemberQnAListDTO> response = new PagingResponseDTO<>(dto, new UserStatusDTO(nickname));
 
         System.out.println(response);
     }
@@ -52,7 +53,7 @@ class MemberQnARepositoryTest {
 
         String nickname = "테스터nick172";
 
-        MemberQnADetailDTO response = new MemberQnADetailDTO(qnaDTO, replyDTOList, nickname);
+        MemberQnADetailDTO response = new MemberQnADetailDTO(qnaDTO, replyDTOList);
 
         System.out.println(response);
     }
