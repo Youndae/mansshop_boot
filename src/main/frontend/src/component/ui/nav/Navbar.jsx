@@ -8,7 +8,9 @@ import {handleLocationPathToLogin} from "../../../modules/loginModule";
 import "../../css/header.css";
 
 function Navbar() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
+    const status = useSelector((state) => state.member);
+    const loginStatus = status.loginStatus;
+    const adminStatus = status.id === '관리자';
     const { pathname } = useLocation();
 
     const [keyword, setKeyword] = useState('');
@@ -74,6 +76,10 @@ function Navbar() {
             navigate(`/category/${btnName}`);
     }
 
+    const handleAdminPageBtn = () => {
+        navigate('/admin/product');
+    }
+
     return (
         <div className="header">
             <div className="header-nav">
@@ -86,11 +92,13 @@ function Navbar() {
                     <ul className="menu-nav">
                         <NavbarBtn
                             loginState={loginStatus}
+                            adminStatus={adminStatus}
                             handleLoginBtn={handleLoginBtn}
                             handleLogoutBtn={handleLogoutBtn}
                             handleCartBtn={handleCartBtn}
                             handleOrderListBtn={handleOrderBtn}
                             handleMyPageBtn={handleMyPageBtn}
+                            handleAdminPageBtn={handleAdminPageBtn}
                         />
                         <li>
                             <div className="main-search-form">
@@ -119,9 +127,26 @@ function Navbar() {
 }
 
 function NavbarBtn(props) {
-    const { loginState, handleLoginBtn, handleLogoutBtn, handleCartBtn, handleOrderListBtn, handleMyPageBtn} = props;
+    const { loginState, adminStatus, handleLoginBtn, handleLogoutBtn, handleCartBtn, handleOrderListBtn, handleMyPageBtn, handleAdminPageBtn} = props;
 
     if(loginState){
+
+        if(adminStatus){
+            return (
+                <>
+                    <li>
+                        <button className="header-btn" type={'button'} onClick={handleLogoutBtn}>로그아웃</button>
+                    </li>
+                    <li>
+                        <button className="header-btn" type={'button'} onClick={handleAdminPageBtn}>관리자페이지</button>
+                    </li>
+                    <li>
+                        <button className="header-btn" type={'button'} onClick={handleCartBtn}>장바구니</button>
+                    </li>
+                </>
+            )
+        }
+
         return (
             <>
                 <li>

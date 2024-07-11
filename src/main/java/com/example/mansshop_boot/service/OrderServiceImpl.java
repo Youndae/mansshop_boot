@@ -74,32 +74,21 @@ public class OrderServiceImpl implements OrderService{
             Long cartId = cartRepository.findIdByUserId(cartMemberDTO);
             List<CartDetail> cartDetailList = cartDetailRepository.findAllCartDetailByCartId(cartId);
 
-            //장바구니 상세 데이터(cartDetailList)와 주문 상품 옵션 리스트(orderOptionList)에서 ProductOption의 id가 일치하는 것을 리스트화
-            List<Long> deleteCartDetailIdList = cartDetailList.stream()
-                    .filter(cartDetail ->
-                            orderOptionIdList.contains(
-                                    cartDetail.getProductOption()
-                                            .getId()
-                            )
-                    )
-                    .map(CartDetail::getId)
-                    .toList();
-
-//            List<Long> deleteCartDetailIdList = new ArrayList<>();
-
-            //조회한 장바구니 상세 정보와 옵션 아이디 리스트를 비교하면서 일치하는 경우 삭제 리스트에 장바구니 상세 아이디를 담는다.
-            /*for(CartDetail data : cartDetailList)
-                if(orderOptionIdList.contains(data.getProductOption().getId()))
-                    deleteCartDetailIdList.add(data.getId());*/
-
-            //담아준 삭제해야 할 상세 데이터 크기와 사용자의 장바구니 상세 데이터 리스트 크기가 같다면 전체 구매라고 판단해 장바구니를 삭제한다.
-            //장바구니와 장바구니 상세는 delete cascade 상태이기 때문에 장바구니 데이터만 삭제하도록 한다.
-            //일치하지 않는 경우 해당하는 상세 데이터만 삭제한다.
-            if(cartDetailList.size() == deleteCartDetailIdList.size())
+            if(cartDetailList.size() == orderOptionIdList.size())
                 cartRepository.deleteById(cartId);
-            else
-                cartDetailRepository.deleteAllById(deleteCartDetailIdList);
+            else{
+                List<Long> deleteCartDetailIdList = cartDetailList.stream()
+                        .filter(cartDetail ->
+                                orderOptionIdList.contains(
+                                        cartDetail.getProductOption()
+                                                .getId()
+                                )
+                        )
+                        .map(CartDetail::getId)
+                        .toList();
 
+                cartDetailRepository.deleteAllById(deleteCartDetailIdList);
+            }
         }
 
         //상품 옵션 재고 수정을 위해 주문 내역에 해당하는 상품 옵션 데이터를 조회
