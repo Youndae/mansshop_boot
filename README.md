@@ -9,6 +9,9 @@
 * react와 Spring이 분리된 환경이 아닌 하나의 프로젝트에 합쳐서 처리하는 경험.
 * 게시판 같은 간단한 CRUD에서 벗어나 좀 더 다양하게 연결되어있는 데이터베이스 구조에서 JPA 사용 및 QueryDSL 사용의 경험.
 
+## JSP 버전 github
+* https://github.com/Youndae/mansShop
+
 <br />
 
 # 프로젝트 정보
