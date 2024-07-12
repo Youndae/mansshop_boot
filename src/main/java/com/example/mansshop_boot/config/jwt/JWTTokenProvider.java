@@ -320,7 +320,7 @@ public class JWTTokenProvider {
                 .from(name, value)
                 .path("/")
                 .maxAge(expires)
-//                .secure(true)
+                .secure(true)
                 .httpOnly(true)
                 .sameSite("Strict")
                 .build()
