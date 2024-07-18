@@ -18,6 +18,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -139,6 +140,18 @@ public class MainController {
         }
 
         return result;
+    }
+
+    /**
+     * S3 getUrl
+     *
+     * "https://mansshop-buket.s3.ap-northeast-2.amazonaws.com/20240717195353d45eecd3-5ba4-4d09-b45a-25daead4ebd1.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Date=20240717T121956Z&amp;X-Amz-SignedHeaders=host&amp;X-Amz-Expires=59&amp;X-Amz-Credential=AKIAZ3HD7KYURZCE2WF6%2F20240717%2Fap-northeast-2%2Fs3%2Faws4_request&amp;X-Amz-Signature=331b7eb5f2cb65ee227890643389f0a74b02eeb9b5fc111db9ba12108b032621"
+     */
+    @GetMapping("/s3/display/{imageName}")
+    public ResponseEntity<InputStreamResource> s3Display(@PathVariable(name = "imageName") String imageName) {
+//        String url = mainService.getSignedUrl(imageName).toString();
+
+        return mainService.getSignedUrl(imageName);
     }
 
     /**

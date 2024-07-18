@@ -52,6 +52,10 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
 
+    // aws
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
+
     // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-mail
     implementation 'org.springframework.boot:spring-boot-starter-mail:3.3.0'
 
