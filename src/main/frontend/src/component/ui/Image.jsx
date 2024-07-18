@@ -10,7 +10,7 @@ function Image(props) {
             getImageDisplay();
     }, [imageName]);
 
-    const getImageDisplay = async () => {
+    /*const getImageDisplay = async () => {
 
         await axiosInstance.get(`main/display/${imageName}`, {
             responseType: 'blob',
@@ -24,7 +24,31 @@ function Image(props) {
 
                 setImgSrc(url);
             })
+    }*/
+
+    const getImageDisplay = async () => {
+
+        await axiosInstance.get(`main/s3/display/${imageName}`, {
+            responseType: 'blob',
+        })
+            .then(res => {
+                console.log('res : ', res);
+                const url = window.URL
+                    .createObjectURL(res.data);
+
+                console.log('url : ', url);
+
+                setImgSrc(url);
+            })
     }
+
+    /*const getImageDisplay = async () => {
+
+        await axiosInstance.get(`main/s3/display/${imageName}`)
+            .then(res => {
+                setImgSrc(res.data);
+            })
+    }*/
 
     return (
         <img src={imgSrc} alt={''} className={className}/>

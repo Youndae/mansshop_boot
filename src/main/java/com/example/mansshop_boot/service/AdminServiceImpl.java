@@ -1,5 +1,11 @@
 package com.example.mansshop_boot.service;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.example.mansshop_boot.domain.dto.admin.*;
 import com.example.mansshop_boot.domain.dto.admin.in.AdminDiscountPatchDTO;
 import com.example.mansshop_boot.domain.dto.admin.in.AdminPostPointDTO;
@@ -27,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -295,7 +302,7 @@ public class AdminServiceImpl implements AdminService {
      * 파일 저장 처리.
      * 저장명을 반환.
      */
-    public String imageInsert(MultipartFile image) {
+    /*public String imageInsert(MultipartFile image) {
         StringBuffer sb = new StringBuffer();
         String saveName = sb.append(new SimpleDateFormat("yyyyMMddHHmmss")
                                         .format(System.currentTimeMillis()))
@@ -313,6 +320,54 @@ public class AdminServiceImpl implements AdminService {
         }
 
         return saveName;
+    }*/
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
+    private final AmazonS3 amazonS3;
+    private final AmazonS3Client amazonS3Client;
+
+    /**
+     *
+     * @param image
+     * S3에 파일 저장
+     * 흰배경 거울 대표
+     * 주황배경 두장 썸네일
+     * 형광가방 정보
+     */
+    public String imageInsert(MultipartFile image) {
+        StringBuffer sb = new StringBuffer();
+        String saveName = sb.append(new SimpleDateFormat("yyyyMMddHHmmss")
+                        .format(System.currentTimeMillis()))
+                .append(UUID.randomUUID().toString())
+                .append(image.getOriginalFilename().substring(image.getOriginalFilename().lastIndexOf(".")))
+                .toString();
+
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentLength(image.getSize());
+        objectMetadata.setContentType(image.getContentType());
+
+        try{
+            amazonS3.putObject(
+                    new PutObjectRequest(
+                            bucket
+                            , saveName
+                            , image.getInputStream()
+                            , objectMetadata
+                    )
+                            .withCannedAcl(CannedAccessControlList.PublicRead)
+            );
+        }catch (Exception e) {
+            log.warn("productImage insert IOException");
+            e.printStackTrace();
+            throw new NullPointerException();
+        }
+
+
+        log.info("AdminServiceImpl.imageInsert :: saveName : {}", saveName);
+        log.info("AdminServiceImpl.imageInsert :: imageUrl : {}", String.valueOf(amazonS3Client.getUrl(bucket, saveName)));
+
+        return saveName;
     }
 
     /**
@@ -321,11 +376,23 @@ public class AdminServiceImpl implements AdminService {
      *
      * 파일 삭제 처리.
      */
-    public void deleteImage(String imageName) {
+    /*public void deleteImage(String imageName) {
         File file = new File(filePath + imageName);
 
         if(file.exists())
             file.delete();
+    }*/
+
+    /**
+     *
+     * @param imageName
+     *
+     * S3 파일 삭제
+     */
+    public void deleteImage(String imageName) {
+        amazonS3.deleteObject(
+                new DeleteObjectRequest(bucket, imageName)
+        );
     }
 
     /**

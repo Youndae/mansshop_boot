@@ -1,5 +1,9 @@
 package com.example.mansshop_boot.service;
 
+import com.amazonaws.HttpMethod;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.model.S3Object;
 import com.example.mansshop_boot.domain.dto.main.MainListDTO;
 import com.example.mansshop_boot.domain.dto.main.MainListResponseDTO;
 import com.example.mansshop_boot.domain.dto.pageable.MemberPageDTO;
@@ -7,14 +11,22 @@ import com.example.mansshop_boot.domain.dto.pageable.PagingMappingDTO;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
 import com.example.mansshop_boot.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.net.URL;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -22,6 +34,11 @@ import java.util.List;
 public class MainServiceImpl implements MainService{
 
     private final ProductRepository productRepository;
+
+    private final AmazonS3 amazonS3;
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
 
     /**
      *
@@ -78,5 +95,36 @@ public class MainServiceImpl implements MainService{
     public List<MainListResponseDTO> mainListDataMapping(List<MainListDTO> dto) {
 
         return dto.stream().map(MainListResponseDTO::new).toList();
+    }
+
+    /*@Override
+    public URL getSignedUrl(String imageName) {
+
+        Date expiration = new Date();
+        long expirationTime = expiration.getTime();
+        expirationTime += 1000 * 60 * 1; //1 minute 최종 설정은 테스트 해보고 결정
+        expiration.setTime(expirationTime);
+
+        GeneratePresignedUrlRequest generatePresignedUrlRequest =
+                new GeneratePresignedUrlRequest(bucket, imageName)
+                        .withMethod(HttpMethod.GET)
+                        .withExpiration(expiration);
+
+
+        return amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
+    }*/
+
+
+    @Override
+    public ResponseEntity<InputStreamResource> getSignedUrl(String imageName) {
+
+        S3Object s3Object = amazonS3.getObject(bucket, imageName);
+        InputStreamResource resource = new InputStreamResource(s3Object.getObjectContent());
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + imageName + "\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .contentLength(s3Object.getObjectMetadata().getContentLength())
+                .body(resource);
     }
 }
