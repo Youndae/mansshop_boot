@@ -28,15 +28,12 @@ function Image(props) {
 
     const getImageDisplay = async () => {
 
-        await axiosInstance.get(`main/s3/display/${imageName}`, {
+        await axiosInstance.get(`main/display/${imageName}`, {
             responseType: 'blob',
         })
             .then(res => {
-                console.log('res : ', res);
                 const url = window.URL
                     .createObjectURL(res.data);
-
-                console.log('url : ', url);
 
                 setImgSrc(url);
             })
