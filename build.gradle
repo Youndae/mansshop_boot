@@ -84,9 +84,9 @@ task installReact(type: Exec) {
     inputs.dir "$frontendDir"
     group = BasePlugin.BUILD_GROUP
     if(System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
-        commandLine "cmd", "/c", "npm.cmd audit fix && npm.cmd install"
+        commandLine "cmd", "/c", "npm.cmd install"
     } else {
-        commandLine "sh", "-c", "npm audit fix && npm install"
+        commandLine "sh", "-c", "npm install"
     }
 }
 
