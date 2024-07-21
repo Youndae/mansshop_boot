@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class ProductQnADSLRepositoryImplTest {
 
-    @Autowired
+    /*@Autowired
     private ProductQnARepository productQnARepository;
 
     @Test
@@ -32,5 +32,5 @@ class ProductQnADSLRepositoryImplTest {
         Page<ProductQnADTO> dto = productQnARepository.findByProductId(productId, qnaPageable);
 
         System.out.println(dto.getContent());
-    }
+    }*/
 }

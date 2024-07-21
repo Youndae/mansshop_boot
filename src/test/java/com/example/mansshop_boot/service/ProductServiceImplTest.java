@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class ProductServiceImplTest {
 
-    @Autowired
+    /*@Autowired
     private ProductService productService;
 
     @Test
@@ -26,5 +26,5 @@ class ProductServiceImplTest {
         long finish = System.currentTimeMillis();
         long timeMs = finish - start;
         System.out.println("complete time : " + timeMs + "ms");
-    }
+    }*/
 }

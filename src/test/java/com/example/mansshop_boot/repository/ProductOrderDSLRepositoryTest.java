@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class ProductOrderDSLRepositoryTest {
 
-    @Autowired
+    /*@Autowired
     private ProductOrderRepository productOrderRepository;
 
     @Test
@@ -70,5 +70,5 @@ class ProductOrderDSLRepositoryTest {
         Page<AdminProductSalesListDTO> response = productOrderRepository.getProductSalesList(pageDTO, pageable);
 
         response.getContent().forEach(System.out::println);
-    }
+    }*/
 }

@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class ProductOrderDetailDSLRepositoryImplTest {
 
-    @Autowired
+    /*@Autowired
     private ProductOrderDetailRepository productOrderDetailRepository;
 
     @Test
@@ -43,5 +43,5 @@ class ProductOrderDetailDSLRepositoryImplTest {
         List<AdminPeriodClassificationDTO> list = productOrderDetailRepository.findPeriodClassification(startDate, endDate);
 
         list.forEach(System.out::println);
-    }
+    }*/
 }

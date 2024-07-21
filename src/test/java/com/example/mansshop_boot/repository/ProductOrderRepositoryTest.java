@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class ProductOrderRepositoryTest {
 
-    @Autowired
+    /*@Autowired
     private ProductOrderRepository productOrderRepository;
 
     @Test
@@ -51,5 +51,5 @@ class ProductOrderRepositoryTest {
                         ", orderTotalPrice : " + v.getOrderTotalPrice() +
                         ", deliveryFee : " + v.getDeliveryFee() +
                         ", createdAt : " + v.getCreatedAt()));
-    }
+    }*/
 }

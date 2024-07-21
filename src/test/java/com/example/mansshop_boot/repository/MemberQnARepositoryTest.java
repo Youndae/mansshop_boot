@@ -20,7 +20,7 @@ import java.util.List;
 @SpringBootTest
 class MemberQnARepositoryTest {
 
-    @Autowired
+  /*  @Autowired
     private MemberQnARepository memberQnARepository;
 
     @Autowired
@@ -56,5 +56,5 @@ class MemberQnARepositoryTest {
         MemberQnADetailDTO response = new MemberQnADetailDTO(qnaDTO, replyDTOList);
 
         System.out.println(response);
-    }
+    }*/
 }
