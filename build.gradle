@@ -86,7 +86,7 @@ task installReact(type: Exec) {
     if(System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
         commandLine "cmd", "/c", "npm.cmd audit fix && npm.cmd install"
     } else {
-        commandLine "bash", "-c", "npm audit fix && npm install"
+        commandLine "sh", "-c", "npm audit fix && npm install"
     }
 }
 
@@ -98,7 +98,7 @@ task buildReact(type: Exec) {
     if(System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
         commandLine "npm.cmd", "run-script", "build"
     }else {
-        commandLine "bash", "-c", "npm run-script build"
+        commandLine "sh", "-c", "npm run-script build"
     }
 }
 
