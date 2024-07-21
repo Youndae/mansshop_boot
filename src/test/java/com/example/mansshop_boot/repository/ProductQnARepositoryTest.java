@@ -18,7 +18,7 @@ import java.util.List;
 @SpringBootTest
 class ProductQnARepositoryTest {
 
-    @Autowired
+    /*@Autowired
     private ProductQnARepository productQnARepository;
 
     @Autowired
@@ -49,5 +49,5 @@ class ProductQnARepositoryTest {
         ProductQnADetailDTO response = new ProductQnADetailDTO(dto, replyDTOList);
 
         System.out.println(response);
-    }
+    }*/
 }

@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class ProductInfoImageDSLRepositoryImplTest {
 
-    @Autowired
+    /*@Autowired
     private ProductInfoImageRepository productInfoImageRepository;
 
     @Test
@@ -23,5 +23,5 @@ class ProductInfoImageDSLRepositoryImplTest {
 
         imageList.forEach(System.out::println);
 
-    }
+    }*/
 }

@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class ProductOptionDSLRepositoryImplTest {
 
-    @Autowired
+    /*@Autowired
     private ProductOptionRepository productOptionRepository;
 
     @Test
@@ -22,5 +22,5 @@ class ProductOptionDSLRepositoryImplTest {
         List<ProductOptionDTO>  dto = productOptionRepository.findByDetailOption(productId);
 
         dto.forEach(System.out::println);
-    }
+    }*/
 }

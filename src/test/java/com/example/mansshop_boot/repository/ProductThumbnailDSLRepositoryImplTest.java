@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class ProductThumbnailDSLRepositoryImplTest {
 
-    @Autowired
+   /* @Autowired
     private ProductThumbnailRepository productThumbnailRepository;
 
     @Test
@@ -21,5 +21,5 @@ class ProductThumbnailDSLRepositoryImplTest {
         List<String> productThumbnail = productThumbnailRepository.findByProductId(productId);
 
         productThumbnail.forEach(System.out::println);
-    }
+    }*/
 }

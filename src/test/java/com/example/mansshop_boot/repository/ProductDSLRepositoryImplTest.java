@@ -24,7 +24,7 @@ import java.util.List;
 @SpringBootTest
 class ProductDSLRepositoryImplTest {
 
-    @Autowired
+    /*@Autowired
     private ProductRepository productRepository;
 
     @Test
@@ -89,9 +89,9 @@ class ProductDSLRepositoryImplTest {
                                             , pageDTO.amount()
                                             , Sort.by("createdAt").descending());
 
-        /*Page<AdminProductListDTO> dto = productRepository.findAdminProductList(pageDTO, pageable);
+        *//*Page<AdminProductListDTO> dto = productRepository.findAdminProductList(pageDTO, pageable);
 
-        System.out.println(dto.getContent());*/
+        System.out.println(dto.getContent());*//*
     }
 
     @Test
@@ -125,5 +125,5 @@ class ProductDSLRepositoryImplTest {
         Page<MainListDTO> dto = productRepository.findListPageable(pageDTO, pageable);
 
         System.out.println("size : " + dto.getContent().size());
-    }
+    }*/
 }

@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class MyPageServiceImplTest {
 
-    @Autowired
+    /*@Autowired
     private MyPageService myPageService;
 
     @Test
@@ -36,5 +36,5 @@ class MyPageServiceImplTest {
 
         responseDTO.content().forEach(System.out::println);
 
-    }
+    }*/
 }

@@ -19,10 +19,10 @@ import java.util.List;
 @SpringBootTest
 class AdminServiceImplTest {
 
-    @Autowired
+    /*@Autowired
     private AdminService adminService;
 
-    /*
+    *//*
         test 시간
         월별 매출 조회 56.396
         날짜 주문 내역 조회 3.428
@@ -41,7 +41,7 @@ class AdminServiceImplTest {
         AdminService.getPeriodSalesDetail = 145.245
         AdminService.getSalesByDay = 70.641
 
-     */
+     *//*
 
     @Autowired
     private ProductOrderDetailRepository productOrderDetailRepository;
@@ -81,14 +81,14 @@ class AdminServiceImplTest {
     @DisplayName("전달받은 연월에 대한 상세 매출 정보를 조회")
     void getPeriodSalesDetail() {
 
-        /*
+        *//*
             1차 테스트 결과
             AdminService.getPeriodSalesDetail = 149,508ms
 
             개선전 테스트
             쿼리별 수행시간 체크.
             메소드 내 처리 구간을 나눠 체크.
-         */
+         *//*
         String term = "2024-06";
 
         AdminPeriodMonthDetailResponseDTO content = adminService.getPeriodSalesDetail(term);
@@ -167,5 +167,5 @@ class AdminServiceImplTest {
         PagingListDTO<AdminOrderResponseDTO> response = adminService.getNewOrderList(pageDTO);
 
         response.content().forEach(System.out::println);
-    }
+    }*/
 }

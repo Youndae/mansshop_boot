@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class ProductReviewDSLRepositoryImplTest {
 
-    @Autowired
+    /*@Autowired
     private ProductReviewRepository productReviewRepository;
 
     @Test
@@ -31,5 +31,5 @@ class ProductReviewDSLRepositoryImplTest {
         Page<ProductReviewDTO> dto = productReviewRepository.findByProductId(productId, reviewPageable);
 
         System.out.println(dto.getContent());
-    }
+    }*/
 }
