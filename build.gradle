@@ -71,8 +71,6 @@ tasks.named('test') {
 
 def frontendDir = "$projectDir/src/main/frontend"
 
-def rootDir = "~"
-
 sourceSets {
     main {
         resources { srcDirs = ["$projectDir/src/main/resources"]}
@@ -80,12 +78,6 @@ sourceSets {
 }
 
 processResources { dependsOn "copyReactBuildFiles" }
-
-task buildscript(type: Exec) {
-    workingDir "$rootDir"
-    inputs.dir "$rootDir"
-    commandLine "source", "~/.bashrc"
-}
 
 task installReact(type: Exec) {
     workingDir "$frontendDir"
