@@ -11,6 +11,7 @@ import com.example.mansshop_boot.domain.dto.pageable.PagingMappingDTO;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
 import com.example.mansshop_boot.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
@@ -31,6 +32,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MainServiceImpl implements MainService{
 
     private final ProductRepository productRepository;
@@ -117,6 +119,9 @@ public class MainServiceImpl implements MainService{
 
     @Override
     public ResponseEntity<InputStreamResource> getSignedUrl(String imageName) {
+
+        log.info("MainServiceImpl.getSignedUrl :: imageName : {}", imageName);
+
 
         S3Object s3Object = amazonS3.getObject(bucket, imageName);
         InputStreamResource resource = new InputStreamResource(s3Object.getObjectContent());
