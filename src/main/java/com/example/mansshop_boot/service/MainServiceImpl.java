@@ -99,6 +99,14 @@ public class MainServiceImpl implements MainService{
         return dto.stream().map(MainListResponseDTO::new).toList();
     }
 
+
+    /**
+     *
+     * @param imageName
+     *
+     * preSignedUrl로 반환.
+     * 테스트를 위해 만료 시간은 1분으로 설정
+     */
     /*@Override
     public URL getSignedUrl(String imageName) {
 
@@ -116,13 +124,15 @@ public class MainServiceImpl implements MainService{
         return amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
     }*/
 
-
+    /**
+     *
+     * @param imageName
+     *
+     * S3로부터 파일을 다운받아 InputStreamResource 타입으로 반환.
+     * 프론트엔드에서는 blob으로 받아 처리.
+     */
     @Override
-    public ResponseEntity<InputStreamResource> getSignedUrl(String imageName) {
-
-        log.info("MainServiceImpl.getSignedUrl :: imageName : {}", imageName);
-
-
+    public ResponseEntity<InputStreamResource> getImageFile(String imageName) {
         S3Object s3Object = amazonS3.getObject(bucket, imageName);
         InputStreamResource resource = new InputStreamResource(s3Object.getObjectContent());
 

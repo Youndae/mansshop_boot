@@ -18,7 +18,7 @@ public interface MainService {
 
     /*URL getSignedUrl(String imageName);*/
 
-    ResponseEntity<InputStreamResource> getSignedUrl(String imageName);
+    ResponseEntity<InputStreamResource> getImageFile(String imageName);
 
 
 }

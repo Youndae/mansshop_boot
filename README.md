@@ -58,10 +58,31 @@
 
 <br />
 
+## 배포 환경
+* AWS
+  * EC2
+  * ALB
+  * RDS(MySQL)
+  * S3
+  * IAM
+  * ElastiCache
+  * ACM
+  * Route53
+* Nginx
+* Jenkins
+* GitHub webhook
+
+<br />
+
 ## ERD
-<img src="src/main/resources/README_image/ERD.jpg">
+<img src="src/main/resources/README_image/new_ERD.jpg">
 
 <br/>
+
+## workflow
+<img src="src/main/resources/README_image/architecture_flow.jpg">
+
+<br />
 
 ## 기능
 * 메인화면
@@ -175,6 +196,7 @@
   * 결제 처리와 관리자의 기간별 매출 처리의 수정
   * 페이징 처리 수정
   * 상품 추가 및 수정 처리 및 발생한 문제
+  * S3 연결로 인한 이미지 출력 처리
   * 비밀번호 찾기
 * 프론트 엔드
   * 상품 구매 요청 시 데이터 처리
@@ -441,7 +463,7 @@ JWT를 사용하게 되면서 탈취에 충분하게 대응할 수 있는 방법
 
 <br />
 
-### 결제 처리와 관리자의 기간별 매출 처리의 수정
+### 결제 처리 수정
 <br />
 
 상품의 카드 결제 API로 아임포트 결제 API를 사용했으며 주소지 입력의 경우 Kakao 우편번호 서비스 API를 사용했습니다.   
@@ -566,6 +588,11 @@ public String payment(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO) {
 처리 순서로는 주문 및 주문 상세 데이터 저장, 장바구니를 통한 구매인 경우 해당 상품을 파악해 장바구니 데이터 삭제, 상품 옵션 테이블에서 구매된 상품의 재고 수정, 상품 테이블에서 구매된 상품의 판매량 수정 순서입니다.   
 이전 버전에서는 이 이후 요약 테이블을 조회해 매출 데이터를 수정하는 과정이 포함되어 있었습니다.
 
+<br />
+
+### 관리자 매출 조회 처리 중 발생한 문제 해결
+<br />
+
 관리자의 기간별 매출 중 월별 조회가 가장 많은 데이터를 집계하고 매핑하게 됩니다.   
 월 매출 정보에 대한 조회, 당월 베스트 5 상품에 대한 조회, 상품 분류별 월 매출 정보 조회, 모든 상품 분류 리스트 조회, 당월의 일별 매출 데이터 조회, 전년 동월 매출 정보 조회, 이렇게 총 6번을 조회한 뒤 매핑하도록 처리했습니다.   
 여기서 가장 문제가 되는 조회가 베스트 5 상품 조회와 분류별 매출 조회였습니다.   
@@ -648,11 +675,11 @@ Man's Shop 프로젝트에는 많은 부분에 페이징 기능을 사용합니�
 <br />
 
 관리자의 상품 추가 및 삭제에서는 JPA의 연관관계 설정을 통해 상위의 Entity에 다른 Entity 객체들을 HashSet으로 담은 뒤 save 처리하도록 했습니다.   
-QnA 처럼 문의 작성 요청과 답변 작성 요청이 분리되어 있는 Entity들에 대해서는 OneToMany 설정을 전혀 하지 않았지만 상품이나 장바구니처럼 한번의 요청으로 같이 처리되어야 하는 Entity들에 대해서는 양방향 매핑으로 처리했습니다.
+QnA 처럼 문의 작성 요청과 답변 작성 요청이 분리되어 있는 Entity들에 양방향 매핑을 처리하지 않았지만 상품이나 장바구니처럼 한번의 요청으로 같이 처리될 수 있는 Entity들에 대해서는 양방향 매핑으로 처리했습니다.
 
 상품 관련된 테이블로는 Product, ProductOption, ProductThumbnail, ProductInfoImage 테이블이 있습니다.   
-Product id를 외래키로 모두 연관관계가 설정되어있기 때문에 양방향 매핑으로 한번에 처리하는 방법을 활용해 데이터 베이스 접근 횟수를 줄였습니다.   
-그리고 이후 더미데이터를 넣는 과정에서 테스트해보니 각각의 Entity를 save 해주는 것 보다 연관관계를 설정할 수 있는 Entity의 경우 같이 담아 save 요청을 처리하는 방법이 더 빠르게 처리된다는 점을 확인할 수 있었습니다.
+Product id를 외래키로 모두 연관관계가 설정되어있기 때문에 양방향 매핑으로 한번에 처리하도록 했습니다.   
+양방향 매핑으로 처리하는 경우 한번의 데이터베이스 요청으로 처리할 수 있다는 장점도 있지만 더미데이터를 넣는 과정에서 테스트해본 결과 양방향 매핑으로 처리하는 것이 더 빠르게 처리 되는 것을 확인 할 수 있었습니다.   
 
 ```java
 //상품 수정
@@ -727,6 +754,50 @@ public void saveAndDeleteProductImage(Product product, AdminProductImageDTO imag
 상품 수정의 경우 ProductOption 리스트를 따로 저장하는데 Multiple representations of the same entity are being merged라는 오류가 발생했기 때문입니다.   
 알아보니 해당 Entity 데이터에 대해 같은 id가 중복되어있기 때문에 발생하는 오류라고 확인할 수 있었는데 이미 저장되어있던 데이터의 아이디와 겹치기 때문에 발생하는건가 싶어 여러 방향으로 테스트해보고 알아봤으나 명확한 해답을 찾을 수 없어 따로 분리하게 되었습니다.   
 이 문제에 대해서는 연관관계에 대해 좀 더 학습하고 개선하고자 계획하고 있습니다.
+
+<br />
+
+### S3 연결로 인한 이미지 출력 처리
+
+<br />
+
+배포 처리를 진행하며 S3에 이미지 파일을 저장하도록 했습니다.   
+S3 연동을 이번에 처음 해봤기 때문에 이미지 파일을 어떻게 불러올지에 대해 알아봤을 때 3가지 방법이 있었습니다.
+1. S3 파일의 url을 통한 요청
+2. preSignedUrl을 통한 요청
+3. 백엔드 서버를 proxy 서버로서 다운로드 받은 뒤 반환하는 요청
+
+여기서 첫번째 방법에 대해서는 S3에 직접 접근하는 형태이기 때문에 해당 방법을 택해서는 안되겠다고 생각했습니다.   
+두번째 방법은 개발자가 직접 url의 유효시간을 설정해 처리하는 방법이기 때문에 안전한 방법이라고는 하지만 전달되는 url에 S3 버킷명과 같은 불필요한 정보가 포함된다는 점이 마음에 걸렸습니다.   
+이 정보들은 노출되더라도 해당 파일에 접근할 수 없기 때문에 괜찮다는 말이 있었지만 그래도 불필요하게 노출할 필요는 없다고 생각해 다른 방법을 찾게 되었습니다.   
+
+그래서 최종적으로 택한 방법은 백엔드 서버를 proxy 서버로 활용하는 방법입니다.   
+이렇게 처리하는 경우 기존 로컬에 저장된 파일을 불러와 반환할때 처럼 다른 정보는 노출하지 않고 요청 url 정도만 노출하는 형태로 처리할 수 있었습니다.
+개인적으로 최대한 불필요한 정보는 노출하지 않도록 하자는 생각을 하고 있기 때문에 이 방법이 가장 유용한 방법이라 생각해 이 방법으로 처리했습니다.
+
+```java
+//MainServiceImpl
+@Service
+@RequiredArgsConstructor
+public class MainServiceImpl implements MainService {
+    private final AmazonS3 amazonS3;
+    
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
+    
+    @Override
+    public ResponseEntity<InputStreamResource> getImageFile(String imageName) {
+        S3Object s3Object = amazonS3.getObject(bucket, imageName);
+        InputStreamResource resource = new InputStreamResource(s3Object.getObjectContent());
+        
+        return ResponseEntity.status(HttpStatus.OK)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + imageName + "\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .contentLength(s3Object.getObjectMetadata().getContentLength())
+                .body(resource);
+    }
+}
+```
 
 <br />
 

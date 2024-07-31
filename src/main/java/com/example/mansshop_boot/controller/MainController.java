@@ -123,7 +123,7 @@ public class MainController {
      *
      * @param imageName
      *
-     * 이미지 파일 출력을 위해 blob으로 반환
+     * 파일 저장을 local로 처리하는 경우 사용.
      */
     /*@GetMapping("/display/{imageName}")
     public ResponseEntity<byte[]> display(@PathVariable(name = "imageName") String imageName) {
@@ -143,15 +143,16 @@ public class MainController {
     }*/
 
     /**
-     * S3 getUrl
      *
-     * "https://mansshop-buket.s3.ap-northeast-2.amazonaws.com/20240717195353d45eecd3-5ba4-4d09-b45a-25daead4ebd1.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Date=20240717T121956Z&amp;X-Amz-SignedHeaders=host&amp;X-Amz-Expires=59&amp;X-Amz-Credential=AKIAZ3HD7KYURZCE2WF6%2F20240717%2Fap-northeast-2%2Fs3%2Faws4_request&amp;X-Amz-Signature=331b7eb5f2cb65ee227890643389f0a74b02eeb9b5fc111db9ba12108b032621"
+     * @param imageName
+     *
+     * S3에서 파일을 받는 경우.
+     * Spring Boot 서버를 proxy 서버로 사용해 파일 다운로드 후 blob으로 반환
      */
     @GetMapping("/display/{imageName}")
     public ResponseEntity<InputStreamResource> display(@PathVariable(name = "imageName") String imageName) {
-//        String url = mainService.getSignedUrl(imageName).toString();
 
-        return mainService.getSignedUrl(imageName);
+        return mainService.getImageFile(imageName);
     }
 
     /**
