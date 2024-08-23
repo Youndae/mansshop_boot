@@ -292,9 +292,6 @@ public class CartServiceImpl implements CartService{
         else
             uid = principal.getName();
 
-        return CartMemberDTO.builder()
-                            .uid(uid)
-                            .cartCookieValue(cartCookieValue)
-                            .build();
+        return new CartMemberDTO(uid, cartCookieValue);
     }
 }

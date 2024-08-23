@@ -1829,3 +1829,13 @@ Ino가 존재하더라도 장기간 미접속으로 AccessToken, RefreshToken이
 > AWS 배포 처리 후 코드 완벽하게 수정 예정.
 
 <br />
+
+### 2024/08/24
+> 코드 개선
+>> record에서는 기본 생성자를 제공하고 불변성의 특징이 있기 때문에 Builder Pattern을 사용하는 것 보다 생성자를 통해 처리하는 것이 좋다. 라는 말에 따라 해당 부분 수정.   
+>> 그렇다고 record에서 Builder Pattern을 사용하지 말아야한다! 는 아니지만 간결성을 위해 지양하는 편이라고 한다.   
+>> 단, 필드 수가 많거나 생성자에서 모든 필드를 한번에 초기화 하는 경우가 아니라면 사용하기도 하며, 간결성의 문제는 lombok의 @Builder Annotation으로 간결해지기도 한다.   
+>> JwtAuthorizationFilter에서 토큰 검증 후 정상 토큰이라면 OAuth2인지 local인지에 따라 CustomUser, CustomOAuth2User를 통해 처리하는데 이때 중복된 코드를 제거하기 위해 CustomUserDetails라는 인터페이스를 생성.   
+>> 해당 인터페이스를 통해 getUserId()와 getAuthorities()를 재정의 하도록 해 필요한 정보를 조건문 밖에서 꺼낼 수 있도록 수정.   
+>> CustomOAuth2Service에서 OAuth2Response를 Member Entity로 매핑해 save 처리하는 과정이 있는데 이 부분에 대해 OAuth2ResponseEntityConverter 클래스를 추가 생성해 처리하도록 개선.   
+>> 실제 운영 서비스 시 OAuth2 서버에서 추가적인 데이터를 받아야 한다면 converter 코드를 수정하는 것으로 유지보수성을 높이기 위함.   

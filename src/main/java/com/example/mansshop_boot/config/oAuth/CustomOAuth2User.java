@@ -1,5 +1,6 @@
 package com.example.mansshop_boot.config.oAuth;
 
+import com.example.mansshop_boot.config.security.CustomUserDetails;
 import com.example.mansshop_boot.domain.dto.oAuth.OAuth2DTO;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -8,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
-public class CustomOAuth2User implements OAuth2User {
+public class CustomOAuth2User implements OAuth2User, CustomUserDetails {
 
     private final OAuth2DTO oAuth2DTO;
 

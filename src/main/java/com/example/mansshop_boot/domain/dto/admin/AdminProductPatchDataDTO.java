@@ -1,7 +1,5 @@
 package com.example.mansshop_boot.domain.dto.admin;
 
-import lombok.Builder;
-
 import java.util.List;
 
 public record AdminProductPatchDataDTO(
@@ -18,7 +16,7 @@ public record AdminProductPatchDataDTO(
         , List<String> classificationList
 ) {
 
-    @Builder
+
     public AdminProductPatchDataDTO(AdminProductDetailDTO productDetailDTO
                                     , List<String> classificationList) {
         this(

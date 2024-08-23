@@ -38,43 +38,26 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         String userId = oAuth2Response.getProvider() + "_" + oAuth2Response.getProviderId();
         Member existsData = memberRepository.findById(userId).orElse(null);
-        OAuth2DTO oAuth2DTO;
 
         if(existsData == null) {
-            Member member = Member.builder()
-                    .userId(userId)
-                    .userEmail(oAuth2Response.getEmail())
-                    .userName(oAuth2Response.getName())
-                    .provider(oAuth2Response.getProvider())
-                    .build();
-
-            Auth auth = Auth.builder()
-                            .auth(Role.MEMBER.getKey())
-                            .build();
-
-            member.addMemberAuth(auth);
+            Member member = OAuth2ResponseEntityConverter.toEntity(oAuth2Response, userId);
+            member.addMemberAuth(
+                            Auth.builder()
+                                .auth(Role.MEMBER.getKey())
+                                .build()
+                    );
 
             memberRepository.save(member);
 
-            oAuth2DTO = OAuth2DTO.builder()
-                    .userId(userId)
-                    .username(oAuth2Response.getName())
-                    .authList(Collections.singletonList(auth))
-                    .nickname(null)
-                    .build();
+            existsData = member;
         }else {
             existsData.setUserEmail(oAuth2Response.getEmail());
             existsData.setUserName(oAuth2Response.getName());
 
             memberRepository.save(existsData);
-
-            oAuth2DTO = OAuth2DTO.builder()
-                    .userId(existsData.getUserId())
-                    .username(existsData.getUserName())
-                    .authList(existsData.getAuths())
-                    .nickname(existsData.getNickname())
-                    .build();
         }
+
+        OAuth2DTO oAuth2DTO = new OAuth2DTO(existsData);
 
         return new CustomOAuth2User(oAuth2DTO);
     }

@@ -143,7 +143,9 @@ public class AdminServiceImpl implements AdminService {
         List<String> thumbnailList = productThumbnailRepository.findByProductId(productId);
         List<String> infoImageList = productInfoImageRepository.findByProductId(productId);
 
-        return AdminProductDetailDTO.builder()
+        return new AdminProductDetailDTO(productId, product, thumbnailList, infoImageList, productOptionList);
+
+        /*return AdminProductDetailDTO.builder()
                                     .productId(productId)
                                     .classification(product.getClassification().getId())
                                     .productName(product.getProductName())
@@ -155,7 +157,7 @@ public class AdminServiceImpl implements AdminService {
                                     .isOpen(product.isOpen())
                                     .sales(product.getProductSales())
                                     .discount(product.getProductDiscount())
-                                    .build();
+                                    .build();*/
     }
 
     /**
@@ -172,10 +174,7 @@ public class AdminServiceImpl implements AdminService {
         List<Classification> entity = classificationRepository.findAll(Sort.by("classificationStep").descending());
         List<String> classificationList = entity.stream().map(Classification::getId).toList();
 
-        return AdminProductPatchDataDTO.builder()
-                .productDetailDTO(dto)
-                .classificationList(classificationList)
-                .build();
+        return new AdminProductPatchDataDTO(dto, classificationList);
     }
 
     /**
@@ -363,10 +362,6 @@ public class AdminServiceImpl implements AdminService {
             throw new NullPointerException();
         }
 
-
-        log.info("AdminServiceImpl.imageInsert :: saveName : {}", saveName);
-        log.info("AdminServiceImpl.imageInsert :: imageUrl : {}", String.valueOf(amazonS3Client.getUrl(bucket, saveName)));
-
         return saveName;
     }
 
@@ -419,27 +414,18 @@ public class AdminServiceImpl implements AdminService {
             AdminProductStockDataDTO stockDTO = dataList.get(i);
             String productId = stockDTO.productId();
 
+            /*List<AdminProductOptionStockDTO> responseOptionList = optionList.stream()
+                                            .filter(option ->
+                                                    productId.equals(option.getProduct().getId()))
+                                            .map(option -> new AdminProductOptionStockDTO(option))
+                                            .toList();*/
             List<AdminProductOptionStockDTO> responseOptionList = optionList.stream()
                                             .filter(option ->
                                                     productId.equals(option.getProduct().getId()))
-                                            .map(option -> AdminProductOptionStockDTO.builder()
-                                                                    .size(option.getSize())
-                                                                    .color(option.getColor())
-                                                                    .optionStock(option.getStock())
-                                                                    .optionIsOpen(option.isOpen())
-                                                                    .build())
+                                            .map(AdminProductOptionStockDTO::new)
                                             .toList();
 
-            responseContent.add(
-                            AdminProductStockDTO.builder()
-                                    .productId(productId)
-                                    .classification(stockDTO.classification())
-                                    .productName(stockDTO.productName())
-                                    .totalStock(stockDTO.totalStock())
-                                    .isOpen(stockDTO.isOpen())
-                                    .optionList(responseOptionList)
-                                    .build()
-            );
+            responseContent.add(new AdminProductStockDTO(productId, stockDTO, responseOptionList));
         }
 
         return new PagingListDTO<>(responseContent, pagingMappingDTO);
@@ -464,13 +450,7 @@ public class AdminServiceImpl implements AdminService {
         Page<Product> entityList = productRepository.getDiscountProduct(pageDTO, pageable);
         List<AdminDiscountResponseDTO> responseDTOList = entityList.getContent()
                                                                     .stream()
-                                                                    .map(entity -> AdminDiscountResponseDTO.builder()
-                                                                                        .productId(entity.getId())
-                                                                                        .classification(entity.getClassification().getId())
-                                                                                        .productName(entity.getProductName())
-                                                                                        .price(entity.getProductPrice())
-                                                                                        .discount(entity.getProductDiscount())
-                                                                                        .build())
+                                                                    .map(AdminDiscountResponseDTO::new)
                                                                     .toList();
 
         PagingMappingDTO pagingMappingDTO = new PagingMappingDTO(entityList.getTotalElements(), pageDTO.page(), pageDTO.amount());
@@ -566,10 +546,8 @@ public class AdminServiceImpl implements AdminService {
 
         for(int i = 0; i < orderDTOList.size(); i++) {
             AdminOrderDTO orderDTO = orderDTOList.get(i);
-            long orderId = orderDTO.orderId();
-
             List<AdminOrderDetailDTO> detailDTOList = detailList.stream()
-                                                            .filter(entity -> orderId == entity.getProductOrder().getId())
+                                                            .filter(entity -> orderDTO.orderId() == entity.getProductOrder().getId())
                                                             .map(AdminOrderDetailDTO::new)
                                                             .toList();
 
@@ -645,10 +623,10 @@ public class AdminServiceImpl implements AdminService {
         ProductQnA productQnA = productQnARepository.findById(insertDTO.qnaId()).orElseThrow(IllegalArgumentException::new);
 
         ProductQnAReply productQnAReply = ProductQnAReply.builder()
-                .member(member)
-                .productQnA(productQnA)
-                .replyContent(insertDTO.content())
-                .build();
+                                                            .member(member)
+                                                            .productQnA(productQnA)
+                                                            .replyContent(insertDTO.content())
+                                                            .build();
 
         productQnAReplyRepository.save(productQnAReply);
 
@@ -737,12 +715,9 @@ public class AdminServiceImpl implements AdminService {
     public List<AdminQnAClassificationDTO> getQnAClassification() {
         List<QnAClassification> entity = qnAClassificationRepository.findAll(Sort.by("id").ascending());
 
-        return entity.stream().map(classification ->
-                                    AdminQnAClassificationDTO.builder()
-                                        .id(classification.getId())
-                                        .name(classification.getQnaClassificationName())
-                                        .build())
-                                .toList();
+        return entity.stream()
+                        .map(AdminQnAClassificationDTO::new)
+                        .toList();
     }
 
     /**
@@ -1033,21 +1008,10 @@ public class AdminServiceImpl implements AdminService {
                                                         .filter(orderDetail ->
                                                                 productOrder.getId() == orderDetail.getProductOrder().getId()
                                                         )
-                                                        .map(orderDetail -> new AdminDailySalesDetailDTO(
-                                                                orderDetail.getProduct().getProductName()
-                                                                , orderDetail.getProductOption().getSize()
-                                                                , orderDetail.getProductOption().getColor()
-                                                                , orderDetail.getOrderDetailCount()
-                                                                , orderDetail.getOrderDetailPrice()
-                                                        )).toList();
-            content.add(
-                    new AdminDailySalesResponseDTO(
-                            productOrder.getOrderTotalPrice()
-                            , productOrder.getDeliveryFee()
-                            , productOrder.getPaymentType()
-                            , detailContent
-                    )
-            );
+                                                        .map(AdminDailySalesDetailDTO::new)
+                                                        .toList();
+
+            content.add(new AdminDailySalesResponseDTO(productOrder, detailContent));
         }
 
         PagingMappingDTO pagingMappingDTO = PagingMappingDTO.builder()
@@ -1147,12 +1111,10 @@ public class AdminServiceImpl implements AdminService {
             for(int i = 0; i < productOption.size(); i++){
                 ProductOption option = productOption.get(i);
                 AdminProductSalesOptionDTO optionDTO = new AdminProductSalesOptionDTO(
-                        option.getId()
-                        , option.getSize()
-                        , option.getColor()
-                        , 0
-                        , 0
-                );
+                                                                    option
+                                                                    , 0
+                                                                    , 0
+                                                            );
                 for(int j = 0; j < optionList.size(); j++) {
                     if(option.getId() == optionList.get(j).optionId()){
                         optionDTO = optionList.get(j);

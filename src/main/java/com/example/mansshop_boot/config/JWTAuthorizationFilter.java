@@ -2,6 +2,7 @@ package com.example.mansshop_boot.config;
 
 import com.example.mansshop_boot.config.jwt.JWTTokenProvider;
 import com.example.mansshop_boot.config.oAuth.CustomOAuth2User;
+import com.example.mansshop_boot.config.security.CustomUserDetails;
 import com.example.mansshop_boot.domain.dto.oAuth.OAuth2DTO;
 import com.example.mansshop_boot.config.security.CustomUser;
 import com.example.mansshop_boot.domain.entity.Member;
@@ -139,22 +140,17 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
             Member memberEntity = memberRepository.findById(username).get();
             String userId;
             Collection<? extends GrantedAuthority> authorities;
+            CustomUserDetails userDetails;
 
-            if(memberEntity.getProvider().equals("local")){
-                CustomUser customUser = new CustomUser(memberEntity);
-                userId = customUser.getMember().getUserId();
-                authorities = customUser.getAuthorities();
-            }else{
-                OAuth2DTO oAuth2DTO = OAuth2DTO.builder()
-                        .userId(memberEntity.getUserId())
-                        .username(memberEntity.getUserName())
-                        .authList(memberEntity.getAuths())
-                        .build();
+            if(memberEntity.getProvider().equals("local"))
+                userDetails = new CustomUser(memberEntity);
+            else
+                userDetails = new CustomOAuth2User(
+                                        memberEntity.toOAuth2DTOUseFilter()
+                                );
 
-                CustomOAuth2User customOAuth2User = new CustomOAuth2User(oAuth2DTO);
-                userId = customOAuth2User.getUserId();
-                authorities = customOAuth2User.getAuthorities();
-            }
+            userId = userDetails.getUserId();
+            authorities = userDetails.getAuthorities();
 
             Authentication authentication =
                     new UsernamePasswordAuthenticationToken(userId, null, authorities);

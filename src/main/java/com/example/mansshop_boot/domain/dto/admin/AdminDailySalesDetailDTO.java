@@ -1,5 +1,7 @@
 package com.example.mansshop_boot.domain.dto.admin;
 
+import com.example.mansshop_boot.domain.entity.ProductOrderDetail;
+
 public record AdminDailySalesDetailDTO(
         String productName
         , String size
@@ -7,4 +9,14 @@ public record AdminDailySalesDetailDTO(
         , int count
         , int price
 ) {
+
+    public AdminDailySalesDetailDTO(ProductOrderDetail orderDetail) {
+        this(
+                orderDetail.getProduct().getProductName()
+                , orderDetail.getProductOption().getSize()
+                , orderDetail.getProductOption().getColor()
+                , orderDetail.getOrderDetailCount()
+                , orderDetail.getOrderDetailPrice()
+        );
+    }
 }

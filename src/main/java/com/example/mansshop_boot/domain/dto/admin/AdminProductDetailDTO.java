@@ -1,5 +1,6 @@
 package com.example.mansshop_boot.domain.dto.admin;
 
+import com.example.mansshop_boot.domain.entity.Product;
 import lombok.Builder;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public record AdminProductDetailDTO(
         , int discount
 ) {
 
-    @Builder
+    /*@Builder
     public AdminProductDetailDTO(String productId
                                 , String classification
                                 , String productName
@@ -41,5 +42,25 @@ public record AdminProductDetailDTO(
         this.isOpen = isOpen;
         this.sales = sales;
         this.discount = discount;
+    }*/
+
+    public AdminProductDetailDTO (String productId
+                                            , Product product
+                                            , List<String> thumbnailList
+                                            , List<String> infoImageList
+                                            , List<AdminProductOptionDTO> productOptionList) {
+        this(
+                productId
+                , product.getClassification().getId()
+                , product.getProductName()
+                , product.getThumbnail()
+                , thumbnailList
+                , infoImageList
+                , productOptionList
+                , product.getProductPrice()
+                , product.isOpen()
+                , product.getProductSales()
+                , product.getProductDiscount()
+        );
     }
 }
