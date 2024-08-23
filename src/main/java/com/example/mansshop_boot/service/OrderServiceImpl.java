@@ -80,8 +80,7 @@ public class OrderServiceImpl implements OrderService{
                 List<Long> deleteCartDetailIdList = cartDetailList.stream()
                         .filter(cartDetail ->
                                 orderOptionIdList.contains(
-                                        cartDetail.getProductOption()
-                                                .getId()
+                                        cartDetail.getProductOption().getId()
                                 )
                         )
                         .map(CartDetail::getId)

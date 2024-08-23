@@ -87,19 +87,11 @@ public class MyPageServiceImpl implements MyPageService{
         List<MyPageOrderDTO> contentList = new ArrayList<>();
 
         for(ProductOrder data : order.getContent()){
-            long orderId = data.getId();
             List<MyPageOrderDetailDTO> orderDetailList = detailDTOList.stream()
-                                                        .filter(dto -> orderId == dto.orderId())
+                                                        .filter(dto -> data.getId() == dto.orderId())
                                                         .toList();
-            contentList.add(
-                    MyPageOrderDTO.builder()
-                            .orderId(orderId)
-                            .orderTotalPrice(data.getOrderTotalPrice())
-                            .orderDate(data.getCreatedAt())
-                            .orderStat(data.getOrderStat())
-                            .detail(orderDetailList)
-                            .build()
-            );
+
+            contentList.add(new MyPageOrderDTO(data, orderDetailList));
         }
 
         PagingMappingDTO pagingMappingDTO = PagingMappingDTO.builder()
@@ -170,7 +162,6 @@ public class MyPageServiceImpl implements MyPageService{
     @Override
     public ProductQnADetailDTO getProductQnADetail(long productQnAId, Principal principal){
         String uid = principalService.getNicknameByPrincipal(principal);
-
         ProductQnADetailDTO dto = getProductQnADetailData(productQnAId);
 
         if(!dto.writer().equals(uid))
@@ -203,9 +194,7 @@ public class MyPageServiceImpl implements MyPageService{
      */
     @Override
     public String deleteProductQnA(long qnaId, Principal principal) {
-
         String userId = principalService.getUserIdByPrincipal(principal);
-
         ProductQnA productQnA = productQnARepository.findById(qnaId).orElseThrow(IllegalArgumentException::new);
 
         if(!productQnA.getMember().getUserId().equals(userId))
@@ -225,9 +214,7 @@ public class MyPageServiceImpl implements MyPageService{
      */
     @Override
     public Page<MemberQnAListDTO> getMemberQnAList(MyPagePageDTO pageDTO, Principal principal) {
-
         String userId = principalService.getUserIdByPrincipal(principal);
-
         Pageable pageable = PageRequest.of(pageDTO.pageNum() - 1
                                             , pageDTO.amount()
                                             , Sort.by("id").descending());
@@ -244,7 +231,6 @@ public class MyPageServiceImpl implements MyPageService{
      */
     @Override
     public Long postMemberQnA(MemberQnAInsertDTO insertDTO, Principal principal) {
-
         Member member = memberRepository.findById(principal.getName()).orElseThrow(IllegalArgumentException::new);
         QnAClassification qnAClassification = qnAClassificationRepository.findById(insertDTO.classificationId()).orElseThrow(IllegalArgumentException::new);
 
@@ -286,7 +272,6 @@ public class MyPageServiceImpl implements MyPageService{
     @Override
     public MemberQnADetailDTO getMemberQnADetailData(long qnaId) {
         MemberQnADTO qnaDTO = memberQnARepository.findByQnAId(qnaId);
-
         List<MyPageQnAReplyDTO> replyDTOList = memberQnAReplyRepository.findAllByQnAId(qnaId);
 
         return new MemberQnADetailDTO(qnaDTO, replyDTOList);
@@ -303,7 +288,6 @@ public class MyPageServiceImpl implements MyPageService{
      */
     @Override
     public String postMemberQnAReply(QnAReplyInsertDTO insertDTO, Principal principal) {
-
         Member member = memberRepository.findById(principal.getName()).orElseThrow(IllegalArgumentException::new);
         MemberQnA memberQnA = memberQnARepository.findById(insertDTO.qnaId()).orElseThrow(IllegalArgumentException::new);
 
@@ -330,7 +314,6 @@ public class MyPageServiceImpl implements MyPageService{
      */
     @Override
     public String patchMemberQnAReply(QnAReplyDTO replyDTO, Principal principal) {
-
         MemberQnAReply memberQnAReplyEntity = memberQnAReplyRepository.findById(replyDTO.replyId()).orElseThrow(IllegalArgumentException::new);
         String userId = principalService.getUserIdByPrincipal(principal);
 
@@ -356,14 +339,12 @@ public class MyPageServiceImpl implements MyPageService{
     public MemberQnAModifyDataDTO getModifyData(long qnaId, Principal principal) {
 
         String userId = principalService.getUserIdByPrincipal(principal);
-
         MemberQnA memberQnA = memberQnARepository.findModifyDataByIdAndUserId(qnaId, userId);
         List<QnAClassification> qnaClassification = qnAClassificationRepository.findAll();
         List<QnAClassificationDTO> classificationDTO = qnaClassification.stream()
-                                                            .map(entity -> QnAClassificationDTO.builder()
-                                                                    .id(entity.getId())
-                                                                    .name(entity.getQnaClassificationName())
-                                                                    .build())
+                                                            .map(entity ->
+                                                                    new QnAClassificationDTO(entity.getId(), entity.getQnaClassificationName())
+                                                            )
                                                             .toList();
 
         return new MemberQnAModifyDataDTO(memberQnA, classificationDTO);
@@ -426,11 +407,10 @@ public class MyPageServiceImpl implements MyPageService{
         List<QnAClassification> classificationList = qnAClassificationRepository.findAll();
 
         return classificationList.stream()
-                                .map(entity -> QnAClassificationDTO.builder()
-                                            .id(entity.getId())
-                                            .name(entity.getQnaClassificationName())
-                                            .build()
-                                ).toList();
+                                .map(entity ->
+                                        new QnAClassificationDTO(entity.getId(), entity.getQnaClassificationName())
+                                )
+                                .toList();
     }
 
     /**
@@ -488,11 +468,11 @@ public class MyPageServiceImpl implements MyPageService{
         Product product = productRepository.findById(reviewDTO.productId()).orElseThrow(IllegalArgumentException::new);
         ProductOption productOption = productOptionRepository.findById(reviewDTO.optionId()).orElseThrow(IllegalArgumentException::new);
         ProductReview productReview = ProductReview.builder()
-                .member(member)
-                .product(product)
-                .reviewContent(reviewDTO.content())
-                .productOption(productOption)
-                .build();
+                                                    .member(member)
+                                                    .product(product)
+                                                    .reviewContent(reviewDTO.content())
+                                                    .productOption(productOption)
+                                                    .build();
 
         productReviewRepository.save(productReview);
         ProductOrderDetail productOrderDetail = productOrderDetailRepository.findById(reviewDTO.detailId()).orElseThrow(IllegalArgumentException::new);
@@ -563,13 +543,7 @@ public class MyPageServiceImpl implements MyPageService{
         String mailSuffix = splitMail[1].substring(0, splitMail[1].indexOf('.'));
         String type = MailSuffix.findSuffixType(mailSuffix);
 
-        return MyPageInfoDTO.builder()
-                            .nickname(member.getNickname())
-                            .phone(member.getPhone().replaceAll("-", ""))
-                            .mailPrefix(splitMail[0])
-                            .mailSuffix(splitMail[1])
-                            .mailType(type)
-                            .build();
+        return new MyPageInfoDTO(member, splitMail, type);
     }
 
     /**

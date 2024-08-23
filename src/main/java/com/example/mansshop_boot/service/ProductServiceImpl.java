@@ -85,26 +85,18 @@ public class ProductServiceImpl implements ProductService{
         List<String> productInfoImageList = productInfoImageRepository.findByProductId(productId);
 
         ProductDetailPageDTO pageDTO = new ProductDetailPageDTO();
-
         ProductPageableDTO<ProductReviewDTO> productReview = new ProductPageableDTO<>(getDetailReview(pageDTO, productId));
         ProductPageableDTO<ProductQnAResponseDTO> productQnA = new ProductPageableDTO<>(getDetailQnA(pageDTO, productId));
 
-        int discountPrice = (int) (product.getProductPrice() * (1 - ((double) product.getProductDiscount() / 100)));
-
-        return ProductDetailDTO.builder()
-                .productId(product.getId())
-                .productName(product.getProductName())
-                .productPrice(product.getProductPrice())
-                .productImageName(product.getThumbnail())
-                .likeStat(likeStat)
-                .discount(product.getProductDiscount())
-                .discountPrice(discountPrice)
-                .productOptionList(productOption)
-                .productThumbnailList(productThumbnailList)
-                .productInfoImageList(productInfoImageList)
-                .productReviewList(productReview)
-                .productQnAList(productQnA)
-                .build();
+        return new ProductDetailDTO(
+                        product
+                        , likeStat
+                        , productOption
+                        , productThumbnailList
+                        , productInfoImageList
+                        , productReview
+                        , productQnA
+                );
     }
 
     /**
@@ -156,10 +148,9 @@ public class ProductServiceImpl implements ProductService{
         for(int i = 0; i < productQnA.getContent().size(); i++) {
             List<ProductQnAReplyDTO> replyList = new ArrayList<>();
             ProductQnADTO dto = productQnA.getContent().get(i);
-            long qnaId = dto.qnaId();
 
             for(int j = replyIdx; j < qnaReplyList.size(); j++) {
-                if(qnaId == qnaReplyList.get(j).getProductQnA().getId()){
+                if(dto.qnaId() == qnaReplyList.get(j).getProductQnA().getId()){
                     replyList.add(
                             new ProductQnAReplyDTO(qnaReplyList.get(j))
                     );

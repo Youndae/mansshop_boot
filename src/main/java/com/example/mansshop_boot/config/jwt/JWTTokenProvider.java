@@ -414,10 +414,8 @@ public class JWTTokenProvider {
     public void issueTokens(String userId, String ino, HttpServletResponse response) {
         String accessToken = createToken(userId, accessSecret, accessExpiration);
         String refreshToken = createToken(userId, refreshSecret, refreshExpiration);
-
-        String accessKey = redisAccessPrefix + ino + userId;
-        String refreshKey = redisRefreshPrefix + ino + userId;
-
+        String accessKey = setRedisKey(redisAccessPrefix, ino, userId);
+        String refreshKey = setRedisKey(redisRefreshPrefix, ino, userId);
         Duration tokenExpiration = Duration.ofDays(redisExpiration);
         saveTokenToRedis(accessKey, accessToken, tokenExpiration);
         saveTokenToRedis(refreshKey, refreshToken, tokenExpiration);

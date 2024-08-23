@@ -1,10 +1,8 @@
 package com.example.mansshop_boot.domain.dto.admin;
 
-import lombok.Builder;
 
 import java.util.List;
 
-@Builder
 public record AdminProductStockDTO(
         String productId
         , String classification
@@ -13,4 +11,15 @@ public record AdminProductStockDTO(
         , boolean isOpen
         , List<AdminProductOptionStockDTO> optionList
 ) {
+
+    public AdminProductStockDTO(String productId, AdminProductStockDataDTO dto, List<AdminProductOptionStockDTO> optionList) {
+        this(
+                productId
+                , dto.classification()
+                , dto.productName()
+                , dto.totalStock()
+                , dto.isOpen()
+                , optionList
+        );
+    }
 }

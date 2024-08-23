@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @Slf4j
-public class CustomUser extends User {
+public class CustomUser extends User implements CustomUserDetails {
 
     private Member member;
 
@@ -32,5 +32,10 @@ public class CustomUser extends User {
         );
 
         this.member = member;
+    }
+
+    @Override
+    public String getUserId() {
+        return member.getUserId();
     }
 }

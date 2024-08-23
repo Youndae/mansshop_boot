@@ -1,6 +1,6 @@
 package com.example.mansshop_boot.domain.dto.admin;
 
-import lombok.Builder;
+import com.example.mansshop_boot.domain.entity.Product;
 
 public record AdminDiscountResponseDTO(
         String productId
@@ -11,15 +11,14 @@ public record AdminDiscountResponseDTO(
         , int totalPrice
 ) {
 
-    @Builder
-    public AdminDiscountResponseDTO(String productId, String classification, String productName, int price, int discount) {
+    public AdminDiscountResponseDTO(Product product) {
         this(
-                productId
-                , classification
-                , productName
-                , price
-                , discount
-                , (int) (price * (1 - ((double)discount / 100)))
+                product.getId()
+                , product.getClassification().getId()
+                , product.getProductName()
+                , product.getProductPrice()
+                , product.getProductDiscount()
+                , (int) (product.getProductPrice() * (1 - ((double)product.getProductDiscount() / 100)))
         );
     }
 }

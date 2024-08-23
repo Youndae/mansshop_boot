@@ -1,6 +1,7 @@
 package com.example.mansshop_boot.domain.entity;
 
 import com.example.mansshop_boot.domain.dto.mypage.in.MyPageInfoPatchDTO;
+import com.example.mansshop_boot.domain.dto.oAuth.OAuth2DTO;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -98,5 +99,14 @@ public class Member {
         this.nickname = patchDTO.nickname();
         this.phone = patchDTO.phone().replaceAll(phoneRegEx, "$1-$2-$3");
         this.userEmail = patchDTO.mail();
+    }
+
+    public OAuth2DTO toOAuth2DTOUseFilter() {
+        return new OAuth2DTO(
+                this.userId
+                , this.userName
+                , this.auths
+                , null
+        );
     }
 }
