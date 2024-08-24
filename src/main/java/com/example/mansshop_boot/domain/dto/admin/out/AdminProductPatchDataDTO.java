@@ -1,0 +1,38 @@
+package com.example.mansshop_boot.domain.dto.admin.out;
+
+import com.example.mansshop_boot.domain.dto.admin.business.AdminProductOptionDTO;
+
+import java.util.List;
+
+public record AdminProductPatchDataDTO(
+        String productId
+        , String productName
+        , String classificationId
+        , String firstThumbnail
+        , int price
+        , boolean isOpen
+        , int discount
+        , List<AdminProductOptionDTO> optionList
+        , List<String> thumbnailList
+        , List<String> infoImageList
+        , List<String> classificationList
+) {
+
+
+    public AdminProductPatchDataDTO(AdminProductDetailDTO productDetailDTO
+                                    , List<String> classificationList) {
+        this(
+                productDetailDTO.productId()
+                , productDetailDTO.productName()
+                , productDetailDTO.classification()
+                , productDetailDTO.firstThumbnail()
+                , productDetailDTO.price()
+                , productDetailDTO.isOpen()
+                , productDetailDTO.discount()
+                , productDetailDTO.optionList()
+                , productDetailDTO.thumbnailList()
+                , productDetailDTO.infoImageList()
+                , classificationList
+        );
+    }
+}

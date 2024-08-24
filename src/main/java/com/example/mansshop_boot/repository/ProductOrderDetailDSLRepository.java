@@ -1,11 +1,10 @@
 package com.example.mansshop_boot.repository;
 
 
-import com.example.mansshop_boot.domain.dto.admin.*;
-import com.example.mansshop_boot.domain.dto.mypage.MyPageOrderDetailDTO;
+import com.example.mansshop_boot.domain.dto.admin.business.*;
+import com.example.mansshop_boot.domain.dto.mypage.business.MyPageOrderDetailDTO;
 import com.example.mansshop_boot.domain.entity.ProductOrderDetail;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 

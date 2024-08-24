@@ -1,10 +1,9 @@
 package com.example.mansshop_boot.repository;
 
-import com.example.mansshop_boot.domain.dto.admin.AdminProductOptionDTO;
-import com.example.mansshop_boot.domain.dto.product.ProductOptionDTO;
+import com.example.mansshop_boot.domain.dto.admin.business.AdminProductOptionDTO;
+import com.example.mansshop_boot.domain.dto.product.business.ProductOptionDTO;
 import com.example.mansshop_boot.domain.entity.ProductOption;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

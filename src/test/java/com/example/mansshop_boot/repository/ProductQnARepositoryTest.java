@@ -1,19 +1,6 @@
 package com.example.mansshop_boot.repository;
 
-import com.example.mansshop_boot.domain.dto.mypage.qna.MyPageProductQnADTO;
-import com.example.mansshop_boot.domain.dto.mypage.qna.MyPageQnAReplyDTO;
-import com.example.mansshop_boot.domain.dto.mypage.qna.ProductQnADetailDTO;
-import com.example.mansshop_boot.domain.dto.mypage.qna.ProductQnAListDTO;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-
-import java.util.List;
 
 @SpringBootTest
 class ProductQnARepositoryTest {

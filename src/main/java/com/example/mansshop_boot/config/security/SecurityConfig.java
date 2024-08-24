@@ -1,12 +1,8 @@
 package com.example.mansshop_boot.config.security;
 
 import com.example.mansshop_boot.config.JWTAuthorizationFilter;
-import com.example.mansshop_boot.config.oAuth.CustomOAuth2SuccessHandler;
-import com.example.mansshop_boot.config.oAuth.CustomOAuth2UserService;
-import com.example.mansshop_boot.domain.enumuration.Role;
-import com.example.mansshop_boot.repository.MemberRepository;
-import com.example.mansshop_boot.config.jwt.JWTTokenProvider;
-import com.example.mansshop_boot.service.JWTTokenService;
+import com.example.mansshop_boot.auth.oAuth.CustomOAuth2SuccessHandler;
+import com.example.mansshop_boot.auth.oAuth.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,7 +1,8 @@
 package com.example.mansshop_boot.repository;
 
-import com.example.mansshop_boot.domain.dto.admin.*;
-import com.example.mansshop_boot.domain.dto.mypage.MemberOrderDTO;
+import com.example.mansshop_boot.domain.dto.admin.business.*;
+import com.example.mansshop_boot.domain.dto.admin.out.AdminProductSalesListDTO;
+import com.example.mansshop_boot.domain.dto.mypage.business.MemberOrderDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;

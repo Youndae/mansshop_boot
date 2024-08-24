@@ -1,17 +1,18 @@
 package com.example.mansshop_boot.service;
 
-import com.example.mansshop_boot.domain.dto.mypage.*;
+import com.example.mansshop_boot.domain.dto.mypage.business.MemberOrderDTO;
+import com.example.mansshop_boot.domain.dto.mypage.business.MyPagePageDTO;
 import com.example.mansshop_boot.domain.dto.mypage.in.MyPageInfoPatchDTO;
 import com.example.mansshop_boot.domain.dto.mypage.in.MyPagePatchReviewDTO;
 import com.example.mansshop_boot.domain.dto.mypage.in.MyPagePostReviewDTO;
-import com.example.mansshop_boot.domain.dto.mypage.qna.*;
+import com.example.mansshop_boot.domain.dto.mypage.out.*;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.MemberQnAInsertDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.MemberQnAModifyDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyInsertDTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.out.*;
 import com.example.mansshop_boot.domain.dto.pageable.LikePageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;
-import com.example.mansshop_boot.domain.dto.response.ResponseIdDTO;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
 import org.springframework.data.domain.Page;
 

@@ -1,7 +1,7 @@
 package com.example.mansshop_boot.repository;
 
-import com.example.mansshop_boot.domain.dto.admin.AdminProductOptionDTO;
-import com.example.mansshop_boot.domain.dto.product.ProductOptionDTO;
+import com.example.mansshop_boot.domain.dto.admin.business.AdminProductOptionDTO;
+import com.example.mansshop_boot.domain.dto.product.business.ProductOptionDTO;
 import com.example.mansshop_boot.domain.entity.ProductOption;
 
 import java.util.List;

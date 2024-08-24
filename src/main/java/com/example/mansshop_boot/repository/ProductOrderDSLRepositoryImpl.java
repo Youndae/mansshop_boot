@@ -1,7 +1,8 @@
 package com.example.mansshop_boot.repository;
 
-import com.example.mansshop_boot.domain.dto.admin.*;
-import com.example.mansshop_boot.domain.dto.mypage.MemberOrderDTO;
+import com.example.mansshop_boot.domain.dto.admin.business.*;
+import com.example.mansshop_boot.domain.dto.admin.out.AdminProductSalesListDTO;
+import com.example.mansshop_boot.domain.dto.mypage.business.MemberOrderDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;
@@ -9,7 +10,6 @@ import com.example.mansshop_boot.domain.entity.ProductOrder;
 import com.example.mansshop_boot.domain.enumuration.OrderStatus;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.ExpressionUtils;
-import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.*;
 import com.querydsl.jpa.JPAExpressions;
@@ -22,7 +22,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 

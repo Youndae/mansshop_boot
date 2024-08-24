@@ -1,10 +1,10 @@
 package com.example.mansshop_boot.service;
 
-import com.example.mansshop_boot.domain.dto.admin.*;
 import com.example.mansshop_boot.domain.dto.admin.in.AdminDiscountPatchDTO;
 import com.example.mansshop_boot.domain.dto.admin.in.AdminPostPointDTO;
 import com.example.mansshop_boot.domain.dto.admin.in.AdminProductImageDTO;
 import com.example.mansshop_boot.domain.dto.admin.in.AdminProductPatchDTO;
+import com.example.mansshop_boot.domain.dto.admin.out.*;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyInsertDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;

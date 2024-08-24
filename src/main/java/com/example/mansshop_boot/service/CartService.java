@@ -1,12 +1,10 @@
 package com.example.mansshop_boot.service;
 
-import com.example.mansshop_boot.domain.dto.cart.AddCartDTO;
-import com.example.mansshop_boot.domain.dto.cart.CartDetailDTO;
-import com.example.mansshop_boot.domain.dto.cart.CartMemberDTO;
-import com.example.mansshop_boot.domain.dto.response.ResponseListDTO;
+import com.example.mansshop_boot.domain.dto.cart.in.AddCartDTO;
+import com.example.mansshop_boot.domain.dto.cart.out.CartDetailDTO;
+import com.example.mansshop_boot.domain.dto.cart.business.CartMemberDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.ResponseEntity;
 
 import java.security.Principal;
 import java.util.List;

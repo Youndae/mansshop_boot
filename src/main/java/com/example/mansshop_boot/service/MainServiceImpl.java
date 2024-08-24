@@ -1,11 +1,9 @@
 package com.example.mansshop_boot.service;
 
-import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.S3Object;
-import com.example.mansshop_boot.domain.dto.main.MainListDTO;
-import com.example.mansshop_boot.domain.dto.main.MainListResponseDTO;
+import com.example.mansshop_boot.domain.dto.main.business.MainListDTO;
+import com.example.mansshop_boot.domain.dto.main.out.MainListResponseDTO;
 import com.example.mansshop_boot.domain.dto.pageable.MemberPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.PagingMappingDTO;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
@@ -24,10 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.net.URL;
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service

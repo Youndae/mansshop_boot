@@ -1,7 +1,7 @@
 package com.example.mansshop_boot.domain.entity;
 
 import com.example.mansshop_boot.domain.dto.mypage.in.MyPageInfoPatchDTO;
-import com.example.mansshop_boot.domain.dto.oAuth.OAuth2DTO;
+import com.example.mansshop_boot.auth.oAuth.response.OAuth2DTO;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

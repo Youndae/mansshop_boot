@@ -1,10 +1,10 @@
 package com.example.mansshop_boot.repository;
 
-import com.example.mansshop_boot.domain.dto.admin.AdminDiscountProductDTO;
+import com.example.mansshop_boot.domain.dto.admin.out.AdminDiscountProductDTO;
 import com.example.mansshop_boot.domain.dto.admin.in.AdminDiscountPatchDTO;
-import com.example.mansshop_boot.domain.dto.admin.AdminProductListDTO;
-import com.example.mansshop_boot.domain.dto.admin.AdminProductStockDataDTO;
-import com.example.mansshop_boot.domain.dto.main.MainListDTO;
+import com.example.mansshop_boot.domain.dto.admin.out.AdminProductListDTO;
+import com.example.mansshop_boot.domain.dto.admin.business.AdminProductStockDataDTO;
+import com.example.mansshop_boot.domain.dto.main.business.MainListDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.MemberPageDTO;
 import com.example.mansshop_boot.domain.entity.Product;

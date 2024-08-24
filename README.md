@@ -261,43 +261,26 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     String userId = oAuth2Response.getProvider() + "_" + oAuth2Response.getProviderId();
     Member existsData = memberRepository.findById(userId).orElse(null);
-    OAuth2DTO oAuth2DTO;
 
     if(existsData == null) {
-      Member member = Member.builder()
-              .userId(userId)
-              .userEmail(oAuth2Response.getEmail())
-              .userName(oAuth2Response.getName())
-              .provider(oAuth2Response.getProvider())
-              .build();
-
-      Auth auth = Auth.builder()
-              .auth(Role.MEMBER.getKey())
-              .build();
-
-      member.addMemberAuth(auth);
+      Member member = OAuth2ResponseEntityConverter.toEntity(oAuth2Response, userId);
+      member.addMemberAuth(
+              Auth.builder()
+                      .auth(Role.MEMBER.getKey())
+                      .build()
+      );
 
       memberRepository.save(member);
 
-      oAuth2DTO = OAuth2DTO.builder()
-              .userId(userId)
-              .username(oAuth2Response.getName())
-              .authList(Collections.singletonList(auth))
-              .nickname(null)
-              .build();
+      existsData = member;
     }else {
       existsData.setUserEmail(oAuth2Response.getEmail());
       existsData.setUserName(oAuth2Response.getName());
 
       memberRepository.save(existsData);
-
-      oAuth2DTO = OAuth2DTO.builder()
-              .userId(existsData.getUserId())
-              .username(existsData.getUserName())
-              .authList(existsData.getAuths())
-              .nickname(existsData.getNickname())
-              .build();
     }
+
+    OAuth2DTO oAuth2DTO = new OAuth2DTO(existsData);
 
     return new CustomOAuth2User(oAuth2DTO);
   }
@@ -408,25 +391,20 @@ protected void doFilterInternal(HttpServletRequest request
         Member memberEntity = memberRepository.findById(username).get();
         String userId;
         Collection<? extends GrantedAuthority> authorities;
+        CustomUserDetails userDetails;
 
-        if(memberEntity.getProvider().equals("local")){
-            CustomUser customUser = new CustomUser(memberEntity);
-            userId = customUser.getMember().getUserId();
-            authorities = customUser.getAuthorities();
-        }else{
-            OAuth2DTO oAuth2DTO = OAuth2DTO.builder()
-                    .userId(memberEntity.getUserId())
-                    .username(memberEntity.getUserName())
-                    .authList(memberEntity.getAuths())
-                    .build();
+        if(memberEntity.getProvider().equals("local"))
+            userDetails = new CustomUser(memberEntity);
+        else
+            userDetails = new CustomOAuth2User(
+                                memberEntity.toOAuth2DTOUseFilter()
+                            );
 
-            CustomOAuth2User customOAuth2User = new CustomOAuth2User(oAuth2DTO);
-            userId = customOAuth2User.getUserId();
-            authorities = customOAuth2User.getAuthorities();
-        }
+        userId = userDetails.getUserId();
+        authorities = userDetails.getAuthorities();
 
         Authentication authentication =
-                new UsernamePasswordAuthenticationToken(userId, null, authorities);
+        new UsernamePasswordAuthenticationToken(userId, null, authorities);
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
@@ -485,104 +463,120 @@ JWT를 사용하게 되면서 탈취에 충분하게 대응할 수 있는 방법
 @Override
 @Transactional(rollbackFor = RuntimeException.class)
 public String payment(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO) {
-  ProductOrder productOrder = paymentDTO.toOrderEntity(cartMemberDTO.uid()); // 주문내역
-  List<OrderProductDTO> orderProductList = paymentDTO.orderProduct();// 주문 내역 중 상품 옵션 정보 리스트
-  List<Long> orderOptionIdList = new ArrayList<>();// 주문한 상품 옵션 아이디를 담아줄 리스트
-  int totalProductCount = 0;// 총 판매량
-        
-  for(OrderProductDTO data : orderProductList) {
-    productOrder.addDetail(data.toOrderDetailEntity());
-    orderOptionIdList.add(data.optionId());
-    totalProductCount += data.detailCount();
-  }
-  productOrder.setProductCount(totalProductCount);
-  // 주문, 주문 상세 테이블 데이터 저장
-  productOrderRepository.save(productOrder);
-
-  //주문 타입이 cart인 경우 장바구니에서 선택한 상품 또는 전체 상품 주문이므로 해당 상품을 장바구니에서 삭제.
-  if(paymentDTO.orderType().equals("cart")){
-    // 사용자의 장바구니 아이디와 장바구니 상세 리스트 조회.
-    Long cartId = cartRepository.findIdByUserId(cartMemberDTO);
-    List<CartDetail> cartDetailList = cartDetailRepository.findAllCartDetailByCartId(cartId);
-        //주문 상품 optionIdList와 장바구니 상세 리스트의 크기가 동일하다면 전체 상품 주문이므로
-        //장바구니 테이블 데이터 삭제를 요청
-        if(cartDetailList.size() == orderOptionIdList.size())
-            cartRepository.deleteById(cartId);
-        else {
-            // 주문 OptionIdList와 장바구니 상세 데이터를 비교하며 일치하는 데이터의 OptionId만 매핑
-            List<Long> deleteCartDetailIdList = cartDetailList.stream()
-                    .filter(cartDetail ->
-                            orderOptionIdList.contains(
-                                  cartDetail.getProductOption()
-                                            .getId()
-                            )
-                    )
-                    .map(CartDetail::getId)
-                    .toList();
+    ProductOrderDataDTO productOrderDataDTO = createOrderDataDTO(paymentDTO, cartMemberDTO);
+    productOrderRepository.save(productOrderDataDTO.productOrder());
     
-            cartDetailRepository.deleteAllById(deleteCartDetailIdList);
-        }
-  }
+    //주문 타입이 cart인 경우 장바구니에서 선택한 상품 또는 전체 상품 주문이므로 해당 상품을 장바구니에서 삭제해준다.
+    if(paymentDTO.orderType().equals("cart"))
+    deleteOrderDataToCart(cartMemberDTO, productOrderDataDTO.orderOptionIdList());
 
-  //상품 옵션 재고 수정을 위해 주문 내역에 해당하는 상품 옵션 데이터를 조회
-  //저장 또는 수정할 데이터를 담아줄 리스트를 새로 생성
-  List<ProductOption> productOptionList = productOptionRepository.findAllById(orderOptionIdList);
-  List<ProductOption> productOptionSetList = new ArrayList<>();
-
-  //상품 테이블에 존재하는 판매량을 처리하기 위해 Map 구조로 '상품 아이디 : 해당 상품 총 주문량(옵션 별 총합)' 으로 처리.
-  //조회해야 할 상품 아이디를 리스트화 하기 위해 리스트를 하나 생성.
-  Map<String, Integer> productMap = new HashMap<>();
-  List<String> productIdList = new ArrayList<>();
+    //ProductOption에서 재고 수정 및 Product에서 상품 판매량 수정.
+    patchOptionStockAndProduct(productOrderDataDTO.orderOptionIdList(), productOrderDataDTO.orderProductList());
 
 
-  for(int i = 0; i < orderProductList.size(); i++) {
-    //주문 내역을 반복문으로 처리하면서 Map에 상품 아이디와 해당 상품 주문 총량을 처리.
-    OrderProductDTO dto = orderProductList.get(i);
-    productMap.put(
-            dto.productId()
-            , productMap.getOrDefault(dto.productId(), 0) + dto.detailCount()
-    );
-
-    //상품 아이디는 겹칠 수 있으므로 list에서 체크 후 처리.
-    if(!productIdList.contains(dto.productId()))
-      productIdList.add(dto.productId());
-
-    //상품 옵션 테이블에서 재고 수정을 위해 해당 옵션 상품 리스트를 반복문으로 돌리면서
-    //조회된 Entity의 재고를 수정한 뒤 리스트에 담아준다.
-    //한번 수정이 발생할 때마다 다음 루프의 횟수를 줄이기 위해 리스트 데이터를 지워나간다.
-    for(int j = 0; j < productOptionList.size(); j++) {
-      if(dto.optionId() == productOptionList.get(j).getId()){
-        ProductOption productOption = productOptionList.get(j);
-
-        productOption.setStock(productOption.getStock() - dto.detailCount());
-        productOptionSetList.add(productOption);
-
-        productOptionList.remove(j);
-        break;
-      }
-    }
-  }
-
-  productOptionRepository.saveAll(productOptionSetList);
-
-  //상품 판매량 수정을 위해 해당되는 상품들을 조회.
-  List<Product> productList = productRepository.findAllByIdList(productIdList);
-  List<Product> productSetList = new ArrayList<>();
-
-  //해당 되는 상품 Entity에 대해 판매량을 수정한 뒤 리스트화.
-  for(Product data : productList) {
-    long productSales = data.getProductSales() + productMap.get(data.getId());
-    data.setProductSales(productSales);
-
-    productSetList.add(data);
-  }
-
-  productRepository.saveAll(productSetList);
-
-
-  return Result.OK.getResultKey();
+    return Result.OK.getResultKey();
 }
 
+public ProductOrderDataDTO createOrderDataDTO(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO) {
+    ProductOrder productOrder = paymentDTO.toOrderEntity(cartMemberDTO.uid());
+    List<OrderProductDTO> orderProductList = paymentDTO.orderProduct();
+    List<Long> orderOptionIdList = new ArrayList<>();// 주문한 상품 옵션 아이디를 담아줄 리스트
+    int totalProductCount = 0;// 총 판매량
+    //옵션 정보 리스트에서 각 객체를 OrderDetail Entity로 Entity화 해서 ProductOrder Entity에 담아준다.
+    //주문한 옵션 번호는 추후 더 사용하기 때문에 리스트화 한다.
+    //총 판매량은 기간별 매출에 필요하기 때문에 이때 같이 총 판매량을 계산한다.
+    for(OrderProductDTO data : paymentDTO.orderProduct()) {
+      productOrder.addDetail(data.toOrderDetailEntity());
+      orderOptionIdList.add(data.optionId());
+      totalProductCount += data.detailCount();
+    }
+    productOrder.setProductCount(totalProductCount);
+
+    return new ProductOrderDataDTO(productOrder, orderProductList, orderOptionIdList);
+}
+
+public void deleteOrderDataToCart(CartMemberDTO cartMemberDTO, List<Long> orderOptionIdList) {
+    //사용자의 장바구니 아이디를 가져와서 장바구니 상세 리스트를 가져온다.
+    //장바구니 상세 리스트의 경우 리스트화 한 옵션 번호를 통해 가져올 수도 있으나 전체 리스트와 주문 리스트의 크기가 일치한다면
+    //장바구니의 모든 상품을 구매한 것이기 때문에 장바구니 데이터 자체를 삭제하도록 하기 위함.
+    Long cartId = cartRepository.findIdByUserId(cartMemberDTO);
+    List<CartDetail> cartDetailList = cartDetailRepository.findAllCartDetailByCartId(cartId);
+
+    if(cartDetailList.size() == orderOptionIdList.size())
+        cartRepository.deleteById(cartId);
+    else{
+      List<Long> deleteCartDetailIdList = cartDetailList.stream()
+                            .filter(cartDetail ->
+                                orderOptionIdList.contains(
+                                        cartDetail.getProductOption().getId()
+                                )
+                            )
+                            .map(CartDetail::getId)
+                            .toList();
+  
+      cartDetailRepository.deleteAllById(deleteCartDetailIdList);
+    }
+}
+
+public void patchOptionStockAndProduct(List<Long> orderOptionIdList, List<OrderProductDTO> orderProductList) {
+    //상품 옵션 재고 수정을 위해 주문 내역에 해당하는 상품 옵션 데이터를 조회
+    //저장 또는 수정할 데이터를 담아줄 리스트를 새로 생성
+    List<ProductOption> productOptionList = productOptionRepository.findAllById(orderOptionIdList);
+    List<ProductOption> productOptionSetList = new ArrayList<>();
+
+    //상품 테이블에 존재하는 판매량을 처리하기 위해 Map 구조로 '상품 아이디 : 해당 상품 총 주문량(옵션 별 총합)' 으로 처리한다.
+    //조회해야 할 상품 아이디를 리스트화 하기 위해 리스트를 하나 생성한다.
+    Map<String, Integer> productMap = new HashMap<>();
+    List<String> productIdList = new ArrayList<>();
+
+
+    for(int i = 0; i < orderProductList.size(); i++) {
+      //주문 내역을 반복문으로 처리하면서 Map에 상품 아이디와 해당 상품 주문 총량을 처리한다.
+      //주문내역에서는 상품 아이디가 겹치는 경우가 발생하기 때문에 리스트에 담겨있지 않은 경우에만 담도록 처리한다.
+      OrderProductDTO dto = orderProductList.get(i);
+      productMap.put(
+          dto.productId()
+          , productMap.getOrDefault(dto.productId(), 0) + dto.detailCount()
+      );
+  
+      if(!productIdList.contains(dto.productId()))
+          productIdList.add(dto.productId());
+  
+      //상품 옵션 테이블에서 재고 수정을 위해 해당 옵션 상품 리스트를 반복문으로 돌리면서
+      //조회된 Entity의 재고를 수정한 뒤 리스트에 담아준다.
+      //한번 수정이 발생할 때마다 다음 루프의 횟수를 줄이기 위해 리스트 데이터를 지워나간다.
+      for(int j = 0; j < productOptionList.size(); j++) {
+        if(dto.optionId() == productOptionList.get(j).getId()){
+          ProductOption productOption = productOptionList.get(j);
+      
+          productOption.setStock(productOption.getStock() - dto.detailCount());
+          productOptionSetList.add(productOption);
+      
+          productOptionList.remove(j);
+          break;
+        }
+      }
+    }
+
+    productOptionRepository.saveAll(productOptionSetList);
+
+    patchProductSales(productIdList, productMap);
+}
+
+public void patchProductSales(List<String> productIdList, Map<String, Integer> productMap) {
+    List<Product> productList = productRepository.findAllByIdList(productIdList);
+    List<Product> productSetList = new ArrayList<>();
+    
+    //해당 되는 상품 Entity에 대해 판매량을 수정한 뒤 리스트에 담아준다.
+    for(Product data : productList) {
+      long productSales = data.getProductSales() + productMap.get(data.getId());
+      data.setProductSales(productSales);
+      
+      productSetList.add(data);
+    }
+    
+    productRepository.saveAll(productSetList);
+}
 ```
 
 처리 순서로는 주문 및 주문 상세 데이터 저장, 장바구니를 통한 구매인 경우 해당 상품을 파악해 장바구니 데이터 삭제, 상품 옵션 테이블에서 구매된 상품의 재고 수정, 상품 테이블에서 구매된 상품의 판매량 수정 순서입니다.   
@@ -688,20 +682,39 @@ Product id를 외래키로 모두 연관관계가 설정되어있기 때문에 �
 public String patchProduct(String productId, List<Long> deleteOptionList, AdminProductPatchDTO patchDTO, AdminProductImageDTO imageDTO) {
         Product product = productRepository.findById(productId).orElseThrow(IllegalArgumentException::new);
         product.setPatchData(patchDTO);
-        List<ProductOption> optionList = setProductDataAndProductOptionSave(product, imageDTO, patchDTO);
-        productOptionRepository.saveAll(optionList);
-        saveAndDeleteProductImage(product, imageDTO);
+        
+        try{
+          List<ProductOption> optionList = setProductDataAndProductOptionSave(product, imageDTO, patchDTO);
+          productOptionRepository.saveAll(optionList);
+        }catch (Exception e) {
+          log.warn("Filed admin patchProduct");
+          e.printStackTrace();
+          deleteFirstThumbnailToException(product);
+  
+          throw new IllegalArgumentException("Failed patchProduct", e);
+        }
 
         if(deleteOptionList != null)
             productOptionRepository.deleteAllById(deleteOptionList);
 
         productRepository.save(product);
 
+        try {
+            saveProductImage(product, imageDTO);
+        }catch (Exception e) {
+          log.warn("Failed admin patchProduct");
+          e.printStackTrace();
+          deleteImageToException(product);
+  
+          throw new IllegalArgumentException("Failed patchProduct", e);
+        }
+        deleteProductImage(imageDTO);
+
         return productId;
 }
 
 //대표 썸네일을 제외한 나머지 썸네일 파일 저장 후 상품 옵션을 ProductOption Entity List로 매핑해 반환
-public List<ProductOption> setProductDataAndProductOptionSave(Product product, AdminProductImageDTO imageDTO, AdminProductPatchDTO patchDTO) {
+public List<ProductOption> setProductDataAndProductOptionSave(Product product, AdminProductImageDTO imageDTO, AdminProductPatchDTO patchDTO) throws Exception{
         if(imageDTO.getFirstThumbnail() != null)
             product.setThumbnail(imageInsert(imageDTO.getFirstThumbnail()));
 
@@ -710,42 +723,57 @@ public List<ProductOption> setProductDataAndProductOptionSave(Product product, A
 
 //썸네일 리스트와 정보 이미지 리스트의 파일 저장 처리 및 Product Entity의 연관관계 설정된 Set에 add 처리.
 //수정 요청이어서 삭제할 이미지 리스트가 존재하는 경우 해당 파일의 삭제 및 테이블 데이터 삭제 요청 처리.
-public void saveAndDeleteProductImage(Product product, AdminProductImageDTO imageDTO){
-        if(imageDTO.getThumbnail() != null){
-            imageDTO.getThumbnail().forEach(thumbnail ->
-                product.addProductThumbnail(
-                    ProductThumbnail.builder()
-                        .product(product)
-                        .imageName(imageInsert(thumbnail))
-                        .build()
-                )
+public void saveProductImage(Product product, AdminProductImageDTO imageDTO) throws Exception{
+        saveThumbnail(product, imageDTO.getThumbnail());
+        saveInfoImage(product, imageDTO.getInfoImage());
+}
+
+public void saveThumbnail(Product product, List<MultipartFile> imageList) throws Exception{
+        if(imageList != null){
+          for(MultipartFile image : imageList)
+            product.addProductThumbnail(
+              ProductThumbnail.builder()
+                      .product(product)
+                      .imageName(imageInsert(image))
+                      .build()
             );
         }
 
-        if(imageDTO.getInfoImage() != null){
-            imageDTO.getInfoImage().forEach(infoImage ->
-                product.addProductInfoImage(
-                    ProductInfoImage.builder()
-                        .product(product)
-                        .imageName(imageInsert(infoImage))
-                        .build()
-                )
+}
+
+public void saveInfoImage(Product product, List<MultipartFile> imageList) throws Exception{
+        if(imageList != null) {
+          for(MultipartFile image : imageList)
+            product.addProductInfoImage(
+              ProductInfoImage.builder()
+                    .product(product)
+                    .imageName(imageInsert(image))
+                    .build()
             );
         }
+}
 
-        if(imageDTO.getDeleteFirstThumbnail() != null)
-                deleteImage(imageDTO.getDeleteFirstThumbnail());
+public void deleteProductImage(AdminProductImageDTO imageDTO) {
+        deleteFirstThumbnail(imageDTO.getDeleteFirstThumbnail());
+        deleteThumbnail(imageDTO.getDeleteThumbnail());
+        deleteInfoImage(imageDTO.getDeleteInfoImage());
+}
 
-        if(imageDTO.getDeleteThumbnail() != null){
-            List<String> deleteList = imageDTO.getDeleteThumbnail();
-            productThumbnailRepository.deleteByImageName(deleteList);
-            deleteList.forEach(this::deleteImage);
+public void deleteFirstThumbnail(String image) {
+        deleteImage(image);
+}
+
+public void deleteThumbnail(List<String> deleteList) {
+        if(deleteList != null){
+          productThumbnailRepository.deleteByImageName(deleteList);
+          deleteList.forEach(this::deleteImage);
         }
+}
 
-        if(imageDTO.getDeleteInfoImage() != null) {
-            List<String> deleteList = imageDTO.getDeleteInfoImage();
-            productInfoImageRepository.deleteByImageName(deleteList);
-            deleteList.forEach(this::deleteImage);
+public void deleteInfoImage(List<String> deleteList) {
+        if(deleteList != null){
+          productInfoImageRepository.deleteByImageName(deleteList);
+          deleteList.forEach(this::deleteImage);
         }
 }
 ```
@@ -754,6 +782,11 @@ public void saveAndDeleteProductImage(Product product, AdminProductImageDTO imag
 상품 수정의 경우 ProductOption 리스트를 따로 저장하는데 Multiple representations of the same entity are being merged라는 오류가 발생했기 때문입니다.   
 알아보니 해당 Entity 데이터에 대해 같은 id가 중복되어있기 때문에 발생하는 오류라고 확인할 수 있었는데 이미 저장되어있던 데이터의 아이디와 겹치기 때문에 발생하는건가 싶어 여러 방향으로 테스트해보고 알아봤으나 명확한 해답을 찾을 수 없어 따로 분리하게 되었습니다.   
 이 문제에 대해서는 연관관계에 대해 좀 더 학습하고 개선하고자 계획하고 있습니다.
+
+개선사항으로는 처리 도중 Exception이 발생할 경우 저장된 파일에 대한 처리가 있습니다.   
+미처 생각하지 못했던 부분이었는데 파일 저장 후 Exception이 발생하는 경우 데이터베이스는 롤백이 되지만 파일은 삭제되지 않고 남을 수 있다는 점을 간과했습니다.   
+그래서 이 부분에 대한 처리를 하기 위해 Exception이 발생하는 경우 최상단 메소드인 patchProduct 혹은 postProduct 메소드까지 예외를 던지도록 처리하고 최상위 메소드에서는 try-catch를 통해 저장 처리된 파일들을 삭제할 수 있도록 처리했습니다.   
+또한, 파일 삭제처리를 가장 나중에 처리하도록 해 예외 발생시 파일의 누락이 발생하지 않도록 개선했습니다.
 
 <br />
 
@@ -1838,4 +1871,12 @@ Ino가 존재하더라도 장기간 미접속으로 AccessToken, RefreshToken이
 >> JwtAuthorizationFilter에서 토큰 검증 후 정상 토큰이라면 OAuth2인지 local인지에 따라 CustomUser, CustomOAuth2User를 통해 처리하는데 이때 중복된 코드를 제거하기 위해 CustomUserDetails라는 인터페이스를 생성.   
 >> 해당 인터페이스를 통해 getUserId()와 getAuthorities()를 재정의 하도록 해 필요한 정보를 조건문 밖에서 꺼낼 수 있도록 수정.   
 >> CustomOAuth2Service에서 OAuth2Response를 Member Entity로 매핑해 save 처리하는 과정이 있는데 이 부분에 대해 OAuth2ResponseEntityConverter 클래스를 추가 생성해 처리하도록 개선.   
->> 실제 운영 서비스 시 OAuth2 서버에서 추가적인 데이터를 받아야 한다면 converter 코드를 수정하는 것으로 유지보수성을 높이기 위함.   
+>> 실제 운영 서비스 시 OAuth2 서버에서 추가적인 데이터를 받아야 한다면 converter 코드를 수정하는 것으로 유지보수성을 높이기 위함.
+>> AdminService에서 파일 저장에 대한 처리 메소드 개선.   
+>> 기존 저장, 삭제를 모두 처리하던 메소드를 저장과 삭제를 기준으로 1차 분리. 그리고 각 엔티티에 대한 처리로 2차 분리.
+>> OrderService의 payment 메소드 분리.   
+>> PaymentDTO 값을 통한 데이터 처리 메소드, 장바구니 처리 관련 메소드, 옵션 재고 수정 및 상품 판매량 수정 메소드로 각각 분리하고 payment에서는 호출하도록 처리.
+> 
+> domain.dto 패키지 구조 개선.
+>> 각 기능별 in, out, business 로 나눠서 분리.
+> OAuth2와 Security 처리에 대한 USER, Service, SuccessHandler auth 패키지 생성해 하위로 이동.

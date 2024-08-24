@@ -1,12 +1,12 @@
 package com.example.mansshop_boot.controller;
 
-import com.example.mansshop_boot.domain.dto.admin.*;
 import com.example.mansshop_boot.domain.dto.admin.in.AdminDiscountPatchDTO;
 import com.example.mansshop_boot.domain.dto.admin.in.AdminPostPointDTO;
 import com.example.mansshop_boot.domain.dto.admin.in.AdminProductImageDTO;
 import com.example.mansshop_boot.domain.dto.admin.in.AdminProductPatchDTO;
-import com.example.mansshop_boot.domain.dto.mypage.qna.MemberQnADetailDTO;
-import com.example.mansshop_boot.domain.dto.mypage.qna.ProductQnADetailDTO;
+import com.example.mansshop_boot.domain.dto.admin.out.*;
+import com.example.mansshop_boot.domain.dto.mypage.qna.out.MemberQnADetailDTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.out.ProductQnADetailDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyInsertDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
@@ -42,21 +42,6 @@ public class AdminController {
     private final MyPageService myPageService;
 
     private final ResponseMappingService responseMappingService;
-    /**
-     * @Memo
-     *
-     * 서비스 메소드를 재활용 하기 위해서는 응답 DTO를 반환하도록 하는것 보다
-     * 해당 DTO를 반환하도록 하는게 유리하겠다.
-     * 정 상황이 안된다면 상위 메소드를 하나 더 만들어서 거기서 호출해가며 처리하는게 맞을듯.
-     *
-     * 응답 DTO를 반환하도록 하면 해당 기능에 너무 종속적이 되는듯.
-     *
-     * 단, 고려해야할 사항으로 userStatus 처리가 있다.
-     * 근데 이건 PrincipalService에 메소드 만들어서 처리하는 것도 괜찮을듯?
-     * 해당 메소드에서는 UserStatus를 반환하도록 처리해서.
-     *
-     * 이런면에서는 대용량 데이터 강의에서 처럼 그런 방식도 좋은듯
-  듯  */
 
     /**
      *

@@ -1,20 +1,6 @@
 package com.example.mansshop_boot.service;
 
-import com.example.mansshop_boot.domain.dto.admin.*;
-import com.example.mansshop_boot.domain.dto.cart.CartDetailDTO;
-import com.example.mansshop_boot.domain.dto.cart.CartMemberDTO;
-import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
-import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
-import com.example.mansshop_boot.repository.ProductOrderDetailRepository;
-import com.example.mansshop_boot.repository.ProductOrderRepository;
-import com.example.mansshop_boot.repository.ProductRepository;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.List;
 
 @SpringBootTest
 class AdminServiceImplTest {

@@ -1,7 +1,7 @@
 package com.example.mansshop_boot.repository;
 
-import com.example.mansshop_boot.domain.dto.mypage.MyPageReviewDTO;
-import com.example.mansshop_boot.domain.dto.product.ProductReviewDTO;
+import com.example.mansshop_boot.domain.dto.mypage.out.MyPageReviewDTO;
+import com.example.mansshop_boot.domain.dto.product.out.ProductReviewDTO;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQuery;

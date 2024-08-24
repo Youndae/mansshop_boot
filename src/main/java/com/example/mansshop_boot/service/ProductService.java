@@ -2,9 +2,9 @@ package com.example.mansshop_boot.service;
 
 import com.example.mansshop_boot.domain.dto.product.in.ProductQnAPostDTO;
 import com.example.mansshop_boot.domain.dto.pageable.ProductDetailPageDTO;
-import com.example.mansshop_boot.domain.dto.product.ProductDetailDTO;
-import com.example.mansshop_boot.domain.dto.product.ProductQnAResponseDTO;
-import com.example.mansshop_boot.domain.dto.product.ProductReviewDTO;
+import com.example.mansshop_boot.domain.dto.product.out.ProductDetailDTO;
+import com.example.mansshop_boot.domain.dto.product.out.ProductQnAResponseDTO;
+import com.example.mansshop_boot.domain.dto.product.out.ProductReviewDTO;
 import org.springframework.data.domain.Page;
 
 import java.security.Principal;
