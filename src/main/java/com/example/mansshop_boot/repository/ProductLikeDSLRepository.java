@@ -1,6 +1,6 @@
 package com.example.mansshop_boot.repository;
 
-import com.example.mansshop_boot.domain.dto.mypage.ProductLikeDTO;
+import com.example.mansshop_boot.domain.dto.mypage.out.ProductLikeDTO;
 import com.example.mansshop_boot.domain.dto.pageable.LikePageDTO;
 import com.example.mansshop_boot.domain.entity.ProductLike;
 import org.springframework.data.domain.Page;

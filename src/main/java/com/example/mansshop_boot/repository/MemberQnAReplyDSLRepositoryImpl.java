@@ -1,7 +1,7 @@
 package com.example.mansshop_boot.repository;
 
 
-import com.example.mansshop_boot.domain.dto.mypage.qna.MyPageQnAReplyDTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.business.MyPageQnAReplyDTO;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;

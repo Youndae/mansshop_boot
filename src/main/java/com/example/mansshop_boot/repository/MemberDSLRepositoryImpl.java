@@ -1,10 +1,9 @@
 package com.example.mansshop_boot.repository;
 
-import com.example.mansshop_boot.domain.dto.admin.AdminMemberDTO;
-import com.example.mansshop_boot.domain.dto.member.UserSearchDTO;
-import com.example.mansshop_boot.domain.dto.member.UserSearchPwDTO;
+import com.example.mansshop_boot.domain.dto.admin.out.AdminMemberDTO;
+import com.example.mansshop_boot.domain.dto.member.business.UserSearchDTO;
+import com.example.mansshop_boot.domain.dto.member.business.UserSearchPwDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
-import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.entity.Member;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;

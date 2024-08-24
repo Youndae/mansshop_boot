@@ -6,11 +6,12 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.example.mansshop_boot.domain.dto.admin.*;
+import com.example.mansshop_boot.domain.dto.admin.business.*;
 import com.example.mansshop_boot.domain.dto.admin.in.AdminDiscountPatchDTO;
 import com.example.mansshop_boot.domain.dto.admin.in.AdminPostPointDTO;
 import com.example.mansshop_boot.domain.dto.admin.in.AdminProductImageDTO;
 import com.example.mansshop_boot.domain.dto.admin.in.AdminProductPatchDTO;
+import com.example.mansshop_boot.domain.dto.admin.out.*;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyInsertDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
@@ -38,9 +39,9 @@ import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.time.LocalTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -144,20 +145,6 @@ public class AdminServiceImpl implements AdminService {
         List<String> infoImageList = productInfoImageRepository.findByProductId(productId);
 
         return new AdminProductDetailDTO(productId, product, thumbnailList, infoImageList, productOptionList);
-
-        /*return AdminProductDetailDTO.builder()
-                                    .productId(productId)
-                                    .classification(product.getClassification().getId())
-                                    .productName(product.getProductName())
-                                    .firstThumbnail(product.getThumbnail())
-                                    .thumbnailList(thumbnailList)
-                                    .infoImageList(infoImageList)
-                                    .optionList(productOptionList)
-                                    .price(product.getProductPrice())
-                                    .isOpen(product.isOpen())
-                                    .sales(product.getProductSales())
-                                    .discount(product.getProductDiscount())
-                                    .build();*/
     }
 
     /**
@@ -189,13 +176,26 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String postProduct(AdminProductPatchDTO patchDTO, AdminProductImageDTO imageDTO) {
-
         Product product = patchDTO.toPostEntity();
-        List<ProductOption> optionList = setProductDataAndProductOptionSave(product, imageDTO, patchDTO);
-        optionList.forEach(product::addProductOption);
-        saveAndDeleteProductImage(product, imageDTO);
+        String resultId;
+        try {
+            List<ProductOption> optionList = setProductDataAndProductOptionSave(product, imageDTO, patchDTO);
+            optionList.forEach(product::addProductOption);
+            saveProductImage(product, imageDTO);
 
-        return productRepository.save(product).getId();
+            resultId = productRepository.save(product).getId();
+        }catch (Exception e) {
+            log.warn("Filed admin postProduct");
+            e.printStackTrace();
+            if(product.getThumbnail() != null)
+                deleteFirstThumbnailToException(product);
+
+            deleteImageToException(product);
+
+            throw new IllegalArgumentException("Failed postProduct", e);
+        }
+
+        return resultId;
     }
 
     /**
@@ -219,14 +219,32 @@ public class AdminServiceImpl implements AdminService {
     public String patchProduct(String productId, List<Long> deleteOptionList, AdminProductPatchDTO patchDTO, AdminProductImageDTO imageDTO) {
         Product product = productRepository.findById(productId).orElseThrow(IllegalArgumentException::new);
         product.setPatchData(patchDTO);
-        List<ProductOption> optionList = setProductDataAndProductOptionSave(product, imageDTO, patchDTO);
-        productOptionRepository.saveAll(optionList);
-        saveAndDeleteProductImage(product, imageDTO);
+        try{
+            List<ProductOption> optionList = setProductDataAndProductOptionSave(product, imageDTO, patchDTO);
+            productOptionRepository.saveAll(optionList);
+        }catch (Exception e) {
+            log.warn("Filed admin patchProduct");
+            e.printStackTrace();
+            deleteFirstThumbnailToException(product);
+
+            throw new IllegalArgumentException("Failed patchProduct", e);
+        }
 
         if(deleteOptionList != null)
             productOptionRepository.deleteAllById(deleteOptionList);
 
         productRepository.save(product);
+
+        try {
+            saveProductImage(product, imageDTO);
+        }catch (Exception e) {
+            log.warn("Failed admin patchProduct");
+            e.printStackTrace();
+            deleteImageToException(product);
+
+            throw new IllegalArgumentException("Failed patchProduct", e);
+        }
+        deleteProductImage(imageDTO);
 
         return productId;
     }
@@ -240,57 +258,88 @@ public class AdminServiceImpl implements AdminService {
      * 대표 썸네일 제외 모든 썸네일 파일 저장 처리 후
      * AdminProductPatchDTO를 통해 요청받은 PatchOptionDTO 타입의 리스트를 ProductOption 타입의 리스트로 생성해 반환.
      */
-    public List<ProductOption> setProductDataAndProductOptionSave(Product product, AdminProductImageDTO imageDTO, AdminProductPatchDTO patchDTO) {
+    public List<ProductOption> setProductDataAndProductOptionSave(Product product, AdminProductImageDTO imageDTO, AdminProductPatchDTO patchDTO) throws Exception{
         if(imageDTO.getFirstThumbnail() != null)
             product.setThumbnail(imageInsert(imageDTO.getFirstThumbnail()));
 
         return patchDTO.getProductOptionList(product);
     }
 
-    /**
-     *
-     * @param product
-     * @param imageDTO
-     *
-     * 썸네일 리스트와 정보 이미지 리스트의 파일 저장 및 Product Entity내 Set에 add 처리.
-     * 수정처럼 삭제해야 하는 이미지 리스트가 존재하는 경우 해당 파일 삭제 처리 및 테이블 데이터 삭제 요청.
-     */
-    public void saveAndDeleteProductImage(Product product, AdminProductImageDTO imageDTO){
-        if(imageDTO.getThumbnail() != null){
-            imageDTO.getThumbnail().forEach(thumbnail ->
-                        product.addProductThumbnail(
-                                ProductThumbnail.builder()
-                                        .product(product)
-                                        .imageName(imageInsert(thumbnail))
-                                        .build()
-                        )
-                    );
-        }
+    public void saveProductImage(Product product, AdminProductImageDTO imageDTO) throws Exception{
+        saveThumbnail(product, imageDTO.getThumbnail());
+        saveInfoImage(product, imageDTO.getInfoImage());
+    }
 
-        if(imageDTO.getInfoImage() != null){
-            imageDTO.getInfoImage().forEach(infoImage ->
-                    product.addProductInfoImage(
-                            ProductInfoImage.builder()
-                                    .product(product)
-                                    .imageName(imageInsert(infoImage))
-                                    .build()
-                    )
+    public void saveThumbnail(Product product, List<MultipartFile> imageList) throws Exception{
+        if(imageList != null){
+            for(MultipartFile image : imageList)
+                product.addProductThumbnail(
+                        ProductThumbnail.builder()
+                                .product(product)
+                                .imageName(imageInsert(image))
+                                .build()
                 );
         }
 
-        if(imageDTO.getDeleteFirstThumbnail() != null)
-            deleteImage(imageDTO.getDeleteFirstThumbnail());
+    }
 
-        if(imageDTO.getDeleteThumbnail() != null){
-            List<String> deleteList = imageDTO.getDeleteThumbnail();
+    public void saveInfoImage(Product product, List<MultipartFile> imageList) throws Exception{
+        if(imageList != null) {
+            for(MultipartFile image : imageList)
+                product.addProductInfoImage(
+                        ProductInfoImage.builder()
+                                .product(product)
+                                .imageName(imageInsert(image))
+                                .build()
+                );
+        }
+    }
+
+    public void deleteProductImage(AdminProductImageDTO imageDTO) {
+        deleteFirstThumbnail(imageDTO.getDeleteFirstThumbnail());
+        deleteThumbnail(imageDTO.getDeleteThumbnail());
+        deleteInfoImage(imageDTO.getDeleteInfoImage());
+    }
+
+    public void deleteFirstThumbnail(String image) {
+        deleteImage(image);
+    }
+
+    public void deleteThumbnail(List<String> deleteList) {
+        if(deleteList != null){
             productThumbnailRepository.deleteByImageName(deleteList);
             deleteList.forEach(this::deleteImage);
         }
+    }
 
-        if(imageDTO.getDeleteInfoImage() != null) {
-            List<String> deleteList = imageDTO.getDeleteInfoImage();
+    public void deleteInfoImage(List<String> deleteList) {
+        if(deleteList != null){
             productInfoImageRepository.deleteByImageName(deleteList);
             deleteList.forEach(this::deleteImage);
+        }
+    }
+
+    public void deleteFirstThumbnailToException(Product product) {
+        if(product.getThumbnail() != null)
+            deleteFirstThumbnail(product.getThumbnail());
+    }
+
+    public void deleteImageToException(Product product) {
+        if(!product.getProductThumbnailSet().isEmpty()) {
+            List<String> thumbnailList = product.getProductThumbnailSet()
+                    .stream()
+                    .map(ProductThumbnail::getImageName)
+                    .toList();
+
+            deleteThumbnail(thumbnailList);
+        }
+
+        if(!product.getProductInfoImageSet().isEmpty()) {
+            List<String> infoImageList = product.getProductInfoImageSet()
+                    .stream()
+                    .map(ProductInfoImage::getImageName)
+                    .toList();
+            deleteInfoImage(infoImageList);
         }
     }
 
@@ -301,7 +350,7 @@ public class AdminServiceImpl implements AdminService {
      * 파일 저장 처리.
      * 저장명을 반환.
      */
-    /*public String imageInsert(MultipartFile image) {
+    public String imageInsert(MultipartFile image) throws Exception{
         StringBuffer sb = new StringBuffer();
         String saveName = sb.append(new SimpleDateFormat("yyyyMMddHHmmss")
                                         .format(System.currentTimeMillis()))
@@ -310,16 +359,10 @@ public class AdminServiceImpl implements AdminService {
                 .toString();
         String saveFile = filePath + saveName;
 
-        try {
-            image.transferTo(new File(saveFile));
-        }catch (Exception e){
-            log.warn("productImage insert IOException");
-            e.printStackTrace();
-            throw new NullPointerException();
-        }
+        image.transferTo(new File(saveFile));
 
         return saveName;
-    }*/
+    }
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -330,11 +373,8 @@ public class AdminServiceImpl implements AdminService {
      *
      * @param image
      * S3에 파일 저장
-     * 흰배경 거울 대표
-     * 주황배경 두장 썸네일
-     * 형광가방 정보
      */
-    public String imageInsert(MultipartFile image) {
+    /*public String imageInsert(MultipartFile image) throws Exception{
         StringBuffer sb = new StringBuffer();
         String saveName = sb.append(new SimpleDateFormat("yyyyMMddHHmmss")
                         .format(System.currentTimeMillis()))
@@ -363,7 +403,7 @@ public class AdminServiceImpl implements AdminService {
         }
 
         return saveName;
-    }
+    }*/
 
     /**
      *
@@ -371,12 +411,12 @@ public class AdminServiceImpl implements AdminService {
      *
      * 파일 삭제 처리.
      */
-    /*public void deleteImage(String imageName) {
+    public void deleteImage(String imageName) {
         File file = new File(filePath + imageName);
 
         if(file.exists())
             file.delete();
-    }*/
+    }
 
     /**
      *
@@ -384,11 +424,11 @@ public class AdminServiceImpl implements AdminService {
      *
      * S3 파일 삭제
      */
-    public void deleteImage(String imageName) {
+    /*public void deleteImage(String imageName) {
         amazonS3.deleteObject(
                 new DeleteObjectRequest(bucket, imageName)
         );
-    }
+    }*/
 
     /**
      *
@@ -414,11 +454,6 @@ public class AdminServiceImpl implements AdminService {
             AdminProductStockDataDTO stockDTO = dataList.get(i);
             String productId = stockDTO.productId();
 
-            /*List<AdminProductOptionStockDTO> responseOptionList = optionList.stream()
-                                            .filter(option ->
-                                                    productId.equals(option.getProduct().getId()))
-                                            .map(option -> new AdminProductOptionStockDTO(option))
-                                            .toList();*/
             List<AdminProductOptionStockDTO> responseOptionList = optionList.stream()
                                             .filter(option ->
                                                     productId.equals(option.getProduct().getId()))
@@ -514,15 +549,12 @@ public class AdminServiceImpl implements AdminService {
      */
     @Override
     public PagingListDTO<AdminOrderResponseDTO> getNewOrderList(AdminOrderPageDTO pageDTO) {
-        LocalDate today = LocalDate.now();
-        LocalDateTime todayLastOrderTime = LocalDateTime.of(
-                today.getYear()
-                , today.getMonth()
-                , today.getDayOfMonth()
-                , 16
-                , 0
-                , 0
-        );
+
+        LocalDateTime todayLastOrderTime = LocalDateTime.now()
+                                                        .withHour(16)
+                                                        .withMinute(0)
+                                                        .withSecond(0)
+                                                        .withNano(0);
 
         List<AdminOrderDTO> orderDTOList = productOrderRepository.findAllNewOrderList(pageDTO, todayLastOrderTime);
         Long totalElements = productOrderRepository.findAllNewOrderListCount(pageDTO, todayLastOrderTime);
@@ -848,14 +880,25 @@ public class AdminServiceImpl implements AdminService {
 
         AdminPeriodSalesStatisticsDTO monthStatistics = productOrderRepository.findPeriodStatistics(startDate, endDate); // 1.505 Index -> createdAt 하는 경우 0.150 정도로 감소.
         List<AdminBestSalesProductDTO> bestProductList = productOrderRepository.findPeriodBestProductOrder(startDate, endDate);
-        List<AdminPeriodClassificationDTO> classificationList = productOrderDetailRepository.findPeriodClassification(startDate, endDate);
-        List<Classification> classification = classificationRepository.findAll(Sort.by("classificationStep").descending()); // 0.063
-        List<AdminPeriodSalesListDTO> dailySalesList = productOrderRepository.findPeriodDailyList(startDate, endDate); // 0.924
+        List<AdminPeriodSalesListDTO> dailySalesResponseDTO = getPeriodSalesList(lastDay, startDate, endDate);
+        List<AdminPeriodClassificationDTO> classificationResponseDTO = getClassificationResponse(startDate, endDate);
 
         startDate = startDate.minusYears(1);
         endDate = endDate.minusYears(1);
 
         AdminPeriodSalesStatisticsDTO lastYearStatistics = productOrderRepository.findPeriodStatistics(startDate, endDate);
+
+        return new AdminPeriodMonthDetailResponseDTO(monthStatistics
+                                                    , lastYearStatistics
+                                                    , bestProductList
+                                                    , classificationResponseDTO
+                                                    , dailySalesResponseDTO);
+    }
+
+    public List<AdminPeriodClassificationDTO> getClassificationResponse(LocalDateTime startDate, LocalDateTime endDate) {
+        List<AdminPeriodClassificationDTO> classificationList = productOrderDetailRepository.findPeriodClassification(startDate, endDate);
+        List<Classification> classification = classificationRepository.findAll(Sort.by("classificationStep").descending()); // 0.063
+
         List<AdminPeriodClassificationDTO> classificationResponseDTO = new ArrayList<>();
 
         //매출이 전혀 없는 상품 분류의 경우 classificationList에 담겨있지 않을 것이므로
@@ -878,7 +921,11 @@ public class AdminServiceImpl implements AdminService {
         }else
             classificationResponseDTO = classificationList;
 
+        return classificationResponseDTO;
+    }
 
+    public List<AdminPeriodSalesListDTO> getPeriodSalesList(int lastDay, LocalDateTime startDate, LocalDateTime endDate) {
+        List<AdminPeriodSalesListDTO> dailySalesList = productOrderRepository.findPeriodDailyList(startDate, endDate); // 0.924
         List<AdminPeriodSalesListDTO> dailySalesResponseDTO = new ArrayList<>();
 
         //상품 분류별 데이터 매핑과 마찬가지로
@@ -902,12 +949,7 @@ public class AdminServiceImpl implements AdminService {
         }else
             dailySalesResponseDTO = dailySalesList;
 
-
-        return new AdminPeriodMonthDetailResponseDTO(monthStatistics
-                                                    , lastYearStatistics
-                                                    , bestProductList
-                                                    , classificationResponseDTO
-                                                    , dailySalesResponseDTO);
+        return dailySalesResponseDTO;
     }
 
     /**
@@ -922,21 +964,14 @@ public class AdminServiceImpl implements AdminService {
      */
     @Override
     public AdminClassificationSalesResponseDTO getSalesByClassification(String term, String classification) {
-        String[] termSplit = term.split("-");
-        int year = Integer.parseInt(termSplit[0]);
-        int month = Integer.parseInt(termSplit[1]);
+        int[] termSplit = Arrays.stream(term.split("-"))
+                                .mapToInt(Integer::parseInt)
+                                .toArray();
 
-        LocalDateTime startDate = LocalDateTime.of(year, month, 1, 0, 0);
-        int lastDay = startDate.getMonth().length(startDate.toLocalDate().isLeapYear());
-        LocalDateTime endDate = LocalDateTime.of(
-                year
-                , month
-                , lastDay
-                , 23
-                , 59
-                , 59
-                , 999999999
-        );
+        LocalDate start = LocalDate.of(termSplit[0], termSplit[1], 1);
+        LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+        LocalDateTime startDate = LocalDateTime.of(start, LocalTime.MIN);
+        LocalDateTime endDate = LocalDateTime.of(end, LocalTime.MAX);
 
         AdminClassificationSalesDTO classificationSalesDTO = productOrderDetailRepository.findPeriodClassificationSales(startDate, endDate, classification);
         List<AdminClassificationSalesProductListDTO> productList = productOrderDetailRepository.findPeriodClassificationProductSales(startDate, endDate, classification);
@@ -954,13 +989,12 @@ public class AdminServiceImpl implements AdminService {
      */
     @Override
     public AdminPeriodSalesResponseDTO getSalesByDay(String term) {
-        String[] termSplit = term.split("-");
-        int year = Integer.parseInt(termSplit[0]);
-        int month = Integer.parseInt(termSplit[1]);
-        int day = Integer.parseInt(termSplit[2]);
-
-        LocalDateTime startDate = LocalDateTime.of(year, month, day, 0, 0);
-        LocalDateTime endDate = LocalDateTime.of(year, month, day, 23, 59, 59, 999999999);
+        int[] termSplit = Arrays.stream(term.split("-"))
+                                .mapToInt(Integer::parseInt)
+                                .toArray();
+        LocalDate start = LocalDate.of(termSplit[0], termSplit[1], termSplit[2]);
+        LocalDateTime startDate = LocalDateTime.of(start, LocalTime.MIN);
+        LocalDateTime endDate = LocalDateTime.of(start, LocalTime.MAX);
 
         AdminClassificationSalesDTO salesDTO = productOrderRepository.findDailySales(startDate, endDate);
         List<AdminPeriodClassificationDTO> classificationList = productOrderDetailRepository.findPeriodClassification(startDate, endDate);
@@ -984,13 +1018,12 @@ public class AdminServiceImpl implements AdminService {
      */
     @Override
     public PagingListDTO<AdminDailySalesResponseDTO> getOrderListByDay(String term, int page) {
-        String[] termSplit = term.split("-");
-        int year = Integer.parseInt(termSplit[0]);
-        int month = Integer.parseInt(termSplit[1]);
-        int day = Integer.parseInt(termSplit[2]);
-
-        LocalDateTime startDate = LocalDateTime.of(year, month, day, 0, 0);
-        LocalDateTime endDate = LocalDateTime.of(year, month, day, 23, 59, 59, 999999999);
+        int[] termSplit = Arrays.stream(term.split("-"))
+                                .mapToInt(Integer::parseInt)
+                                .toArray();
+        LocalDate start = LocalDate.of(termSplit[0], termSplit[1], termSplit[2]);
+        LocalDateTime startDate = LocalDateTime.of(start, LocalTime.MIN);
+        LocalDateTime endDate = LocalDateTime.of(start, LocalTime.MAX);
 
         Pageable pageable = PageRequest.of(page - 1
                                         , 30

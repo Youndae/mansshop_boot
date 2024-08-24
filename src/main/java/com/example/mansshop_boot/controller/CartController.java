@@ -1,31 +1,23 @@
 package com.example.mansshop_boot.controller;
 
-import com.example.mansshop_boot.domain.dto.cart.AddCartDTO;
-import com.example.mansshop_boot.domain.dto.cart.CartDetailDTO;
-import com.example.mansshop_boot.domain.dto.cart.CartMemberDTO;
-import com.example.mansshop_boot.domain.dto.response.ResponseDTO;
+import com.example.mansshop_boot.domain.dto.cart.in.AddCartDTO;
+import com.example.mansshop_boot.domain.dto.cart.out.CartDetailDTO;
+import com.example.mansshop_boot.domain.dto.cart.business.CartMemberDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseListDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
-import com.example.mansshop_boot.domain.enumuration.Result;
 import com.example.mansshop_boot.service.CartService;
 import com.example.mansshop_boot.service.ResponseMappingService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.WebUtils;
 
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.LongStream;
 
 @RestController
 @RequestMapping("/api/cart")

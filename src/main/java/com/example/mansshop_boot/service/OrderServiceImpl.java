@@ -1,6 +1,7 @@
 package com.example.mansshop_boot.service;
 
-import com.example.mansshop_boot.domain.dto.cart.CartMemberDTO;
+import com.example.mansshop_boot.domain.dto.cart.business.CartMemberDTO;
+import com.example.mansshop_boot.domain.dto.order.business.ProductOrderDataDTO;
 import com.example.mansshop_boot.domain.dto.order.in.OrderProductDTO;
 import com.example.mansshop_boot.domain.dto.order.in.PaymentDTO;
 import com.example.mansshop_boot.domain.entity.*;
@@ -9,6 +10,7 @@ import com.example.mansshop_boot.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -47,49 +49,67 @@ public class OrderServiceImpl implements OrderService{
      * 뭔가 너무 복잡하게 처리하고 있는 듯한 느낌인데 개선할 수 있는 방법이 있을지 고민해보기.
      */
     @Override
-    @Transactional(rollbackFor = RuntimeException.class)
+    @Transactional(rollbackFor = RuntimeException.class, propagation = Propagation.REQUIRED)
     public String payment(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO) {
-        ProductOrder productOrder = paymentDTO.toOrderEntity(cartMemberDTO.uid()); // 주문내역
-        List<OrderProductDTO> orderProductList = paymentDTO.orderProduct();// 주문 내역 중 상품 옵션 정보 리스트
+        ProductOrderDataDTO productOrderDataDTO = createOrderDataDTO(paymentDTO, cartMemberDTO);
+        productOrderRepository.save(productOrderDataDTO.productOrder());
+        //주문 타입이 cart인 경우 장바구니에서 선택한 상품 또는 전체 상품 주문이므로 해당 상품을 장바구니에서 삭제해준다.
+        if(paymentDTO.orderType().equals("cart"))
+            deleteOrderDataToCart(cartMemberDTO, productOrderDataDTO.orderOptionIdList());
+
+        //ProductOption에서 재고 수정 및 Product에서 상품 판매량 수정.
+        patchOptionStockAndProduct(productOrderDataDTO.orderOptionIdList(), productOrderDataDTO.orderProductList());
+
+
+        return Result.OK.getResultKey();
+    }
+
+    public ProductOrderDataDTO createOrderDataDTO(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO) {
+        ProductOrder productOrder = paymentDTO.toOrderEntity(cartMemberDTO.uid());
+        List<OrderProductDTO> orderProductList = paymentDTO.orderProduct();
         List<Long> orderOptionIdList = new ArrayList<>();// 주문한 상품 옵션 아이디를 담아줄 리스트
         int totalProductCount = 0;// 총 판매량
-
         //옵션 정보 리스트에서 각 객체를 OrderDetail Entity로 Entity화 해서 ProductOrder Entity에 담아준다.
         //주문한 옵션 번호는 추후 더 사용하기 때문에 리스트화 한다.
         //총 판매량은 기간별 매출에 필요하기 때문에 이때 같이 총 판매량을 계산한다.
-        for(OrderProductDTO data : orderProductList) {
+        for(OrderProductDTO data : paymentDTO.orderProduct()) {
             productOrder.addDetail(data.toOrderDetailEntity());
             orderOptionIdList.add(data.optionId());
             totalProductCount += data.detailCount();
         }
         productOrder.setProductCount(totalProductCount);
-        //주문 정보와 주문 상세정보를 같이 저장한다.
-        productOrderRepository.save(productOrder);
 
-        //주문 타입이 cart인 경우 장바구니에서 선택한 상품 또는 전체 상품 주문이므로 해당 상품을 장바구니에서 삭제해준다.
-        if(paymentDTO.orderType().equals("cart")){
-            //사용자의 장바구니 아이디를 가져와서 장바구니 상세 리스트를 가져온다.
-            //장바구니 상세 리스트의 경우 리스트화 한 옵션 번호를 통해 가져올 수도 있으나 전체 리스트와 주문 리스트의 크기가 일치한다면
-            //장바구니의 모든 상품을 구매한 것이기 때문에 장바구니 데이터 자체를 삭제하도록 하기 위함.
-            Long cartId = cartRepository.findIdByUserId(cartMemberDTO);
-            List<CartDetail> cartDetailList = cartDetailRepository.findAllCartDetailByCartId(cartId);
+        return new ProductOrderDataDTO(productOrder, orderProductList, orderOptionIdList);
+    }
 
-            if(cartDetailList.size() == orderOptionIdList.size())
-                cartRepository.deleteById(cartId);
-            else{
-                List<Long> deleteCartDetailIdList = cartDetailList.stream()
-                        .filter(cartDetail ->
-                                orderOptionIdList.contains(
-                                        cartDetail.getProductOption().getId()
-                                )
-                        )
-                        .map(CartDetail::getId)
-                        .toList();
+    public void deleteOrderDataToCart(CartMemberDTO cartMemberDTO, List<Long> orderOptionIdList) {
+        //사용자의 장바구니 아이디를 가져와서 장바구니 상세 리스트를 가져온다.
+        //장바구니 상세 리스트의 경우 리스트화 한 옵션 번호를 통해 가져올 수도 있으나 전체 리스트와 주문 리스트의 크기가 일치한다면
+        //장바구니의 모든 상품을 구매한 것이기 때문에 장바구니 데이터 자체를 삭제하도록 하기 위함.
+        Long cartId = cartRepository.findIdByUserId(cartMemberDTO);
+        List<CartDetail> cartDetailList = cartDetailRepository.findAllCartDetailByCartId(cartId);
 
-                cartDetailRepository.deleteAllById(deleteCartDetailIdList);
-            }
+        if(cartDetailList.size() == orderOptionIdList.size())
+            cartRepository.deleteById(cartId);
+        else{
+            List<Long> deleteCartDetailIdList = cartDetailList.stream()
+                    .filter(cartDetail ->
+                            orderOptionIdList.contains(
+                                    cartDetail.getProductOption().getId()
+                            )
+                    )
+                    .map(CartDetail::getId)
+                    .toList();
+
+            cartDetailRepository.deleteAllById(deleteCartDetailIdList);
         }
+    }
 
+
+    /**
+     * 재고 수정
+     */
+    public void patchOptionStockAndProduct(List<Long> orderOptionIdList, List<OrderProductDTO> orderProductList) {
         //상품 옵션 재고 수정을 위해 주문 내역에 해당하는 상품 옵션 데이터를 조회
         //저장 또는 수정할 데이터를 담아줄 리스트를 새로 생성
         List<ProductOption> productOptionList = productOptionRepository.findAllById(orderOptionIdList);
@@ -131,7 +151,10 @@ public class OrderServiceImpl implements OrderService{
 
         productOptionRepository.saveAll(productOptionSetList);
 
-        //상품 판매량 수정을 위해 해당되는 상품들을 조회.
+        patchProductSales(productIdList, productMap);
+    }
+
+    public void patchProductSales(List<String> productIdList, Map<String, Integer> productMap) {
         List<Product> productList = productRepository.findAllByIdList(productIdList);
         List<Product> productSetList = new ArrayList<>();
 
@@ -144,8 +167,8 @@ public class OrderServiceImpl implements OrderService{
         }
 
         productRepository.saveAll(productSetList);
-
-
-        return Result.OK.getResultKey();
     }
+
+
+
 }

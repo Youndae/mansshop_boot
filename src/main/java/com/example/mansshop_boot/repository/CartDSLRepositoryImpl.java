@@ -1,6 +1,6 @@
 package com.example.mansshop_boot.repository;
 
-import com.example.mansshop_boot.domain.dto.cart.CartMemberDTO;
+import com.example.mansshop_boot.domain.dto.cart.business.CartMemberDTO;
 import com.example.mansshop_boot.domain.entity.Cart;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;

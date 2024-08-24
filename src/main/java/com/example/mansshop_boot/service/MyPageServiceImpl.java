@@ -2,19 +2,24 @@ package com.example.mansshop_boot.service;
 
 import com.example.mansshop_boot.config.customException.ErrorCode;
 import com.example.mansshop_boot.config.customException.exception.CustomAccessDeniedException;
-import com.example.mansshop_boot.domain.dto.mypage.*;
+import com.example.mansshop_boot.domain.dto.mypage.business.MemberOrderDTO;
+import com.example.mansshop_boot.domain.dto.mypage.business.MyPageOrderDetailDTO;
+import com.example.mansshop_boot.domain.dto.mypage.business.MyPagePageDTO;
 import com.example.mansshop_boot.domain.dto.mypage.in.MyPageInfoPatchDTO;
 import com.example.mansshop_boot.domain.dto.mypage.in.MyPagePatchReviewDTO;
 import com.example.mansshop_boot.domain.dto.mypage.in.MyPagePostReviewDTO;
-import com.example.mansshop_boot.domain.dto.mypage.qna.*;
+import com.example.mansshop_boot.domain.dto.mypage.out.*;
+import com.example.mansshop_boot.domain.dto.mypage.qna.business.MemberQnADTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.business.MyPageProductQnADTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.business.MyPageQnAReplyDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.MemberQnAInsertDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.MemberQnAModifyDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyInsertDTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.out.*;
 import com.example.mansshop_boot.domain.dto.pageable.LikePageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.PagingMappingDTO;
-import com.example.mansshop_boot.domain.dto.response.ResponseIdDTO;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
 import com.example.mansshop_boot.domain.entity.*;
 import com.example.mansshop_boot.domain.enumuration.MailSuffix;
@@ -27,6 +32,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 import java.util.ArrayList;
@@ -287,9 +293,12 @@ public class MyPageServiceImpl implements MyPageService{
      * 미답변으로 수정한다.
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String postMemberQnAReply(QnAReplyInsertDTO insertDTO, Principal principal) {
         Member member = memberRepository.findById(principal.getName()).orElseThrow(IllegalArgumentException::new);
         MemberQnA memberQnA = memberQnARepository.findById(insertDTO.qnaId()).orElseThrow(IllegalArgumentException::new);
+        memberQnA.setMemberQnAStat(false);
+        memberQnARepository.save(memberQnA);
 
         MemberQnAReply memberQnAReply = MemberQnAReply.builder()
                 .member(member)
@@ -297,9 +306,6 @@ public class MyPageServiceImpl implements MyPageService{
                 .replyContent(insertDTO.content())
                 .build();
 
-        memberQnA.setMemberQnAStat(false);
-
-        memberQnARepository.save(memberQnA);
         memberQnAReplyRepository.save(memberQnAReply);
 
         return Result.OK.getResultKey();
@@ -403,7 +409,6 @@ public class MyPageServiceImpl implements MyPageService{
      */
     @Override
     public List<QnAClassificationDTO> getQnAClassification(Principal principal) {
-
         List<QnAClassification> classificationList = qnAClassificationRepository.findAll();
 
         return classificationList.stream()
@@ -463,6 +468,7 @@ public class MyPageServiceImpl implements MyPageService{
      * 리뷰 작성 처리.
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String postReview(MyPagePostReviewDTO reviewDTO, Principal principal) {
         Member member = memberRepository.findById(principal.getName()).orElseThrow(IllegalArgumentException::new);
         Product product = productRepository.findById(reviewDTO.productId()).orElseThrow(IllegalArgumentException::new);

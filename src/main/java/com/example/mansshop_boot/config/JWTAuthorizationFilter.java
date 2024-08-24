@@ -1,31 +1,26 @@
 package com.example.mansshop_boot.config;
 
 import com.example.mansshop_boot.config.jwt.JWTTokenProvider;
-import com.example.mansshop_boot.config.oAuth.CustomOAuth2User;
-import com.example.mansshop_boot.config.security.CustomUserDetails;
-import com.example.mansshop_boot.domain.dto.oAuth.OAuth2DTO;
-import com.example.mansshop_boot.config.security.CustomUser;
+import com.example.mansshop_boot.auth.oAuth.CustomOAuth2User;
+import com.example.mansshop_boot.auth.user.CustomUserDetails;
+import com.example.mansshop_boot.auth.user.CustomUser;
 import com.example.mansshop_boot.domain.entity.Member;
 import com.example.mansshop_boot.domain.enumuration.Result;
 import com.example.mansshop_boot.repository.MemberRepository;
 import com.example.mansshop_boot.service.JWTTokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.WebUtils;
 

@@ -1,11 +1,8 @@
 package com.example.mansshop_boot.controller;
 
-import com.example.mansshop_boot.config.customException.ErrorCode;
-import com.example.mansshop_boot.config.customException.exception.CustomTokenStealingException;
-import com.example.mansshop_boot.domain.dto.main.MainListDTO;
-import com.example.mansshop_boot.domain.dto.main.MainListResponseDTO;
-import com.example.mansshop_boot.domain.dto.mypage.MemberOrderDTO;
-import com.example.mansshop_boot.domain.dto.mypage.MyPageOrderDTO;
+import com.example.mansshop_boot.domain.dto.main.out.MainListResponseDTO;
+import com.example.mansshop_boot.domain.dto.mypage.business.MemberOrderDTO;
+import com.example.mansshop_boot.domain.dto.mypage.out.MyPageOrderDTO;
 import com.example.mansshop_boot.domain.dto.pageable.MemberPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseListDTO;
@@ -19,15 +16,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.security.Principal;
 import java.util.List;
 

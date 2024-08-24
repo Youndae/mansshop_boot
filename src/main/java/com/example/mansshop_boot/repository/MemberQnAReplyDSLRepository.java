@@ -1,6 +1,6 @@
 package com.example.mansshop_boot.repository;
 
-import com.example.mansshop_boot.domain.dto.mypage.qna.MyPageQnAReplyDTO;
+import com.example.mansshop_boot.domain.dto.mypage.qna.business.MyPageQnAReplyDTO;
 
 import java.util.List;
 

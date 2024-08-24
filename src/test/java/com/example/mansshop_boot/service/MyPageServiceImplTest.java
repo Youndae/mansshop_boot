@@ -1,16 +1,6 @@
 package com.example.mansshop_boot.service;
 
-import com.example.mansshop_boot.domain.dto.mypage.MemberOrderDTO;
-import com.example.mansshop_boot.domain.dto.mypage.MyPageOrderDTO;
-import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;
-import com.example.mansshop_boot.domain.dto.response.PagingResponseDTO;
-import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class MyPageServiceImplTest {
