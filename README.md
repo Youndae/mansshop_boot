@@ -686,6 +686,10 @@ public String patchProduct(String productId, List<Long> deleteOptionList, AdminP
         try{
           List<ProductOption> optionList = setProductDataAndProductOptionSave(product, imageDTO, patchDTO);
           productOptionRepository.saveAll(optionList);
+          if(deleteOptionList != null)
+              productOptionRepository.deleteAllById(deleteOptionList);
+  
+          productRepository.save(product);
         }catch (Exception e) {
           log.warn("Filed admin patchProduct");
           e.printStackTrace();
@@ -693,12 +697,7 @@ public String patchProduct(String productId, List<Long> deleteOptionList, AdminP
   
           throw new IllegalArgumentException("Failed patchProduct", e);
         }
-
-        if(deleteOptionList != null)
-            productOptionRepository.deleteAllById(deleteOptionList);
-
-        productRepository.save(product);
-
+        
         try {
             saveProductImage(product, imageDTO);
         }catch (Exception e) {
