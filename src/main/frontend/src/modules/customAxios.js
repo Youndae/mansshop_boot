@@ -62,18 +62,11 @@ axiosInstance.interceptors.response.use(
         return res;
     },
     async (err) => {
-        console.log('axios interceptor response');
        await errorHandling(err);
     }
 )
 
-const getToken = () => {
-
-    const token = window.localStorage.getItem('Authorization');
-    console.log('getToken : ', token);
-
-    return token;
-};
+const getToken = () => window.localStorage.getItem('Authorization');
 
 
 export const checkResponseMessageOk = (res) => {
@@ -90,11 +83,9 @@ export const checkResponseMessageOk = (res) => {
 export const errorHandling = (err) => {
     const errorStatus = err.response.status;
     const errorMessage = err.response.data.errorMessage;
-    console.log('error response : ', err.response);
     if(errorStatus === 401){
         //토큰 만료 응답
         // err.config._retry = true;
-        console.log('axios default response status is 401');
 
         return axiosInstance.get(`reissue`)
             .then(res => {

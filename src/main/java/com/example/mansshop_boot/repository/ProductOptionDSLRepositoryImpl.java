@@ -1,6 +1,7 @@
 package com.example.mansshop_boot.repository;
 
 import com.example.mansshop_boot.domain.dto.admin.business.AdminProductOptionDTO;
+import com.example.mansshop_boot.domain.dto.order.business.OrderProductInfoDTO;
 import com.example.mansshop_boot.domain.dto.product.business.ProductOptionDTO;
 import com.example.mansshop_boot.domain.entity.ProductOption;
 import com.querydsl.core.types.Projections;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 import static com.example.mansshop_boot.domain.entity.QProductOption.productOption;
+import static com.example.mansshop_boot.domain.entity.QProduct.product;
 
 @Repository
 @RequiredArgsConstructor
@@ -67,6 +69,28 @@ public class ProductOptionDSLRepositoryImpl implements ProductOptionDSLRepositor
                 .from(productOption)
                 .where(productOption.product.id.eq(productId))
                 .orderBy(productOption.id.asc())
+                .fetch();
+    }
+
+    @Override
+    public List<OrderProductInfoDTO> findOrderData(List<Long> optionIds) {
+
+        return jpaQueryFactory.select(
+                        Projections.constructor(
+                                OrderProductInfoDTO.class
+                                , product.id.as("productId")
+                                , productOption.id.as("optionId")
+                                , product.productName
+                                , productOption.size
+                                , productOption.color
+                                , product.productPrice.as("price")
+                                , product.productDiscount.as("discount")
+                        )
+                )
+                .from(productOption)
+                .innerJoin(product)
+                .on(productOption.product.id.eq(product.id))
+                .where(productOption.id.in(optionIds))
                 .fetch();
     }
 }

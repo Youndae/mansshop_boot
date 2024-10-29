@@ -27,29 +27,19 @@ public class CartDetail {
 
     private int cartCount;
 
-    private int cartPrice;
+    public void countUpDown(String type) {
+        if(type.equals("up"))
+            this.cartCount = cartCount + 1;
+        else
+            this.cartCount = cartCount - 1;
+
+    }
 
     public void setCart(Cart cart) {
         this.cart = cart;
     }
 
-    public void countUpDown(String type) {
-        int productPrice = productOption.getProduct().getProductPrice();
-
-        if(type.equals("up")) {
-            this.cartCount = cartCount + 1;
-            this.cartPrice = cartPrice + productPrice;
-        }else {
-            this.cartCount = cartCount - 1;
-            this.cartPrice = cartPrice - productPrice;
-        }
-    }
-
     public void setCartCount(int cartCount) {
         this.cartCount = this.cartCount + cartCount;
-    }
-
-    public void setCartPrice(int cartPrice) {
-        this.cartPrice = this.cartPrice + cartPrice;
     }
 }

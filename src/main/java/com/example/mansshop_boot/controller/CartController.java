@@ -57,11 +57,11 @@ public class CartController {
      * 상품 상세 페이지에서 장바구니 담기
      */
     @PostMapping("/")
-    public ResponseEntity<ResponseMessageDTO> addCart(@RequestBody AddCartDTO addList, HttpServletRequest request, HttpServletResponse response, Principal principal) {
+    public ResponseEntity<ResponseMessageDTO> addCart(@RequestBody List<AddCartDTO> addList, HttpServletRequest request, HttpServletResponse response, Principal principal) {
 
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
 
-        String responseMessage = cartService.addCart(addList.addList(), cartMemberDTO, response, principal);
+        String responseMessage = cartService.addCart(addList, cartMemberDTO, response, principal);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ResponseMessageDTO(responseMessage));

@@ -1,9 +1,15 @@
 package com.example.mansshop_boot.repository;
 
+import com.example.mansshop_boot.domain.dto.admin.business.AdminReviewDTO;
+import com.example.mansshop_boot.domain.dto.admin.out.AdminReviewDetailDTO;
 import com.example.mansshop_boot.domain.dto.mypage.out.MyPageReviewDTO;
+import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.product.out.ProductReviewDTO;
+import com.example.mansshop_boot.domain.enumuration.AdminListType;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -93,5 +99,87 @@ public class ProductReviewDSLRepositoryImpl implements ProductReviewDSLRepositor
                 .where(productReview.member.userId.eq(userId));
 
         return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
+    }
+
+    @Override
+    public List<AdminReviewDTO> findAllByAdminReviewList(AdminOrderPageDTO pageDTO, String listType) {
+        return jpaQueryFactory.select(
+                        Projections.constructor(
+                                AdminReviewDTO.class
+                                , productReview.id.as("reviewId")
+                                , product.productName
+                                , new CaseBuilder()
+                                        .when(productReview.member.nickname.isNull())
+                                        .then(productReview.member.userName)
+                                        .otherwise(productReview.member.nickname)
+                                        .as("writer")
+                                , productReview.updatedAt.as("updatedAt")
+                                , productReview.status
+                        )
+                )
+                .from(productReview)
+                .innerJoin(product)
+                .on(productReview.product.id.eq(product.id))
+                .where(adminReviewListSearch(pageDTO, listType))
+                .orderBy(productReview.updatedAt.desc())
+                .offset(pageDTO.offset())
+                .limit(pageDTO.amount())
+                .fetch();
+    }
+
+    @Override
+    public Long countByAdminReviewList(AdminOrderPageDTO pageDTO, String listType) {
+        return jpaQueryFactory.select(productReview.countDistinct())
+                .from(productReview)
+                .where(adminReviewListSearch(pageDTO, listType))
+                .fetchOne();
+    }
+
+    public BooleanExpression adminReviewListSearch(AdminOrderPageDTO pageDTO, String listType) {
+        BooleanExpression response = Expressions.asBoolean(true).isTrue();
+        if(pageDTO.searchType() != null) {
+            String keyword = String.format("%%%s%%", pageDTO.keyword());
+            if(pageDTO.searchType().equals("user"))
+                response = response.and(
+                                    productReview.member.userName.like(keyword)
+                                            .or(productReview.member.nickname.like(keyword))
+                            );
+            else if(pageDTO.searchType().equals("product"))
+                response = response.and(productReview.product.productName.like(keyword));
+        }
+
+        if(listType.equals(AdminListType.NEW.name())) {
+            response = response.and(productReview.status.eq(false));
+        }
+
+        return response.equals(Expressions.asBoolean(true).isTrue()) ? null : response;
+    }
+
+    @Override
+    public AdminReviewDetailDTO findByAdminReviewDetail(long reviewId) {
+        return jpaQueryFactory.select(
+                Projections.constructor(
+                        AdminReviewDetailDTO.class
+                        , productReview.id.as("reviewId")
+                        , productReview.product.productName
+                        , productReview.productOption.size
+                        , productReview.productOption.color
+                        , new CaseBuilder()
+                                .when(productReview.member.nickname.isNull())
+                                .then(productReview.member.userName)
+                                .otherwise(productReview.member.nickname)
+                                .as("writer")
+                        , productReview.createdAt
+                        , productReview.updatedAt
+                        , productReview.reviewContent.as("content")
+                        , productReviewReply.updatedAt.as("replyUpdatedAt")
+                        , productReviewReply.replyContent
+                )
+        )
+                .from(productReview)
+                .leftJoin(productReviewReply)
+                .on(productReviewReply.productReview.id.eq(productReview.id))
+                .where(productReview.id.eq(reviewId))
+                .fetchOne();
     }
 }

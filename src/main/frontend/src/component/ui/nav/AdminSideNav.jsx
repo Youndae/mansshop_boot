@@ -38,6 +38,10 @@ function AdminSideNav(props) {
                     <Link to={'/admin/qna/product'}>문의 관리</Link>
                     <SideMenuCategory categoryStatus={categoryStatus} status={'qna'}/>
                 </li>
+                <li>
+                    <Link to={'/admin/review'}>리뷰 관리</Link>
+                    <SideMenuCategory categoryStatus={categoryStatus} status={'review'}/>
+                </li>
                 <li><Link to={'/admin/member'}>회원 관리</Link></li>
                 <li>
                     <Link to={'/admin/sales/period'}>매출 관리</Link>
@@ -95,6 +99,17 @@ function SideMenuCategory(props) {
                     text: '문의 카테고리 설정',
                 }
             ];
+        }else if(categoryStatus === 'review') {
+            categoryData = [
+                {
+                    link: '/admin/review',
+                    text: '미답변 목록',
+                },
+                {
+                    link: '/admin/review/all',
+                    text: '전체 목록',
+                }
+            ]
         }else if(categoryStatus === 'sales') {
             categoryData = [
                 {

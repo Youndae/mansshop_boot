@@ -211,6 +211,15 @@ function ProductDetail() {
 
             for(let i = 0; i < selectOption.length; i++) {
                 orderProductArr.push({
+                    optionId: selectOption[i].optionId,
+                    count: selectOption[i].count,
+                })
+            }
+
+            getOrderData(orderProductArr);
+
+            /*for(let i = 0; i < selectOption.length; i++) {
+                orderProductArr.push({
                     productId: productData.productId,
                     optionId: selectOption[i].optionId,
                     productName: productData.productName,
@@ -219,15 +228,29 @@ function ProductDetail() {
                     count: selectOption[i].count,
                     price: selectOption[i].price,
                 })
-            }
+            }*/
 
-            navigate('/productOrder', {state : {
+            /*navigate('/productOrder', {state : {
                     orderProduct : orderProductArr,
                     orderType: 'direct',
                     totalPrice: totalPrice,
                 }}
-            );
+            );*/
         }
+    }
+
+    const getOrderData = async (selectData) => {
+        await axiosInstance.post(`order/product`, selectData)
+            .then(res => {
+                const dataList = res.data.orderData;
+                const totalPrice = res.data.totalPrice;
+
+                navigate('/productOrder', {state : {
+                        orderProduct : dataList,
+                        orderType: 'direct',
+                        totalPrice: totalPrice,
+                    }});
+            })
     }
 
     const handleCartBtn = async () => {
@@ -243,11 +266,10 @@ function ProductDetail() {
                 addList.push({
                     optionId: selectOption[i].optionId,
                     count: selectOption[i].count,
-                    price: addPrice,
                 })
             }
 
-            await axiosDefault.post(`cart/`, {addList})
+            await axiosDefault.post(`cart/`, addList)
                 .then(res => {
                     if (checkResponseMessageOk(res))
                         alert('장바구니에 상품을 추가했습니다.');
