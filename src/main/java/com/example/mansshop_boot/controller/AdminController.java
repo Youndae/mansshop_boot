@@ -1,9 +1,7 @@
 package com.example.mansshop_boot.controller;
 
-import com.example.mansshop_boot.domain.dto.admin.in.AdminDiscountPatchDTO;
-import com.example.mansshop_boot.domain.dto.admin.in.AdminPostPointDTO;
-import com.example.mansshop_boot.domain.dto.admin.in.AdminProductImageDTO;
-import com.example.mansshop_boot.domain.dto.admin.in.AdminProductPatchDTO;
+import com.example.mansshop_boot.domain.dto.admin.business.AdminReviewDTO;
+import com.example.mansshop_boot.domain.dto.admin.in.*;
 import com.example.mansshop_boot.domain.dto.admin.out.*;
 import com.example.mansshop_boot.domain.dto.mypage.qna.out.MemberQnADetailDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.out.ProductQnADetailDTO;
@@ -14,6 +12,7 @@ import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.response.*;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.ResponseWrappingDTO;
+import com.example.mansshop_boot.domain.enumuration.AdminListType;
 import com.example.mansshop_boot.service.AdminService;
 import com.example.mansshop_boot.service.MyPageService;
 import com.example.mansshop_boot.service.ResponseMappingService;
@@ -502,6 +501,45 @@ public class AdminController {
     public ResponseEntity<ResponseMessageDTO> deleteQnAClassification(@PathVariable(name = "qnaClassificationId") Long classificationId) {
 
         String responseMessage = adminService.deleteQnAClassification(classificationId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
+    }
+
+    @GetMapping("/review")
+    public ResponseEntity<PagingResponseDTO<?>> getNewReviewList(@RequestParam(name = "keyword", required = false) String keyword
+                                        , @RequestParam(name = "page") int page
+                                        , @RequestParam(name = "searchType", required = false) String searchType
+                                        , Principal principal) {
+        AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(keyword, searchType, page);
+        PagingListDTO<AdminReviewDTO> responseDTO = adminService.getReviewList(pageDTO, AdminListType.NEW);
+
+        return responseMappingService.mappingPagingResponseDTO(responseDTO, principal);
+    }
+
+    @GetMapping("/review/all")
+    public ResponseEntity<PagingResponseDTO<?>> getAllReviewList(@RequestParam(name = "keyword", required = false) String keyword
+                                            , @RequestParam(name = "page") int page
+                                            , @RequestParam(name = "searchType", required = false) String searchType
+                                            , Principal principal) {
+        AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(keyword, searchType, page);
+        PagingListDTO<AdminReviewDTO> responseDTO = adminService.getReviewList(pageDTO, AdminListType.ALL);
+
+        return responseMappingService.mappingPagingResponseDTO(responseDTO, principal);
+    }
+
+    @GetMapping("/review/detail/{reviewId}")
+    public ResponseEntity<ResponseDTO<?>> getReviewDetail(@PathVariable("reviewId") long reviewId
+                                                            , Principal principal) {
+        ResponseWrappingDTO<AdminReviewDetailDTO> dto = new ResponseWrappingDTO<>(adminService.getReviewDetail(reviewId));
+
+        return responseMappingService.mappingResponseDTO(dto, principal);
+    }
+
+    @PostMapping("/review")
+    public ResponseEntity<ResponseMessageDTO> postReviewReply(@RequestBody AdminReviewRequestDTO postDTO
+                                                            , Principal principal) {
+        String responseMessage = adminService.postReviewReply(postDTO, principal);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ResponseMessageDTO(responseMessage));

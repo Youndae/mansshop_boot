@@ -1,9 +1,16 @@
 package com.example.mansshop_boot.service;
 
+import com.example.mansshop_boot.config.customException.ErrorCode;
+import com.example.mansshop_boot.config.customException.exception.CustomAccessDeniedException;
+import com.example.mansshop_boot.config.customException.exception.CustomNotFoundException;
 import com.example.mansshop_boot.domain.dto.cart.business.CartMemberDTO;
+import com.example.mansshop_boot.domain.dto.order.business.OrderDataDTO;
+import com.example.mansshop_boot.domain.dto.order.business.OrderProductInfoDTO;
 import com.example.mansshop_boot.domain.dto.order.business.ProductOrderDataDTO;
 import com.example.mansshop_boot.domain.dto.order.in.OrderProductDTO;
+import com.example.mansshop_boot.domain.dto.order.in.OrderProductRequestDTO;
 import com.example.mansshop_boot.domain.dto.order.in.PaymentDTO;
+import com.example.mansshop_boot.domain.dto.order.out.OrderDataResponseDTO;
 import com.example.mansshop_boot.domain.entity.*;
 import com.example.mansshop_boot.domain.enumuration.Result;
 import com.example.mansshop_boot.repository.*;
@@ -170,5 +177,62 @@ public class OrderServiceImpl implements OrderService{
     }
 
 
+    @Override
+    public OrderDataResponseDTO getProductOrderData(List<OrderProductRequestDTO> optionIdAndCountDTO) {
 
+        List<OrderProductInfoDTO> orderProductInfoDTO = getOrderDataDTOList(optionIdAndCountDTO);
+
+        return mappingOrderResponseDTO(optionIdAndCountDTO, orderProductInfoDTO);
+    }
+
+    @Override
+    public OrderDataResponseDTO getCartOrderData(List<Long> cartDetailIds, CartMemberDTO cartMemberDTO) {
+        List<CartDetail> cartDetails = cartDetailRepository.findAllById(cartDetailIds);
+
+        if(cartDetails.isEmpty())
+            throw new CustomNotFoundException(ErrorCode.NOT_FOUND, ErrorCode.NOT_FOUND.getMessage());
+
+        Long cartId = cartDetails.get(0).getCart().getId();
+        Cart cart = cartRepository.findById(cartId).orElseThrow(IllegalArgumentException::new);
+
+        if(!cart.getMember().getUserId().equals(cartMemberDTO.uid())
+                && !cart.getCookieId().equals(cartMemberDTO.cartCookieValue()))
+            throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
+
+        List<OrderProductRequestDTO> optionIdAndCountDTO = cartDetails.stream()
+                                                                    .map(dto ->
+                                                                            new OrderProductRequestDTO(
+                                                                                    dto.getProductOption().getId()
+                                                                                    , dto.getCartCount()
+                                                                            )
+                                                                    )
+                                                                    .toList();
+
+        List<OrderProductInfoDTO> orderProductInfoDTO = getOrderDataDTOList(optionIdAndCountDTO);
+
+        return mappingOrderResponseDTO(optionIdAndCountDTO, orderProductInfoDTO);
+    }
+
+    public List<OrderProductInfoDTO> getOrderDataDTOList(List<OrderProductRequestDTO> optionIdAndCountDTO) {
+        List<Long> optionIds = optionIdAndCountDTO.stream().map(OrderProductRequestDTO::optionId).toList();
+
+        return productOptionRepository.findOrderData(optionIds);
+    }
+
+    public OrderDataResponseDTO mappingOrderResponseDTO(List<OrderProductRequestDTO> optionIdAndCountDTO, List<OrderProductInfoDTO> orderInfoList) {
+        int totalPrice = 0;
+        List<OrderDataDTO> orderDataDTOList = new ArrayList<>();
+
+        for(OrderProductInfoDTO data : orderInfoList) {
+            for(OrderProductRequestDTO dto : optionIdAndCountDTO){
+                if(data.optionId() == dto.optionId()) {
+                    OrderDataDTO orderData = new OrderDataDTO(data, dto.count());
+                    orderDataDTOList.add(orderData);
+                    totalPrice += orderData.price();
+                }
+            }
+        }
+
+        return new OrderDataResponseDTO(orderDataDTOList, totalPrice);
+    }
 }

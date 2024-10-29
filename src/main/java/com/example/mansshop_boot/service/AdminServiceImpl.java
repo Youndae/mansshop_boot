@@ -7,10 +7,7 @@ import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.example.mansshop_boot.domain.dto.admin.business.*;
-import com.example.mansshop_boot.domain.dto.admin.in.AdminDiscountPatchDTO;
-import com.example.mansshop_boot.domain.dto.admin.in.AdminPostPointDTO;
-import com.example.mansshop_boot.domain.dto.admin.in.AdminProductImageDTO;
-import com.example.mansshop_boot.domain.dto.admin.in.AdminProductPatchDTO;
+import com.example.mansshop_boot.domain.dto.admin.in.*;
 import com.example.mansshop_boot.domain.dto.admin.out.*;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyInsertDTO;
@@ -19,6 +16,7 @@ import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.PagingMappingDTO;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
 import com.example.mansshop_boot.domain.entity.*;
+import com.example.mansshop_boot.domain.enumuration.AdminListType;
 import com.example.mansshop_boot.domain.enumuration.OrderStatus;
 import com.example.mansshop_boot.domain.enumuration.Result;
 import com.example.mansshop_boot.repository.*;
@@ -78,6 +76,10 @@ public class AdminServiceImpl implements AdminService {
     private final QnAClassificationRepository qnAClassificationRepository;
 
     private final MemberRepository memberRepository;
+
+    private final ProductReviewRepository productReviewRepository;
+
+    private final ProductReviewReplyRepository productReviewReplyRepository;
 
     private final MyPageService myPageService;
 
@@ -777,6 +779,63 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public String deleteQnAClassification(long classificationId) {
         qnAClassificationRepository.deleteById(classificationId);
+
+        return Result.OK.getResultKey();
+    }
+
+    /**
+     *
+     * @param pageDTO
+     * @param listType
+     *
+     * 리뷰 리스트 조회.
+     * 미답변 상태인 new, 전체인 all을 동적으로 처리
+     * AdminListType이라는 enum을 통해 관리.
+     * 검색 타입은 userName || nickname으로 검색하는 'user' 와
+     * productName으로 검색하는 'product' 두가지가 존재.
+     */
+    @Override
+    public PagingListDTO<AdminReviewDTO> getReviewList(AdminOrderPageDTO pageDTO, AdminListType listType) {
+        List<AdminReviewDTO> content = productReviewRepository.findAllByAdminReviewList(pageDTO, listType.name());
+        content.forEach(v -> log.info("AdminServiceImpl.getReviewList :: content forEach : {}", v));
+        Long totalElements = productReviewRepository.countByAdminReviewList(pageDTO, listType.name());
+        PagingMappingDTO pagingMappingDTO = new PagingMappingDTO(totalElements, pageDTO.page(), pageDTO.amount());
+
+        return new PagingListDTO<>(content, pagingMappingDTO);
+    }
+
+    /**
+     *
+     * @param reviewId
+     *
+     * 리뷰 상세 페이지 데이터
+     */
+    @Override
+    public AdminReviewDetailDTO getReviewDetail(long reviewId) {
+//        return productReviewRepository.findByAdminReviewDetail(reviewId);
+
+        AdminReviewDetailDTO dto =  productReviewRepository.findByAdminReviewDetail(reviewId);
+        System.out.println("detail DTO : " + dto);
+
+        return dto;
+    }
+
+    @Override
+    public String postReviewReply(AdminReviewRequestDTO postDTO
+                                , Principal principal) {
+        Member member = memberRepository.findById(principal.getName())
+                .orElseThrow(IllegalArgumentException::new);
+
+        ProductReview reviewEntity = productReviewRepository.findById(postDTO.reviewId())
+                .orElseThrow(IllegalArgumentException::new);
+
+        ProductReviewReply entity = ProductReviewReply.builder()
+                .member(member)
+                .replyContent(postDTO.content())
+                .productReview(reviewEntity)
+                .build();
+
+        productReviewReplyRepository.save(entity);
 
         return Result.OK.getResultKey();
     }

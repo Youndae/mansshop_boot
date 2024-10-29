@@ -53,6 +53,8 @@ import AdminProductQnADetail from "./component/page/admin/AdminProductQnADetail"
 import AdminMemberQnA from "./component/page/admin/AdminMemberQnA";
 import AdminMemberQnADetail from "./component/page/admin/AdminMemberQnADetail";
 import AdminQnAClassification from "./component/page/admin/AdminQnAClassification";
+import AdminReview from "./component/page/admin/AdminReview";
+import AdminReviewDetail from "./component/page/admin/AdminReviewDetail";
 import AdminMember from "./component/page/admin/AdminMember";
 import AdminPeriodSales from "./component/page/admin/AdminPeriodSales";
 import AdminPeriodSalesDetail from "./component/page/admin/AdminPeriodSalesDetail";
@@ -149,6 +151,14 @@ function App() {
               <Route path='admin/qna/member?type=:type&keyword=:keyword&page=:page' element={<AdminMemberQnA />} />
               <Route path='admin/qna/member/:qnaId' element={<AdminMemberQnADetail />} />
               <Route path='admin/qna/classification' element={<AdminQnAClassification />} />
+
+              <Route path='admin/review' element={<AdminReview />}/>
+              <Route path='admin/review?page=:page' element={<AdminReview />}/>
+              <Route path='admin/review?page=:page&type=:type&keyword=:keyword' element={<AdminReview />}/>
+              <Route path='admin/review/all' element={<AdminReview />}/>
+              <Route path='admin/review/all?page=:page' element={<AdminReview />}/>
+              <Route path='admin/review/all?page=:page&type=:type&keyword=:keyword' element={<AdminReview />}/>
+              <Route path='admin/review/detail/:reviewId' element={<AdminReviewDetail />} />
 
               <Route path='admin/member' element={<AdminMember />} />
               <Route path='admin/member?page=:page' element={<AdminMember />} />

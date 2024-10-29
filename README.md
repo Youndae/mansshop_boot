@@ -75,7 +75,7 @@
 <br />
 
 ## ERD
-<img src="src/main/resources/README_image/new_ERD.jpg">
+<img src="src/main/resources/README_image/new_Man'sShop_ERD.png">
 
 <br/>
 
@@ -854,72 +854,6 @@ public class MainServiceImpl implements MainService {
 <br />
 
 ## 프론트 엔드 기능
-
-<br />
-
-### 상품 구매 요청 시 데이터 처리
-<br />
-
-React를 학습하고 적용하기 시작하면서 가장 신경을 많이 쓴 부분은 클라이언트에서 서버에 요청을 너무 자주하지 않도록 처리하는 부분이었습니다.   
-문제가 발생하지 않고 보안을 유지할 수 있는 선에서 프론트가 알아서 처리해주고 서버로 요청을 보내지 않는다면 비용을 줄일 수 있고 트래픽을 조금이라도 줄일 수 있지 않을까 하는 생각이었기 때문입니다.
-
-이번 프로젝트에서는 state를 통해 해당 부분들을 처리할 수 있었습니다.   
-가장 대표적인 처리가 장바구니 혹은 상품 상세페이지에서 구매 버튼을 눌렀을 경우입니다.   
-이전 프로젝트는 사용자가 구매버튼을 누르게 되면 선택된 상품의 정보, 수량, 가격 등을 모두 서버에게 전달하고 서버에서 다시 매핑한 뒤 Model에 담아 주문 페이지를 호출하는 형태였습니다.   
-하지만 React에서는 state를 통해 원하는 데이터를 보낼 수 있었기 때문에 서버로 요청을 보내지 않고 컴포넌트 내에서 매핑한 뒤 state에 담아 해당 페이지로 이동하는 형태로 처리했습니다.
-
-```javascript
-// 장바구니 Component
-// 선택 상품 주문 클릭 시
-const handleSelectOrder = () => {
-    let resultArr = [];
-    for(let i = 0; i < selectValue.length; i++)
-        if(selectValue[i].status)
-            resultArr.push(getOrderObject(i));
-    
-    navigateOrder(resultArr);
-}
-
-const getOrderObject = (idx) => {
-    return {
-        productId: cartData[idx].productId,
-        optionId: cartData[idx].optionId,
-        productName: cartData[idx].productName,
-        size: cartData[idx].size,
-        color: cartData[idx].color,
-        count: cartData[idx].count,
-        price: cartData[idx].price
-    }
-}
-
-const navigateOrder = (data) => {
-    navigate('/productOrder'
-            , { state : { orderProduct: data, orderType: 'cart', totalPrice: totalPrice } }
-    );
-}
-
-
-// 주문 Component
-
-useEffect(() => {
-    if (state !== null) {
-        setOrderProduct(state.orderProduct);
-        setTotalPrice(state.totalPrice);
-        setOrderType(state.orderType);
-        
-        if(state.totalPrice >= 100000)
-            setDeliveryFee(0);
-        
-        //...
-    }else {
-        navigate('/error');
-    }
-})
-```
-
-장바구니에서는 선택 상품 주문과 전체 상품 주문 두가지 버튼이 존재하기 때문에 두 버튼 이벤트에 대한 핸들링을 처리해야 하고, 동일한 주문 객체를 생성해야 하므로 getOrderObject를 통해 객체를 생성하도록 분리했습니다.   
-그리고 navigateOrder를 통해 state에 각 데이터들을 state에 담아준 뒤 주문 페이지로 이동할 수 있도록 처리했습니다.   
-주문 컴포넌트에서는 state가 전달되지 않은 잘못된 접근의 경우 오류페이지로 이동하도록 하고 state가 전달되었다면 전달받은 데이터들을 useState에 담도록 처리했습니다.
 
 <br />
 
@@ -1879,3 +1813,19 @@ Ino가 존재하더라도 장기간 미접속으로 AccessToken, RefreshToken이
 > domain.dto 패키지 구조 개선.
 >> 각 기능별 in, out, business 로 나눠서 분리.
 > OAuth2와 Security 처리에 대한 USER, Service, SuccessHandler auth 패키지 생성해 하위로 이동.
+
+<br />
+
+### 2024/10/29
+> 리팩토링
+>> CartDetail 테이블에서 detailPrice 컬럼 제거.   
+>>> 제거 이유로는 할인율이 적용되는 이상 고정적인 값을 갖고 있는게 의미가 없기 때문.   
+>>> 연관 부분 수정 및 확인 완료.
+>>
+>> 주문 페이지 이동 시 React에서 바로 넘겨주던 처리를 서버에 요청 이후 해당 컴포넌트로 넘겨주도록 수정.   
+>>> 이 부분 수정 역시 할인율이 적용되는 경우와 데이터 무결성을 위해 서버 요청 방식으로 수정.   
+>>> 만약 서버에 요청하지 않고 처리할 경우, 할인이 종료되었는데도 불구하고 기존 페이지 로딩 시점의 가격으로 처리될 우려가 있기 때문에 서버에서 다시 데이터를 받아오도록 해야 한다.
+>>
+>> 관리자 리뷰 관리 기능 추가.
+>>> 누락 기능으로 이번에 추가.   
+>>> 여기에는 ReviewStatus도 없었기 때문에 status라는 이름의 컬럼을 ProductReview 테이블에 추가.   

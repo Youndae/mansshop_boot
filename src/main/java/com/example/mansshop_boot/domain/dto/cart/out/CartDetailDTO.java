@@ -9,6 +9,7 @@ public record CartDetailDTO(
         , String size
         , String color
         , int count
+        , int originPrice
         , int price
         , int discount
 ) {
@@ -22,15 +23,18 @@ public record CartDetailDTO(
                         , int count
                         , int price
                         , int discount) {
-        this.cartDetailId = cartDetailId;
-        this.productId = productId;
-        this.optionId = optionId;
-        this.productName = productName;
-        this.productThumbnail = productThumbnail;
-        this.size = size;
-        this.color = color;
-        this.count = count;
-        this.price = (int) (price * (1 - ((double) discount / 100)));
-        this.discount = discount;
+        this(
+                cartDetailId
+                , productId
+                , optionId
+                , productName
+                , productThumbnail
+                , size
+                , color
+                , count
+                , price * count
+                , (price - (price * discount / 100)) * count
+                , discount
+        );
     }
 }

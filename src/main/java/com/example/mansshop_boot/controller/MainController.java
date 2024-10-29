@@ -16,9 +16,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.security.Principal;
 import java.util.List;
 
@@ -116,7 +122,7 @@ public class MainController {
      *
      * 파일 저장을 local로 처리하는 경우 사용.
      */
-    /*@GetMapping("/display/{imageName}")
+    @GetMapping("/display/{imageName}")
     public ResponseEntity<byte[]> display(@PathVariable(name = "imageName") String imageName) {
         File file = new File(filePath + imageName);
         ResponseEntity<byte[]> result = null;
@@ -131,7 +137,7 @@ public class MainController {
         }
 
         return result;
-    }*/
+    }
 
     /**
      *
@@ -140,11 +146,11 @@ public class MainController {
      * S3에서 파일을 받는 경우.
      * Spring Boot 서버를 proxy 서버로 사용해 파일 다운로드 후 blob으로 반환
      */
-    @GetMapping("/display/{imageName}")
+    /*@GetMapping("/display/{imageName}")
     public ResponseEntity<InputStreamResource> display(@PathVariable(name = "imageName") String imageName) {
 
         return mainService.getImageFile(imageName);
-    }
+    }*/
 
     /**
      *

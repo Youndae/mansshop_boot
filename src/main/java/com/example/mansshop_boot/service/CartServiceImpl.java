@@ -127,7 +127,6 @@ public class CartServiceImpl implements CartService{
                                                             .orElseThrow(IllegalArgumentException::new)
                                             )
                                             .cartCount(detailValue.count())
-                                            .cartPrice(detailValue.price())
                                             .build();
 
             if(!optionListDetail.isEmpty()) {
@@ -135,7 +134,6 @@ public class CartServiceImpl implements CartService{
                     CartDetail listObject = optionListDetail.get(i);
                     if(detailValue.optionId().equals(listObject.getProductOption().getId())){
                         listObject.setCartCount(detailValue.count());
-                        listObject.setCartPrice(detailValue.price());
 
                         addDetail = listObject;
                         optionListDetail.remove(i);

@@ -41,6 +41,8 @@ public class ProductReview {
     @UpdateTimestamp
     private LocalDate updatedAt;
 
+    private boolean status;
+
     public void setReviewContent(String reviewContent) {
         this.reviewContent = reviewContent;
     }

@@ -21,6 +21,7 @@ function Cart() {
         size: '',
         color: '',
         count: '',
+        originPrice: '',
         price: '',
         discount: 0,
         status: true,
@@ -51,6 +52,7 @@ function Cart() {
                                 size: data[i].size,
                                 color: data[i].color,
                                 count: data[i].count,
+                                originPrice: data[i].originPrice,
                                 price: data[i].price,
                                 discount: data[i].discount,
                                 status: true
@@ -100,31 +102,46 @@ function Cart() {
     }
 
     const handleSelectOrder = () => {
-        let resultArr = [];
+        let detailIds = [];
         for(let i = 0; i < selectValue.length; i++)
             if(selectValue[i].status)
-                resultArr.push(getOrderObject(i))
+                detailIds.push(selectValue[i].cartDetailId)
 
-        navigateOrder(resultArr);
+        getOrderData(detailIds);
+
+        // navigateOrder(resultArr);
     }
 
     const handleAllOrder = () => {
-        let resultArr = [];
+        let detailIds = [];
         for(let i = 0; i < cartData.length; i++)
-            resultArr.push(getOrderObject(i))
+            detailIds.push(selectValue[i].cartDetailId)
 
-        navigateOrder(resultArr);
+        getOrderData(detailIds);
+        // navigateOrder(resultArr);
     }
 
-    const getOrderObject = (idx) => {
+    const getOrderData = async (detailIds) => {
+        await axiosInstance.post(`order/cart`, detailIds)
+            .then(res => {
+                const dataList = res.data.orderData;
+                const orderTotalPrice = res.data.totalPrice;
+
+                getOrderObject(dataList);
+
+                navigate('/productOrder', {state : {orderProduct: dataList, orderType: 'cart', totalPrice: orderTotalPrice}});
+            })
+    }
+
+    const getOrderObject = (data) => {
         return {
-            productId: cartData[idx].productId,
-            optionId: cartData[idx].optionId,
-            productName: cartData[idx].productName,
-            size: cartData[idx].size,
-            color: cartData[idx].color,
-            count: cartData[idx].count,
-            price: cartData[idx].price
+            productId: data.productId,
+            optionId: data.optionId,
+            productName: data.productName,
+            size: data.size,
+            color: data.color,
+            count: data.count,
+            price: data.price
         }
     }
 
@@ -272,8 +289,12 @@ function CartDetail(props) {
                     }
 
                     let discountText = '';
-                    if(cart.discount !== 0)
+                    let originPriceText = '';
+                    if(cart.discount !== 0){
                         discountText = `-${cart.discount}%`;
+                        originPriceText = `${numberComma(cart.originPrice)}`;
+                    }
+
 
                     return (
                         <div key={index} className="cart-data">
@@ -307,7 +328,7 @@ function CartDetail(props) {
                                         </div>
                                     </div>
                                     <div className="cart-price">
-                                        <p className={'cart-option-price'}><p className={'cart-option-price-discount'}>{discountText}</p>{numberComma(cart.price)} 원</p>
+                                        <p className={'cart-option-price'}><p className={'cart-option-price-discount'} style={{textDecoration: 'line-through'}}>{originPriceText}</p><p className={'cart-option-price-discount'}>{discountText}</p>{numberComma(cart.price)} 원</p>
                                     </div>
                                 </div>
                             </div>

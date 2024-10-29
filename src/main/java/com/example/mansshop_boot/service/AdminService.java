@@ -1,15 +1,14 @@
 package com.example.mansshop_boot.service;
 
-import com.example.mansshop_boot.domain.dto.admin.in.AdminDiscountPatchDTO;
-import com.example.mansshop_boot.domain.dto.admin.in.AdminPostPointDTO;
-import com.example.mansshop_boot.domain.dto.admin.in.AdminProductImageDTO;
-import com.example.mansshop_boot.domain.dto.admin.in.AdminProductPatchDTO;
+import com.example.mansshop_boot.domain.dto.admin.business.AdminReviewDTO;
+import com.example.mansshop_boot.domain.dto.admin.in.*;
 import com.example.mansshop_boot.domain.dto.admin.out.*;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyInsertDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
+import com.example.mansshop_boot.domain.enumuration.AdminListType;
 import org.springframework.data.domain.Page;
 
 import java.security.Principal;
@@ -63,6 +62,8 @@ public interface AdminService {
 
     String deleteQnAClassification(long classificationId);
 
+    PagingListDTO<AdminReviewDTO> getReviewList(AdminOrderPageDTO pageDTO, AdminListType listType);
+
     Page<AdminMemberDTO> getMemberList(AdminOrderPageDTO pageDTO);
 
     String postPoint(AdminPostPointDTO pointDTO);
@@ -80,4 +81,8 @@ public interface AdminService {
     Page<AdminProductSalesListDTO> getProductSalesList(AdminPageDTO pageDTO);
 
     AdminProductSalesDetailDTO getProductSalesDetail(String productId);
+
+    AdminReviewDetailDTO getReviewDetail(long reviewId);
+
+    String postReviewReply(AdminReviewRequestDTO postDTO, Principal principal);
 }
