@@ -45,14 +45,14 @@ public class Product {
     @UpdateTimestamp
     private LocalDate updatedAt;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    private final Set<ProductOption> productOptionSet = new HashSet<>();
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private final List<ProductOption> productOptionSet = new ArrayList<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    private final Set<ProductThumbnail> productThumbnailSet = new HashSet<>();
+    private final List<ProductThumbnail> productThumbnailSet = new ArrayList<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    private final Set<ProductInfoImage> productInfoImageSet = new HashSet<>();
+    private final List<ProductInfoImage> productInfoImageSet = new ArrayList<>();
 
     public void addProductOption(ProductOption productOption) {
         productOptionSet.add(productOption);

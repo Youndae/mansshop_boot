@@ -1,5 +1,6 @@
 package com.example.mansshop_boot.domain.entity;
 
+import com.example.mansshop_boot.domain.dto.admin.business.PatchOptionDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,5 +36,12 @@ public class ProductOption {
 
     public void setStock(int stock) {
         this.stock = stock;
+    }
+
+    public void patchOptionData(PatchOptionDTO dto) {
+        this.size = dto.getSize();
+        this.color = dto.getColor();
+        this.stock = dto.getOptionStock();
+        this.isOpen = dto.isOptionIsOpen();
     }
 }
