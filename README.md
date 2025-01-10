@@ -665,15 +665,15 @@ Man's Shop 프로젝트에는 많은 부분에 페이징 기능을 사용합니�
 
 <br />
 
-### 상품 추가 및 수정 처리 및 발생한 문제
+### 상품 추가 및 수정 처리
 <br />
 
-관리자의 상품 추가 및 삭제에서는 JPA의 연관관계 설정을 통해 상위의 Entity에 다른 Entity 객체들을 HashSet으로 담은 뒤 save 처리하도록 했습니다.   
-QnA 처럼 문의 작성 요청과 답변 작성 요청이 분리되어 있는 Entity들에 양방향 매핑을 처리하지 않았지만 상품이나 장바구니처럼 한번의 요청으로 같이 처리될 수 있는 Entity들에 대해서는 양방향 매핑으로 처리했습니다.
+관리자의 상품 추가 및 삭제는 JPA의 연관관계 설정을 통해 상위 Entity인 Product를 save하는 것으로 하위 Entity들을 같이 저장할 수 있도록 처리했습니다.   
+양방향 매핑으로 처리함으로써 한번의 save() 요청으로 모든 Entity들을 같이 처리할 수 있기 때문에 효율이 높다고 생각했기 때문입니다.   
+실제로 더미데이터를 넣는 과정에서 테스트 해본 결과 여러개의 Entity를 각각의 Repository를 통해 저장하는 것 보다 양방향 매핑을 통해 한번에 저장하도록 하는 것이 더 빠르게 처리되는 것을 확인할 수 있었습니다.   
 
-상품 관련된 테이블로는 Product, ProductOption, ProductThumbnail, ProductInfoImage 테이블이 있습니다.   
-Product id를 외래키로 모두 연관관계가 설정되어있기 때문에 양방향 매핑으로 한번에 처리하도록 했습니다.   
-양방향 매핑으로 처리하는 경우 한번의 데이터베이스 요청으로 처리할 수 있다는 장점도 있지만 더미데이터를 넣는 과정에서 테스트해본 결과 양방향 매핑으로 처리하는 것이 더 빠르게 처리 되는 것을 확인 할 수 있었습니다.   
+상품 관련된 테이블로는 Product, ProductOption, ProductThumbnail, ProductInfoImage 가 존재합니다.   
+ProductOption, ProductThumbnail, ProductInfoImage에서는 Product를 참조하고 있는 구조입니다.
 
 ```java
 //상품 수정
@@ -684,12 +684,12 @@ public String patchProduct(String productId, List<Long> deleteOptionList, AdminP
         product.setPatchData(patchDTO);
         
         try{
-          List<ProductOption> optionList = setProductDataAndProductOptionSave(product, imageDTO, patchDTO);
-          productOptionRepository.saveAll(optionList);
+          setProductFirstThumbnail(product, imageDTO.getFirstThumbnail());
+          setProductOptionData(product, patchDTO);
+          productRepository.save(product);
+            
           if(deleteOptionList != null)
               productOptionRepository.deleteAllById(deleteOptionList);
-  
-          productRepository.save(product);
         }catch (Exception e) {
           log.warn("Filed admin patchProduct");
           e.printStackTrace();
@@ -712,12 +712,35 @@ public String patchProduct(String productId, List<Long> deleteOptionList, AdminP
         return productId;
 }
 
-//대표 썸네일을 제외한 나머지 썸네일 파일 저장 후 상품 옵션을 ProductOption Entity List로 매핑해 반환
-public List<ProductOption> setProductDataAndProductOptionSave(Product product, AdminProductImageDTO imageDTO, AdminProductPatchDTO patchDTO) throws Exception{
-        if(imageDTO.getFirstThumbnail() != null)
-            product.setThumbnail(imageInsert(imageDTO.getFirstThumbnail()));
+//대표 썸네일 저장 및 Product Entity 필드에 set
+public void setProductFirstThumbnail(Product product, MultipartFile, firstThumbnail) throws Exception {
+        if(firstThumbnail != null)
+            product.setThumbnail(imageInsert(firstThumbnail));
+}
 
-        return patchDTO.getProductOptionList(product);
+//대표 썸네일을 제외한 나머지 썸네일 파일 저장 후 상품 옵션을 ProductOption Entity List로 매핑해 반환
+public void setProductOptionData(Product product, AdminProductPatchDTO patchDTO) {
+        List<PatchOptionDTO> optionDTOList = patchDTO.getOptionList();
+        List<ProductOption> optionEntities = product.getProductOptionSet();
+        
+        for(int i = 0; i < optionDTOList.size(); i++) {
+            PatchOptionDTO dto = optionDTOList.get(i);
+            long dtoOptionId = dto.getOptionId();
+            boolean patchStatus = true;
+            
+            for(int j = 0; j < optionEntities.size(); j++) {
+                ProductOption option = optionEntities.get(j);
+                
+                if(dtoOptionId == option.getId()) {
+                    option.patchOptionData(dto);
+                    patchStatus = false;
+                    break;
+                }
+            }
+            
+            if(patchStatus)
+                product.addProductOption(dto.toEntity());
+        }
 }
 
 //썸네일 리스트와 정보 이미지 리스트의 파일 저장 처리 및 Product Entity의 연관관계 설정된 Set에 add 처리.
@@ -775,17 +798,89 @@ public void deleteInfoImage(List<String> deleteList) {
           deleteList.forEach(this::deleteImage);
         }
 }
+
+//로컬에 이미지 파일을 저장
+public String imageInsert(MultipartFile image) throws Exception {
+        StringBuffer sb = new StringBuffer();
+        String saveName = sb.append(new SimpleDateFormat("yyyyMMddHHmmss")
+                            .format(System.currentTimeMillis()))
+                            .append(UUID.randomUUID())
+                            .append(
+                                    image.getOriginalFilename().substring(
+                                            image.getOriginalFilename().lastIndexOf(".")
+                                    )
+                            )
+                            .toString();
+        String saveFile = filePath + saveName;
+        image.transferTo(new File(saveFile));
+        
+        return saveName;
+}
+
+@Value("${cloud.aws.s3.bucket}")
+private String bucket;
+
+private final AmazonS3 amazonS3;
+
+private final AmazonS3Client amazonS3Client;
+
+//S3 bucket에 파일 저장
+public String imageInsert(MultipartFile image) throws Exception {
+        StringBuffer sb = new StringBuffer();
+        String saveName = sb.append(new SimpleDateFormat("yyyyMMddHHmmss")
+                            .format(System.currentTimeMillis()))
+                            .append(UUID.randomUUID())
+                            .append(
+                                    image.getOriginalFilename().substring(
+                                              image.getOriginalFilename().lastIndexOf(".")
+                                    )
+                            )
+                            .toString();
+        
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentLength(image.getSize());
+        objectMetadata.setContentType(image.getContentType());
+        
+        try {
+            amazonS3.putObject(
+                    new PutObjectRequest(
+                            bucket,
+                            saveName,
+                            image.getInputStream(),
+                            objectMetadata
+                    )
+                    .withCannedAcl(CannedAccessControlList.PublicRead)
+            );
+        }catch {
+            log.warn("productImage insert IOException");
+            e.printStackTrace();
+            throw new NullPointerException();
+        }
+        
+        return saveName;
+}
+
+//로컬 이미지 파일 삭제
+public void deleteImage(String imageName) {
+        File file = new File(filePath + imageName);
+        
+        if(file.exists())
+            file.delete();
+}
+
+//S3 이미지 파일 삭제
+public void deleteImage(String imageName) {
+        amazonS3.deleteObject(new DeleteObjectRequest(bucket, imageName));
+}
 ```
 
-상품 수정 처리 코드입니다.   
-상품 수정의 경우 ProductOption 리스트를 따로 저장하는데 Multiple representations of the same entity are being merged라는 오류가 발생했기 때문입니다.   
-알아보니 해당 Entity 데이터에 대해 같은 id가 중복되어있기 때문에 발생하는 오류라고 확인할 수 있었는데 이미 저장되어있던 데이터의 아이디와 겹치기 때문에 발생하는건가 싶어 여러 방향으로 테스트해보고 알아봤으나 명확한 해답을 찾을 수 없어 따로 분리하게 되었습니다.   
-이 문제에 대해서는 연관관계에 대해 좀 더 학습하고 개선하고자 계획하고 있습니다.
+위 코드는 상품 수정 처리 코드입니다.   
+상품 수정 처리는 등록과 대부분 비슷하게 처리되며, 수정 내역에 대한 갱신만이 추가된 구조입니다.   
+상품 옵션의 수정을 위해 조회한 Product Entity 내부의 ProductOptionList의 각 요소를 확인해 수정하도록 처리했습니다.   
+예외가 발생한다면 저장된 이미지를 제거해야 한다고 생각했기에 예외가 발생하는 경우 저장된 모든 이미지 파일을 제거할 수 있도록 처리했습니다.   
 
-개선사항으로는 처리 도중 Exception이 발생할 경우 저장된 파일에 대한 처리가 있습니다.   
-미처 생각하지 못했던 부분이었는데 파일 저장 후 Exception이 발생하는 경우 데이터베이스는 롤백이 되지만 파일은 삭제되지 않고 남을 수 있다는 점을 간과했습니다.   
-그래서 이 부분에 대한 처리를 하기 위해 Exception이 발생하는 경우 최상단 메소드인 patchProduct 혹은 postProduct 메소드까지 예외를 던지도록 처리하고 최상위 메소드에서는 try-catch를 통해 저장 처리된 파일들을 삭제할 수 있도록 처리했습니다.   
-또한, 파일 삭제처리를 가장 나중에 처리하도록 해 예외 발생시 파일의 누락이 발생하지 않도록 개선했습니다.
+파일 저장의 경우 개발 시 로컬 경로에 저장하도록 처리하면서 진행했고, 이후 테스트 과정에서 S3에 저장하도록 처리해 테스트와 배포 테스트를 진행했습니다.
+
 
 <br />
 
@@ -1829,3 +1924,18 @@ Ino가 존재하더라도 장기간 미접속으로 AccessToken, RefreshToken이
 >> 관리자 리뷰 관리 기능 추가.
 >>> 누락 기능으로 이번에 추가.   
 >>> 여기에는 ReviewStatus도 없었기 때문에 status라는 이름의 컬럼을 ProductReview 테이블에 추가.   
+
+<br/>
+
+### 2025/01/10
+> 문제 해결
+>> Admin의 상품 수정 과정에서 발생한 Multiple representations of the same entity 오류 문제 해결.
+>>> 멀티 모듈 환경 프로젝트 진행하면서 테스트 코드 작성 중 비슷한 오류가 발생하는 상황이 발생 해 원인을 파악할 수 있었고 문제를 해결.   
+>>> 문제 원인은 ProductOption Entity의 중복 문제.   
+>>> 이미 존재하는 id와 같은 ProductOption을 생성해 담아주었으니 당연히 중복 오류가 발생한 것.
+>>> 문제 해결로 인해 상품 대표 썸네일과 ProductOption 리스트를 생성해 반환하던 메소드는 분리해서 대표 썸네일을 처리하는 메소드와 ProductOption 데이터를 수정하는 메소드로 분리.   
+>>> 수정될 옵션 데이터를 담고 있는 PatchOptionDTO에 ProductOption 타입의 toEntity 메소드를 아무런 매개변수도 받지 않도록 하나 더 추가.   
+>>> ProductOption Entity에는 수정 데이터를 적용하는 patchOptionData() 메소드를 추가.   
+>>> Product에서는 연관관계에 있는 Entity 리스트의 타입을 Set이 아닌 List로 수정.   
+>>> List로 수정 이유는 순서가 보장되어야 하기 때문.
+>>> 정상적으로 옵션이 수정되는지 확인 완료.

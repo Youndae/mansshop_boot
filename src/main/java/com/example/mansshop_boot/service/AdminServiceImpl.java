@@ -2,10 +2,6 @@ package com.example.mansshop_boot.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.example.mansshop_boot.domain.dto.admin.business.*;
 import com.example.mansshop_boot.domain.dto.admin.in.*;
 import com.example.mansshop_boot.domain.dto.admin.out.*;
@@ -32,14 +28,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.IOException;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -181,8 +175,8 @@ public class AdminServiceImpl implements AdminService {
         Product product = patchDTO.toPostEntity();
         String resultId;
         try {
-            List<ProductOption> optionList = setProductDataAndProductOptionSave(product, imageDTO, patchDTO);
-            optionList.forEach(product::addProductOption);
+            setProductFirstThumbnail(product, imageDTO.getFirstThumbnail());
+            patchDTO.getProductOptionList(product).forEach(product::addProductOption);
             saveProductImage(product, imageDTO);
 
             resultId = productRepository.save(product).getId();
@@ -209,10 +203,6 @@ public class AdminServiceImpl implements AdminService {
      *
      * 상품 수정 처리.
      * 상품 추가 처리와 대부분 동일.
-     * 차이점으로는 ProductOption의 경우 Product에 담아주지 않고 따로 save 요청으로 처리.
-     * multiple representations of the same entity are being merged 이 오류로 인해 한번에 처리하는 것이 불가.
-     * 알아봤을 때 중복되는 엔티티 아이디가 있기 때문에 안되는 것이라고 하는데 아직 문제를 해결하지 못했기 때문에 이렇게 처리.
-     * 이후 개선 계획.
      *
      * 데이터 저장 처리 후 삭제해야할 옵션과 썸네일, 정보이미지에 대한 처리 진행 후 응답
      */
@@ -221,13 +211,14 @@ public class AdminServiceImpl implements AdminService {
     public String patchProduct(String productId, List<Long> deleteOptionList, AdminProductPatchDTO patchDTO, AdminProductImageDTO imageDTO) {
         Product product = productRepository.findById(productId).orElseThrow(IllegalArgumentException::new);
         product.setPatchData(patchDTO);
+
         try{
-            List<ProductOption> optionList = setProductDataAndProductOptionSave(product, imageDTO, patchDTO);
-            productOptionRepository.saveAll(optionList);
+            setProductFirstThumbnail(product, imageDTO.getFirstThumbnail());
+            setProductOptionData(product, patchDTO);
+            productRepository.save(product);
+
             if(deleteOptionList != null)
                 productOptionRepository.deleteAllById(deleteOptionList);
-
-            productRepository.save(product);
         }catch (Exception e) {
             log.warn("Filed admin patchProduct");
             e.printStackTrace();
@@ -253,17 +244,47 @@ public class AdminServiceImpl implements AdminService {
     /**
      *
      * @param product
-     * @param imageDTO
+     * @param firstThumbnail
+     * @throws Exception
+     *
+     * 대표 썸네일 파일 저장 및 Entity set
+     */
+    public void setProductFirstThumbnail(Product product, MultipartFile firstThumbnail) throws Exception{
+        if(firstThumbnail != null)
+            product.setThumbnail(imageInsert(firstThumbnail));
+    }
+
+    /**
+     *
+     * @param product
      * @param patchDTO
      *
-     * 대표 썸네일 제외 모든 썸네일 파일 저장 처리 후
-     * AdminProductPatchDTO를 통해 요청받은 PatchOptionDTO 타입의 리스트를 ProductOption 타입의 리스트로 생성해 반환.
+     * AdminProductPatchDTO에 존재하는 수정된 OptionDTO를 통해 ProductOption Entity를 수정.
+     * 이렇게 처리하지 않으면 PersistenceContext에 의해 오류가 발생하기 때문에 ProductOption 리스트를 별도로 save 처리해야 함.
      */
-    public List<ProductOption> setProductDataAndProductOptionSave(Product product, AdminProductImageDTO imageDTO, AdminProductPatchDTO patchDTO) throws Exception{
-        if(imageDTO.getFirstThumbnail() != null)
-            product.setThumbnail(imageInsert(imageDTO.getFirstThumbnail()));
+    @Transactional
+    public void setProductOptionData(Product product, AdminProductPatchDTO patchDTO) {
+        List<PatchOptionDTO> optionDTOList = patchDTO.getOptionList();
+        List<ProductOption> optionEntities = product.getProductOptionSet();
 
-        return patchDTO.getProductOptionList(product);
+        for(int i = 0; i < optionDTOList.size(); i++) {
+            PatchOptionDTO dto = optionDTOList.get(i);
+            long dtoOptionId = dto.getOptionId();
+            boolean patchStatus = true;
+
+            for(int j = 0; j < optionEntities.size(); j++) {
+                ProductOption option = optionEntities.get(j);
+
+                if(dtoOptionId == option.getId()){
+                    option.patchOptionData(dto);
+                    patchStatus = false;
+                    break;
+                }
+            }
+
+            if(patchStatus)
+                product.addProductOption(dto.toEntity());
+        }
     }
 
     public void saveProductImage(Product product, AdminProductImageDTO imageDTO) throws Exception{

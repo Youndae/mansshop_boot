@@ -31,4 +31,14 @@ public class PatchOptionDTO {
                 .isOpen(isOptionIsOpen())
                 .build();
     }
+
+    public ProductOption toEntity() {
+        return ProductOption.builder()
+                            .id(optionId == 0 ? null : optionId)
+                            .size(size)
+                            .color(color)
+                            .stock(optionStock)
+                            .isOpen(isOptionIsOpen())
+                            .build();
+    }
 }
