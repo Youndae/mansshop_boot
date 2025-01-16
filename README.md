@@ -682,40 +682,43 @@ ProductOption, ProductThumbnail, ProductInfoImage에서는 Product를 참조하�
 public String patchProduct(String productId, List<Long> deleteOptionList, AdminProductPatchDTO patchDTO, AdminProductImageDTO imageDTO) {
         Product product = productRepository.findById(productId).orElseThrow(IllegalArgumentException::new);
         product.setPatchData(patchDTO);
-        
+        List<String> saveImages = new ArrayList<>();
         try{
-          setProductFirstThumbnail(product, imageDTO.getFirstThumbnail());
-          setProductOptionData(product, patchDTO);
-          productRepository.save(product);
-            
-          if(deleteOptionList != null)
-              productOptionRepository.deleteAllById(deleteOptionList);
+            setProductOptionData(product, patchDTO);
+            saveImages = saveProductImage(product, imageDTO);
+            String firstThumbnail = setProductFirstThumbnail(product, imageDTO.getFirstThumbnail());
+
+            if(firstThumbnail != null)
+                saveImages.add(firstThumbnail);
+
+            productRepository.save(product);
+
+            if(deleteOptionList != null)
+                productOptionRepository.deleteAllById(deleteOptionList);
+
+            deleteProductImage(imageDTO);
         }catch (Exception e) {
-          log.warn("Filed admin patchProduct");
-          e.printStackTrace();
-          deleteFirstThumbnailToException(product);
-  
-          throw new IllegalArgumentException("Failed patchProduct", e);
+            log.warn("Filed admin patchProduct");
+            e.printStackTrace();
+            saveImages.forEach(this::deleteImage);
+
+            throw new IllegalArgumentException("Failed patchProduct", e);
         }
-        
-        try {
-            saveProductImage(product, imageDTO);
-        }catch (Exception e) {
-          log.warn("Failed admin patchProduct");
-          e.printStackTrace();
-          deleteImageToException(product);
-  
-          throw new IllegalArgumentException("Failed patchProduct", e);
-        }
-        deleteProductImage(imageDTO);
 
         return productId;
 }
 
 //대표 썸네일 저장 및 Product Entity 필드에 set
-public void setProductFirstThumbnail(Product product, MultipartFile, firstThumbnail) throws Exception {
-        if(firstThumbnail != null)
-            product.setThumbnail(imageInsert(firstThumbnail));
+public String setProductFirstThumbnail(Product product, MultipartFile, firstThumbnail) throws Exception {
+        String thumbnail = null;
+
+        if(firstThumbnail != null){
+            String saveName = imageInsert(firstThumbnail);
+            thumbnail = saveName;
+            product.setThumbnail(saveName);
+        }
+
+        return thumbnail;
 }
 
 //대표 썸네일을 제외한 나머지 썸네일 파일 저장 후 상품 옵션을 ProductOption Entity List로 매핑해 반환
@@ -743,36 +746,52 @@ public void setProductOptionData(Product product, AdminProductPatchDTO patchDTO)
         }
 }
 
-//썸네일 리스트와 정보 이미지 리스트의 파일 저장 처리 및 Product Entity의 연관관계 설정된 Set에 add 처리.
-//수정 요청이어서 삭제할 이미지 리스트가 존재하는 경우 해당 파일의 삭제 및 테이블 데이터 삭제 요청 처리.
 public void saveProductImage(Product product, AdminProductImageDTO imageDTO) throws Exception{
-        saveThumbnail(product, imageDTO.getThumbnail());
-        saveInfoImage(product, imageDTO.getInfoImage());
+        List<String> thumbnails = saveThumbnail(product, imageDTO.getThumbnail());
+        List<String> infoImages = saveInfoImage(product, imageDTO.getInfoImage());
+
+        thumbnails.addAll(infoImages);
+
+        return thumbnails;
 }
 
-public void saveThumbnail(Product product, List<MultipartFile> imageList) throws Exception{
+public List<String> saveThumbnail(Product product, List<MultipartFile> imageList) throws Exception{
+        List<String> thumbnailList = Collections.emptyList();
+
         if(imageList != null){
-          for(MultipartFile image : imageList)
+          for(MultipartFile image : imageList){
+            String saveName = imageInsert(image);
+            thumbnailList.add(saveName);
             product.addProductThumbnail(
-              ProductThumbnail.builder()
-                      .product(product)
-                      .imageName(imageInsert(image))
-                      .build()
+                ProductThumbnail.builder()
+                        .product(product)
+                        .imageName(saveName)
+                        .build()
             );
+          }
         }
+
+        return thumbnailList;
 
 }
 
 public void saveInfoImage(Product product, List<MultipartFile> imageList) throws Exception{
+        List<String> infoImages = Collections.emptyList();
+
         if(imageList != null) {
-          for(MultipartFile image : imageList)
+          for(MultipartFile image : imageList) {
+            String saveName = imageInsert(image);
+            infoImages.add(saveName);
             product.addProductInfoImage(
-              ProductInfoImage.builder()
-                    .product(product)
-                    .imageName(imageInsert(image))
-                    .build()
+                ProductInfoImage.builder()
+                        .product(product)
+                        .imageName(saveName)
+                        .build()
             );
+          }
         }
+
+        return infoImages;
 }
 
 public void deleteProductImage(AdminProductImageDTO imageDTO) {
@@ -1939,3 +1958,12 @@ Ino가 존재하더라도 장기간 미접속으로 AccessToken, RefreshToken이
 >>> Product에서는 연관관계에 있는 Entity 리스트의 타입을 Set이 아닌 List로 수정.   
 >>> List로 수정 이유는 순서가 보장되어야 하기 때문.
 >>> 정상적으로 옵션이 수정되는지 확인 완료.
+
+<br/>
+
+### 2025/01/16
+> 처리 개선
+>> 관리자의 상품 추가 및 수정 관련해서 예외 발생 시 처리 개선
+>>> 상품 수정 기준 기존에는 처리에 따라 try-catch로 감싸서 처리한 반면   
+>>> 이번에는 하나의 try-catch로 묶어서 처리하되 각 이미지 파일 저장 처리 이후 저장된 파일명을 리스트 또는 문자열로 반환하도록 처리.   
+>>> 호출하는 메소드에서는 해당 리스트와 문자열 객체를 별도의 리스트에 담아두었다가 예외가 발생하면 해당 리스트를 기반으로 파일 삭제 요청을 처리하도록 개선.
