@@ -174,19 +174,20 @@ public class AdminServiceImpl implements AdminService {
     public String postProduct(AdminProductPatchDTO patchDTO, AdminProductImageDTO imageDTO) {
         Product product = patchDTO.toPostEntity();
         String resultId;
+        List<String> saveImages = new ArrayList<>();
         try {
-            setProductFirstThumbnail(product, imageDTO.getFirstThumbnail());
+            saveImages = saveProductImage(product, imageDTO);
+            String firstThumbnail = setProductFirstThumbnail(product, imageDTO.getFirstThumbnail());
+            if(firstThumbnail != null)
+                saveImages.add(firstThumbnail);
+
             patchDTO.getProductOptionList(product).forEach(product::addProductOption);
-            saveProductImage(product, imageDTO);
 
             resultId = productRepository.save(product).getId();
         }catch (Exception e) {
             log.warn("Filed admin postProduct");
             e.printStackTrace();
-            if(product.getThumbnail() != null)
-                deleteFirstThumbnailToException(product);
-
-            deleteImageToException(product);
+            saveImages.forEach(this::deleteImage);
 
             throw new IllegalArgumentException("Failed postProduct", e);
         }
@@ -211,32 +212,29 @@ public class AdminServiceImpl implements AdminService {
     public String patchProduct(String productId, List<Long> deleteOptionList, AdminProductPatchDTO patchDTO, AdminProductImageDTO imageDTO) {
         Product product = productRepository.findById(productId).orElseThrow(IllegalArgumentException::new);
         product.setPatchData(patchDTO);
+        List<String> saveImages = new ArrayList<>();
 
         try{
-            setProductFirstThumbnail(product, imageDTO.getFirstThumbnail());
             setProductOptionData(product, patchDTO);
+            saveImages = saveProductImage(product, imageDTO);
+            String firstThumbnail = setProductFirstThumbnail(product, imageDTO.getFirstThumbnail());
+
+            if(firstThumbnail != null)
+                saveImages.add(firstThumbnail);
+
             productRepository.save(product);
 
             if(deleteOptionList != null)
                 productOptionRepository.deleteAllById(deleteOptionList);
+
+            deleteProductImage(imageDTO);
         }catch (Exception e) {
             log.warn("Filed admin patchProduct");
             e.printStackTrace();
-            deleteFirstThumbnailToException(product);
+            saveImages.forEach(this::deleteImage);
 
             throw new IllegalArgumentException("Failed patchProduct", e);
         }
-
-        try {
-            saveProductImage(product, imageDTO);
-        }catch (Exception e) {
-            log.warn("Failed admin patchProduct");
-            e.printStackTrace();
-            deleteImageToException(product);
-
-            throw new IllegalArgumentException("Failed patchProduct", e);
-        }
-        deleteProductImage(imageDTO);
 
         return productId;
     }
@@ -249,9 +247,16 @@ public class AdminServiceImpl implements AdminService {
      *
      * 대표 썸네일 파일 저장 및 Entity set
      */
-    public void setProductFirstThumbnail(Product product, MultipartFile firstThumbnail) throws Exception{
-        if(firstThumbnail != null)
-            product.setThumbnail(imageInsert(firstThumbnail));
+    public String setProductFirstThumbnail(Product product, MultipartFile firstThumbnail) throws Exception{
+        String thumbnail = null;
+
+        if(firstThumbnail != null){
+            String saveName = imageInsert(firstThumbnail);
+            thumbnail = saveName;
+            product.setThumbnail(saveName);
+        }
+
+        return thumbnail;
     }
 
     /**
@@ -287,34 +292,51 @@ public class AdminServiceImpl implements AdminService {
         }
     }
 
-    public void saveProductImage(Product product, AdminProductImageDTO imageDTO) throws Exception{
-        saveThumbnail(product, imageDTO.getThumbnail());
-        saveInfoImage(product, imageDTO.getInfoImage());
+    public List<String> saveProductImage(Product product, AdminProductImageDTO imageDTO) throws Exception{
+        List<String> thumbnails = saveThumbnail(product, imageDTO.getThumbnail());
+        List<String> infoImages = saveInfoImage(product, imageDTO.getInfoImage());
+
+        thumbnails.addAll(infoImages);
+
+        return thumbnails;
     }
 
-    public void saveThumbnail(Product product, List<MultipartFile> imageList) throws Exception{
+    public List<String> saveThumbnail(Product product, List<MultipartFile> imageList) throws Exception{
+        List<String> thumbnailList = Collections.emptyList();
+
         if(imageList != null){
-            for(MultipartFile image : imageList)
+            for(MultipartFile image : imageList){
+                String saveName = imageInsert(image);
+                thumbnailList.add(saveName);
                 product.addProductThumbnail(
                         ProductThumbnail.builder()
                                 .product(product)
-                                .imageName(imageInsert(image))
+                                .imageName(saveName)
                                 .build()
                 );
+            }
         }
 
+        return thumbnailList;
     }
 
-    public void saveInfoImage(Product product, List<MultipartFile> imageList) throws Exception{
+    public List<String> saveInfoImage(Product product, List<MultipartFile> imageList) throws Exception{
+        List<String> infoImages = Collections.emptyList();
+
         if(imageList != null) {
-            for(MultipartFile image : imageList)
+            for(MultipartFile image : imageList) {
+                String saveName = imageInsert(image);
+                infoImages.add(saveName);
                 product.addProductInfoImage(
                         ProductInfoImage.builder()
                                 .product(product)
-                                .imageName(imageInsert(image))
+                                .imageName(saveName)
                                 .build()
                 );
+            }
         }
+
+        return infoImages;
     }
 
     public void deleteProductImage(AdminProductImageDTO imageDTO) {
@@ -338,30 +360,6 @@ public class AdminServiceImpl implements AdminService {
         if(deleteList != null){
             productInfoImageRepository.deleteByImageName(deleteList);
             deleteList.forEach(this::deleteImage);
-        }
-    }
-
-    public void deleteFirstThumbnailToException(Product product) {
-        if(product.getThumbnail() != null)
-            deleteFirstThumbnail(product.getThumbnail());
-    }
-
-    public void deleteImageToException(Product product) {
-        if(!product.getProductThumbnailSet().isEmpty()) {
-            List<String> thumbnailList = product.getProductThumbnailSet()
-                    .stream()
-                    .map(ProductThumbnail::getImageName)
-                    .toList();
-
-            deleteThumbnail(thumbnailList);
-        }
-
-        if(!product.getProductInfoImageSet().isEmpty()) {
-            List<String> infoImageList = product.getProductInfoImageSet()
-                    .stream()
-                    .map(ProductInfoImage::getImageName)
-                    .toList();
-            deleteInfoImage(infoImageList);
         }
     }
 
