@@ -17,6 +17,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "productOrder")
 public class ProductOrder {
 
     @Id
@@ -24,28 +25,47 @@ public class ProductOrder {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "userId", nullable = false)
     private Member member;
 
+    @Column(length = 50,
+            nullable = false
+    )
     private String recipient;
 
+    @Column(length = 100,
+            nullable = false
+    )
     private String orderPhone;
 
+    @Column(length = 200,
+            nullable = false
+    )
     private String orderAddress;
 
+    @Column(length = 200)
     private String orderMemo;
 
+    @Column(nullable = false)
     private int orderTotalPrice;
 
     private int deliveryFee;
 
     @CreationTimestamp
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @Column(length = 10,
+            nullable = false
+    )
     private String paymentType;
 
+    @Column(length = 20,
+            nullable = false
+    )
     private String orderStat;
 
+    @Column(nullable = false)
     private int productCount;
 
     @OneToMany(mappedBy = "productOrder", cascade = CascadeType.ALL)

@@ -14,6 +14,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Table(name = "productLike")
 public class ProductLike {
 
     @Id
@@ -21,13 +22,14 @@ public class ProductLike {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "userId", nullable = false)
     private Member member;
 
     @ManyToOne
-    @JoinColumn(name = "productId")
+    @JoinColumn(name = "productId", nullable = false)
     private Product product;
 
     @CreationTimestamp
+    @Column(nullable = false)
     private Date createdAt;
 }
