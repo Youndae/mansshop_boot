@@ -16,26 +16,44 @@ import java.util.List;
 @NoArgsConstructor
 @EqualsAndHashCode
 @ToString
+@Table(name = "member")
 public class Member {
 
     @Id
+    @Column(length = 50)
     private String userId;
 
+    @Column(length = 200)
     private String userPw;
 
+    @Column(length = 100,
+            nullable = false
+    )
     private String userName;
 
+    @Column(length = 100)
     private String nickname;
 
+    @Column(length = 100,
+            nullable = false
+    )
     private String userEmail;
 
+    @Column(length = 20,
+            nullable = false
+    )
     private String provider;
 
+    @Column(nullable = false,
+            columnDefinition = "INT DEFAULT 0"
+    )
     private Long memberPoint;
 
     @CreationTimestamp
+    @Column(nullable = false)
     private LocalDate createdAt;
 
+    @Column(length = 20)
     private String phone;
 
     private LocalDate birth;

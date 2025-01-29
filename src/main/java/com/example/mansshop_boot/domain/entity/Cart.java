@@ -15,6 +15,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Table(name = "cart")
 public class Cart {
 
     @Id
@@ -22,9 +23,10 @@ public class Cart {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "userId", nullable = false)
     private Member member;
 
+    @Column(length = 200)
     private String cookieId;
 
     @CreationTimestamp

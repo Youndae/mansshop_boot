@@ -18,31 +18,50 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Table(name = "product")
 public class Product {
 
     @Id
+    @Column(length = 200)
     private String id;
 
     @ManyToOne
-    @JoinColumn(name = "classificationId")
+    @JoinColumn(name = "classificationId", nullable = false)
     private Classification classification;
 
+    @Column(length = 200,
+            nullable = false
+    )
     private String productName;
 
     private int productPrice;
 
+    @Column(length = 200,
+            nullable = false
+    )
     private String thumbnail;
 
+    @Column(columnDefinition = "TINYINT(1) DEFAULT 1",
+            nullable = false
+    )
     private boolean isOpen;
 
+    @Column(columnDefinition = "BIGINT DEFAULT 0",
+            nullable = false
+    )
     private Long productSales;
 
+    @Column(columnDefinition = "INT DEFAULT 0",
+            nullable = false
+    )
     private int productDiscount;
 
     @CreationTimestamp
+    @Column(nullable = false)
     private LocalDate createdAt;
 
     @UpdateTimestamp
+    @Column(nullable = false)
     private LocalDate updatedAt;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER)

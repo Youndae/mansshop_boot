@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "cartDetail")
 public class CartDetail {
 
     @Id
@@ -18,11 +19,11 @@ public class CartDetail {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "cartId")
+    @JoinColumn(name = "cartId", nullable = false)
     private Cart cart;
 
     @ManyToOne
-    @JoinColumn(name = "productOptionId")
+    @JoinColumn(name = "productOptionId", nullable = false)
     private ProductOption productOption;
 
     private int cartCount;

@@ -17,6 +17,7 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "memberQnA")
 public class MemberQnA {
 
     @Id
@@ -24,23 +25,33 @@ public class MemberQnA {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "userId", nullable = false)
     private Member member;
 
     @ManyToOne
-    @JoinColumn(name = "qnaClassificationId")
+    @JoinColumn(name = "qnaClassificationId", nullable = false)
     private QnAClassification qnAClassification;
 
+    @Column(length = 200,
+            nullable = false
+    )
     private String memberQnATitle;
 
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String memberQnAContent;
 
     @CreationTimestamp
+    @Column(nullable = false)
     private LocalDate createdAt;
 
     @UpdateTimestamp
+    @Column(nullable = false)
     private LocalDate updatedAt;
 
+    @Column(columnDefinition = "TINYINT(1) DEFAULT 0",
+            nullable = false
+    )
     private boolean memberQnAStat;
 
     public void setModifyData(MemberQnAModifyDTO modifyDTO, QnAClassification qnaClassification) {

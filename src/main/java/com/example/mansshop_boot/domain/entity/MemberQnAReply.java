@@ -15,6 +15,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Table(name = "memberQnAReply")
 public class MemberQnAReply {
 
     @Id
@@ -22,19 +23,23 @@ public class MemberQnAReply {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "userId", nullable = false)
     private Member member;
 
     @ManyToOne
-    @JoinColumn(name = "qnaId")
+    @JoinColumn(name = "qnaId", nullable = false)
     private MemberQnA memberQnA;
 
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String replyContent;
 
     @CreationTimestamp
+    @Column(nullable = false)
     private LocalDate createdAt;
 
     @UpdateTimestamp
+    @Column(nullable = false)
     private LocalDate updatedAt;
 
     public void setReplyContent(String content) {

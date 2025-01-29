@@ -14,6 +14,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Table(name = "productReviewReply")
 public class ProductReviewReply {
 
     @Id
@@ -21,18 +22,22 @@ public class ProductReviewReply {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "userId", nullable = false)
     private Member member;
 
     @ManyToOne
-    @JoinColumn(name = "reviewId")
+    @JoinColumn(name = "reviewId", nullable = false)
     private ProductReview productReview;
 
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String replyContent;
 
     @CreationTimestamp
+    @Column(nullable = false)
     private LocalDate createdAt;
 
     @CreationTimestamp
+    @Column(nullable = false)
     private LocalDate updatedAt;
 }
