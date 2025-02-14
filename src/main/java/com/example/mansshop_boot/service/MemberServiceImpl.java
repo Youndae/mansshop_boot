@@ -284,7 +284,7 @@ public class MemberServiceImpl implements MemberService{
             stringValueOperations.set(searchDTO.userId(), String.valueOf(certificationNo), 6L, TimeUnit.MINUTES);
 
             MimeMessage mailForm = createEmailForm(searchDTO.userEmail(), certificationNo);
-            javaMailSender.send(mailForm);
+//            javaMailSender.send(mailForm);
 
             return Result.OK.getResultKey();
         }catch (Exception e) {

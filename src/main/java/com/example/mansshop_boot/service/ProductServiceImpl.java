@@ -3,10 +3,7 @@ package com.example.mansshop_boot.service;
 import com.example.mansshop_boot.config.customException.ErrorCode;
 import com.example.mansshop_boot.config.customException.exception.CustomAccessDeniedException;
 import com.example.mansshop_boot.config.customException.exception.CustomNotFoundException;
-import com.example.mansshop_boot.domain.dto.product.business.ProductOptionDTO;
-import com.example.mansshop_boot.domain.dto.product.business.ProductPageableDTO;
-import com.example.mansshop_boot.domain.dto.product.business.ProductQnADTO;
-import com.example.mansshop_boot.domain.dto.product.business.ProductQnAReplyDTO;
+import com.example.mansshop_boot.domain.dto.product.business.*;
 import com.example.mansshop_boot.domain.dto.product.in.ProductQnAPostDTO;
 import com.example.mansshop_boot.domain.dto.pageable.ProductDetailPageDTO;
 import com.example.mansshop_boot.domain.dto.product.out.ProductDetailDTO;
@@ -148,7 +145,8 @@ public class ProductServiceImpl implements ProductService{
         Page<ProductQnADTO> productQnA = productQnARepository.findByProductId(productId, qnaPageable);
         List<Long> qnaIdList = productQnA.getContent().stream().map(ProductQnADTO::qnaId).toList();
         List<ProductQnAResponseDTO> productQnADTOList = new ArrayList<>();
-        List<ProductQnAReply> qnaReplyList = productQnAReplyRepository.getQnAReply(qnaIdList);
+        // TODO: writer, replyContent, createdAt, qnaId
+        List<ProductQnAReplyListDTO> qnaReplyList = productQnAReplyRepository.getQnAReply(qnaIdList);
         int replyIdx = 0;
 
         for(int i = 0; i < productQnA.getContent().size(); i++) {
@@ -156,7 +154,7 @@ public class ProductServiceImpl implements ProductService{
             ProductQnADTO dto = productQnA.getContent().get(i);
 
             for(int j = replyIdx; j < qnaReplyList.size(); j++) {
-                if(dto.qnaId() == qnaReplyList.get(j).getProductQnA().getId()){
+                if(dto.qnaId() == qnaReplyList.get(j).qnaId()){
                     replyList.add(
                             new ProductQnAReplyDTO(qnaReplyList.get(j))
                     );

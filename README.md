@@ -1976,3 +1976,9 @@ Ino가 존재하더라도 장기간 미접속으로 AccessToken, RefreshToken이
 >> 모든 Entity에 대해 @Table, @Column Annotation 추가.   
 >> Ubuntu 환경에서 테스트하려고 하다보니 Docker 환경의 MySQL을 사용하게 되었는데 그 과정에서 테이블 매핑이 정상적으로 처리되지 않는 문제가 발생.   
 >> lower_case_table_names=1을 통해 문제를 해결할 수 있는 여지가 있었지만 RDS, Local MySQL 에서는 해당 문제가 발생하지 않는만큼 Docker 설정을 바꾸는 것 보다는 @Table로 처리하는게 더 낫다고 판단.
+
+<br />
+
+### 2025/02/14
+> JMeter를 통한 부하테스트 중.
+>> ProductQnAReply에 대한 N + 1 문제를 해결하기 위해 Entity를 통째로 조회하는 것이 아닌 필요한 데이터만 DTO에 매핑하도록 수정.
