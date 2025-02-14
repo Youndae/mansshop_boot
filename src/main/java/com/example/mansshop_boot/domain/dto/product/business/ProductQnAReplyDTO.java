@@ -13,12 +13,11 @@ public record ProductQnAReplyDTO(
         , LocalDate createdAt
 ) {
 
-    public ProductQnAReplyDTO (ProductQnAReply qnAReply) {
+    public ProductQnAReplyDTO (ProductQnAReplyListDTO qnAReply) {
         this(
-                qnAReply.getMember().getNickname() == null
-                        ? qnAReply.getMember().getUserName() : qnAReply.getMember().getNickname()
-                , qnAReply.getReplyContent()
-                , qnAReply.getCreatedAt()
+                qnAReply.writer()
+                , qnAReply.replyContent()
+                , qnAReply.createdAt()
         );
     }
 }
