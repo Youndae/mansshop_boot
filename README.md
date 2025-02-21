@@ -1986,6 +1986,17 @@ Ino가 존재하더라도 장기간 미접속으로 AccessToken, RefreshToken이
 <br />
 
 ### 2025/02/19 ~
-> ver 1.4 리펙토링
-> 1. Swagger 적용.
->> springdoc-openapi 를 통한 Swagger 의존성 추가 및 설정, 각 Controller에 대한 문서화 완료.
+> ver 1.4 리팩토링
+> 목표
+>> 1. Swagger 적용.   
+>> 2. JMeter 부하 테스트 결과를 통한 코드레벨 또는 데이터베이스 최적화 수행 및 재 테스트
+>> 3. Redis를 통한 캐싱 처리로 조회 성능 개선
+>> 4. 테스트 코드 재작성
+>> 5. React Redux 개선
+> 
+> 리팩토링 처리 내역
+>> 1. Swagger 적용. ( 2025/02/19 ~ 2025/02/21 )
+>>> springdoc-openapi 를 통한 Swagger 의존성 추가 및 설정, 각 Controller에 대한 문서화 완료.   
+>>> 중복되는 Response에 대한 @ApiResponse는 @DefaultApiResponse라는 Custom Annotation을 생성해 간결하게 처리.   
+>>> JWT에 대한 @Parameter, @SecurityRequirement에 대해서는 @SwaggerAuthentication 이라는 Custom Annotation을 통해 처리.   
+>>> 관리자 기능 중 상품 추가, 수정 기능은 여러 필드로 이미지를 받고 있으므로 DTO로 받도록 처리하고 있는데 Swagger에서는 MultipartFile이 내부 필드에 존재하는 경우 처리하지 못한다는 점 때문에 테스트 불가로 description 작성.
