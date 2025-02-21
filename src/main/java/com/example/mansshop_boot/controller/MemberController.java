@@ -1,6 +1,9 @@
 package com.example.mansshop_boot.controller;
 
+import com.example.mansshop_boot.annotation.swagger.DefaultApiResponse;
+import com.example.mansshop_boot.annotation.swagger.SwaggerAuthentication;
 import com.example.mansshop_boot.config.customException.ErrorCode;
+import com.example.mansshop_boot.config.customException.ExceptionEntity;
 import com.example.mansshop_boot.config.customException.exception.CustomAccessDeniedException;
 import com.example.mansshop_boot.domain.dto.member.business.LogoutDTO;
 import com.example.mansshop_boot.domain.dto.member.business.UserSearchDTO;
@@ -15,6 +18,14 @@ import com.example.mansshop_boot.domain.dto.response.ResponseUserStatusDTO;
 import com.example.mansshop_boot.domain.dto.response.UserStatusDTO;
 import com.example.mansshop_boot.service.MemberService;
 import com.example.mansshop_boot.service.PrincipalService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +63,19 @@ public class MemberController {
      *
      * 로컬 로그인 요청
      */
+    @Operation(summary = "로그인 요청")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "403", description = "권한 정보 불일치"
+                    , content = @Content(schema = @Schema(implementation = ExceptionEntity.class))
+            ),
+            @ApiResponse(responseCode = "400", description = "존재하지 않는 데이터"
+                    , content = @Content(schema = @Schema(implementation = ExceptionEntity.class))
+            ),
+            @ApiResponse(responseCode = "800", description = "토큰 탈취"
+                    , content = @Content(schema = @Schema(implementation = ExceptionEntity.class))
+            )
+    })
     @PostMapping("/login")
     public ResponseEntity<ResponseUserStatusDTO> loginProc(@RequestBody LoginDTO loginDTO
                                         , HttpServletRequest request
@@ -68,6 +92,9 @@ public class MemberController {
      *
      * 로그아웃 요청
      */
+    @Operation(summary = "로그아웃 요청")
+    @DefaultApiResponse
+    @SwaggerAuthentication
     @PostMapping("/logout")
     @PreAuthorize("hasAnyRole('ROLE_MEMBER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
     public ResponseEntity<ResponseMessageDTO> logoutProc(HttpServletRequest request
@@ -100,6 +127,8 @@ public class MemberController {
      *
      * 회원 가입 요청
      */
+    @Operation(summary = "회원가입 요청")
+    @ApiResponse(responseCode = "200", description = "성공")
     @PostMapping("/join")
     public ResponseEntity<?> joinProc(@RequestBody JoinDTO joinDTO) {
 
@@ -121,6 +150,10 @@ public class MemberController {
      * 특정 컴포넌트로 Redirect 되도록 처리했고 그 컴포넌트에서는 임시 토큰을 통해 정상적인 토큰의 발급을 요청한다.
      * 해당 요청이 여기로 오는 것.
      */
+    @Operation(summary = "oAuth 사용자의 토큰 발급 요청",
+            description = "Swagger 테스트 불가. oAuth2 로그인 사용자는 임시 토큰이 발급되기 때문에 임시 토큰 응답 이후 바로 해당 요청을 보내 정식 토큰을 발급."
+    )
+    @DefaultApiResponse
     @GetMapping("/oAuth/token")
     public ResponseEntity<?> oAuthIssueToken(HttpServletRequest request, HttpServletResponse response) {
 
@@ -134,6 +167,13 @@ public class MemberController {
      *
      * 회원 가입 중 아이디 중복 체크
      */
+    @Operation(summary = "회원가입 과정 중 아이디 중복 체크 요청")
+    @ApiResponse(responseCode = "200", description = "사용 가능한 경우 No Duplicated, 중복인 경우 Duplicated 반환")
+    @Parameter(name = "userId",
+            example = "testerrr1",
+            required = true,
+            in = ParameterIn.QUERY
+    )
     @GetMapping("/check-id")
     public ResponseEntity<?> checkJoinId(@RequestParam("userId") String userId) {
 
@@ -150,6 +190,13 @@ public class MemberController {
      *
      * 회원가입 중 닉네임 중복 체크
      */
+    @Operation(summary = "회원가입 과정 중 아이디 중복 체크 요청")
+    @ApiResponse(responseCode = "200", description = "사용 가능한 경우 No Duplicated, 중복인 경우 Duplicated 반환")
+    @Parameter(name = "nickname",
+            example = "테스터1",
+            required = true,
+            in = ParameterIn.QUERY
+    )
     @GetMapping("/check-nickname")
     public ResponseEntity<?> checkNickname(@RequestParam("nickname") String nickname, Principal principal) {
 
@@ -166,6 +213,7 @@ public class MemberController {
      * 클라이언트에서 로그인 상태 체크 요청
      * 별다른 데이터는 필요하지 않으나 새로고침에 대한 Redux의 처리를 위함.
      */
+    @Operation(hidden = true)
     @GetMapping("/check-login")
     public ResponseEntity<ResponseUserStatusDTO> checkLoginStatus(Principal principal) {
 
@@ -186,6 +234,28 @@ public class MemberController {
      *
      * 아이디 찾기
      */
+    @Operation(summary = "아이디 찾기 요청",
+            description = "사용자 이름은 필수, 연락처와 이메일 둘 중 하나를 선택해서 조회 가능"
+    )
+    @ApiResponse(responseCode = "200", description = "성공. 일치하는 데이터가 있다면 OK, 없다면 not found 반환")
+    @Parameters({
+            @Parameter(name = "userName",
+                    description = "사용자 이름",
+                    example = "코코",
+                    required = true,
+                    in = ParameterIn.QUERY
+            ),
+            @Parameter(name = "userPhone",
+                    description = "사용자 연락처",
+                    example = "01012345678",
+                    in = ParameterIn.QUERY
+            ),
+            @Parameter(name = "userEmail",
+                    description = "사용자 이메일",
+                    example = "tester1@tester1.com",
+                    in = ParameterIn.QUERY
+            )
+    })
     @GetMapping("/search-id")
     public ResponseEntity<UserSearchIdResponseDTO> searchId(@RequestParam(name = "userName") String userName
                                     , @RequestParam(name = "userPhone", required = false) String userPhone
@@ -210,6 +280,28 @@ public class MemberController {
      * 데이터베이스에 저장된 이메일로 인증번호를 보낸다.
      * 정상적으로 처리되면 메세지를 담은 응답 전달.
      */
+    @Operation(summary = "비밀번호 찾기 요청")
+    @ApiResponse(responseCode = "200", description = "성공. 정상인 경우 OK, 일치하는 데이터가 없는 경우 not found, 오류 발생 시 FAIL 반환")
+    @Parameters({
+            @Parameter(name = "userId",
+                    description = "사용자 아이디",
+                    example = "coco",
+                    required = true,
+                    in = ParameterIn.QUERY
+            ),
+            @Parameter(name = "userName",
+                    description = "사용자 이름",
+                    example = "코코",
+                    required = true,
+                    in = ParameterIn.QUERY
+            ),
+            @Parameter(name = "userEmail",
+                    description = "사용자 이메일",
+                    example = "tester1@tester1.com",
+                    required = true,
+                    in = ParameterIn.QUERY
+            )
+    })
     @GetMapping("/search-pw")
     public ResponseEntity<ResponseMessageDTO> searchPw(@RequestParam(name = "id") String userId
                                                         , @RequestParam(name = "name") String userName
@@ -230,6 +322,8 @@ public class MemberController {
      * 인증번호 확인.
      * 사용자가 메일을 확인하고 해당 인증번호를 입력해 확인 요청.
      */
+    @Operation(summary = "비밀번호 찾기 인증번호 확인 요청")
+    @ApiResponse(responseCode = "200", description = "성공. 정상인 경우 OK, 일치하는 데이터가 없는 경우 FAIL, 오류 발생 시 ERROR 반환")
     @PostMapping("/certification")
     public ResponseEntity<ResponseMessageDTO> checkCertification(@RequestBody UserCertificationDTO certificationDTO) {
 
@@ -245,6 +339,13 @@ public class MemberController {
      *
      * 비밀번호 수정 요청
      */
+    @Operation(summary = "인증번호 확인 이후 비밀번호 수정 요청")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "성공. 정상인 경우 OK, 인증번호 재확인 시 불일치하는 경우 FAIL 반환"),
+            @ApiResponse(responseCode = "500", description = "일치하는 사용자 데이터가 없는 경우"
+                    , content = @Content(schema = @Schema(implementation = ExceptionEntity.class))
+            )
+    })
     @PatchMapping("/reset-pw")
     public ResponseEntity<ResponseMessageDTO> resetPassword(@RequestBody UserResetPwDTO resetDTO) {
 

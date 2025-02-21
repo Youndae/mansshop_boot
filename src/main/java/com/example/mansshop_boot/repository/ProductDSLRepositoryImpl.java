@@ -6,7 +6,7 @@ import com.example.mansshop_boot.domain.dto.admin.out.AdminProductListDTO;
 import com.example.mansshop_boot.domain.dto.admin.business.AdminProductStockDataDTO;
 import com.example.mansshop_boot.domain.dto.main.business.MainListDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
-import com.example.mansshop_boot.domain.dto.pageable.MemberPageDTO;
+import com.example.mansshop_boot.domain.dto.pageable.MainPageDTO;
 import com.example.mansshop_boot.domain.entity.Product;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Order;
@@ -46,36 +46,39 @@ public class ProductDSLRepositoryImpl implements ProductDSLRepository{
      * 상품 12개 정보만 필요하기 때문에 페이징 사용하지 않을 것이므로 Page 타입이 아닌 List 타입으로.
      */
     @Override
-    public List<MainListDTO> findListDefault(MemberPageDTO pageDTO) {
+    public List<MainListDTO> findListDefault(MainPageDTO pageDTO) {
 
-        List<MainListDTO> list = jpaQueryFactory.select(
+        return jpaQueryFactory.select(
                         Projections.constructor(
-                                MainListDTO.class
-                                , product.id.as("productId")
-                                , product.productName
-                                , product.thumbnail
-                                , product.productPrice.as("price")
-                                , product.productDiscount.as("discount")
-                                , productOption.stock.longValue().sum().as("stock")
+                                MainListDTO.class,
+                                product.id.as("productId"),
+                                product.productName,
+                                product.thumbnail,
+                                product.productPrice.as("price"),
+                                product.productDiscount.as("discount"),
+                                ExpressionUtils.as(
+                                        JPAExpressions.select(
+                                                productOption.stock
+                                                        .longValue()
+                                                        .sum()
+                                        )
+                                        .from(productOption)
+                                        .where(productOption.product.id.eq(product.id))
+                                        .groupBy(productOption.stock)
+                                        , "stock"
+                                )
                         )
                 )
                 .from(product)
-                .innerJoin(productOption)
-                .on(product.id.eq(productOption.product.id))
                 .where(product.isOpen.eq(true))
-                .orderBy(defaultListOrderBy(pageDTO.classification()))
-                .orderBy(product.id.desc())
-                .groupBy(product.id)
+                .orderBy(defaultListOrderBy(pageDTO.classification()), product.id.desc())
                 .limit(pageDTO.mainProductAmount())
                 .fetch();
-
-
-        return list;
     }
 
 
     @Override
-    public Page<MainListDTO> findListPageable(MemberPageDTO pageDTO, Pageable pageable) {
+    public Page<MainListDTO> findListPageable(MainPageDTO pageDTO, Pageable pageable) {
 
         List<MainListDTO> list = jpaQueryFactory.select(
                         Projections.constructor(

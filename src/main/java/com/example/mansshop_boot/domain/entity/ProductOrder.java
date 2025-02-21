@@ -7,10 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -69,7 +68,7 @@ public class ProductOrder {
     private int productCount;
 
     @OneToMany(mappedBy = "productOrder", cascade = CascadeType.ALL)
-    private final Set<ProductOrderDetail> productOrderDetailSet = new HashSet<>();
+    private final List<ProductOrderDetail> productOrderDetailSet = new ArrayList<>();
 
     public void addDetail(ProductOrderDetail productOrderDetail) {
         productOrderDetailSet.add(productOrderDetail);

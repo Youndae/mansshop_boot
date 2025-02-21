@@ -168,9 +168,7 @@ function Cart() {
                 })
         }else {
             await axiosInstance.delete(`${reqUrl}`, {
-                data : {
-                    ...reqData,
-                },
+                data : reqData,
                 headers: {
                     'Content-Type': 'application/json',
                 }

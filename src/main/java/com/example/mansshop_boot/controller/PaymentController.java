@@ -4,6 +4,7 @@ import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +34,7 @@ public class PaymentController {
         this.iamportClient = new IamportClient(apiKey, apiSecret);
     }
 
+    @Operation(hidden = true)
     @PostMapping("/iamport/{imp_uid}")
     public IamportResponse<Payment> paymentIamportResponse(@PathVariable(name = "imp_uid") String imp_uid) throws IamportResponseException, IOException {
 

@@ -13,7 +13,7 @@ public interface ResponseMappingService {
 
     ResponseEntity<ResponseDTO<?>> mappingResponseDTO(ResponseWrappingDTO<?> content, Principal principal);
 
-    ResponseEntity<PagingResponseDTO<?>> mappingPagingResponseDTO(PagingListDTO<?> content, Principal principal);
+    <T> ResponseEntity<PagingResponseDTO<T>> mappingPagingResponseDTO(PagingListDTO<T> content, Principal principal);
 
     ResponseEntity<PagingResponseDTO<?>> mappingPageableResponseDTO(Page<?> content, Principal principal);
 
@@ -21,6 +21,6 @@ public interface ResponseMappingService {
 
     ResponseEntity<PagingElementsResponseDTO<?>> mappingPagingElementsResponseDTO(PagingListDTO<?> content, Principal principal);
 
-    ResponseEntity<ResponseListDTO<?>> mappingResponseListDTO(List<?> content, Principal principal);
+    <T> ResponseEntity<ResponseListDTO<T>>mappingResponseListDTO(List<T> content, Principal principal);
 
 }
