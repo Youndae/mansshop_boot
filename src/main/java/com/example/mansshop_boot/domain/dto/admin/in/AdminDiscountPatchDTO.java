@@ -1,9 +1,15 @@
 package com.example.mansshop_boot.domain.dto.admin.in;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.List;
 
+@Schema(name = "상품 할인 요청 데이터")
 public record AdminDiscountPatchDTO(
-        List<String> productIdList
-        , int discount
+        @Schema(name = "productIdList", description = "상품 아이디 리스트", type = "array")
+        List<String> productIdList,
+        @Schema(name = "discount", description = "할인율")
+        int discount
 ) {
 }

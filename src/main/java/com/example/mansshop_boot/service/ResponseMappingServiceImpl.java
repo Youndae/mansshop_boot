@@ -53,11 +53,11 @@ public class ResponseMappingServiceImpl implements ResponseMappingService{
      * 페이징 정보가 따로 매핑이 되는 경우
      */
     @Override
-    public ResponseEntity<PagingResponseDTO<?>> mappingPagingResponseDTO(PagingListDTO<?> content, Principal principal) {
+    public <T> ResponseEntity<PagingResponseDTO<T>> mappingPagingResponseDTO(PagingListDTO<T> content, Principal principal) {
 
         UserStatusDTO userStatusDTO = principalService.getUserStatusDTOByPrincipal(principal);
 
-        PagingResponseDTO<?> responseDTO = new PagingResponseDTO<>(content, userStatusDTO);
+        PagingResponseDTO<T> responseDTO = new PagingResponseDTO<>(content, userStatusDTO);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDTO);
@@ -127,11 +127,11 @@ public class ResponseMappingServiceImpl implements ResponseMappingService{
      * List 타입의 응답 객체에 대한 매핑
      */
     @Override
-    public ResponseEntity<ResponseListDTO<?>> mappingResponseListDTO(List<?> content, Principal principal) {
+    public <T> ResponseEntity<ResponseListDTO<T>> mappingResponseListDTO(List<T> content, Principal principal) {
 
         UserStatusDTO userStatusDTO = principalService.getUserStatusDTOByPrincipal(principal);
 
-        ResponseListDTO<?> responseDTO = new ResponseListDTO<>(content, userStatusDTO);
+        ResponseListDTO<T> responseDTO = new ResponseListDTO<>(content, userStatusDTO);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDTO);

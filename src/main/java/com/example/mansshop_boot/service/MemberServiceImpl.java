@@ -375,7 +375,7 @@ public class MemberServiceImpl implements MemberService{
         if(certificationValue == null || !certificationValue.equals(resetDTO.certification()))
             return Result.FAIL.getResultKey();
 
-        Member member = memberRepository.findById(resetDTO.userId()).orElseThrow(IllegalAccessError::new);
+        Member member = memberRepository.findById(resetDTO.userId()).orElseThrow(IllegalArgumentException::new);
         member.setUserPw(resetDTO.userPw());
 
         memberRepository.save(member);

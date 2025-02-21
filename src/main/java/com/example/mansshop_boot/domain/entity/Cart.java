@@ -6,8 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -36,7 +36,7 @@ public class Cart {
     private LocalDate updatedAt;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
-    private final Set<CartDetail> cartDetailSet = new HashSet<>();
+    private final List<CartDetail> cartDetailSet = new ArrayList<>();
 
     public void addCartDetail(CartDetail cartDetail) {
         cartDetailSet.add(cartDetail);

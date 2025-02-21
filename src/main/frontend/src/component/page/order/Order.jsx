@@ -72,7 +72,7 @@ function Order() {
 
     const requestPay = () => {
         const { IMP } = window;
-        IMP.init('imp78285136');
+        IMP.init('');
 
         const price = totalPrice;
         const name = orderData.recipient;

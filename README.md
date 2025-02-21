@@ -1982,3 +1982,10 @@ Ino가 존재하더라도 장기간 미접속으로 AccessToken, RefreshToken이
 ### 2025/02/14
 > JMeter를 통한 부하테스트 중.
 >> ProductQnAReply에 대한 N + 1 문제를 해결하기 위해 Entity를 통째로 조회하는 것이 아닌 필요한 데이터만 DTO에 매핑하도록 수정.
+
+<br />
+
+### 2025/02/19 ~
+> ver 1.4 리펙토링
+> 1. Swagger 적용.
+>> springdoc-openapi 를 통한 Swagger 의존성 추가 및 설정, 각 Controller에 대한 문서화 완료.

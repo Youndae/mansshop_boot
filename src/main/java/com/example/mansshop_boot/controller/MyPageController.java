@@ -1,5 +1,7 @@
 package com.example.mansshop_boot.controller;
 
+import com.example.mansshop_boot.annotation.swagger.DefaultApiResponse;
+import com.example.mansshop_boot.annotation.swagger.SwaggerAuthentication;
 import com.example.mansshop_boot.domain.dto.mypage.business.MemberOrderDTO;
 import com.example.mansshop_boot.domain.dto.mypage.business.MyPagePageDTO;
 import com.example.mansshop_boot.domain.dto.mypage.in.MyPageInfoPatchDTO;
@@ -18,6 +20,10 @@ import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListD
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.ResponseWrappingDTO;
 import com.example.mansshop_boot.service.MyPageService;
 import com.example.mansshop_boot.service.ResponseMappingService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -50,8 +56,25 @@ public class MyPageController {
      * term으로는 3, 6, 12, all을 받는다.
      * 각 개월수를 의미.
      */
+    @Operation(summary = "회원의 주문내역 조회")
+    @DefaultApiResponse
+    @SwaggerAuthentication
+    @Parameters({
+            @Parameter(name = "term",
+                    description = "주문내역 조회 기간. 3, 6, 12, all",
+                    example = "3",
+                    required = true,
+                    in = ParameterIn.PATH
+            ),
+            @Parameter(name = "page",
+                    description = "페이지 번호",
+                    example = "1",
+                    required = true,
+                    in = ParameterIn.PATH
+            )
+    })
     @GetMapping("/order/{term}/{page}")
-    public ResponseEntity<PagingResponseDTO<?>> getOrderList(@PathVariable(name = "term") String term
+    public ResponseEntity<PagingResponseDTO<MyPageOrderDTO>> getOrderList(@PathVariable(name = "term") String term
                                         , @PathVariable(name = "page") int page
                                         , Principal principal) {
 
@@ -77,6 +100,15 @@ public class MyPageController {
      *
      * 관심상품으로 등록된 상품의 리스트 조회
      */
+    @Operation(summary = "회원의 관심상품 리스트 조회")
+    @DefaultApiResponse
+    @SwaggerAuthentication
+    @Parameter(name = "page",
+            description = "페이지 번호",
+            example = "1",
+            required = true,
+            in = ParameterIn.PATH
+    )
     @GetMapping("/like/{page}")
     public ResponseEntity<PagingResponseDTO<?>> getLikeProduct(@PathVariable(name = "page") int page, Principal principal) {
         LikePageDTO pageDTO = new LikePageDTO(page);
@@ -92,6 +124,15 @@ public class MyPageController {
      *
      * 사용자의 상품 문의 리스트 조회.
      */
+    @Operation(summary = "회원의 작성한 상품 문의 리스트 조회")
+    @DefaultApiResponse
+    @SwaggerAuthentication
+    @Parameter(name = "page",
+            description = "페이지 번호",
+            example = "1",
+            required = true,
+            in = ParameterIn.PATH
+    )
     @GetMapping("/qna/product/{page}")
     public ResponseEntity<PagingResponseDTO<?>> getProductQnA(@PathVariable(name = "page") int page, Principal principal) {
         MyPagePageDTO pageDTO = new MyPagePageDTO(page);
@@ -107,6 +148,15 @@ public class MyPageController {
      *
      * 사용자의 상품 문의 상세 페이지 데이터 조회
      */
+    @Operation(summary = "회원의 상품 문의 상세 데이터")
+    @DefaultApiResponse
+    @SwaggerAuthentication
+    @Parameter(name = "qnaId",
+            description = "상품 문의 아이디",
+            example = "1",
+            required = true,
+            in = ParameterIn.PATH
+    )
     @GetMapping("/qna/product/detail/{qnaId}")
     public ResponseEntity<ResponseDTO<?>> getProductQnADetail(@PathVariable(name = "qnaId") long qnaId, Principal principal) {
         ResponseWrappingDTO<ProductQnADetailDTO> wrappingDTO = new ResponseWrappingDTO<>(myPageService.getProductQnADetail(qnaId, principal));
@@ -121,6 +171,15 @@ public class MyPageController {
      *
      * 사용자의 상품 문의 삭제 요청
      */
+    @Operation(summary = "회원의 상품 문의 삭제")
+    @DefaultApiResponse
+    @SwaggerAuthentication
+    @Parameter(name = "qnaId",
+            description = "상품 문의 아이디",
+            example = "1",
+            required = true,
+            in = ParameterIn.PATH
+    )
     @DeleteMapping("/qna/product/{qnaId}")
     public ResponseEntity<ResponseMessageDTO> deleteProductQnA(@PathVariable(name = "qnaId") long qnaId, Principal principal) {
 
@@ -137,6 +196,15 @@ public class MyPageController {
      *
      * 사용자의 회원 문의 내역 리스트 조회
      */
+    @Operation(summary = "회원의 문의내역 조회")
+    @DefaultApiResponse
+    @SwaggerAuthentication
+    @Parameter(name = "page",
+            description = "페이지 번호",
+            example = "1",
+            required = true,
+            in = ParameterIn.PATH
+    )
     @GetMapping("/qna/member/{page}")
     public ResponseEntity<PagingResponseDTO<?>> getMemberQnA(@PathVariable(name = "page") int page, Principal principal) {
         MyPagePageDTO pageDTO = new MyPagePageDTO(page);
@@ -153,6 +221,9 @@ public class MyPageController {
      *
      * 사용자의 회원 문의 내역 작성
      */
+    @Operation(summary = "회원의 문의 작성 요청")
+    @DefaultApiResponse
+    @SwaggerAuthentication
     @PostMapping("/qna/member")
     public ResponseEntity<ResponseIdDTO<Long>> memberQnAInsert(@RequestBody MemberQnAInsertDTO insertDTO, Principal principal) {
 
@@ -169,6 +240,15 @@ public class MyPageController {
      *
      * 사용자의 회원 문의 상세 데이터 조회
      */
+    @Operation(summary = "회원의 문의 상세 데이터 조회")
+    @DefaultApiResponse
+    @SwaggerAuthentication
+    @Parameter(name = "qnaId",
+            description = "회원 문의 아이디",
+            example = "1",
+            required = true,
+            in = ParameterIn.PATH
+    )
     @GetMapping("/qna/member/detail/{qnaId}")
     public ResponseEntity<ResponseDTO<?>> getMemberQnADetail(@PathVariable(name = "qnaId") long qnaId, Principal principal) {
         ResponseWrappingDTO<MemberQnADetailDTO> wrappingDTO = new ResponseWrappingDTO<>(myPageService.getMemberQnADetail(qnaId, principal));
@@ -183,6 +263,9 @@ public class MyPageController {
      *
      * 사용자의 회원 문의 답변 작성
      */
+    @Operation(summary = "회원의 문의 답변 작성")
+    @DefaultApiResponse
+    @SwaggerAuthentication
     @PostMapping("/qna/member/reply")
     public ResponseEntity<ResponseMessageDTO> postMemberQnAReply(@RequestBody QnAReplyInsertDTO insertDTO, Principal principal) {
 
@@ -199,6 +282,9 @@ public class MyPageController {
      *
      * 사용자의 회원 문의 답변 수정
      */
+    @Operation(summary = "회원의 문의 답변 수정")
+    @DefaultApiResponse
+    @SwaggerAuthentication
     @PatchMapping("/qna/member/reply")
     public ResponseEntity<ResponseMessageDTO> patchMemberQnAReply(@RequestBody QnAReplyDTO replyDTO, Principal principal) {
 
@@ -215,6 +301,15 @@ public class MyPageController {
      *
      * 사용자의 회원 문의 수정시 필요한 데이터 요청
      */
+    @Operation(summary = "회원의 문의 수정 기능 데이터 조회")
+    @DefaultApiResponse
+    @SwaggerAuthentication
+    @Parameter(name = "qnaId",
+            description = "회원 문의 아이디",
+            example = "1",
+            required = true,
+            in = ParameterIn.PATH
+    )
     @GetMapping("/qna/member/modify/{qnaId}")
     public ResponseEntity<ResponseDTO<?>> getModifyData(@PathVariable(name = "qnaId") long qnaId, Principal principal) {
         ResponseWrappingDTO<MemberQnAModifyDataDTO> wrappingDTO = new ResponseWrappingDTO<>(myPageService.getModifyData(qnaId, principal));
@@ -229,6 +324,9 @@ public class MyPageController {
      *
      * 사용자의 회원 문의 수정
      */
+    @Operation(summary = "회원의 문의 수정 요청")
+    @DefaultApiResponse
+    @SwaggerAuthentication
     @PatchMapping("/qna/member")
     public ResponseEntity<ResponseMessageDTO> patchModifyData(@RequestBody MemberQnAModifyDTO modifyDTO, Principal principal) {
 
@@ -245,6 +343,15 @@ public class MyPageController {
      *
      * 사용자의 회원 문의 삭제
      */
+    @Operation(summary = "회원의 문의 삭제 요청")
+    @DefaultApiResponse
+    @SwaggerAuthentication
+    @Parameter(name = "qnaId",
+            description = "문의 아이디",
+            example = "1",
+            required = true,
+            in = ParameterIn.PATH
+    )
     @DeleteMapping("/qna/member/{qnaId}")
     public ResponseEntity<ResponseMessageDTO> deleteMemberQnA(@PathVariable(name = "qnaId") long qnaId, Principal principal) {
 
@@ -260,8 +367,13 @@ public class MyPageController {
      *
      * 상품 문의 작성 또는 수정 시 문의 카테고리 설정을 위한 카테고리 리스트 조회.
      */
+    @Operation(summary = "회원의 문의 작성 시 필요한 문의 분류 리스트 조회",
+            description = "관리자에도 동일한 기능이 있으나, 거기에서는 모든 분류를 조회하고 여기에서는 노출되어야 할 분류만 조회"
+    )
+    @DefaultApiResponse
+    @SwaggerAuthentication
     @GetMapping("/classification")
-    public ResponseEntity<ResponseListDTO<?>> getQnAClassification(Principal principal) {
+    public ResponseEntity<ResponseListDTO<QnAClassificationDTO>> getQnAClassification(Principal principal) {
         List<QnAClassificationDTO> responseDTO = myPageService.getQnAClassification(principal);
 
         return responseMappingService.mappingResponseListDTO(responseDTO, principal);
@@ -274,6 +386,15 @@ public class MyPageController {
      *
      * 사용자의 작성한 리뷰 리스트 조회
      */
+    @Operation(summary = "회원의 작성한 리뷰 목록 조회")
+    @DefaultApiResponse
+    @SwaggerAuthentication
+    @Parameter(name = "page",
+            description = "페이지 번호",
+            example = "1",
+            required = true,
+            in = ParameterIn.PATH
+    )
     @GetMapping("/review/{page}")
     public ResponseEntity<PagingResponseDTO<?>> getReview(@PathVariable(name = "page") int page, Principal principal) {
         MyPagePageDTO pageDTO = new MyPagePageDTO(page);
@@ -289,6 +410,15 @@ public class MyPageController {
      *
      * 사용자의 작성한 리뷰 수정 데이터 요청
      */
+    @Operation(summary = "회원의 리뷰 수정 기능 데이터 조회")
+    @DefaultApiResponse
+    @SwaggerAuthentication
+    @Parameter(name = "reviewId",
+            description = "리뷰 아이디",
+            example = "1",
+            required = true,
+            in = ParameterIn.PATH
+    )
     @GetMapping("/review/modify/{reviewId}")
     public ResponseEntity<ResponseDTO<?>> getPatchReviewData(@PathVariable(name = "reviewId") long reviewId, Principal principal) {
         ResponseWrappingDTO<MyPagePatchReviewDataDTO> wrappingDTO = new ResponseWrappingDTO<>(myPageService.getPatchReview(reviewId, principal));
@@ -303,6 +433,9 @@ public class MyPageController {
      *
      * 사용자의 리뷰 작성
      */
+    @Operation(summary = "회원의 리뷰 작성")
+    @DefaultApiResponse
+    @SwaggerAuthentication
     @PostMapping("/review")
     public ResponseEntity<ResponseMessageDTO> postReview(@RequestBody MyPagePostReviewDTO reviewDTO, Principal principal) {
 
@@ -319,6 +452,9 @@ public class MyPageController {
      *
      * 사용자의 리뷰 수정
      */
+    @Operation(summary = "회원의 리뷰 수정")
+    @DefaultApiResponse
+    @SwaggerAuthentication
     @PatchMapping("/review")
     public ResponseEntity<ResponseMessageDTO> patchReview(@RequestBody MyPagePatchReviewDTO reviewDTO, Principal principal) {
 
@@ -336,6 +472,15 @@ public class MyPageController {
      *
      * 사용자의 리뷰 삭제
      */
+    @Operation(summary = "회원의 리뷰 삭제")
+    @DefaultApiResponse
+    @SwaggerAuthentication
+    @Parameter(name = "reviewId",
+            description = "리뷰 아이디",
+            example = "1",
+            required = true,
+            in = ParameterIn.PATH
+    )
     @DeleteMapping("/review/{reviewId}")
     public ResponseEntity<ResponseMessageDTO> deleteReview(@PathVariable(name = "reviewId") long reviewId, Principal principal) {
 
@@ -351,6 +496,9 @@ public class MyPageController {
      *
      * 사용자의 정보 수정 데이터 요청
      */
+    @Operation(summary = "회원의 정보 수정 기능 데이터 조회")
+    @DefaultApiResponse
+    @SwaggerAuthentication
     @GetMapping("/info")
     public ResponseEntity<ResponseDTO<?>> getInfo(Principal principal) {
         ResponseWrappingDTO<MyPageInfoDTO> wrappingDTO = new ResponseWrappingDTO<>(myPageService.getInfo(principal));
@@ -365,6 +513,9 @@ public class MyPageController {
      *
      * 사용자의 정보 수정 요청
      */
+    @Operation(summary = "회원의 정보 수정 요청")
+    @DefaultApiResponse
+    @SwaggerAuthentication
     @PatchMapping("/info")
     public ResponseEntity<ResponseMessageDTO> patchInfo(@RequestBody MyPageInfoPatchDTO infoDTO, Principal principal) {
 

@@ -4,6 +4,7 @@ import com.example.mansshop_boot.domain.dto.admin.business.PatchOptionDTO;
 import com.example.mansshop_boot.domain.entity.Classification;
 import com.example.mansshop_boot.domain.entity.Product;
 import com.example.mansshop_boot.domain.entity.ProductOption;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.text.SimpleDateFormat;
@@ -13,18 +14,25 @@ import java.util.List;
 @Setter
 @ToString
 @NoArgsConstructor
+@Schema(description = "관리자의 상품 추가 및 수정 요청시 상품 데이터")
 public class AdminProductPatchDTO {
 
+    @Schema(description = "상품명", example = "testProduct")
     private String productName;
 
+    @Schema(description = "상품 분류명", example = "OUTER")
     private String classification;
 
+    @Schema(description = "상품 가격", example = "10000")
     private int price;
 
+    @Schema(description = "상품 공개 여부. true = 공개, false = 비공개", example = "true")
     private Boolean isOpen;
 
+    @Schema(description = "상품 할인율", example = "10")
     private int discount;
 
+    @Schema(description = "상품 옵션 리스트. 여러 옵션 추가 가능.")
     private List<PatchOptionDTO> optionList;
 
     public Product toPostEntity() {

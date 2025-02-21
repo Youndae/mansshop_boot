@@ -1,5 +1,7 @@
 package com.example.mansshop_boot.controller;
 
+import com.example.mansshop_boot.annotation.swagger.DefaultApiResponse;
+import com.example.mansshop_boot.annotation.swagger.SwaggerAuthentication;
 import com.example.mansshop_boot.domain.dto.cart.in.AddCartDTO;
 import com.example.mansshop_boot.domain.dto.cart.out.CartDetailDTO;
 import com.example.mansshop_boot.domain.dto.cart.business.CartMemberDTO;
@@ -7,6 +9,10 @@ import com.example.mansshop_boot.domain.dto.response.ResponseListDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
 import com.example.mansshop_boot.service.CartService;
 import com.example.mansshop_boot.service.ResponseMappingService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -36,8 +42,16 @@ public class CartController {
      *
      * 사용자의 장바구니 데이터 조회
      */
+    @Operation(summary = "장바구니 데이터 조회")
+    @DefaultApiResponse
+    @SwaggerAuthentication
+    @Parameter(
+            name = "cartCookie",
+            description = "비회원인 경우 갖게 되는 장바구니 cookieId. 비회원의 경우 JWT가 아닌 이 쿠키값이 필요.",
+            in = ParameterIn.COOKIE
+    )
     @GetMapping("/")
-    public ResponseEntity<ResponseListDTO<?>> getCartList(HttpServletRequest request, Principal principal) {
+    public ResponseEntity<ResponseListDTO<CartDetailDTO>> getCartList(HttpServletRequest request, Principal principal) {
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
 
         if(cartMemberDTO.uid() == null && cartMemberDTO.cartCookieValue() == null)
@@ -56,6 +70,14 @@ public class CartController {
      *
      * 상품 상세 페이지에서 장바구니 담기
      */
+    @Operation(summary = "상품 상세 페이지에서 장바구니에 담기 요청")
+    @DefaultApiResponse
+    @SwaggerAuthentication
+    @Parameter(
+            name = "cartCookie",
+            description = "비회원인 경우 갖게 되는 장바구니 cookieId. 비회원의 경우 JWT가 아닌 이 쿠키값이 필요. 생략하면 새로운 Cookie 발급이 되면서 새로운 장바구니에 상품이 담김.",
+            in = ParameterIn.COOKIE
+    )
     @PostMapping("/")
     public ResponseEntity<ResponseMessageDTO> addCart(@RequestBody List<AddCartDTO> addList, HttpServletRequest request, HttpServletResponse response, Principal principal) {
 
@@ -75,6 +97,20 @@ public class CartController {
      *
      * 장바구니내 상품 수량 증가
      */
+    @Operation(summary = "장바구니 상품 수량 증가")
+    @DefaultApiResponse
+    @SwaggerAuthentication
+    @Parameter(
+            name = "cartCookie",
+            description = "비회원인 경우 갖게 되는 장바구니 cookieId. 비회원의 경우 JWT가 아닌 이 쿠키값이 필요.",
+            in = ParameterIn.COOKIE
+    )
+    @Parameter(name = "cartDetailId",
+            description = "장바구니 상세 데이터 아이디",
+            example = "1",
+            required = true,
+            in = ParameterIn.PATH
+    )
     @PatchMapping("/count-up/{cartDetailId}")
     public ResponseEntity<ResponseMessageDTO> cartCountUp(@PathVariable(name = "cartDetailId") long cartDetailId, HttpServletRequest request, Principal principal) {
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
@@ -94,6 +130,20 @@ public class CartController {
      *
      * 장바구니내 상품 수량 감소
      */
+    @Operation(summary = "장바구니 상품 수량 감소")
+    @DefaultApiResponse
+    @SwaggerAuthentication
+    @Parameter(
+            name = "cartCookie",
+            description = "비회원인 경우 갖게 되는 장바구니 cookieId. 비회원의 경우 JWT가 아닌 이 쿠키값이 필요.",
+            in = ParameterIn.COOKIE
+    )
+    @Parameter(name = "cartDetailId",
+            description = "장바구니 상세 데이터 아이디",
+            example = "1",
+            required = true,
+            in = ParameterIn.PATH
+    )
     @PatchMapping("/count-down/{cartDetailId}")
     public ResponseEntity<ResponseMessageDTO> cartCountDown(@PathVariable(name = "cartDetailId") long cartDetailId, HttpServletRequest request, Principal principal) {
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
@@ -129,13 +179,22 @@ public class CartController {
      *
      * 장바구니 선택 상품 삭제
      */
+    @Operation(summary = "장바구니 선택 상품 삭제")
+    @DefaultApiResponse
+    @SwaggerAuthentication
+    @Parameter(
+            name = "cartCookie",
+            description = "비회원인 경우 갖게 되는 장바구니 cookieId. 비회원의 경우 JWT가 아닌 이 쿠키값이 필요.",
+            in = ParameterIn.COOKIE
+    )
     @DeleteMapping("/select")
-    public ResponseEntity<ResponseMessageDTO> deleteSelectCart(@RequestBody Map<String, Long> deleteSelectId, HttpServletRequest request, Principal principal) {
+    public ResponseEntity<ResponseMessageDTO> deleteSelectCart(@RequestBody List<Long> deleteSelectId,
+                                                               HttpServletRequest request,
+                                                               Principal principal) {
 
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
-        List<Long> cartDetailIdList = deleteSelectId.values().stream().toList();
 
-        String responseMessage = cartService.deleteCartSelect(cartMemberDTO, cartDetailIdList);
+        String responseMessage = cartService.deleteCartSelect(cartMemberDTO, deleteSelectId);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ResponseMessageDTO(responseMessage));
@@ -149,6 +208,14 @@ public class CartController {
      *
      * 장바구니 모든 상품 삭제
      */
+    @Operation(summary = "장바구니 상품 전체 삭제")
+    @DefaultApiResponse
+    @SwaggerAuthentication
+    @Parameter(
+            name = "cartCookie",
+            description = "비회원인 경우 갖게 되는 장바구니 cookieId. 비회원의 경우 JWT가 아닌 이 쿠키값이 필요.",
+            in = ParameterIn.COOKIE
+    )
     @DeleteMapping("/all")
     public ResponseEntity<ResponseMessageDTO> deleteCart(Principal principal, HttpServletRequest request, HttpServletResponse response) {
 

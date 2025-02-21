@@ -4,7 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3Object;
 import com.example.mansshop_boot.domain.dto.main.business.MainListDTO;
 import com.example.mansshop_boot.domain.dto.main.out.MainListResponseDTO;
-import com.example.mansshop_boot.domain.dto.pageable.MemberPageDTO;
+import com.example.mansshop_boot.domain.dto.pageable.MainPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.PagingMappingDTO;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
 import com.example.mansshop_boot.repository.ProductRepository;
@@ -47,7 +47,7 @@ public class MainServiceImpl implements MainService{
      *
      */
     @Override
-    public List<MainListResponseDTO> getBestAndNewList(MemberPageDTO pageDTO, Principal principal) {
+    public List<MainListResponseDTO> getBestAndNewList(MainPageDTO pageDTO, Principal principal) {
         List<MainListDTO> listDto = productRepository.findListDefault(pageDTO);
 
         return mainListDataMapping(listDto);
@@ -62,7 +62,7 @@ public class MainServiceImpl implements MainService{
      * 개인 쇼핑몰 컨셉이기 때문에 상품 목록이 엄청 많지 않을 것이라고 생각해 페이징의 직접 구현이 아닌 Pageable을 통한 처리.
      */
     @Override
-    public PagingListDTO<MainListResponseDTO> getClassificationAndSearchList(MemberPageDTO pageDTO, Principal principal) {
+    public PagingListDTO<MainListResponseDTO> getClassificationAndSearchList(MainPageDTO pageDTO, Principal principal) {
         Pageable pageable =  PageRequest.of(pageDTO.pageNum() - 1
                                             , pageDTO.mainProductAmount()
                                             , Sort.by("createdAt").descending()

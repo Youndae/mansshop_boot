@@ -1,8 +1,9 @@
 package com.example.mansshop_boot.domain.dto.pageable;
 
+import com.example.mansshop_boot.domain.enumuration.PageAmount;
 import lombok.Builder;
 
-public record MemberPageDTO(
+public record MainPageDTO(
         int pageNum
         , int mainProductAmount
         , String keyword
@@ -10,7 +11,7 @@ public record MemberPageDTO(
 ) {
 
     @Builder
-    public MemberPageDTO(int pageNum
+    public MainPageDTO(int pageNum
                         , String keyword
                         , String classification) {
         this(
@@ -18,6 +19,15 @@ public record MemberPageDTO(
                 , 12
                 , keyword == null ? null : "%" + keyword + "%"
                 , classification
+        );
+    }
+
+    public MainPageDTO(String classification) {
+        this(
+                1,
+                PageAmount.MAIN_AMOUNT.getAmount(),
+                null,
+                classification
         );
     }
 }
