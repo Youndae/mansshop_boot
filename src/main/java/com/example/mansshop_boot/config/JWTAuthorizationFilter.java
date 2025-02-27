@@ -132,7 +132,7 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
         }
 
         if(username != null){
-            Member memberEntity = memberRepository.findById(username).get();
+            Member memberEntity = memberRepository.findByUserId(username);
             String userId;
             Collection<? extends GrantedAuthority> authorities;
             CustomUserDetails userDetails;

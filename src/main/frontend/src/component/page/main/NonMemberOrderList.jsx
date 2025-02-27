@@ -6,8 +6,7 @@ import {axiosInstance} from "../../../modules/customAxios";
 import {
     getClickNumber,
     getNextNumber,
-    getPrevNumber,
-    productDetailPagingObject
+    getPrevNumber, mainProductPagingObject
 } from "../../../modules/pagingModule";
 
 import OrderListDetail from "../../ui/OrderListDetail";
@@ -53,14 +52,14 @@ function NonMemberOrderList() {
             }
         })
             .then(res => {
-                const pagingObject = productDetailPagingObject(page, res.data.totalPages);
+                const pagingObject = mainProductPagingObject(page, res.data.totalPages);
 
                 setPagingData({
                     startPage: pagingObject.startPage,
                     endPage: pagingObject.endPage,
                     prev: pagingObject.prev,
                     next: pagingObject.next,
-                    activeNo: page,
+                    activeNo: pagingObject.activeNo,
                 });
 
                 setOrderData(res.data.content);

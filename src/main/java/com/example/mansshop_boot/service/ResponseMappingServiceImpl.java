@@ -34,10 +34,10 @@ public class ResponseMappingServiceImpl implements ResponseMappingService{
      * 단일 객체에 대한 매핑
      */
     @Override
-    public ResponseEntity<ResponseDTO<?>> mappingResponseDTO(ResponseWrappingDTO<?> content, Principal principal) {
+    public <T> ResponseEntity<ResponseDTO<T>> mappingResponseDTO(ResponseWrappingDTO<T> content, Principal principal) {
         UserStatusDTO userStatusDTO = principalService.getUserStatusDTOByPrincipal(principal);
 
-        ResponseDTO<?> responseDTO = new ResponseDTO<>(content.content(), userStatusDTO);
+        ResponseDTO<T> responseDTO = new ResponseDTO<>(content.content(), userStatusDTO);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDTO);
@@ -71,11 +71,11 @@ public class ResponseMappingServiceImpl implements ResponseMappingService{
      * Pageable을 통한 페이징 데이터 반환에 대한 매핑
      */
     @Override
-    public ResponseEntity<PagingResponseDTO<?>> mappingPageableResponseDTO(Page<?> content, Principal principal) {
+    public <T> ResponseEntity<PagingResponseDTO<T>> mappingPageableResponseDTO(Page<T> content, Principal principal) {
 
         UserStatusDTO userStatusDTO = principalService.getUserStatusDTOByPrincipal(principal);
 
-        PagingResponseDTO<?> responseDTO = new PagingResponseDTO<>(content, userStatusDTO);
+        PagingResponseDTO<T> responseDTO = new PagingResponseDTO<>(content, userStatusDTO);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDTO);
@@ -90,11 +90,11 @@ public class ResponseMappingServiceImpl implements ResponseMappingService{
      * 추가적으로 TotalElement가 필요한 경우의 매핑
      */
     @Override
-    public ResponseEntity<PagingElementsResponseDTO<?>> mappingPageableElementsResponseDTO(Page<?> content, Principal principal) {
+    public <T> ResponseEntity<PagingElementsResponseDTO<T>> mappingPageableElementsResponseDTO(Page<T> content, Principal principal) {
 
         UserStatusDTO userStatusDTO = principalService.getUserStatusDTOByPrincipal(principal);
 
-        PagingElementsResponseDTO<?> responseDTO = new PagingElementsResponseDTO<>(content, userStatusDTO);
+        PagingElementsResponseDTO<T> responseDTO = new PagingElementsResponseDTO<>(content, userStatusDTO);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDTO);
@@ -110,10 +110,10 @@ public class ResponseMappingServiceImpl implements ResponseMappingService{
      * 추가적으로 TotalElement가 필요한 경우의 매핑
      */
     @Override
-    public ResponseEntity<PagingElementsResponseDTO<?>> mappingPagingElementsResponseDTO(PagingListDTO<?> content, Principal principal) {
+    public <T> ResponseEntity<PagingElementsResponseDTO<T>> mappingPagingElementsResponseDTO(PagingListDTO<T> content, Principal principal) {
         UserStatusDTO userStatusDTO = principalService.getUserStatusDTOByPrincipal(principal);
 
-        PagingElementsResponseDTO<?> responseDTO = new PagingElementsResponseDTO<>(content, userStatusDTO);
+        PagingElementsResponseDTO<T> responseDTO = new PagingElementsResponseDTO<>(content, userStatusDTO);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDTO);

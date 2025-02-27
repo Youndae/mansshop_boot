@@ -1,7 +1,5 @@
 package com.example.mansshop_boot.domain.dto.admin.business;
 
-import com.example.mansshop_boot.domain.entity.ProductOption;
-
 public record AdminProductOptionStockDTO(
         String size
         , String color
@@ -9,12 +7,12 @@ public record AdminProductOptionStockDTO(
         , boolean optionIsOpen
 ) {
 
-    public AdminProductOptionStockDTO(ProductOption productOption) {
+    public AdminProductOptionStockDTO(AdminOptionStockDTO productOption) {
         this(
-                productOption.getSize()
-                , productOption.getColor()
-                , productOption.getStock()
-                , productOption.isOpen()
+                productOption.size()
+                , productOption.color()
+                , productOption.optionStock()
+                , productOption.optionIsOpen()
         );
     }
 }

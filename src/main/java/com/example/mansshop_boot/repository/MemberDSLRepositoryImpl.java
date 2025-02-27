@@ -18,6 +18,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 import static com.example.mansshop_boot.domain.entity.QMember.member;
+import static com.example.mansshop_boot.domain.entity.QAuth.auth1;
 
 @Repository
 @RequiredArgsConstructor
@@ -28,8 +29,17 @@ public class MemberDSLRepositoryImpl implements MemberDSLRepository{
     @Override
     public Member findByLocalUserId(String userId) {
 
-        return jpaQueryFactory.select(member)
-                .from(member)
+        return jpaQueryFactory.selectFrom(member)
+                .leftJoin(member.auths, auth1).fetchJoin()
+                .where(member.userId.eq(userId).and(member.provider.eq("local")))
+                .fetchOne();
+    }
+
+    @Override
+    public Member findByUserId(String userId) {
+
+        return jpaQueryFactory.selectFrom(member)
+                .leftJoin(member.auths, auth1).fetchJoin()
                 .where(member.userId.eq(userId).and(member.provider.eq("local")))
                 .fetchOne();
     }

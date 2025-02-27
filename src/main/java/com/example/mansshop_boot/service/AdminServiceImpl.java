@@ -2,6 +2,7 @@ package com.example.mansshop_boot.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.example.mansshop_boot.domain.dto.admin.business.AdminOptionStockDTO;
 import com.example.mansshop_boot.domain.dto.admin.business.*;
 import com.example.mansshop_boot.domain.dto.admin.in.*;
 import com.example.mansshop_boot.domain.dto.admin.out.*;
@@ -466,7 +467,7 @@ public class AdminServiceImpl implements AdminService {
         Long totalElements = productRepository.findStockCount(pageDTO);
         PagingMappingDTO pagingMappingDTO = new PagingMappingDTO(totalElements, pageDTO.page(), pageDTO.amount());
         List<String> productIdList = dataList.stream().map(AdminProductStockDataDTO::productId).toList();
-        List<ProductOption> optionList = productOptionRepository.findAllOptionByProductIdList(productIdList);
+        List<AdminOptionStockDTO> optionList = productOptionRepository.findAllOptionByProductIdList(productIdList);
 
         List<AdminProductStockDTO> responseContent = new ArrayList<>();
 
@@ -476,7 +477,7 @@ public class AdminServiceImpl implements AdminService {
 
             List<AdminProductOptionStockDTO> responseOptionList = optionList.stream()
                                             .filter(option ->
-                                                    productId.equals(option.getProduct().getId()))
+                                                    productId.equals(option.productId()))
                                             .map(AdminProductOptionStockDTO::new)
                                             .toList();
 
@@ -593,13 +594,14 @@ public class AdminServiceImpl implements AdminService {
      */
     public PagingListDTO<AdminOrderResponseDTO> mappingOrderDataAndPagingData(List<AdminOrderDTO> orderDTOList, Long totalElements, AdminOrderPageDTO pageDTO) {
         List<Long> orderIdList = orderDTOList.stream().map(AdminOrderDTO::orderId).toList();
-        List<ProductOrderDetail> detailList = productOrderDetailRepository.findByOrderIds(orderIdList);
-        List<AdminOrderResponseDTO> responseContent = new ArrayList<>();
+        List<AdminOrderDetailListDTO> detailList = productOrderDetailRepository.findByOrderIds(orderIdList);
 
+        List<AdminOrderResponseDTO> responseContent = new ArrayList<>();
         for(int i = 0; i < orderDTOList.size(); i++) {
             AdminOrderDTO orderDTO = orderDTOList.get(i);
+
             List<AdminOrderDetailDTO> detailDTOList = detailList.stream()
-                                                            .filter(entity -> orderDTO.orderId() == entity.getProductOrder().getId())
+                                                            .filter(entity -> orderDTO.orderId() == entity.orderId())
                                                             .map(AdminOrderDetailDTO::new)
                                                             .toList();
 
@@ -719,6 +721,7 @@ public class AdminServiceImpl implements AdminService {
     public PagingListDTO<AdminQnAListResponseDTO> getMemberQnAList(AdminOrderPageDTO pageDTO) {
         List<AdminQnAListResponseDTO> responseDTO = memberQnARepository.findAllByAdminMemberQnA(pageDTO);
         Long totalElements = memberQnARepository.findAllByAdminMemberQnACount(pageDTO);
+        System.out.println("count result : " + totalElements);
         PagingMappingDTO pagingMappingDTO = new PagingMappingDTO(totalElements, pageDTO.page(), pageDTO.amount());
 
         return new PagingListDTO<>(responseDTO, pagingMappingDTO);
@@ -816,7 +819,6 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public PagingListDTO<AdminReviewDTO> getReviewList(AdminOrderPageDTO pageDTO, AdminListType listType) {
         List<AdminReviewDTO> content = productReviewRepository.findAllByAdminReviewList(pageDTO, listType.name());
-        content.forEach(v -> log.info("AdminServiceImpl.getReviewList :: content forEach : {}", v));
         Long totalElements = productReviewRepository.countByAdminReviewList(pageDTO, listType.name());
         PagingMappingDTO pagingMappingDTO = new PagingMappingDTO(totalElements, pageDTO.page(), pageDTO.amount());
 
@@ -831,12 +833,7 @@ public class AdminServiceImpl implements AdminService {
      */
     @Override
     public AdminReviewDetailDTO getReviewDetail(long reviewId) {
-//        return productReviewRepository.findByAdminReviewDetail(reviewId);
-
-        AdminReviewDetailDTO dto =  productReviewRepository.findByAdminReviewDetail(reviewId);
-        System.out.println("detail DTO : " + dto);
-
-        return dto;
+        return productReviewRepository.findByAdminReviewDetail(reviewId);
     }
 
     @Override
@@ -1075,7 +1072,7 @@ public class AdminServiceImpl implements AdminService {
 
         AdminClassificationSalesDTO salesDTO = productOrderRepository.findDailySales(startDate, endDate);
         List<AdminPeriodClassificationDTO> classificationList = productOrderDetailRepository.findPeriodClassification(startDate, endDate);
-
+        System.out.println("size : " + classificationList.size());
         return new AdminPeriodSalesResponseDTO(
                         classificationList
                         , salesDTO.sales()
@@ -1108,7 +1105,7 @@ public class AdminServiceImpl implements AdminService {
 
         Page<ProductOrder> orderList = productOrderRepository.findAllByDay(startDate, endDate, pageable);
         List<Long> orderIdList = orderList.stream().map(ProductOrder::getId).toList();
-        List<ProductOrderDetail> orderDetailList = productOrderDetailRepository.findByOrderIds(orderIdList);
+        List<AdminOrderDetailListDTO> orderDetailList = productOrderDetailRepository.findByOrderIds(orderIdList);
 
         List<AdminDailySalesResponseDTO> content = new ArrayList<>();
 
@@ -1116,7 +1113,7 @@ public class AdminServiceImpl implements AdminService {
             ProductOrder productOrder = orderList.getContent().get(i);
             List<AdminDailySalesDetailDTO> detailContent = orderDetailList.stream()
                                                         .filter(orderDetail ->
-                                                                productOrder.getId() == orderDetail.getProductOrder().getId()
+                                                                productOrder.getId() == orderDetail.orderId()
                                                         )
                                                         .map(AdminDailySalesDetailDTO::new)
                                                         .toList();
@@ -1163,7 +1160,9 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public AdminProductSalesDetailDTO getProductSalesDetail(String productId) {
         LocalDate date = LocalDate.now();
-        int year = date.getYear();
+//        int year = date.getYear();
+
+        int year = 2023;
 
         AdminProductSalesDTO totalSalesDTO = productOrderRepository.getProductSales(productId);
         AdminSalesDTO yearSalesDTO = productOrderRepository.getProductPeriodSales(year, productId);
@@ -1173,6 +1172,8 @@ public class AdminServiceImpl implements AdminService {
         List<AdminProductSalesOptionDTO> optionYearSalesList = productOrderDetailRepository.getProductOptionSales(year, productId);
         List<AdminProductSalesOptionDTO> optionLastYearSalesList = productOrderDetailRepository.getProductOptionSales(year - 1, productId);
         List<ProductOption> productOption = productOptionRepository.findAllOptionByProductId(productId);
+
+        List<AdminProductSalesOptionMonthDTO> monthOptions = productOrderDetailRepository.getProductOptionSalesMonth(year, productId);
 
         // stream().filter()를 통한 방법, 반복문을 사용하는 방법
         // 또 그 중에서 기존 리스트에 add 해준 뒤 정렬하는 방법들도 수행해봤으나 이게 제일 빠름.

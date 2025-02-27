@@ -7,9 +7,8 @@ import {setMemberObject} from "../../../modules/loginModule";
 import {
     getClickNumber,
     getNextNumber,
-    getPrevNumber,
-    pageSubmit,
-    productDetailPagingObject
+    getPrevNumber, mainProductPagingObject,
+    pageSubmit
 } from "../../../modules/pagingModule";
 import {numberComma} from "../../../modules/numberCommaModule";
 
@@ -50,15 +49,14 @@ function AdminPeriodSalesDailyDetail() {
             .then(res => {
                 setData(res.data.content);
 
-                const pagingObject = productDetailPagingObject(page, res.data.totalPages);
+                const pagingObject = mainProductPagingObject(page, res.data.totalPages);
 
                 setPagingData({
                     startPage: pagingObject.startPage,
                     endPage: pagingObject.endPage,
                     prev: pagingObject.prev,
                     next: pagingObject.next,
-                    totalElements: res.data.totalElements,
-                    activeNo: page,
+                    activeNo: pagingObject.activeNo,
                 });
 
                 const member = setMemberObject(res, loginStatus);

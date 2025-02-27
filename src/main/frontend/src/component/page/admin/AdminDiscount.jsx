@@ -4,12 +4,13 @@ import {Link, useNavigate, useSearchParams} from "react-router-dom";
 
 import {axiosInstance} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
+import {createPageAndKeywordUrl} from "../../../modules/requestUrlModule";
 import {
     getClickNumber,
     getNextNumber,
-    getPrevNumber,
+    getPrevNumber, mainProductPagingObject,
     pageSubmit,
-    productDetailPagingObject, searchPageSubmit, searchSubmit
+    searchPageSubmit, searchSubmit
 } from "../../../modules/pagingModule";
 
 import AdminSideNav from "../../ui/nav/AdminSideNav";
@@ -29,7 +30,7 @@ import DefaultBtn from "../../ui/DefaultBtn";
 function AdminDiscount() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
     const [params] = useSearchParams();
-    const page = params.get('page') == null ? 1 : params.get('page');
+    const page = params.get('page');
     const keyword = params.get('keyword');
 
     const [data, setData] = useState([]);
@@ -51,21 +52,19 @@ function AdminDiscount() {
     }, [page, keyword]);
 
     const getDiscountProduct = async () => {
-        let url = `admin/product/discount?page=${page}`;
-        if(keyword != null)
-            url = `admin/product/discount?page=${page}&keyword=${keyword}`;
+        let url = `admin/product/discount${createPageAndKeywordUrl(page, keyword)}`;
 
         await axiosInstance.get(url)
             .then(res => {
                 setData(res.data.content);
-                const pagingObject = productDetailPagingObject(page, res.data.totalPages);
+                const pagingObject = mainProductPagingObject(page, res.data.totalPages);
 
                 setPagingData({
                     startPage: pagingObject.startPage,
                     endPage: pagingObject.endPage,
                     prev: pagingObject.prev,
                     next: pagingObject.next,
-                    activeNo: page,
+                    activeNo: pagingObject.activeNo,
                 });
 
                 const member = setMemberObject(res, loginStatus);

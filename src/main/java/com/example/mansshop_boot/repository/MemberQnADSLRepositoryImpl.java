@@ -5,9 +5,11 @@ import com.example.mansshop_boot.domain.dto.mypage.qna.business.MemberQnADTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.out.MemberQnAListDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.entity.MemberQnA;
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -134,7 +136,12 @@ public class MemberQnADSLRepositoryImpl implements MemberQnADSLRepository{
                         Projections.constructor(
                                 AdminQnAListResponseDTO.class
                                 , memberQnA.id.as("qnaId")
-                                , qnAClassification.qnaClassificationName.as("classification")
+                                , ExpressionUtils.as(
+                                        JPAExpressions.select(qnAClassification.qnaClassificationName)
+                                                .from(qnAClassification)
+                                                .where(qnAClassification.id.eq(memberQnA.qnAClassification.id)), "classification"
+                                )
+//                                , qnAClassification.qnaClassificationName.as("classification")
                                 , memberQnA.memberQnATitle.as("title")
                                 , new CaseBuilder()
                                         .when(memberQnA.member.nickname.isNull())
@@ -158,7 +165,7 @@ public class MemberQnADSLRepositoryImpl implements MemberQnADSLRepository{
 
     @Override
     public Long findAllByAdminMemberQnACount(AdminOrderPageDTO pageDTO) {
-        return jpaQueryFactory.select(memberQnA.countDistinct())
+        return jpaQueryFactory.select(memberQnA.updatedAt.count())
                 .from(memberQnA)
                 .where(adminMemberQnASearch(pageDTO))
                 .fetchOne();

@@ -130,7 +130,7 @@ public class MemberController {
     @Operation(summary = "회원가입 요청")
     @ApiResponse(responseCode = "200", description = "성공")
     @PostMapping("/join")
-    public ResponseEntity<?> joinProc(@RequestBody JoinDTO joinDTO) {
+    public ResponseEntity<ResponseMessageDTO> joinProc(@RequestBody JoinDTO joinDTO) {
 
         String responseMessage = memberService.joinProc(joinDTO);
 
@@ -155,7 +155,7 @@ public class MemberController {
     )
     @DefaultApiResponse
     @GetMapping("/oAuth/token")
-    public ResponseEntity<?> oAuthIssueToken(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<ResponseMessageDTO> oAuthIssueToken(HttpServletRequest request, HttpServletResponse response) {
 
 
         return memberService.oAuthUserIssueToken(request, response);
@@ -175,7 +175,7 @@ public class MemberController {
             in = ParameterIn.QUERY
     )
     @GetMapping("/check-id")
-    public ResponseEntity<?> checkJoinId(@RequestParam("userId") String userId) {
+    public ResponseEntity<ResponseMessageDTO> checkJoinId(@RequestParam("userId") String userId) {
 
         String responseMessage = memberService.checkJoinId(userId);
 
@@ -198,7 +198,7 @@ public class MemberController {
             in = ParameterIn.QUERY
     )
     @GetMapping("/check-nickname")
-    public ResponseEntity<?> checkNickname(@RequestParam("nickname") String nickname, Principal principal) {
+    public ResponseEntity<ResponseMessageDTO> checkNickname(@RequestParam("nickname") String nickname, Principal principal) {
 
         String responseMessage = memberService.checkNickname(nickname, principal);
 

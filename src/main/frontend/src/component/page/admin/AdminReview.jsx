@@ -4,16 +4,17 @@ import {useLocation, useSearchParams, useNavigate} from "react-router-dom";
 
 import {axiosInstance} from "../../../modules/customAxios";
 import {setMemberObject} from "../../../modules/loginModule";
+import {createPageAndSearchTypeKeyword} from "../../../modules/requestUrlModule";
 
 import AdminSideNav from "../../ui/nav/AdminSideNav";
 import AdminReviewListForm from "./AdminReviewListForm";
-import {productDetailPagingObject} from "../../../modules/pagingModule";
+import {mainProductPagingObject} from "../../../modules/pagingModule";
 
 function AdminReview() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
     const location = useLocation();
     const [params] = useSearchParams();
-    const page = params.get('page') == null ? 1 : params.get('page');
+    const page = params.get('page');
     const keyword = params.get('keyword');
     const searchType = params.get('type') == null ? 'user' : params.get('type');
 
@@ -45,23 +46,20 @@ function AdminReview() {
         else
             setContentHeader('전체 리뷰');
 
-        let url = `${urlPrefix}?page=${page}`;
-        if(keyword !== null)
-            url += `&keyword=${keyword}&searchType=${searchType}`;
+        let url = `${urlPrefix}${createPageAndSearchTypeKeyword(page, keyword, searchType)}`;
 
         await axiosInstance.get(url)
             .then(res => {
-                console.log('reviewList res : ', res);
                 setData(res.data.content);
 
-                const pagingObject = productDetailPagingObject(page, res.data.totalPages);
+                const pagingObject = mainProductPagingObject(page, res.data.totalPages);
+
                 setPagingData({
                     startPage: pagingObject.startPage,
                     endPage: pagingObject.endPage,
                     prev: pagingObject.prev,
                     next: pagingObject.next,
-                    totalElements: res.data.totalElements,
-                    activeNo: page,
+                    activeNo: pagingObject.activeNo,
                 });
 
                 const member = setMemberObject(res, loginStatus);
@@ -81,7 +79,6 @@ function AdminReview() {
     }
 
     const handleOnClick = (reviewId) => {
-        console.log('review list handleOnClick');
         navigate(`/admin/review/detail/${reviewId}`);
     }
 

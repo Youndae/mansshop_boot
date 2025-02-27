@@ -4,11 +4,12 @@ import {useNavigate, useSearchParams} from "react-router-dom";
 
 import {setMemberObject} from "../../../modules/loginModule";
 import {axiosInstance} from "../../../modules/customAxios";
-import {getClickNumber,
-        getNextNumber,
-        getPrevNumber,
-        productDetailPagingObject
+import {
+    getClickNumber,
+    getNextNumber,
+    getPrevNumber, mainProductPagingObject
 } from "../../../modules/pagingModule";
+import {createPageParam} from "../../../modules/requestUrlModule";
 
 import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import OrderListDetail from "../../ui/OrderListDetail";
@@ -18,7 +19,7 @@ import '../../css/mypage.css';
 function MyPageOrder() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
     const [params] = useSearchParams();
-    const page = params.get('page') === null ? 1 : params.get('page');
+    const page = params.get('page');
     const term = params.get('term') === null ? 3 : params.get('term');
 
     const [orderData, setOrderData] = useState([]);
@@ -40,16 +41,16 @@ function MyPageOrder() {
 
     const getOrderData = async (term) => {
 
-        await axiosInstance.get(`my-page/order/${term}/${page}`)
+        await axiosInstance.get(`my-page/order/${term}${createPageParam(page)}`)
             .then(res => {
-                const pagingObject = productDetailPagingObject(page, res.data.totalPages);
+                const pagingObject = mainProductPagingObject(page, res.data.totalPages);
 
                 setPagingData({
                     startPage: pagingObject.startPage,
                     endPage: pagingObject.endPage,
                     prev: pagingObject.prev,
                     next: pagingObject.next,
-                    activeNo: page,
+                    activeNo: pagingObject.activeNo,
                 });
 
                 setOrderData(res.data.content);

@@ -1,15 +1,16 @@
 
 export const mainProductPagingObject = (pageNum, totalPages) => {
-    return createPagingObject(pageNum, 10, totalPages);
+
+    return createPagingObject(checkPageNum(pageNum), 10, totalPages);
 }
 
 export const productDetailPagingObject = (pageNum, totalPages) => {
-    return createPagingObject(pageNum, 10, totalPages);
+    return createPagingObject(checkPageNum(pageNum), 5, totalPages);
 }
 
 const createPagingObject = (pageNum, elementSize, totalPages) => {
     let endPage = Number(Math.ceil(pageNum / elementSize) * elementSize);
-    const startPage = endPage - 9;
+    const startPage = endPage - (elementSize - 1);
     if(totalPages < endPage)
         endPage = totalPages;
 
@@ -21,7 +22,12 @@ const createPagingObject = (pageNum, elementSize, totalPages) => {
         endPage: endPage,
         prev: prev,
         next: next,
+        activeNo: pageNum
     }
+}
+
+const checkPageNum = (pageNum) => {
+    return pageNum === null ? 1 : pageNum
 }
 
 export const getClickNumber = (e) => {

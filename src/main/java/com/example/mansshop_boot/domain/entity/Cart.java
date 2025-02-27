@@ -35,7 +35,7 @@ public class Cart {
     @UpdateTimestamp
     private LocalDate updatedAt;
 
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.PERSIST)
     private final List<CartDetail> cartDetailSet = new ArrayList<>();
 
     public void addCartDetail(CartDetail cartDetail) {

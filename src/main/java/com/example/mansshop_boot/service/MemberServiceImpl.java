@@ -157,7 +157,7 @@ public class MemberServiceImpl implements MemberService{
      * 임시 토큰 검증 후 토큰 발행
      */
     @Override
-    public ResponseEntity<?> oAuthUserIssueToken(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<ResponseMessageDTO> oAuthUserIssueToken(HttpServletRequest request, HttpServletResponse response) {
 
         Cookie temporaryCookie = WebUtils.getCookie(request, temporaryHeader);
 

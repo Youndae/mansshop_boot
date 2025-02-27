@@ -47,9 +47,7 @@ function AdminQnAClassification() {
 
     const handleSubmit = async () => {
 
-        await axiosInstance.post(`admin/qna/classification`, {
-            name: inputValue
-        }, {
+        await axiosInstance.post(`admin/qna/classification`, JSON.stringify(inputValue), {
             headers: {
                 'Content-Type': 'application/json'
             }

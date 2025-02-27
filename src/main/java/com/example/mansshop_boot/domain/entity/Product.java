@@ -64,13 +64,13 @@ public class Product {
     @Column(nullable = false)
     private LocalDate updatedAt;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.PERSIST)
     private final List<ProductOption> productOptionSet = new ArrayList<>();
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.PERSIST)
     private final List<ProductThumbnail> productThumbnailSet = new ArrayList<>();
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.PERSIST)
     private final List<ProductInfoImage> productInfoImageSet = new ArrayList<>();
 
     public void addProductOption(ProductOption productOption) {

@@ -7,10 +7,10 @@ import {setMemberObject} from "../../../modules/loginModule";
 import {
     getClickNumber,
     getNextNumber,
-    getPrevNumber,
-    pageSubmit,
-    productDetailPagingObject
+    getPrevNumber, mainProductPagingObject,
+    pageSubmit
 } from "../../../modules/pagingModule";
+import {createPageParam} from "../../../modules/requestUrlModule";
 
 import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import Paging from "../../ui/Paging";
@@ -19,7 +19,7 @@ import DefaultBtn from "../../ui/DefaultBtn";
 function MemberQnA() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
     const [params] = useSearchParams();
-    const page = params.get('page') == null ? 1 : params.get('page');
+    const page = params.get('page');
 
     const [pagingData, setPagingData] = useState({
         startPage: 0,
@@ -39,18 +39,18 @@ function MemberQnA() {
 
     const getMemberQnA = async () => {
 
-        await axiosInstance.get(`my-page/qna/member/${page}`)
+        await axiosInstance.get(`my-page/qna/member${createPageParam(page)}`)
             .then(res => {
                 setQnAData(res.data.content);
 
-                const pagingObject = productDetailPagingObject(page, res.data.totalPages);
+                const pagingObject = mainProductPagingObject(page, res.data.totalPages);
 
                 setPagingData({
                     startPage: pagingObject.startPage,
                     endPage: pagingObject.endPage,
                     prev: pagingObject.prev,
                     next: pagingObject.next,
-                    activeNo: page,
+                    activeNo: pagingObject.activeNo,
                 });
 
                 const member = setMemberObject(res, loginStatus);

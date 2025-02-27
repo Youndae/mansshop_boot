@@ -51,7 +51,8 @@ public class CartController {
             in = ParameterIn.COOKIE
     )
     @GetMapping("/")
-    public ResponseEntity<ResponseListDTO<CartDetailDTO>> getCartList(HttpServletRequest request, Principal principal) {
+    public ResponseEntity<ResponseListDTO<CartDetailDTO>> getCartList(HttpServletRequest request,
+                                                                      Principal principal) {
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
 
         if(cartMemberDTO.uid() == null && cartMemberDTO.cartCookieValue() == null)
@@ -79,7 +80,10 @@ public class CartController {
             in = ParameterIn.COOKIE
     )
     @PostMapping("/")
-    public ResponseEntity<ResponseMessageDTO> addCart(@RequestBody List<AddCartDTO> addList, HttpServletRequest request, HttpServletResponse response, Principal principal) {
+    public ResponseEntity<ResponseMessageDTO> addCart(@RequestBody List<AddCartDTO> addList,
+                                                      HttpServletRequest request,
+                                                      HttpServletResponse response,
+                                                      Principal principal) {
 
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
 
@@ -112,7 +116,9 @@ public class CartController {
             in = ParameterIn.PATH
     )
     @PatchMapping("/count-up/{cartDetailId}")
-    public ResponseEntity<ResponseMessageDTO> cartCountUp(@PathVariable(name = "cartDetailId") long cartDetailId, HttpServletRequest request, Principal principal) {
+    public ResponseEntity<ResponseMessageDTO> cartCountUp(@PathVariable(name = "cartDetailId") long cartDetailId,
+                                                          HttpServletRequest request,
+                                                          Principal principal) {
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
 
 
@@ -145,7 +151,9 @@ public class CartController {
             in = ParameterIn.PATH
     )
     @PatchMapping("/count-down/{cartDetailId}")
-    public ResponseEntity<ResponseMessageDTO> cartCountDown(@PathVariable(name = "cartDetailId") long cartDetailId, HttpServletRequest request, Principal principal) {
+    public ResponseEntity<ResponseMessageDTO> cartCountDown(@PathVariable(name = "cartDetailId") long cartDetailId,
+                                                            HttpServletRequest request,
+                                                            Principal principal) {
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
 
         String responseMessage = cartService.countDown(cartMemberDTO, cartDetailId);
@@ -217,7 +225,9 @@ public class CartController {
             in = ParameterIn.COOKIE
     )
     @DeleteMapping("/all")
-    public ResponseEntity<ResponseMessageDTO> deleteCart(Principal principal, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<ResponseMessageDTO> deleteCart(Principal principal,
+                                                         HttpServletRequest request,
+                                                         HttpServletResponse response) {
 
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
 

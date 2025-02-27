@@ -11,6 +11,7 @@ import {
     pageSubmit
 } from "../../../modules/pagingModule";
 import {setMemberObject} from "../../../modules/loginModule";
+import {createPageParam} from "../../../modules/requestUrlModule";
 
 import MainContent from "../../ui/MainContent";
 import Paging from "../../ui/Paging";
@@ -19,7 +20,7 @@ function MainClassification() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
     const { classification } = useParams();
     const [params] = useSearchParams();
-    const page = params.get('page') == null ? 1 : params.get('page');
+    const page = params.get('page');
 
     const [data, setData] = useState([]);
     const [pagingData, setPagingData] = useState({
@@ -38,7 +39,8 @@ function MainClassification() {
     }, [page, classification]);
 
     const getClassificationList = async() => {
-        await axiosInstance.get(`/main/${classification}?page=${page}`)
+
+        await axiosInstance.get(`main/${classification}${createPageParam(page)}`)
             .then(res => {
                 setData(res.data.content);
 
@@ -49,7 +51,7 @@ function MainClassification() {
                     endPage: pagingObject.endPage,
                     prev: pagingObject.prev,
                     next: pagingObject.next,
-                    activeNo: page,
+                    activeNo: pagingObject.activeNo,
                 });
 
                 const member = setMemberObject(res, loginStatus);

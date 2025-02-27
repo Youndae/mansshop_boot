@@ -7,9 +7,8 @@ import {setMemberObject} from "../../../modules/loginModule";
 import {
     getClickNumber,
     getNextNumber,
-    getPrevNumber,
-    pageSubmit,
-    productDetailPagingObject
+    getPrevNumber, mainProductPagingObject,
+    pageSubmit
 } from "../../../modules/pagingModule";
 
 import MyPageSideNav from "../../ui/nav/MyPageSideNav";
@@ -47,14 +46,14 @@ function MyPageReview() {
             .then(res => {
                 setData(res.data.content);
 
-                const pagingObject = productDetailPagingObject(page, res.data.totalPages);
+                const pagingObject = mainProductPagingObject(page, res.data.totalPages);
 
                 setPagingData({
                     startPage: pagingObject.startPage,
                     endPage: pagingObject.endPage,
                     prev: pagingObject.prev,
                     next: pagingObject.next,
-                    activeNo: page,
+                    activeNo: pagingObject.activeNo,
                 });
 
                 const member = setMemberObject(res, loginStatus);
