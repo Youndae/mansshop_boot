@@ -2,8 +2,9 @@ import React, {useEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useSearchParams} from "react-router-dom";
 import {axiosInstance} from "../../../modules/customAxios";
-import { productDetailPagingObject } from "../../../modules/pagingModule";
+import { mainProductPagingObject } from "../../../modules/pagingModule";
 import {setMemberObject} from "../../../modules/loginModule";
+import {createPageAndSearchTypeKeyword} from "../../../modules/requestUrlModule";
 
 import dayjs from "dayjs";
 
@@ -26,7 +27,7 @@ import AdminOrderModalDetail from "./modal/AdminOrderModalDetail";
 function AdminAllOrder() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
     const [params] = useSearchParams();
-    const page = params.get('page') == null ? 1 : params.get('page');
+    const page = params.get('page');
     const keyword = params.get('keyword');
     const searchType = params.get('type');
 
@@ -61,22 +62,20 @@ function AdminAllOrder() {
     }, [page, keyword, searchType]);
 
     const getOrderList = async () => {
-        let url = `admin/order/all?page=${page}`;
-        if(keyword !== null)
-            url += `&keyword=${keyword}&searchType=${searchType}`;
+        let url = `admin/order/all${createPageAndSearchTypeKeyword(page, keyword, searchType)}`;
 
         await axiosInstance.get(url)
             .then(res => {
                 setData(res.data.content);
 
-                const pagingObject = productDetailPagingObject(page, res.data.totalPages);
+                const pagingObject = mainProductPagingObject(page, res.data.totalPages);
 
                 setPagingData({
                     startPage: pagingObject.startPage,
                     endPage: pagingObject.endPage,
                     prev: pagingObject.prev,
                     next: pagingObject.next,
-                    activeNo: page,
+                    activeNo: pagingObject.activeNo,
                 });
 
                 const member = setMemberObject(res, loginStatus);

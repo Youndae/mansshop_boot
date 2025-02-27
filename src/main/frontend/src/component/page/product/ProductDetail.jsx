@@ -285,12 +285,9 @@ function ProductDetail() {
             if(window.confirm('로그인 사용자만 관심상품 등록이 가능합니다.\n로그인 하시겠습니까?'))
                 handleLocationPathToLogin(pathname, navigate);
         }else {
-            const pid = productData.productId;
             const likeStatus = productData.productLikeStat;
 
-            await axiosDefault.post(`product/like`, {
-                productId : pid,
-            }, {
+            await axiosDefault.post(`product/like`, JSON.stringify(productId), {
                 headers: {'Content-Type' : 'application/json'},
             })
                 .then(res => {
@@ -351,7 +348,7 @@ function ProductDetail() {
 
     const handleReviewPaging = async (clickNo) => {
 
-        await axiosInstance.get(`product/${productId}/review/${clickNo}`)
+        await axiosInstance.get(`product/${productId}/review?page=${clickNo}`)
             .then(res => {
                 setProductReview(res.data.content);
 
@@ -382,7 +379,7 @@ function ProductDetail() {
 
     const handleQnAPaging = async (clickNo) => {
 
-        await axiosInstance.get(`product/${productId}/qna/${clickNo}`)
+        await axiosInstance.get(`product/${productId}/qna?page=${clickNo}`)
             .then(res => {
                 setProductQnA(res.data.content);
 

@@ -9,13 +9,14 @@ import {
     mainProductPagingObject,
     searchPageSubmit
 } from "../../../modules/pagingModule";
+import {createPageAndKeywordUrl} from "../../../modules/requestUrlModule";
 
 import Paging from "../../ui/Paging";
 import MainContent from "../../ui/MainContent";
 
 function SearchProduct() {
     const [params] = useSearchParams();
-    const page = params.get('page') == null ? 1 : params.get('page');
+    const page = params.get('page');
     const keyword = params.get('keyword');
 
     const [data, setData] = useState([]);
@@ -34,7 +35,7 @@ function SearchProduct() {
     }, [page, keyword]);
 
     const getSearchProductList = async () => {
-        await axiosInstance.get(`/main/search?keyword=${keyword}&page=${page}`)
+        await axiosInstance.get(`/main/search${createPageAndKeywordUrl(page, keyword)}`)
             .then(res => {
                 setData(res.data.content);
 
@@ -45,7 +46,7 @@ function SearchProduct() {
                     endPage: pagingObject.endPage,
                     prev: pagingObject.prev,
                     next: pagingObject.next,
-                    activeNo: page,
+                    activeNo: pagingObject.activeNo,
                 });
             })
     }

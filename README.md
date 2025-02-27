@@ -2000,3 +2000,14 @@ Ino가 존재하더라도 장기간 미접속으로 AccessToken, RefreshToken이
 >>> 중복되는 Response에 대한 @ApiResponse는 @DefaultApiResponse라는 Custom Annotation을 생성해 간결하게 처리.   
 >>> JWT에 대한 @Parameter, @SecurityRequirement에 대해서는 @SwaggerAuthentication 이라는 Custom Annotation을 통해 처리.   
 >>> 관리자 기능 중 상품 추가, 수정 기능은 여러 필드로 이미지를 받고 있으므로 DTO로 받도록 처리하고 있는데 Swagger에서는 MultipartFile이 내부 필드에 존재하는 경우 처리하지 못한다는 점 때문에 테스트 불가로 description 작성.
+> 
+>> 2 - 1. 쿼리 개선 및 인덱스 개선 ( 2025/02/23 ~ 2025/02/27 )
+>>> 대부분 기능이 비즈니스 로직 보다도 쿼리 성능에서 문제가 발생.   
+>>> 서브 쿼리 및 JOIN 개선으로 개선 및 인덱스 개선으로 최적화 수행.   
+>>> 몇몇 쿼리에서 발생하고 있던 N + 1 문제와 하위 엔티티 조회에서 발생하는 역 N + 1 문제를 해결.   
+>>> TimeCheckAOP의 표현식 수정. 간간히 표시되지 않던 로그가 있었는데 이 문제를 표현식 수정으로 해결.   
+>>> 주문 데이터 처리와 관리자의 매출 기능은 아직 개선 이전.   
+>>> JMeter와 유사한 테스트를 위해 테스트 클래스에서 QueryTest라는 클래스 생성 후 CompletableFuture를 통해 간이 테스트 수행. 최적화 이후 제거 예정.   
+>>> Controller에서 Map으로 받던 데이터들 모두 수정. React Axios에서 보내는 방식을 수정하는 것으로 해결.   
+>>> page, keyword, searchType, listType과 같은 QueryParam도 공통적으로 처리되는 부분이 많기 때문에 requestUrlModule.js 라는 모듈을 추가해서 사용하도록 개선.   
+>>> pagingModule은 동적으로 사용될 수 있도록 개선.

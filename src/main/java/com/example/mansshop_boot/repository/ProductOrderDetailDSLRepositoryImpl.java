@@ -21,7 +21,7 @@ import static com.example.mansshop_boot.domain.entity.QProductOrderDetail.produc
 import static com.example.mansshop_boot.domain.entity.QProduct.product;
 import static com.example.mansshop_boot.domain.entity.QProductOption.productOption;
 import static com.example.mansshop_boot.domain.entity.QProductOrder.productOrder;
-
+import static com.example.mansshop_boot.domain.entity.QClassification.classification;
 
 @Repository
 @RequiredArgsConstructor
@@ -91,17 +91,18 @@ public class ProductOrderDetailDSLRepositoryImpl implements ProductOrderDetailDS
     @Override
     public List<AdminPeriodClassificationDTO> findPeriodClassification(LocalDateTime startDate, LocalDateTime endDate) {
 
-        StringPath aliasClassification = Expressions.stringPath("classification");
+//        StringPath aliasClassification = Expressions.stringPath("classification");
 
         return jpaQueryFactory.select(
                         Projections.constructor(
                                 AdminPeriodClassificationDTO.class
-                                , ExpressionUtils.as(
+                                /*, ExpressionUtils.as(
                                         JPAExpressions.select(product.classification.id)
                                                 .from(product)
                                                 .where(productOrderDetail.product.id.eq(product.id))
                                         , aliasClassification
-                                )
+                                )*/
+                                , product.classification.id.as("classification")
                                 , productOrderDetail.orderDetailPrice.longValue().sum().as("classificationSales")
                                 , productOrderDetail.orderDetailCount.longValue().sum().as("classificationSalesQuantity")
                         )
@@ -112,7 +113,7 @@ public class ProductOrderDetailDSLRepositoryImpl implements ProductOrderDetailDS
                 .innerJoin(product)
                 .on(productOrderDetail.product.id.eq(product.id))
                 .where(productOrder.createdAt.between(startDate, endDate))
-                .groupBy(aliasClassification)
+                .groupBy(product.classification.id)
                 .fetch();
     }
 
@@ -158,11 +159,27 @@ public class ProductOrderDetailDSLRepositoryImpl implements ProductOrderDetailDS
     }
 
     @Override
-    public List<ProductOrderDetail> findByOrderIds(List<Long> orderIdList) {
-        return jpaQueryFactory.select(productOrderDetail)
+    public List<AdminOrderDetailListDTO> findByOrderIds(List<Long> orderIdList) {
+        return jpaQueryFactory.select(
+                Projections.constructor(
+                        AdminOrderDetailListDTO.class,
+                        productOrder.id.as("orderId"),
+                        classification.id.as("classification"),
+                        product.productName,
+                        productOption.size,
+                        productOption.color,
+                        productOrderDetail.orderDetailCount.as("count"),
+                        productOrderDetail.orderDetailPrice.as("price"),
+                        productOrderDetail.orderReviewStatus.as("reviewStatus")
+                )
+        )
                 .from(productOrderDetail)
+                .innerJoin(productOrderDetail.product, product)
+                .innerJoin(productOrderDetail.productOption, productOption)
+                .innerJoin(productOrderDetail.productOrder, productOrder)
+                .innerJoin(product.classification, classification)
                 .where(productOrderDetail.productOrder.id.in(orderIdList))
-                .orderBy(productOrderDetail.productOrder.id.desc())
+                .orderBy(productOrder.id.desc())
                 .fetch();
     }
 
@@ -187,6 +204,31 @@ public class ProductOrderDetailDSLRepositoryImpl implements ProductOrderDetailDS
                 .where(productOrderDetail.product.id.eq(productId).and(searchOption(year)))
                 .orderBy(productOption.id.asc())
                 .groupBy(productOption.id)
+                .fetch();
+    }
+
+    @Override
+    public List<AdminProductSalesOptionMonthDTO> getProductOptionSalesMonth(int year, String productId) {
+
+        return jpaQueryFactory.select(
+                        Projections.constructor(
+                                AdminProductSalesOptionMonthDTO.class
+                                , productOption.id.as("optionId")
+                                , productOrder.createdAt.month().as("month")
+                                , productOption.size
+                                , productOption.color
+                                , productOrderDetail.orderDetailPrice.longValue().sum().as("optionSales")
+                                , productOrderDetail.orderDetailCount.longValue().sum().as("optionSalesQuantity")
+                        )
+                )
+                .from(productOption)
+                .leftJoin(productOrderDetail)
+                .on(productOption.id.eq(productOrderDetail.productOption.id))
+                .innerJoin(productOrder)
+                .on(productOrder.id.eq(productOrderDetail.productOrder.id))
+                .where(productOrderDetail.product.id.eq(productId).and(searchOption(year)))
+                .orderBy(productOption.id.asc())
+                .groupBy(productOption.id, productOrder.createdAt.month())
                 .fetch();
     }
 

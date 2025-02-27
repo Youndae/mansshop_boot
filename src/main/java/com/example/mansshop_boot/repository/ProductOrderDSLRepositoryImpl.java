@@ -7,6 +7,7 @@ import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;
 import com.example.mansshop_boot.domain.entity.ProductOrder;
+import com.example.mansshop_boot.domain.entity.QProductOrder;
 import com.example.mansshop_boot.domain.enumuration.OrderStatus;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.ExpressionUtils;
@@ -28,6 +29,7 @@ import java.util.List;
 import static com.example.mansshop_boot.domain.entity.QProductOrder.productOrder;
 import static com.example.mansshop_boot.domain.entity.QProduct.product;
 import static com.example.mansshop_boot.domain.entity.QProductOrderDetail.productOrderDetail;
+import static com.example.mansshop_boot.domain.entity.QMember.member;
 
 @Repository
 @RequiredArgsConstructor
@@ -49,7 +51,7 @@ public class ProductOrderDSLRepositoryImpl implements ProductOrderDSLRepository{
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        JPAQuery<Long> count = jpaQueryFactory.select(productOrder.count())
+        JPAQuery<Long> count = jpaQueryFactory.select(productOrder.countDistinct())
                 .from(productOrder)
                 .where(search(memberOrderDTO, pageDTO));
 
@@ -90,7 +92,7 @@ public class ProductOrderDSLRepositoryImpl implements ProductOrderDSLRepository{
 
     @Override
     public Long findAllOrderListCount(AdminOrderPageDTO pageDTO) {
-        return jpaQueryFactory.select(productOrder.countDistinct())
+        return jpaQueryFactory.select(productOrder.createdAt.countDistinct())
                 .from(productOrder)
                 .where(searchAdminOrder(pageDTO))
                 .fetchOne();
@@ -169,7 +171,6 @@ public class ProductOrderDSLRepositoryImpl implements ProductOrderDSLRepository{
                 .groupBy(productOrder.createdAt.month())
                 .fetch();
 
-
         return list;
     }
 
@@ -201,6 +202,7 @@ public class ProductOrderDSLRepositoryImpl implements ProductOrderDSLRepository{
                 )
                 .from(productOrder)
                 .where(productOrder.createdAt.between(startDate, endDate))
+//                .where(productOrder.createdAt.goe(startDate).and(productOrder.createdAt.lt(endDate)))
                 .fetchOne();
 
         return result;
@@ -269,6 +271,7 @@ public class ProductOrderDSLRepositoryImpl implements ProductOrderDSLRepository{
                                         JPAExpressions.select(productOrderDetail.orderDetailPrice.longValue().sum())
                                                 .from(productOrderDetail)
                                                 .where(productOrderDetail.product.id.eq(product.id))
+                                                .groupBy(productOrderDetail.product.id)
                                         , "sales"
                                 )
                                 , product.productSales.as("salesQuantity")
@@ -276,7 +279,7 @@ public class ProductOrderDSLRepositoryImpl implements ProductOrderDSLRepository{
                 )
                 .from(product)
                 .where(searchSales(pageDTO))
-                .groupBy(product.id)
+//                .groupBy(product.id)
                 .orderBy(product.classification.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())

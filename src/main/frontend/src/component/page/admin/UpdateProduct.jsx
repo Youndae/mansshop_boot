@@ -52,7 +52,6 @@ function UpdateProduct() {
     const getPatchData = async (productId) => {
         await axiosInstance.get(`admin/product/patch/${productId}`)
             .then(res => {
-                console.log('patch product res : ', res);
                 const content = res.data.content;
 
                 setProductData({

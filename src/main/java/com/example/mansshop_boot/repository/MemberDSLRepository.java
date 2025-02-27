@@ -12,6 +12,8 @@ public interface MemberDSLRepository {
 
     Member findByLocalUserId(String userId);
 
+    Member findByUserId(String userId);
+
     Page<AdminMemberDTO> findMember(AdminOrderPageDTO pageDTO, Pageable pageable);
 
     String searchId(UserSearchDTO searchDTO);

@@ -62,19 +62,19 @@ public class AdminController {
     @SwaggerAuthentication
     @Parameters({
             @Parameter(name = "page",
-                        description = "페이지 번호. 최소값 1",
+                        description = "페이지 번호.",
                         example = "1",
-                        required = true
+                        in = ParameterIn.QUERY
             ),
             @Parameter(name = "keyword",
                         description = "검색어. 검색 요청시에만 필요.",
                         example = "DummyOUTER",
-                        required = false
+                        in = ParameterIn.QUERY
             )
     })
     @GetMapping("/product")
     public ResponseEntity<PagingResponseDTO<AdminProductListDTO>> getProductList(@RequestParam(name = "keyword", required = false) String keyword
-                                                                                , @RequestParam(name = "page") int page
+                                                                                , @RequestParam(name = "page", required = false, defaultValue = "1") int page
                                                                                 , Principal principal){
 
         PagingListDTO<AdminProductListDTO> responseDTO = adminService.getProductList(new AdminPageDTO(keyword, page));
@@ -88,7 +88,7 @@ public class AdminController {
      * 상품 추가 혹은 상품 할인 추가시 조회.
      * 모든 상품 분류명을 반환
      */
-    @Operation(summary = "관리자 상품 분류 조회", description = "분류별 리스트 조회가 아닌 상품 분류명 리스트를 반환.\n상품 추가 및 할인 추가 시 필요.")
+    @Operation(summary = "관리자 상품 분류 조회", description = "분류별 리스트 조회가 아닌 상품 분류명 리스트를 반환. 상품 추가 및 할인 추가 시 필요.")
     @DefaultApiResponse
     @SwaggerAuthentication
     @GetMapping("/product/classification")
@@ -114,7 +114,7 @@ public class AdminController {
                 in = ParameterIn.PATH
     )
     @GetMapping("/product/detail/{productId}")
-    public ResponseEntity<ResponseDTO<?>> getProductDetail(@PathVariable(name = "productId") String productId
+    public ResponseEntity<ResponseDTO<AdminProductDetailDTO>> getProductDetail(@PathVariable(name = "productId") String productId
                                                             , Principal principal){
 
         ResponseWrappingDTO<AdminProductDetailDTO> dto = new ResponseWrappingDTO<>(
@@ -164,8 +164,8 @@ public class AdminController {
                 in = ParameterIn.PATH
     )
     @GetMapping("/product/patch/{productId}")
-    public ResponseEntity<ResponseDTO<?>> getPatchProductData(@PathVariable(name = "productId") String productId
-                                                                                            , Principal principal) {
+    public ResponseEntity<ResponseDTO<AdminProductPatchDataDTO>> getPatchProductData(@PathVariable(name = "productId") String productId
+                                                                                    , Principal principal) {
         ResponseWrappingDTO<AdminProductPatchDataDTO> dto = new ResponseWrappingDTO<>(adminService.getPatchProductData(productId, principal));
 
         return responseMappingService.mappingResponseDTO(dto, principal);
@@ -223,19 +223,19 @@ public class AdminController {
     @SwaggerAuthentication
     @Parameters({
             @Parameter(name = "page",
-                        description = "페이지 번호. 최소값 1",
+                        description = "페이지 번호.",
                         example = "1",
-                        required = true
+                        in = ParameterIn.QUERY
             ),
             @Parameter(name = "keyword",
                         description = "검색어(상품명)",
                         example = "DummyOUTER",
-                        required = false
+                        in = ParameterIn.QUERY
             )
     })
     @GetMapping("/product/stock")
     public ResponseEntity<PagingResponseDTO<AdminProductStockDTO>> getProductStock(@RequestParam(name = "keyword", required = false) String keyword
-                                                                , @RequestParam(name = "page") int page
+                                                                , @RequestParam(name = "page", required = false, defaultValue = "1") int page
                                                                 , Principal principal) {
         AdminPageDTO pageDTO = new AdminPageDTO(keyword, page);
         PagingListDTO<AdminProductStockDTO> responseDTO = adminService.getProductStock(pageDTO);
@@ -255,19 +255,19 @@ public class AdminController {
     @SwaggerAuthentication
     @Parameters({
             @Parameter(name = "page",
-                        description = "페이지 번호. 최소값 1",
+                        description = "페이지 번호.",
                         example = "1",
-                        required = true
+                        in = ParameterIn.QUERY
             ),
             @Parameter(name = "keyword",
                         description = "검색어(상품명)",
                         example = "DummyOUTER",
-                        required = false
+                        in = ParameterIn.QUERY
             )
     })
     @GetMapping("/product/discount")
     public ResponseEntity<PagingResponseDTO<AdminDiscountResponseDTO>> getDiscountProductList(@RequestParam(name = "keyword", required = false) String keyword
-                                                                                            , @RequestParam(name = "page") int page
+                                                                                            , @RequestParam(name = "page", required = false, defaultValue = "1") int page
                                                                                             , Principal principal) {
 
         AdminPageDTO pageDTO = new AdminPageDTO(keyword, page);
@@ -309,7 +309,8 @@ public class AdminController {
      * 상품 할인 설정.
      */
     @Operation(summary = "상품 할인 설정 요청",
-    description = "여러 상품 아이디를 보내 복수의 상품을 동일한 할인율로 설정 가능")
+                description = "여러 상품 아이디를 보내 복수의 상품을 동일한 할인율로 설정 가능"
+    )
     @DefaultApiResponse
     @SwaggerAuthentication
     @PatchMapping(value = "/product/discount", consumes = {MediaType.APPLICATION_JSON_VALUE})
@@ -337,21 +338,24 @@ public class AdminController {
     @Parameters({
             @Parameter(name = "page",
                         description = "페이지 번호",
-                        example = "1"
+                        example = "1",
+                        in = ParameterIn.QUERY
             ),
             @Parameter(name = "searchType",
                         description = "검색 타입. recipient, userId",
-                        example = "userId"
+                        example = "userId",
+                        in = ParameterIn.QUERY
             ),
             @Parameter(name = "keyword",
                         description = "검색어",
-                        example = "tester1"
+                        example = "tester1",
+                        in = ParameterIn.QUERY
             )
     })
     @GetMapping("/order/all")
     public ResponseEntity<PagingResponseDTO<AdminOrderResponseDTO>> getAllOrder(@RequestParam(name = "searchType", required = false) String searchType
                                         , @RequestParam(value = "keyword", required = false) String keyword
-                                        , @RequestParam(name = "page", required = false) int page
+                                        , @RequestParam(name = "page", required = false, defaultValue = "1") int page
                                         , Principal principal) {
 
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(keyword, searchType, page);
@@ -374,21 +378,24 @@ public class AdminController {
     @Parameters({
             @Parameter(name = "page",
                     description = "페이지 번호",
-                    example = "1"
+                    example = "1",
+                    in = ParameterIn.QUERY
             ),
             @Parameter(name = "searchType",
                     description = "검색 타입. recipient, userId",
-                    example = "userId"
+                    example = "userId",
+                    in = ParameterIn.QUERY
             ),
             @Parameter(name = "keyword",
                     description = "검색어",
-                    example = "tester1"
+                    example = "tester1",
+                    in = ParameterIn.QUERY
             )
     })
     @GetMapping("/order/new")
-    public ResponseEntity<PagingElementsResponseDTO<?>> getNewOrder(@RequestParam(name = "searchType", required = false) String searchType
+    public ResponseEntity<PagingElementsResponseDTO<AdminOrderResponseDTO>> getNewOrder(@RequestParam(name = "searchType", required = false) String searchType
             , @RequestParam(name = "keyword", required = false) String keyword
-            , @RequestParam(name = "page", required = false) int page
+            , @RequestParam(name = "page", required = false, defaultValue = "1") int page
             , Principal principal) {
 
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(keyword, searchType, page);
@@ -438,21 +445,23 @@ public class AdminController {
             @Parameter(name = "page",
                     description = "페이지 번호",
                     example = "1",
-                    required = true
+                    in = ParameterIn.QUERY
             ),
-            @Parameter(name = "listType",
+            @Parameter(name = "type",
                     description = "조회 리스트 타입. new 또는 all",
                     example = "all",
-                    required = true
+                    required = true,
+                    in = ParameterIn.QUERY
             ),
             @Parameter(name = "keyword",
                     description = "검색어(닉네임 또는 아이디)",
-                    example = "tester1"
+                    example = "tester1",
+                    in = ParameterIn.QUERY
             )
     })
     @GetMapping("/qna/product")
     public ResponseEntity<PagingResponseDTO<AdminQnAListResponseDTO>> getProductQnA(@RequestParam(name = "keyword", required = false) String keyword
-                                        , @RequestParam(name = "page") int page
+                                        , @RequestParam(name = "page", required = false, defaultValue = "1") int page
                                         , @RequestParam(name = "type") String listType
                                         , Principal principal) {
 
@@ -478,7 +487,7 @@ public class AdminController {
             in = ParameterIn.PATH
     )
     @GetMapping("/qna/product/{qnaId}")
-    public ResponseEntity<ResponseDTO<?>> getProductDetail(@PathVariable(name = "qnaId") long qnaId
+    public ResponseEntity<ResponseDTO<ProductQnADetailDTO>> getProductDetail(@PathVariable(name = "qnaId") long qnaId
                                                                 , Principal principal) {
 
 
@@ -565,21 +574,24 @@ public class AdminController {
     @Parameters({
             @Parameter(name = "page",
                     description = "페이지 번호",
-                    example = "1"
+                    example = "1",
+                    in = ParameterIn.QUERY
             ),
             @Parameter(name = "listType",
                     description = "조회 리스트 타입. new 또는 all",
                     example = "all",
-                    required = true
+                    required = true,
+                    in = ParameterIn.QUERY
             ),
             @Parameter(name = "keyword",
                     description = "검색어(아이디 또는 닉네임)",
-                    example = "tester1"
+                    example = "tester1",
+                    in = ParameterIn.QUERY
             )
     })
     @GetMapping("/qna/member")
     public ResponseEntity<PagingResponseDTO<AdminQnAListResponseDTO>> getMemberQnA(@RequestParam(name = "keyword", required = false) String keyword
-                                        , @RequestParam(name = "page") int page
+                                        , @RequestParam(name = "page", required = false, defaultValue = "1") int page
                                         , @RequestParam(name = "type") String listType
                                         , Principal principal) {
 
@@ -605,7 +617,7 @@ public class AdminController {
             in = ParameterIn.PATH
     )
     @GetMapping("/qna/member/{qnaId}")
-    public ResponseEntity<ResponseDTO<?>> getMemberDetail(@PathVariable(name = "qnaId") long qnaId
+    public ResponseEntity<ResponseDTO<MemberQnADetailDTO>> getMemberDetail(@PathVariable(name = "qnaId") long qnaId
                                                             , Principal principal) {
 
 
@@ -704,9 +716,8 @@ public class AdminController {
     @DefaultApiResponse
     @SwaggerAuthentication
     @PostMapping("/qna/classification")
-    public ResponseEntity<ResponseMessageDTO> postQnAClassification(@RequestBody Map<String, String> classification) {
-        // TODO: classification 을 Map<String, String> 이 아닌 String 으로 받을 수 있도록 수정.
-        String responseMessage = adminService.postQnAClassification(classification.get("name"));
+    public ResponseEntity<ResponseMessageDTO> postQnAClassification(@RequestBody String classification) {
+        String responseMessage = adminService.postQnAClassification(classification);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ResponseMessageDTO(responseMessage));
@@ -753,20 +764,23 @@ public class AdminController {
     @Parameters({
             @Parameter(name = "page",
                     description = "페이지 번호",
-                    example = "1"
+                    example = "1",
+                    in = ParameterIn.QUERY
             ),
             @Parameter(name = "searchType",
                     description = "검색 타입. user 또는 product",
-                    example = "user"
+                    example = "user",
+                    in = ParameterIn.QUERY
             ),
             @Parameter(name = "keyword",
                     description = "검색어",
-                    example = "tester1"
+                    example = "tester1",
+                    in = ParameterIn.QUERY
             )
     })
     @GetMapping("/review")
     public ResponseEntity<PagingResponseDTO<AdminReviewDTO>> getNewReviewList(@RequestParam(name = "keyword", required = false) String keyword
-                                        , @RequestParam(name = "page") int page
+                                        , @RequestParam(name = "page", required = false, defaultValue = "1") int page
                                         , @RequestParam(name = "searchType", required = false) String searchType
                                         , Principal principal) {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(keyword, searchType, page);
@@ -792,20 +806,23 @@ public class AdminController {
     @Parameters({
             @Parameter(name = "page",
                     description = "페이지 번호",
-                    example = "1"
+                    example = "1",
+                    in = ParameterIn.QUERY
             ),
             @Parameter(name = "searchType",
                     description = "검색 타입. user 또는 product",
-                    example = "user"
+                    example = "user",
+                    in = ParameterIn.QUERY
             ),
             @Parameter(name = "keyword",
                     description = "검색어",
-                    example = "tester1"
+                    example = "tester1",
+                    in = ParameterIn.QUERY
             )
     })
     @GetMapping("/review/all")
     public ResponseEntity<PagingResponseDTO<AdminReviewDTO>> getAllReviewList(@RequestParam(name = "keyword", required = false) String keyword
-                                            , @RequestParam(name = "page") int page
+                                            , @RequestParam(name = "page", required = false, defaultValue = "1") int page
                                             , @RequestParam(name = "searchType", required = false) String searchType
                                             , Principal principal) {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(keyword, searchType, page);
@@ -831,7 +848,7 @@ public class AdminController {
             in = ParameterIn.PATH
     )
     @GetMapping("/review/detail/{reviewId}")
-    public ResponseEntity<ResponseDTO<?>> getReviewDetail(@PathVariable("reviewId") long reviewId
+    public ResponseEntity<ResponseDTO<AdminReviewDetailDTO>> getReviewDetail(@PathVariable("reviewId") long reviewId
                                                             , Principal principal) {
         ResponseWrappingDTO<AdminReviewDetailDTO> dto = new ResponseWrappingDTO<>(adminService.getReviewDetail(reviewId));
 
@@ -873,21 +890,24 @@ public class AdminController {
     @Parameters({
             @Parameter(name = "page",
                     description = "페이지 번호",
-                    example = "1"
+                    example = "1",
+                    in = ParameterIn.QUERY
             ),
             @Parameter(name = "searchType",
                     description = "검색 타입. userId, userName, nickname",
-                    example = "userId"
+                    example = "userId",
+                    in = ParameterIn.QUERY
             ),
             @Parameter(name = "keyword",
                     description = "검색어",
-                    example = "tester1"
+                    example = "tester1",
+                    in = ParameterIn.QUERY
             )
     })
     @GetMapping("/member")
-    public ResponseEntity<PagingResponseDTO<?>> getMember(@RequestParam(name = "keyword", required = false) String keyword
+    public ResponseEntity<PagingResponseDTO<AdminMemberDTO>> getMember(@RequestParam(name = "keyword", required = false) String keyword
                                                                     , @RequestParam(name = "searchType", required = false) String searchType
-                                                                    , @RequestParam(name = "page") int page
+                                                                    , @RequestParam(name = "page", required = false, defaultValue = "1") int page
                                                                     , Principal principal) {
 
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(keyword, searchType, page);
@@ -933,7 +953,7 @@ public class AdminController {
             in = ParameterIn.PATH
     )
     @GetMapping("/sales/period/{term}")
-    public ResponseEntity<ResponseDTO<?>> getPeriodSales(@PathVariable(name = "term") int term
+    public ResponseEntity<ResponseDTO<AdminPeriodSalesResponseDTO>> getPeriodSales(@PathVariable(name = "term") int term
                                                         , Principal principal) {
 
         ResponseWrappingDTO<AdminPeriodSalesResponseDTO> dto = new ResponseWrappingDTO<>(adminService.getPeriodSales(term));
@@ -960,7 +980,7 @@ public class AdminController {
             in = ParameterIn.PATH
     )
     @GetMapping("sales/period/detail/{term}")
-    public ResponseEntity<ResponseDTO<?>> getPeriodSalesDetail(@PathVariable(name = "term") String term
+    public ResponseEntity<ResponseDTO<AdminPeriodMonthDetailResponseDTO>> getPeriodSalesDetail(@PathVariable(name = "term") String term
                                                                 , Principal principal) {
 
         ResponseWrappingDTO<AdminPeriodMonthDetailResponseDTO> dto = new ResponseWrappingDTO<>(adminService.getPeriodSalesDetail(term));
@@ -1053,7 +1073,7 @@ public class AdminController {
             )
     })
     @GetMapping("/sales/period/order-list")
-    public ResponseEntity<PagingElementsResponseDTO<?>> getOrderListByDay(@RequestParam(value = "term") String term
+    public ResponseEntity<PagingElementsResponseDTO<AdminDailySalesResponseDTO>> getOrderListByDay(@RequestParam(value = "term") String term
                                                                         , @RequestParam(value = "page") int page
                                                                         , Principal principal) {
 
@@ -1080,7 +1100,6 @@ public class AdminController {
             @Parameter(name = "page",
                     description = "페이지 번호",
                     example = "1",
-                    required = true,
                     in = ParameterIn.PATH
             ),
             @Parameter(name = "keyword",
@@ -1090,8 +1109,8 @@ public class AdminController {
             )
     })
     @GetMapping("/sales/product")
-    public ResponseEntity<PagingResponseDTO<?>> getProductSales(@RequestParam(value = "keyword", required = false) String keyword
-                                            , @RequestParam(value = "page") int page
+    public ResponseEntity<PagingResponseDTO<AdminProductSalesListDTO>> getProductSales(@RequestParam(value = "keyword", required = false) String keyword
+                                            , @RequestParam(value = "page", required = false, defaultValue = "1") int page
                                             , Principal principal) {
 
         AdminPageDTO pageDTO = new AdminPageDTO(keyword, page);
@@ -1117,7 +1136,7 @@ public class AdminController {
             in = ParameterIn.PATH
     )
     @GetMapping("/sales/product/{productId}")
-    public ResponseEntity<ResponseDTO<?>> getProductSales(@PathVariable(name = "productId") String productId
+    public ResponseEntity<ResponseDTO<AdminProductSalesDetailDTO>> getProductSales(@PathVariable(name = "productId") String productId
                                             , Principal principal) {
 
         ResponseWrappingDTO<AdminProductSalesDetailDTO> responseDTO = new ResponseWrappingDTO<>(adminService.getProductSalesDetail(productId));

@@ -1,5 +1,6 @@
 package com.example.mansshop_boot.repository;
 
+import com.example.mansshop_boot.domain.dto.admin.business.AdminOptionStockDTO;
 import com.example.mansshop_boot.domain.dto.admin.business.AdminProductOptionDTO;
 import com.example.mansshop_boot.domain.dto.order.business.OrderProductInfoDTO;
 import com.example.mansshop_boot.domain.dto.product.business.ProductOptionDTO;
@@ -13,7 +14,7 @@ public interface ProductOptionDSLRepository {
 
     List<AdminProductOptionDTO> findAllByProductId(String productId);
 
-    List<ProductOption> findAllOptionByProductIdList(List<String> productIdList);
+    List<AdminOptionStockDTO> findAllOptionByProductIdList(List<String> productIdList);
 
     List<ProductOption> findAllOptionByProductId(String productId);
 

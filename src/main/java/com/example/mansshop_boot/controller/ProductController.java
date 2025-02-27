@@ -54,6 +54,7 @@ public class ProductController {
             description = "JWT를 같이 보내면 관심상품 여부를 확인 가능"
     )
     @DefaultApiResponse
+    @SwaggerAuthentication
     @Parameters({
             @Parameter(
                     name = "productId",
@@ -84,7 +85,7 @@ public class ProductController {
             @SecurityRequirement(name = "Authorization_ino")
     })
     @GetMapping("/{productId}")
-    public ResponseEntity<ResponseDTO<?>> getDetail(@PathVariable(name = "productId") String productId, Principal principal) {
+    public ResponseEntity<ResponseDTO<ProductDetailDTO>> getDetail(@PathVariable(name = "productId") String productId, Principal principal) {
         ResponseWrappingDTO<ProductDetailDTO> wrappingDTO = new ResponseWrappingDTO<>(productService.getDetail(productId, principal));
 
         return responseMappingService.mappingResponseDTO(wrappingDTO, principal);
@@ -113,10 +114,10 @@ public class ProductController {
             ),
             @Parameter(
                     name = "page",
-                    description = "페이지 번호. 리뷰 페이징 기능에 사용되기 때문에 페이지 번호는 필수",
-                    example = "2",
+                    description = "페이지 번호",
+                    example = "1",
                     required = true,
-                    in = ParameterIn.PATH
+                    in = ParameterIn.QUERY
             ),
             @Parameter(
                     name = "Authorization",
@@ -139,9 +140,9 @@ public class ProductController {
             @SecurityRequirement(name = "Authorization_Refresh"),
             @SecurityRequirement(name = "Authorization_ino")
     })
-    @GetMapping("/{productId}/review/{page}")
-    public ResponseEntity<PagingElementsResponseDTO<?>> getReview(@PathVariable(name = "productId") String productId
-                                                        , @PathVariable(name = "page") int page
+    @GetMapping("/{productId}/review")
+    public ResponseEntity<PagingElementsResponseDTO<ProductReviewDTO>> getReview(@PathVariable(name = "productId") String productId
+                                                        , @RequestParam(name = "page") int page
                                                         , Principal principal) {
         ProductDetailPageDTO pageDTO = new ProductDetailPageDTO(page);
         Page<ProductReviewDTO> responseDTO = productService.getDetailReview(pageDTO, productId);
@@ -170,10 +171,10 @@ public class ProductController {
             ),
             @Parameter(
                     name = "page",
-                    description = "페이지 번호. 상품 문의 페이징 기능에 사용되기 때문에 페이지 번호는 필수",
+                    description = "페이지 번호.",
                     example = "2",
                     required = true,
-                    in = ParameterIn.PATH
+                    in = ParameterIn.QUERY
             ),
             @Parameter(
                     name = "Authorization",
@@ -196,9 +197,9 @@ public class ProductController {
             @SecurityRequirement(name = "Authorization_Refresh"),
             @SecurityRequirement(name = "Authorization_ino")
     })
-    @GetMapping("/{productId}/qna/{page}")
-    public ResponseEntity<PagingElementsResponseDTO<?>> getQnA(@PathVariable(name = "productId") String productId
-                                                    , @PathVariable(name = "page") int page
+    @GetMapping("/{productId}/qna")
+    public ResponseEntity<PagingElementsResponseDTO<ProductQnAResponseDTO>> getQnA(@PathVariable(name = "productId") String productId
+                                                    , @RequestParam(name = "page") int page
                                                     , Principal principal) {
         ProductDetailPageDTO pageDTO = new ProductDetailPageDTO(page);
         Page<ProductQnAResponseDTO> responseDTO = productService.getDetailQnA(pageDTO, productId);
@@ -219,7 +220,7 @@ public class ProductController {
     @SwaggerAuthentication
     @PostMapping("/qna")
     @PreAuthorize("hasAnyRole('ROLE_MEMBER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
-    public ResponseEntity<?> postProductQnA(@RequestBody ProductQnAPostDTO postDTO, Principal principal) {
+    public ResponseEntity<ResponseMessageDTO> postProductQnA(@RequestBody ProductQnAPostDTO postDTO, Principal principal) {
 
         String responseMessage = productService.postProductQnA(postDTO, principal);
 
@@ -240,13 +241,10 @@ public class ProductController {
     @SwaggerAuthentication
     @PostMapping("/like")
     @PreAuthorize("hasAnyRole('ROLE_MEMBER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
-    public ResponseEntity<?> likeProduct(@Schema(name = "productId", description = "상품 아이디")
-                                             @RequestBody Map<String, String> productId
+    public ResponseEntity<ResponseMessageDTO> likeProduct(@Schema(name = "productId", description = "상품 아이디")
+                                             @RequestBody String productId
                                         , Principal principal) {
-        //TODO: productId를 String productId로 받도록 수정
-        String productIdValue = productId.get("productId");
-
-        String responseMessage = productService.likeProduct(productIdValue, principal);
+        String responseMessage = productService.likeProduct(productId, principal);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ResponseMessageDTO(responseMessage));
@@ -271,7 +269,7 @@ public class ProductController {
     )
     @DeleteMapping("/like/{productId}")
     @PreAuthorize("hasAnyRole('ROLE_MEMBER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
-    public ResponseEntity<?> deLikeProduct(@PathVariable(name = "productId") String productId
+    public ResponseEntity<ResponseMessageDTO> deLikeProduct(@PathVariable(name = "productId") String productId
             , Principal principal) {
 
         String responseMessage = productService.deLikeProduct(productId, principal);

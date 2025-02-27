@@ -19,8 +19,10 @@ public interface ProductOrderDetailDSLRepository {
 
     List<AdminClassificationSalesProductListDTO> findPeriodClassificationProductSales(LocalDateTime startDate, LocalDateTime endDate, String classification);
 
-    List<ProductOrderDetail> findByOrderIds(List<Long> orderIdList);
+    List<AdminOrderDetailListDTO> findByOrderIds(List<Long> orderIdList);
 
     List<AdminProductSalesOptionDTO> getProductOptionSales(int year, String productId);
+
+    public List<AdminProductSalesOptionMonthDTO> getProductOptionSalesMonth(int year, String productId);
 
 }

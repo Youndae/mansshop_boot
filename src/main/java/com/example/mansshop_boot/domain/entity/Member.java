@@ -58,7 +58,7 @@ public class Member {
 
     private LocalDate birth;
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "member", cascade = CascadeType.PERSIST)
     private final List<Auth> auths = new ArrayList<>();
 
     public void addMemberAuth(Auth auth) {

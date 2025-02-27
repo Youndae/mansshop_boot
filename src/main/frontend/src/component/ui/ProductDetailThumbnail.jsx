@@ -23,7 +23,6 @@ function ProductDetailThumbnail(props) {
                     responseType: 'blob',
                 })
                     .then(res => {
-                        console.log('detailThumb res : ', res);
                         const url = window.URL.createObjectURL(
                             new Blob ([res.data], { type: res.headers['content-type']})
                         );

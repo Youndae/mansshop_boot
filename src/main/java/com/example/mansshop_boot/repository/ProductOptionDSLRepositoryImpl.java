@@ -1,5 +1,6 @@
 package com.example.mansshop_boot.repository;
 
+import com.example.mansshop_boot.domain.dto.admin.business.AdminOptionStockDTO;
 import com.example.mansshop_boot.domain.dto.admin.business.AdminProductOptionDTO;
 import com.example.mansshop_boot.domain.dto.order.business.OrderProductInfoDTO;
 import com.example.mansshop_boot.domain.dto.product.business.ProductOptionDTO;
@@ -56,10 +57,28 @@ public class ProductOptionDSLRepositoryImpl implements ProductOptionDSLRepositor
     }
 
     @Override
-    public List<ProductOption> findAllOptionByProductIdList(List<String> productIdList) {
-        return jpaQueryFactory.select(productOption)
-                .from(productOption)
+    public List<AdminOptionStockDTO> findAllOptionByProductIdList(List<String> productIdList) {
+        /*return jpaQueryFactory.selectFrom(productOption)
+//                .from(productOption)
+                .join(productOption.product).fetchJoin()
                 .where(productOption.product.id.in(productIdList))
+                .fetch();*/
+
+
+        return jpaQueryFactory.select(
+                Projections.constructor(
+                        AdminOptionStockDTO.class,
+                        product.id.as("productId"),
+                        productOption.size,
+                        productOption.color,
+                        productOption.stock.as("optionStock"),
+                        productOption.isOpen.as("optionIsOpen")
+                )
+        )
+                .from(productOption)
+                .innerJoin(product)
+                .on(productOption.product.id.eq(product.id))
+                .where(product.id.in(productIdList))
                 .fetch();
     }
 

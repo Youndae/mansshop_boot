@@ -10,13 +10,13 @@ public record AdminDailySalesDetailDTO(
         , int price
 ) {
 
-    public AdminDailySalesDetailDTO(ProductOrderDetail orderDetail) {
+    public AdminDailySalesDetailDTO(AdminOrderDetailListDTO orderDetail) {
         this(
-                orderDetail.getProduct().getProductName()
-                , orderDetail.getProductOption().getSize()
-                , orderDetail.getProductOption().getColor()
-                , orderDetail.getOrderDetailCount()
-                , orderDetail.getOrderDetailPrice()
+                orderDetail.productName()
+                , orderDetail.size()
+                , orderDetail.color()
+                , orderDetail.count()
+                , orderDetail.price()
         );
     }
 }

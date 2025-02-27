@@ -27,7 +27,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.security.Principal;
@@ -50,7 +52,6 @@ public class MainController {
 
     /**
      *
-     * @param request
      * @param principal
      *
      * 메인의 BEST 리스트 조회.
@@ -95,13 +96,14 @@ public class MainController {
             ),
             @Parameter(
                     name = "page",
-                    description = "상품 리스트 페이지 번호. 최소값 1",
-                    required = true
+                    description = "페이지 번호",
+                    example = "1",
+                    in = ParameterIn.QUERY
             )
     })
     @GetMapping("/{classification}")
     public ResponseEntity<PagingResponseDTO<MainListResponseDTO>> mainClassificationList(@PathVariable(name = "classification") String classification
-                                                            , @RequestParam(name = "page") int page
+                                                            , @RequestParam(name = "page", required = false, defaultValue = "1") int page
                                                             , Principal principal){
 
         MainPageDTO mainPageDTO = MainPageDTO.builder()
@@ -127,8 +129,9 @@ public class MainController {
     @DefaultApiResponse
     @Parameters({
             @Parameter(name = "page",
-                        description = "페이지 번호. 최소값 1",
-                        required = true
+                        description = "페이지 번호",
+                        example = "1",
+                        in = ParameterIn.QUERY
             ),
             @Parameter(name = "keyword",
                         description = "검색어",
@@ -137,7 +140,7 @@ public class MainController {
             )
     })
     @GetMapping("/search")
-    public ResponseEntity<PagingResponseDTO<MainListResponseDTO>> searchList(@RequestParam(name = "page") int page
+    public ResponseEntity<PagingResponseDTO<MainListResponseDTO>> searchList(@RequestParam(name = "page", required = false, defaultValue = "1") int page
                                                                     , @RequestParam(name = "keyword") String keyword
                                                                     , Principal principal){
 
@@ -162,11 +165,12 @@ public class MainController {
     @Parameter(name = "imageName",
                 description = "이미지 파일명",
                 example = "2149347511.jpg",
+                required = true,
                 in = ParameterIn.PATH
     )
     @GetMapping("/display/{imageName}")
     public ResponseEntity<byte[]> display(@PathVariable(name = "imageName") String imageName) {
-        File file = new File(filePath + imageName);
+        /*File file = new File(filePath + imageName);
         ResponseEntity<byte[]> result = null;
 
         try{
@@ -174,6 +178,35 @@ public class MainController {
             header.add("Content-Type", Files.probeContentType(file.toPath()));
 
             result = new ResponseEntity<>(FileCopyUtils.copyToByteArray(file), HttpStatus.OK);
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return result;*/
+
+        //TODO: 우선 JMeter 테스트로 결과 확인 후 최종 결정
+        File file = new File(filePath + imageName);
+        ResponseEntity<byte[]> result = null;
+
+        try {
+            HttpHeaders header = new HttpHeaders();
+
+            String contentType = "";
+            if(imageName.endsWith(".png"))
+                contentType = "image/png";
+            else if(imageName.endsWith(".jpg") || imageName.endsWith(".jpeg"))
+                contentType = "image/jpeg";
+            else if (imageName.endsWith(".gif"))
+                contentType = "image/gif";
+            else
+                contentType = "application/octet-stream";
+
+            header.add("Content-Type", contentType);
+
+            try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
+                byte[] imageBytes = bis.readAllBytes();
+                result = new ResponseEntity<>(imageBytes, header, HttpStatus.OK);
+            }
         }catch (IOException e) {
             e.printStackTrace();
         }
@@ -211,22 +244,26 @@ public class MainController {
             @Parameter(name = "recipient",
                         description = "수령인",
                         example = "테스터1000",
-                        required = true
+                        required = true,
+                        in = ParameterIn.QUERY
             ),
             @Parameter(name = "phone",
                         description = "수령인 연락처",
                         example = "01034568890",
-                        required = true
+                        required = true,
+                        in = ParameterIn.QUERY
             ),
             @Parameter(name = "term",
                         description = "조회 기간. 페이지 최초 접근시에는 3으로 처리. 3, 6, 12, all로 구성",
                         example = "3",
-                        required = true
+                        required = true,
+                        in = ParameterIn.PATH
             ),
             @Parameter(name = "page",
                         description = "페이지 번호. 최소값 1",
                         example = "1",
-                        required = true
+                        required = true,
+                        in = ParameterIn.PATH
             )
     })
     @GetMapping("/order/{term}/{page}")

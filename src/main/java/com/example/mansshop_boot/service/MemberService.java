@@ -8,6 +8,7 @@ import com.example.mansshop_boot.domain.dto.member.in.LoginDTO;
 import com.example.mansshop_boot.domain.dto.member.in.UserCertificationDTO;
 import com.example.mansshop_boot.domain.dto.member.in.UserResetPwDTO;
 import com.example.mansshop_boot.domain.dto.member.out.UserSearchIdResponseDTO;
+import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseUserStatusDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,7 +22,7 @@ public interface MemberService {
 
     ResponseEntity<ResponseUserStatusDTO> loginProc(LoginDTO dto, HttpServletRequest request, HttpServletResponse response);
 
-    ResponseEntity<?> oAuthUserIssueToken(HttpServletRequest request, HttpServletResponse response);
+    ResponseEntity<ResponseMessageDTO> oAuthUserIssueToken(HttpServletRequest request, HttpServletResponse response);
 
     String checkJoinId(String userId);
 

@@ -1,7 +1,5 @@
 package com.example.mansshop_boot.domain.dto.admin.business;
 
-import com.example.mansshop_boot.domain.entity.ProductOrderDetail;
-import lombok.Builder;
 
 public record AdminOrderDetailDTO(
         String classification
@@ -13,16 +11,15 @@ public record AdminOrderDetailDTO(
         , boolean reviewStatus
 ) {
 
-    @Builder
-    public AdminOrderDetailDTO(ProductOrderDetail productOrderDetail) {
+    public AdminOrderDetailDTO(AdminOrderDetailListDTO detail) {
         this(
-                productOrderDetail.getProduct().getClassification().getId()
-                , productOrderDetail.getProduct().getProductName()
-                , productOrderDetail.getProductOption().getSize()
-                , productOrderDetail.getProductOption().getColor()
-                , productOrderDetail.getOrderDetailCount()
-                , productOrderDetail.getOrderDetailPrice()
-                , productOrderDetail.isOrderReviewStatus()
+                detail.classification(),
+                detail.productName(),
+                detail.size(),
+                detail.color(),
+                detail.count(),
+                detail.price(),
+                detail.reviewStatus()
         );
     }
 }

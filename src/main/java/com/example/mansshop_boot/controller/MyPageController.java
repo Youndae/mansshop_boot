@@ -73,9 +73,9 @@ public class MyPageController {
                     in = ParameterIn.PATH
             )
     })
-    @GetMapping("/order/{term}/{page}")
+    @GetMapping("/order/{term}")
     public ResponseEntity<PagingResponseDTO<MyPageOrderDTO>> getOrderList(@PathVariable(name = "term") String term
-                                        , @PathVariable(name = "page") int page
+                                        , @RequestParam(name = "page", required = false, defaultValue = "1") int page
                                         , Principal principal) {
 
         OrderPageDTO orderPageDTO = OrderPageDTO.builder()
@@ -106,11 +106,11 @@ public class MyPageController {
     @Parameter(name = "page",
             description = "페이지 번호",
             example = "1",
-            required = true,
-            in = ParameterIn.PATH
+            in = ParameterIn.QUERY
     )
-    @GetMapping("/like/{page}")
-    public ResponseEntity<PagingResponseDTO<?>> getLikeProduct(@PathVariable(name = "page") int page, Principal principal) {
+    @GetMapping("/like")
+    public ResponseEntity<PagingResponseDTO<ProductLikeDTO>> getLikeProduct(@RequestParam(name = "page", required = false, defaultValue = "1") int page,
+                                                                            Principal principal) {
         LikePageDTO pageDTO = new LikePageDTO(page);
         Page<ProductLikeDTO> responseDTO = myPageService.getLikeList(pageDTO, principal);
 
@@ -130,11 +130,10 @@ public class MyPageController {
     @Parameter(name = "page",
             description = "페이지 번호",
             example = "1",
-            required = true,
-            in = ParameterIn.PATH
+            in = ParameterIn.QUERY
     )
-    @GetMapping("/qna/product/{page}")
-    public ResponseEntity<PagingResponseDTO<?>> getProductQnA(@PathVariable(name = "page") int page, Principal principal) {
+    @GetMapping("/qna/product")
+    public ResponseEntity<PagingResponseDTO<ProductQnAListDTO>> getProductQnA(@RequestParam(name = "page", required = false, defaultValue = "1") int page, Principal principal) {
         MyPagePageDTO pageDTO = new MyPagePageDTO(page);
         Page<ProductQnAListDTO> responseDTO = myPageService.getProductQnAList(pageDTO, principal);
 
@@ -158,7 +157,7 @@ public class MyPageController {
             in = ParameterIn.PATH
     )
     @GetMapping("/qna/product/detail/{qnaId}")
-    public ResponseEntity<ResponseDTO<?>> getProductQnADetail(@PathVariable(name = "qnaId") long qnaId, Principal principal) {
+    public ResponseEntity<ResponseDTO<ProductQnADetailDTO>> getProductQnADetail(@PathVariable(name = "qnaId") long qnaId, Principal principal) {
         ResponseWrappingDTO<ProductQnADetailDTO> wrappingDTO = new ResponseWrappingDTO<>(myPageService.getProductQnADetail(qnaId, principal));
 
         return responseMappingService.mappingResponseDTO(wrappingDTO, principal);
@@ -203,10 +202,11 @@ public class MyPageController {
             description = "페이지 번호",
             example = "1",
             required = true,
-            in = ParameterIn.PATH
+            in = ParameterIn.QUERY
     )
-    @GetMapping("/qna/member/{page}")
-    public ResponseEntity<PagingResponseDTO<?>> getMemberQnA(@PathVariable(name = "page") int page, Principal principal) {
+    @GetMapping("/qna/member")
+    public ResponseEntity<PagingResponseDTO<MemberQnAListDTO>> getMemberQnA(@RequestParam(name = "page", required = false, defaultValue = "1") int page,
+                                                                            Principal principal) {
         MyPagePageDTO pageDTO = new MyPagePageDTO(page);
 
         Page<MemberQnAListDTO> responseDTO = myPageService.getMemberQnAList(pageDTO, principal);
@@ -250,7 +250,7 @@ public class MyPageController {
             in = ParameterIn.PATH
     )
     @GetMapping("/qna/member/detail/{qnaId}")
-    public ResponseEntity<ResponseDTO<?>> getMemberQnADetail(@PathVariable(name = "qnaId") long qnaId, Principal principal) {
+    public ResponseEntity<ResponseDTO<MemberQnADetailDTO>> getMemberQnADetail(@PathVariable(name = "qnaId") long qnaId, Principal principal) {
         ResponseWrappingDTO<MemberQnADetailDTO> wrappingDTO = new ResponseWrappingDTO<>(myPageService.getMemberQnADetail(qnaId, principal));
 
         return responseMappingService.mappingResponseDTO(wrappingDTO, principal);
@@ -311,7 +311,7 @@ public class MyPageController {
             in = ParameterIn.PATH
     )
     @GetMapping("/qna/member/modify/{qnaId}")
-    public ResponseEntity<ResponseDTO<?>> getModifyData(@PathVariable(name = "qnaId") long qnaId, Principal principal) {
+    public ResponseEntity<ResponseDTO<MemberQnAModifyDataDTO>> getModifyData(@PathVariable(name = "qnaId") long qnaId, Principal principal) {
         ResponseWrappingDTO<MemberQnAModifyDataDTO> wrappingDTO = new ResponseWrappingDTO<>(myPageService.getModifyData(qnaId, principal));
 
         return responseMappingService.mappingResponseDTO(wrappingDTO, principal);
@@ -393,10 +393,11 @@ public class MyPageController {
             description = "페이지 번호",
             example = "1",
             required = true,
-            in = ParameterIn.PATH
+            in = ParameterIn.QUERY
     )
-    @GetMapping("/review/{page}")
-    public ResponseEntity<PagingResponseDTO<?>> getReview(@PathVariable(name = "page") int page, Principal principal) {
+    @GetMapping("/review")
+    public ResponseEntity<PagingResponseDTO<MyPageReviewDTO>> getReview(@RequestParam(name = "page", required = false, defaultValue = "1") int page,
+                                                                        Principal principal) {
         MyPagePageDTO pageDTO = new MyPagePageDTO(page);
         Page<MyPageReviewDTO> responseDTO = myPageService.getReview(pageDTO, principal);
 
@@ -420,7 +421,7 @@ public class MyPageController {
             in = ParameterIn.PATH
     )
     @GetMapping("/review/modify/{reviewId}")
-    public ResponseEntity<ResponseDTO<?>> getPatchReviewData(@PathVariable(name = "reviewId") long reviewId, Principal principal) {
+    public ResponseEntity<ResponseDTO<MyPagePatchReviewDataDTO>> getPatchReviewData(@PathVariable(name = "reviewId") long reviewId, Principal principal) {
         ResponseWrappingDTO<MyPagePatchReviewDataDTO> wrappingDTO = new ResponseWrappingDTO<>(myPageService.getPatchReview(reviewId, principal));
 
         return responseMappingService.mappingResponseDTO(wrappingDTO, principal);
@@ -500,7 +501,7 @@ public class MyPageController {
     @DefaultApiResponse
     @SwaggerAuthentication
     @GetMapping("/info")
-    public ResponseEntity<ResponseDTO<?>> getInfo(Principal principal) {
+    public ResponseEntity<ResponseDTO<MyPageInfoDTO>> getInfo(Principal principal) {
         ResponseWrappingDTO<MyPageInfoDTO> wrappingDTO = new ResponseWrappingDTO<>(myPageService.getInfo(principal));
 
         return responseMappingService.mappingResponseDTO(wrappingDTO, principal);
