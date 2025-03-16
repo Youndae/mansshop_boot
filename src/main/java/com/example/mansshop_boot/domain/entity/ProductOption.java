@@ -2,10 +2,7 @@ package com.example.mansshop_boot.domain.entity;
 
 import com.example.mansshop_boot.domain.dto.admin.business.PatchOptionDTO;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
@@ -13,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "productOption")
+@ToString
 public class ProductOption {
 
     @Id

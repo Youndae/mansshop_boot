@@ -4,6 +4,7 @@ import com.example.mansshop_boot.domain.dto.mypage.qna.business.MemberQnADTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.business.MyPageQnAReplyDTO;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record MemberQnADetailDTO(
@@ -12,7 +13,7 @@ public record MemberQnADetailDTO(
         , String qnaTitle
         , String writer
         , String qnaContent
-        , LocalDate updatedAt
+        , LocalDateTime updatedAt
         , boolean memberQnAStat
         , List<MyPageQnAReplyDTO> replyList
 ) {

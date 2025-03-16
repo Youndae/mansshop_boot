@@ -4,18 +4,23 @@ import com.example.mansshop_boot.config.customException.ErrorCode;
 import com.example.mansshop_boot.config.customException.exception.CustomAccessDeniedException;
 import com.example.mansshop_boot.config.customException.exception.CustomNotFoundException;
 import com.example.mansshop_boot.domain.dto.cart.business.CartMemberDTO;
-import com.example.mansshop_boot.domain.dto.order.business.OrderDataDTO;
-import com.example.mansshop_boot.domain.dto.order.business.OrderProductInfoDTO;
-import com.example.mansshop_boot.domain.dto.order.business.ProductOrderDataDTO;
+import com.example.mansshop_boot.domain.dto.order.business.*;
 import com.example.mansshop_boot.domain.dto.order.in.OrderProductDTO;
 import com.example.mansshop_boot.domain.dto.order.in.OrderProductRequestDTO;
 import com.example.mansshop_boot.domain.dto.order.in.PaymentDTO;
 import com.example.mansshop_boot.domain.dto.order.out.OrderDataResponseDTO;
+import com.example.mansshop_boot.domain.dto.rabbitMQ.RabbitMQProperties;
 import com.example.mansshop_boot.domain.entity.*;
+import com.example.mansshop_boot.domain.enumuration.RabbitMQPrefix;
 import com.example.mansshop_boot.domain.enumuration.Result;
-import com.example.mansshop_boot.repository.*;
+import com.example.mansshop_boot.repository.cart.CartDetailRepository;
+import com.example.mansshop_boot.repository.cart.CartRepository;
+import com.example.mansshop_boot.repository.product.ProductOptionRepository;
+import com.example.mansshop_boot.repository.product.ProductRepository;
+import com.example.mansshop_boot.repository.productOrder.ProductOrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,142 +45,106 @@ public class OrderServiceImpl implements OrderService{
 
     private final ProductRepository productRepository;
 
+    private final RabbitTemplate rabbitTemplate;
+
+    private final RabbitMQProperties rabbitMQProperties;
+
     /**
      *
      * @param paymentDTO
      * @param cartMemberDTO
      * @return
      *
-     * 주문 내역 데이터 처리
-     * , 장바구니를 통한 구매의 경우 장바구니 데이터 정리
-     * , 기간별, 상품별 매출 정리
-     * , 상품의 판매량 수정
-     * , 상품 옵션별 재고 수정
+     * 결제 처리 이후 주문 데이터 처리.
      *
+     * 주문 데이터인 ProductOrder, List<ProductOrderDetail> 저장 이후
+     * 주문 타입 (direct, cart)에 따라 장바구니를 통한 주문인 경우 장바구니 데이터 삭제.
+     * 상품 옵션별 재고 수정
+     * 상품 판매량 수정
+     * 기간별 매출 테이블 데이터 수정
+     * 상품 옵션별 매출 테이블 데이터 수정 처리.
      *
-     * 뭔가 너무 복잡하게 처리하고 있는 듯한 느낌인데 개선할 수 있는 방법이 있을지 고민해보기.
+     * 주문 데이터 처리를 제외한 나머지 처리들에 대해서는 RabbitMQ를 통한 비동기 처리.
+     * 장바구니를 제외한 다른 RabbitMQ 요청은 동시성을 제어해야 하기 떄문에 concurrency 1 로 처리.
+     *
+     * 빠른 주문 데이터 처리를 위해 대부분의 로직은 Consumer에서 처리.
      */
     @Override
     @Transactional(rollbackFor = RuntimeException.class, propagation = Propagation.REQUIRED)
     public String payment(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO) {
         ProductOrderDataDTO productOrderDataDTO = createOrderDataDTO(paymentDTO, cartMemberDTO);
-        productOrderRepository.save(productOrderDataDTO.productOrder());
+        ProductOrder order = productOrderDataDTO.productOrder();
+        productOrderRepository.save(order);
+
+        String orderExchange = rabbitMQProperties.getExchange()
+                                                .get(RabbitMQPrefix.EXCHANGE_ORDER.getKey())
+                                                .getName();
+
         //주문 타입이 cart인 경우 장바구니에서 선택한 상품 또는 전체 상품 주문이므로 해당 상품을 장바구니에서 삭제해준다.
         if(paymentDTO.orderType().equals("cart"))
-            deleteOrderDataToCart(cartMemberDTO, productOrderDataDTO.orderOptionIdList());
+            rabbitTemplate.convertAndSend(
+                    orderExchange,
+                    getQueueRoutingKey(RabbitMQPrefix.QUEUE_ORDER_CART),
+                    new OrderCartDTO(cartMemberDTO, productOrderDataDTO.orderOptionIds())
+            );
 
-        //ProductOption에서 재고 수정 및 Product에서 상품 판매량 수정.
-        patchOptionStockAndProduct(productOrderDataDTO.orderOptionIdList(), productOrderDataDTO.orderProductList());
+        // ProductOption의 재고 수정
+        rabbitTemplate.convertAndSend(
+                orderExchange,
+                getQueueRoutingKey(RabbitMQPrefix.QUEUE_ORDER_PRODUCT_OPTION),
+                productOrderDataDTO.orderProductList()
+        );
 
+        // Product의 salesQuantity 수정
+        rabbitTemplate.convertAndSend(
+                orderExchange,
+                getQueueRoutingKey(RabbitMQPrefix.QUEUE_ORDER_PRODUCT),
+                productOrderDataDTO.orderProductList()
+        );
+
+        // Period Summary 처리
+        rabbitTemplate.convertAndSend(
+                orderExchange,
+                getQueueRoutingKey(RabbitMQPrefix.QUEUE_PERIOD_SUMMARY),
+                new PeriodSummaryQueueDTO(order)
+        );
+
+        // Product Summary 처리
+        rabbitTemplate.convertAndSend(
+                orderExchange,
+                getQueueRoutingKey(RabbitMQPrefix.QUEUE_PRODUCT_SUMMARY),
+                new OrderProductSummaryDTO(productOrderDataDTO)
+        );
 
         return Result.OK.getResultKey();
+    }
+
+    private String getQueueRoutingKey(RabbitMQPrefix rabbitMQPrefix) {
+        return rabbitMQProperties.getQueue()
+                                .get(rabbitMQPrefix.getKey())
+                                .getRouting();
     }
 
     public ProductOrderDataDTO createOrderDataDTO(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO) {
         ProductOrder productOrder = paymentDTO.toOrderEntity(cartMemberDTO.uid());
         List<OrderProductDTO> orderProductList = paymentDTO.orderProduct();
-        List<Long> orderOptionIdList = new ArrayList<>();// 주문한 상품 옵션 아이디를 담아줄 리스트
+        List<String> orderProductIds = new ArrayList<>();// 주문한 상품 옵션 아이디를 담아줄 리스트
+        List<Long> orderOptionIds = new ArrayList<>();
         int totalProductCount = 0;// 총 판매량
         //옵션 정보 리스트에서 각 객체를 OrderDetail Entity로 Entity화 해서 ProductOrder Entity에 담아준다.
         //주문한 옵션 번호는 추후 더 사용하기 때문에 리스트화 한다.
         //총 판매량은 기간별 매출에 필요하기 때문에 이때 같이 총 판매량을 계산한다.
         for(OrderProductDTO data : paymentDTO.orderProduct()) {
             productOrder.addDetail(data.toOrderDetailEntity());
-            orderOptionIdList.add(data.optionId());
+            if(!orderProductIds.contains(data.productId()))
+                orderProductIds.add(data.productId());
+            orderOptionIds.add(data.optionId());
             totalProductCount += data.detailCount();
         }
         productOrder.setProductCount(totalProductCount);
 
-        return new ProductOrderDataDTO(productOrder, orderProductList, orderOptionIdList);
+        return new ProductOrderDataDTO(productOrder, orderProductList, orderProductIds, orderOptionIds);
     }
-
-    public void deleteOrderDataToCart(CartMemberDTO cartMemberDTO, List<Long> orderOptionIdList) {
-        //사용자의 장바구니 아이디를 가져와서 장바구니 상세 리스트를 가져온다.
-        //장바구니 상세 리스트의 경우 리스트화 한 옵션 번호를 통해 가져올 수도 있으나 전체 리스트와 주문 리스트의 크기가 일치한다면
-        //장바구니의 모든 상품을 구매한 것이기 때문에 장바구니 데이터 자체를 삭제하도록 하기 위함.
-        Long cartId = cartRepository.findIdByUserId(cartMemberDTO);
-        List<CartDetail> cartDetailList = cartDetailRepository.findAllCartDetailByCartId(cartId);
-
-        if(cartDetailList.size() == orderOptionIdList.size())
-            cartRepository.deleteById(cartId);
-        else{
-            List<Long> deleteCartDetailIdList = cartDetailList.stream()
-                    .filter(cartDetail ->
-                            orderOptionIdList.contains(
-                                    cartDetail.getProductOption().getId()
-                            )
-                    )
-                    .map(CartDetail::getId)
-                    .toList();
-
-            cartDetailRepository.deleteAllById(deleteCartDetailIdList);
-        }
-    }
-
-
-    /**
-     * 재고 수정
-     */
-    public void patchOptionStockAndProduct(List<Long> orderOptionIdList, List<OrderProductDTO> orderProductList) {
-        //상품 옵션 재고 수정을 위해 주문 내역에 해당하는 상품 옵션 데이터를 조회
-        //저장 또는 수정할 데이터를 담아줄 리스트를 새로 생성
-        List<ProductOption> productOptionList = productOptionRepository.findAllById(orderOptionIdList);
-        List<ProductOption> productOptionSetList = new ArrayList<>();
-
-        //상품 테이블에 존재하는 판매량을 처리하기 위해 Map 구조로 '상품 아이디 : 해당 상품 총 주문량(옵션 별 총합)' 으로 처리한다.
-        //조회해야 할 상품 아이디를 리스트화 하기 위해 리스트를 하나 생성한다.
-        Map<String, Integer> productMap = new HashMap<>();
-        List<String> productIdList = new ArrayList<>();
-
-
-        for(int i = 0; i < orderProductList.size(); i++) {
-            //주문 내역을 반복문으로 처리하면서 Map에 상품 아이디와 해당 상품 주문 총량을 처리한다.
-            //주문내역에서는 상품 아이디가 겹치는 경우가 발생하기 때문에 리스트에 담겨있지 않은 경우에만 담도록 처리한다.
-            OrderProductDTO dto = orderProductList.get(i);
-            productMap.put(
-                    dto.productId()
-                    , productMap.getOrDefault(dto.productId(), 0) + dto.detailCount()
-            );
-
-            if(!productIdList.contains(dto.productId()))
-                productIdList.add(dto.productId());
-
-            //상품 옵션 테이블에서 재고 수정을 위해 해당 옵션 상품 리스트를 반복문으로 돌리면서
-            //조회된 Entity의 재고를 수정한 뒤 리스트에 담아준다.
-            //한번 수정이 발생할 때마다 다음 루프의 횟수를 줄이기 위해 리스트 데이터를 지워나간다.
-            for(int j = 0; j < productOptionList.size(); j++) {
-                if(dto.optionId() == productOptionList.get(j).getId()){
-                    ProductOption productOption = productOptionList.get(j);
-
-                    productOption.setStock(productOption.getStock() - dto.detailCount());
-                    productOptionSetList.add(productOption);
-
-                    productOptionList.remove(j);
-                    break;
-                }
-            }
-        }
-
-        productOptionRepository.saveAll(productOptionSetList);
-
-        patchProductSales(productIdList, productMap);
-    }
-
-    public void patchProductSales(List<String> productIdList, Map<String, Integer> productMap) {
-        List<Product> productList = productRepository.findAllByIdList(productIdList);
-        List<Product> productSetList = new ArrayList<>();
-
-        //해당 되는 상품 Entity에 대해 판매량을 수정한 뒤 리스트에 담아준다.
-        for(Product data : productList) {
-            long productSales = data.getProductSales() + productMap.get(data.getId());
-            data.setProductSales(productSales);
-
-            productSetList.add(data);
-        }
-
-        productRepository.saveAll(productSetList);
-    }
-
 
     @Override
     public OrderDataResponseDTO getProductOrderData(List<OrderProductRequestDTO> optionIdAndCountDTO) {

@@ -4,6 +4,7 @@ import com.example.mansshop_boot.domain.dto.mypage.qna.business.MyPageProductQnA
 import com.example.mansshop_boot.domain.dto.mypage.qna.business.MyPageQnAReplyDTO;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record ProductQnADetailDTO(
@@ -11,7 +12,7 @@ public record ProductQnADetailDTO(
         , String productName
         , String writer
         , String qnaContent
-        , LocalDate createdAt
+        , LocalDateTime createdAt
         , boolean productQnAStat
         , List<MyPageQnAReplyDTO> replyList
 ) {

@@ -6,9 +6,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDate;
-
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -36,7 +36,11 @@ public class ProductQnA {
 
     @CreationTimestamp
     @Column(nullable = false)
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
 
     @Column(columnDefinition = "TINYINT(1) DEFAULT 0",
             nullable = false

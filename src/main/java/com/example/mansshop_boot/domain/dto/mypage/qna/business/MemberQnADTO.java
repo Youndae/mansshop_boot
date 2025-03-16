@@ -3,6 +3,7 @@ package com.example.mansshop_boot.domain.dto.mypage.qna.business;
 import com.example.mansshop_boot.domain.entity.MemberQnA;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public record MemberQnADTO(
         long memberQnAId
@@ -10,7 +11,7 @@ public record MemberQnADTO(
         , String qnaTitle
         , String writer
         , String qnaContent
-        , LocalDate updatedAt
+        , LocalDateTime updatedAt
         , boolean memberQnAStat
 ) {
 

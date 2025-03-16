@@ -7,7 +7,7 @@ import com.example.mansshop_boot.domain.dto.main.out.MainListResponseDTO;
 import com.example.mansshop_boot.domain.dto.pageable.MainPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.PagingMappingDTO;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
-import com.example.mansshop_boot.repository.ProductRepository;
+import com.example.mansshop_boot.repository.product.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

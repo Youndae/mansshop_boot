@@ -5,17 +5,19 @@ import com.example.mansshop_boot.auth.oAuth.response.OAuth2DTO;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode
-@ToString
 @Table(name = "member")
 public class Member {
 
@@ -51,15 +53,27 @@ public class Member {
 
     @CreationTimestamp
     @Column(nullable = false)
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
 
     @Column(length = 20)
     private String phone;
 
     private LocalDate birth;
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "member")
     private final List<Auth> auths = new ArrayList<>();
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 
     public void addMemberAuth(Auth auth) {
         auths.add(auth);

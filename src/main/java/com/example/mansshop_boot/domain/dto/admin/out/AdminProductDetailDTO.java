@@ -59,7 +59,7 @@ public record AdminProductDetailDTO(
                 , productOptionList
                 , product.getProductPrice()
                 , product.isOpen()
-                , product.getProductSales()
+                , product.getProductSalesQuantity()
                 , product.getProductDiscount()
         );
     }

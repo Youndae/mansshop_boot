@@ -1,10 +1,7 @@
 package com.example.mansshop_boot.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
@@ -12,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "productInfoImage")
+@ToString
 public class ProductInfoImage {
 
     @Id
@@ -22,7 +20,7 @@ public class ProductInfoImage {
     @JoinColumn(name = "productId", nullable = false)
     private Product product;
 
-    @Column(length = 200,
+    @Column(length = 255,
             nullable = false
     )
     private String imageName;

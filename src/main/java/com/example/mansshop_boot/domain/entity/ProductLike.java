@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -31,5 +31,5 @@ public class ProductLike {
 
     @CreationTimestamp
     @Column(nullable = false)
-    private Date createdAt;
+    private LocalDateTime createdAt;
 }

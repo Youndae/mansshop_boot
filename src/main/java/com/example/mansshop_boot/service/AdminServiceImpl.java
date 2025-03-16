@@ -15,8 +15,25 @@ import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListD
 import com.example.mansshop_boot.domain.entity.*;
 import com.example.mansshop_boot.domain.enumuration.AdminListType;
 import com.example.mansshop_boot.domain.enumuration.OrderStatus;
+import com.example.mansshop_boot.domain.enumuration.PageAmount;
 import com.example.mansshop_boot.domain.enumuration.Result;
-import com.example.mansshop_boot.repository.*;
+import com.example.mansshop_boot.repository.classification.ClassificationRepository;
+import com.example.mansshop_boot.repository.member.MemberRepository;
+import com.example.mansshop_boot.repository.memberQnA.MemberQnAReplyRepository;
+import com.example.mansshop_boot.repository.memberQnA.MemberQnARepository;
+import com.example.mansshop_boot.repository.periodSales.PeriodSalesSummaryRepository;
+import com.example.mansshop_boot.repository.product.ProductInfoImageRepository;
+import com.example.mansshop_boot.repository.product.ProductOptionRepository;
+import com.example.mansshop_boot.repository.product.ProductRepository;
+import com.example.mansshop_boot.repository.product.ProductThumbnailRepository;
+import com.example.mansshop_boot.repository.productOrder.ProductOrderDetailRepository;
+import com.example.mansshop_boot.repository.productOrder.ProductOrderRepository;
+import com.example.mansshop_boot.repository.productQnA.ProductQnAReplyRepository;
+import com.example.mansshop_boot.repository.productQnA.ProductQnARepository;
+import com.example.mansshop_boot.repository.productReview.ProductReviewReplyRepository;
+import com.example.mansshop_boot.repository.productReview.ProductReviewRepository;
+import com.example.mansshop_boot.repository.productSales.ProductSalesSummaryRepository;
+import com.example.mansshop_boot.repository.qnaClassification.QnAClassificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +51,10 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -76,6 +96,10 @@ public class AdminServiceImpl implements AdminService {
 
     private final ProductReviewReplyRepository productReviewReplyRepository;
 
+    private final PeriodSalesSummaryRepository periodSalesSummaryRepository;
+
+    private final ProductSalesSummaryRepository productSalesSummaryRepository;
+
     private final MyPageService myPageService;
 
     /**
@@ -106,7 +130,6 @@ public class AdminServiceImpl implements AdminService {
      */
     @Override
     public List<String> getClassification() {
-
         List<Classification> classification = classificationRepository.findAll(Sort.by("classificationStep").ascending());
 
         return classification.stream().map(Classification::getId).toList();
@@ -168,7 +191,9 @@ public class AdminServiceImpl implements AdminService {
      *
      * 싱픔 추가 처리.
      * ProductEntity 안에 ProductOption, ProductThumbnail, ProductInfoImage Entity들에 대한 연관관계 설정과 Set으로 담을 수 있도록 처리.
-     * Entity별로 save 요청하는 것이 아닌 데이터를 모두 담아준 뒤 ProductRepository.save로 처리.
+     * 양방향 매핑은 각 엔티티에 대한 데이터 파싱을 편하게 하기 위한 용도로만 사용하고,
+     * 저장은 각 Repository를 통해서 저장하도록 처리.
+     * CascadeType.ALL 사용을 지양하기 위함.
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -185,6 +210,9 @@ public class AdminServiceImpl implements AdminService {
             patchDTO.getProductOptionList(product).forEach(product::addProductOption);
 
             resultId = productRepository.save(product).getId();
+            productOptionRepository.saveAll(product.getProductOptions());
+            productThumbnailRepository.saveAll(product.getProductThumbnails());
+            productInfoImageRepository.saveAll(product.getProductInfoImages());
         }catch (Exception e) {
             log.warn("Filed admin postProduct");
             e.printStackTrace();
@@ -224,6 +252,9 @@ public class AdminServiceImpl implements AdminService {
                 saveImages.add(firstThumbnail);
 
             productRepository.save(product);
+            productOptionRepository.saveAll(product.getProductOptions());
+            productThumbnailRepository.saveAll(product.getProductThumbnails());
+            productInfoImageRepository.saveAll(product.getProductInfoImages());
 
             if(deleteOptionList != null)
                 productOptionRepository.deleteAllById(deleteOptionList);
@@ -271,7 +302,7 @@ public class AdminServiceImpl implements AdminService {
     @Transactional
     public void setProductOptionData(Product product, AdminProductPatchDTO patchDTO) {
         List<PatchOptionDTO> optionDTOList = patchDTO.getOptionList();
-        List<ProductOption> optionEntities = product.getProductOptionSet();
+        List<ProductOption> optionEntities = product.getProductOptions();
 
         for(int i = 0; i < optionDTOList.size(); i++) {
             PatchOptionDTO dto = optionDTOList.get(i);
@@ -596,17 +627,16 @@ public class AdminServiceImpl implements AdminService {
         List<Long> orderIdList = orderDTOList.stream().map(AdminOrderDTO::orderId).toList();
         List<AdminOrderDetailListDTO> detailList = productOrderDetailRepository.findByOrderIds(orderIdList);
 
-        List<AdminOrderResponseDTO> responseContent = new ArrayList<>();
-        for(int i = 0; i < orderDTOList.size(); i++) {
-            AdminOrderDTO orderDTO = orderDTOList.get(i);
+        List<AdminOrderResponseDTO> responseContent = orderDTOList.stream()
+                                        .map(v -> {
+                                            List<AdminOrderDetailDTO> detail = detailList.stream()
+                                                    .filter(entity -> v.orderId() == entity.orderId())
+                                                    .map(AdminOrderDetailDTO::new)
+                                                    .toList();
 
-            List<AdminOrderDetailDTO> detailDTOList = detailList.stream()
-                                                            .filter(entity -> orderDTO.orderId() == entity.orderId())
-                                                            .map(AdminOrderDetailDTO::new)
-                                                            .toList();
-
-            responseContent.add(orderDTO.toResponseDTO(detailDTOList));
-        }
+                                            return v.toResponseDTO(detail);
+                                        })
+                                        .toList();
 
         PagingMappingDTO pagingMappingDTO = new PagingMappingDTO(totalElements, pageDTO.page(), pageDTO.amount());
 
@@ -896,31 +926,28 @@ public class AdminServiceImpl implements AdminService {
      * 해당 연도에 대해 매출, 판매량, 주문량, 월별 매출 리스트을 조회.
      *
      * 월 매출 리스트로는 월, 매출, 판매량, 주문량으로 조회.
-     * 데이터가 전혀 없는 달이라도 0으로 출력하기 위해 반복문 횟수를 12번으로 고정.
-     * 데이터가 없으면 월을 제외한 모든 데이터에 0으로 처리.
+     * 데이터가 존재하지 않는 월에 대한 데이터를 처리하기 위해 반복문으로 date 필드를 체크.
+     * 데이터가 없다면 date를 제외한 나머지 필드를 0으로 생성해서 저장.
      */
     @Override
     public AdminPeriodSalesResponseDTO getPeriodSales(int term) {
-        List<AdminPeriodSalesListDTO> selectList = productOrderRepository.findPeriodList(term);
+        List<AdminPeriodSalesListDTO> selectList = periodSalesSummaryRepository.findPeriodList(term);
+        Map<Integer, AdminPeriodSalesListDTO> map = selectList.stream()
+                                    .collect(
+                                            Collectors.toMap(AdminPeriodSalesListDTO::date, dto -> dto)
+                                    );
+
         List<AdminPeriodSalesListDTO> contentList = new ArrayList<>();
         long yearSales = 0;
         long yearSalesQuantity = 0;
         long yearOrderQuantity = 0;
 
-        for(int i = 1; i < 13; i++){
-            AdminPeriodSalesListDTO content = new AdminPeriodSalesListDTO(i);
+        for(int i = 1; i <= 12; i++) {
+            AdminPeriodSalesListDTO content = map.getOrDefault(i, new AdminPeriodSalesListDTO(i));
+            yearSales += content.sales();
+            yearSalesQuantity += content.salesQuantity();
+            yearOrderQuantity += content.orderQuantity();
 
-            for(int j = 0; j < selectList.size(); j++) {
-                if(selectList.get(j).date() == i){
-                    content = selectList.get(j);
-                    yearSales += content.sales();
-                    yearSalesQuantity += content.salesQuantity();
-                    yearOrderQuantity += content.orderQuantity();
-
-                    selectList.remove(j);
-                    break;
-                }
-            }
             contentList.add(content);
         }
 
@@ -948,19 +975,19 @@ public class AdminServiceImpl implements AdminService {
         int year = Integer.parseInt(termSplit[0]);
         int month = Integer.parseInt(termSplit[1]);
 
-        LocalDateTime startDate = LocalDateTime.of(year, month, 1, 0, 0);
-        int lastDay = startDate.getMonth().length(startDate.toLocalDate().isLeapYear());
-        LocalDateTime endDate = startDate.plusMonths(1);
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.plusMonths(1);
+        int lastDay = YearMonth.from(startDate).lengthOfMonth();
 
-        AdminPeriodSalesStatisticsDTO monthStatistics = productOrderRepository.findPeriodStatistics(startDate, endDate); // 1.505 Index -> createdAt 하는 경우 0.150 정도로 감소.
-        List<AdminBestSalesProductDTO> bestProductList = productOrderRepository.findPeriodBestProductOrder(startDate, endDate);
+        AdminPeriodSalesStatisticsDTO monthStatistics = periodSalesSummaryRepository.findPeriodStatistics(startDate, endDate);
+        List<AdminBestSalesProductDTO> bestProductList = productSalesSummaryRepository.findPeriodBestProductOrder(startDate, endDate);
         List<AdminPeriodSalesListDTO> dailySalesResponseDTO = getPeriodSalesList(lastDay, startDate, endDate);
-        List<AdminPeriodClassificationDTO> classificationResponseDTO = getClassificationResponse(startDate, endDate);
+        List<AdminPeriodClassificationDTO> classificationResponseDTO = productSalesSummaryRepository.findPeriodClassification(startDate, endDate);
 
         startDate = startDate.minusYears(1);
         endDate = endDate.minusYears(1);
 
-        AdminPeriodSalesStatisticsDTO lastYearStatistics = productOrderRepository.findPeriodStatistics(startDate, endDate);
+        AdminPeriodSalesStatisticsDTO lastYearStatistics = periodSalesSummaryRepository.findPeriodStatistics(startDate, endDate);
 
         return new AdminPeriodMonthDetailResponseDTO(monthStatistics
                                                     , lastYearStatistics
@@ -969,61 +996,23 @@ public class AdminServiceImpl implements AdminService {
                                                     , dailySalesResponseDTO);
     }
 
-    public List<AdminPeriodClassificationDTO> getClassificationResponse(LocalDateTime startDate, LocalDateTime endDate) {
-        List<AdminPeriodClassificationDTO> classificationList = productOrderDetailRepository.findPeriodClassification(startDate, endDate);
-        List<Classification> classification = classificationRepository.findAll(Sort.by("classificationStep").descending()); // 0.063
+    @Deprecated
+    public List<AdminPeriodClassificationDTO> getClassificationResponse(LocalDate startDate, LocalDate endDate) {
 
-        List<AdminPeriodClassificationDTO> classificationResponseDTO = new ArrayList<>();
-
-        //매출이 전혀 없는 상품 분류의 경우 classificationList에 담겨있지 않을 것이므로
-        //classification의 크기와 classificationList의 크기가 다르다면
-        //조회되지 않은 상품 분류를 매출 0 으로 처리하기 위해 반복문을 통해 처리.
-        if(classification.size() != classificationList.size()){
-            for(int i = 0; i < classification.size(); i++) {
-                String id = classification.get(i).getId();
-                AdminPeriodClassificationDTO content = new AdminPeriodClassificationDTO(id, 0, 0);
-
-                for(int j = 0; j < classificationList.size(); j++) {
-                    if(id.equals(classificationList.get(j).classification())){
-                        content = classificationList.get(j);
-                        break;
-                    }
-                }
-
-                classificationResponseDTO.add(content);
-            }
-        }else
-            classificationResponseDTO = classificationList;
-
-        return classificationResponseDTO;
+        return productSalesSummaryRepository.findPeriodClassification(startDate, endDate);
     }
 
-    public List<AdminPeriodSalesListDTO> getPeriodSalesList(int lastDay, LocalDateTime startDate, LocalDateTime endDate) {
-        List<AdminPeriodSalesListDTO> dailySalesList = productOrderRepository.findPeriodDailyList(startDate, endDate); // 0.924
-        List<AdminPeriodSalesListDTO> dailySalesResponseDTO = new ArrayList<>();
+    public List<AdminPeriodSalesListDTO> getPeriodSalesList(int lastDay, LocalDate startDate, LocalDate endDate) {
+        List<AdminPeriodSalesListDTO> dailySalesList = periodSalesSummaryRepository.findPeriodDailyList(startDate, endDate);
+        Map<Integer, AdminPeriodSalesListDTO> dailyMap = dailySalesList.stream()
+                                                            .collect(
+                                                                    Collectors.toMap(AdminPeriodSalesListDTO::date, dto -> dto)
+                                                            );
 
-        //상품 분류별 데이터 매핑과 마찬가지로
-        //매출이 없는 일자에 대해 0으로 처리 하기위해 크기가 다른 경우
-        //반복문을 통해 0으로 처리.
-        if(dailySalesList.size() != lastDay){
-            for(int i = 1; i <= lastDay; i++) {
-                int day = i;
-                AdminPeriodSalesListDTO content = new AdminPeriodSalesListDTO(day);
-
-                for(int j = 0; j < dailySalesList.size(); j++) {
-                    if(day == dailySalesList.get(j).date()){
-                        content = dailySalesList.get(j);
-                        dailySalesList.remove(j);
-                        break;
-                    }
-                }
-
-                dailySalesResponseDTO.add(content);
-            }
-        }else
-            dailySalesResponseDTO = dailySalesList;
-
-        return dailySalesResponseDTO;
+        return IntStream.rangeClosed(1, lastDay)
+                        .mapToObj(v ->
+                                dailyMap.getOrDefault(v, new AdminPeriodSalesListDTO(v))
+                        ).toList();
     }
 
     /**
@@ -1042,13 +1031,11 @@ public class AdminServiceImpl implements AdminService {
                                 .mapToInt(Integer::parseInt)
                                 .toArray();
 
-        LocalDate start = LocalDate.of(termSplit[0], termSplit[1], 1);
-        LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
-        LocalDateTime startDate = LocalDateTime.of(start, LocalTime.MIN);
-        LocalDateTime endDate = LocalDateTime.of(end, LocalTime.MAX);
+        LocalDate startDate = LocalDate.of(termSplit[0], termSplit[1], 1);
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
 
-        AdminClassificationSalesDTO classificationSalesDTO = productOrderDetailRepository.findPeriodClassificationSales(startDate, endDate, classification);
-        List<AdminClassificationSalesProductListDTO> productList = productOrderDetailRepository.findPeriodClassificationProductSales(startDate, endDate, classification);
+        AdminClassificationSalesDTO classificationSalesDTO = productSalesSummaryRepository.findPeriodClassificationSales(startDate, endDate, classification);
+        List<AdminClassificationSalesProductListDTO> productList = productSalesSummaryRepository.findPeriodClassificationProductSales(startDate, endDate, classification);
 
         return new AdminClassificationSalesResponseDTO(classification, classificationSalesDTO, productList);
     }
@@ -1066,13 +1053,12 @@ public class AdminServiceImpl implements AdminService {
         int[] termSplit = Arrays.stream(term.split("-"))
                                 .mapToInt(Integer::parseInt)
                                 .toArray();
-        LocalDate start = LocalDate.of(termSplit[0], termSplit[1], termSplit[2]);
-        LocalDateTime startDate = LocalDateTime.of(start, LocalTime.MIN);
-        LocalDateTime endDate = LocalDateTime.of(start, LocalTime.MAX);
+        LocalDate startDate = LocalDate.of(termSplit[0], termSplit[1], termSplit[2]);
+        LocalDate endDate = startDate.plusDays(1);
 
-        AdminClassificationSalesDTO salesDTO = productOrderRepository.findDailySales(startDate, endDate);
-        List<AdminPeriodClassificationDTO> classificationList = productOrderDetailRepository.findPeriodClassification(startDate, endDate);
-        System.out.println("size : " + classificationList.size());
+        AdminClassificationSalesDTO salesDTO = periodSalesSummaryRepository.findDailySales(startDate);
+        List<AdminPeriodClassificationDTO> classificationList = productSalesSummaryRepository.findPeriodClassification(startDate, endDate);
+
         return new AdminPeriodSalesResponseDTO(
                         classificationList
                         , salesDTO.sales()
@@ -1100,26 +1086,24 @@ public class AdminServiceImpl implements AdminService {
         LocalDateTime endDate = LocalDateTime.of(start, LocalTime.MAX);
 
         Pageable pageable = PageRequest.of(page - 1
-                                        , 30
+                                        , PageAmount.ADMIN_DAILY_ORDER_AMOUNT.getAmount()
                                         , Sort.by("createdAt").descending());
 
         Page<ProductOrder> orderList = productOrderRepository.findAllByDay(startDate, endDate, pageable);
         List<Long> orderIdList = orderList.stream().map(ProductOrder::getId).toList();
         List<AdminOrderDetailListDTO> orderDetailList = productOrderDetailRepository.findByOrderIds(orderIdList);
 
-        List<AdminDailySalesResponseDTO> content = new ArrayList<>();
+        List<AdminDailySalesResponseDTO> content = orderList.getContent()
+                                                        .stream()
+                                                        .map(v -> {
+                                                            List<AdminDailySalesDetailDTO> detailContent = orderDetailList.stream()
+                                                                    .filter(orderDetail -> v.getId() == orderDetail.orderId())
+                                                                    .map(AdminDailySalesDetailDTO::new)
+                                                                    .toList();
 
-        for(int i = 0; i < orderList.getContent().size(); i++) {
-            ProductOrder productOrder = orderList.getContent().get(i);
-            List<AdminDailySalesDetailDTO> detailContent = orderDetailList.stream()
-                                                        .filter(orderDetail ->
-                                                                productOrder.getId() == orderDetail.orderId()
-                                                        )
-                                                        .map(AdminDailySalesDetailDTO::new)
+                                                            return new AdminDailySalesResponseDTO(v, detailContent);
+                                                        })
                                                         .toList();
-
-            content.add(new AdminDailySalesResponseDTO(productOrder, detailContent));
-        }
 
         PagingMappingDTO pagingMappingDTO = PagingMappingDTO.builder()
                                                 .totalElements(orderList.getTotalElements())
@@ -1144,7 +1128,7 @@ public class AdminServiceImpl implements AdminService {
                                         , pageDTO.amount()
                                         , Sort.by("classificationStep").ascending());
 
-        return productOrderRepository.getProductSalesList(pageDTO, pageable);
+        return productSalesSummaryRepository.findProductSalesList(pageDTO, pageable);
     }
 
     /**
@@ -1160,42 +1144,24 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public AdminProductSalesDetailDTO getProductSalesDetail(String productId) {
         LocalDate date = LocalDate.now();
-//        int year = date.getYear();
+        int year = date.getYear();
 
-        int year = 2023;
-
-        AdminProductSalesDTO totalSalesDTO = productOrderRepository.getProductSales(productId);
-        AdminSalesDTO yearSalesDTO = productOrderRepository.getProductPeriodSales(year, productId);
-        AdminSalesDTO lastYearSalesDTO = productOrderRepository.getProductPeriodSales(year - 1, productId);
-        List<AdminPeriodSalesListDTO> monthSalesDTO = productOrderRepository.getProductMonthPeriodSales(year, productId);
-        List<AdminProductSalesOptionDTO> optionTotalSalesList = productOrderDetailRepository.getProductOptionSales(0, productId);
-        List<AdminProductSalesOptionDTO> optionYearSalesList = productOrderDetailRepository.getProductOptionSales(year, productId);
-        List<AdminProductSalesOptionDTO> optionLastYearSalesList = productOrderDetailRepository.getProductOptionSales(year - 1, productId);
-        List<ProductOption> productOption = productOptionRepository.findAllOptionByProductId(productId);
-
-        List<AdminProductSalesOptionMonthDTO> monthOptions = productOrderDetailRepository.getProductOptionSalesMonth(year, productId);
-
-        // stream().filter()를 통한 방법, 반복문을 사용하는 방법
-        // 또 그 중에서 기존 리스트에 add 해준 뒤 정렬하는 방법들도 수행해봤으나 이게 제일 빠름.
-        // 찾으면 break 하는게 한몫 한다.
-        // 만약 여러 데이터를 찾는다면 비슷할듯.
+        AdminProductSalesDTO totalSalesDTO = productSalesSummaryRepository.getProductSales(productId);
+        AdminSalesDTO yearSalesDTO = productSalesSummaryRepository.getProductPeriodSales(year, productId);
+        AdminSalesDTO lastYearSalesDTO = productSalesSummaryRepository.getProductPeriodSales(year - 1, productId);
+        List<AdminPeriodSalesListDTO> monthSalesDTO = productSalesSummaryRepository.getProductMonthPeriodSales(year, productId);
+        List<AdminProductSalesOptionDTO> optionTotalSalesList = productSalesSummaryRepository.getProductOptionSales(0, productId);
+        List<AdminProductSalesOptionDTO> optionYearSalesList = productSalesSummaryRepository.getProductOptionSales(year, productId);
+        List<AdminProductSalesOptionDTO> optionLastYearSalesList = productSalesSummaryRepository.getProductOptionSales(year - 1, productId);
+        Map<Integer, AdminPeriodSalesListDTO> map = monthSalesDTO.stream()
+                                                                .collect(
+                                                                        Collectors.toMap(AdminPeriodSalesListDTO::date, dto -> dto)
+                                                                );
         List<AdminPeriodSalesListDTO> monthSalesMappingDTO = new ArrayList<>();
-        for(int i = 1; i < 13; i++) {
-            AdminPeriodSalesListDTO monthContent = new AdminPeriodSalesListDTO(i);
-
-            for(int j = 0; j < monthSalesDTO.size(); j++) {
-                if(i == monthSalesDTO.get(j).date()){
-                    monthContent = monthSalesDTO.get(j);
-                    break;
-                }
-            }
-
-            monthSalesMappingDTO.add(monthContent);
+        for(int i = 1; i <= 12; i++) {
+            AdminPeriodSalesListDTO content = map.getOrDefault(i, new AdminPeriodSalesListDTO(i));
+            monthSalesMappingDTO.add(content);
         }
-
-        optionTotalSalesList = optionDataMapping(optionTotalSalesList, productOption);
-        optionYearSalesList = optionDataMapping(optionYearSalesList, productOption);
-        optionLastYearSalesList = optionDataMapping(optionLastYearSalesList, productOption);
 
         return new AdminProductSalesDetailDTO(
                             totalSalesDTO
@@ -1206,37 +1172,5 @@ public class AdminServiceImpl implements AdminService {
                             , optionYearSalesList
                             , optionLastYearSalesList
                     );
-    }
-
-    /**
-     *
-     * @param optionList
-     * @param productOption
-     *
-     * 옵션 리스트와 옵션별 집계 리스트를 매핑.
-     */
-    public List<AdminProductSalesOptionDTO> optionDataMapping(List<AdminProductSalesOptionDTO> optionList, List<ProductOption> productOption) {
-        List<AdminProductSalesOptionDTO> returnDTOList = new ArrayList<>();
-
-        if(productOption.size() != optionList.size()){
-            for(int i = 0; i < productOption.size(); i++){
-                ProductOption option = productOption.get(i);
-                AdminProductSalesOptionDTO optionDTO = new AdminProductSalesOptionDTO(
-                                                                    option
-                                                                    , 0
-                                                                    , 0
-                                                            );
-                for(int j = 0; j < optionList.size(); j++) {
-                    if(option.getId() == optionList.get(j).optionId()){
-                        optionDTO = optionList.get(j);
-                        break;
-                    }
-                }
-                returnDTOList.add(optionDTO);
-            }
-
-            return returnDTOList;
-        }else
-            return optionList;
     }
 }

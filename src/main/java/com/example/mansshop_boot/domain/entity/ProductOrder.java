@@ -67,7 +67,7 @@ public class ProductOrder {
     @Column(nullable = false)
     private int productCount;
 
-    @OneToMany(mappedBy = "productOrder", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "productOrder", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private final List<ProductOrderDetail> productOrderDetailSet = new ArrayList<>();
 
     public void addDetail(ProductOrderDetail productOrderDetail) {
