@@ -14,7 +14,6 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 @Table(name = "cart")
 public class Cart {
 
@@ -26,23 +25,22 @@ public class Cart {
     @JoinColumn(name = "userId", nullable = false)
     private Member member;
 
-    @Column(length = 200)
+    @Column(length = 255)
     private String cookieId;
 
     @CreationTimestamp
+    @Column(nullable = false)
     private LocalDate createdAt;
 
     @UpdateTimestamp
+    @Column(nullable = false)
     private LocalDate updatedAt;
 
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.PERSIST)
-    private final List<CartDetail> cartDetailSet = new ArrayList<>();
+    @OneToMany(mappedBy = "cart", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private final List<CartDetail> cartDetailList = new ArrayList<>();
 
-    public void addCartDetail(CartDetail cartDetail) {
-        cartDetailSet.add(cartDetail);
-        cartDetail.setCart(this);
+    public void addCartDetail(CartDetail detail) {
+        cartDetailList.add(detail);
+        detail.setCart(this);
     }
-
-
-
 }

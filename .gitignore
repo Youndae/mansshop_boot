@@ -22,6 +22,7 @@ application.yml
 application-oauth.yml
 filePath.properties
 jwt.properties
+rabbitMQ.yml
 .idea
 *.iws
 *.iml

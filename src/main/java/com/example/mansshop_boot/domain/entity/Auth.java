@@ -2,10 +2,7 @@ package com.example.mansshop_boot.domain.entity;
 
 import com.example.mansshop_boot.domain.enumuration.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
@@ -20,7 +17,7 @@ public class Auth {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "userId", nullable = false)
+    @JoinColumn(name = "userId")
     private Member member;
 
     @Column(length = 50,
@@ -32,9 +29,17 @@ public class Auth {
         this.member = member;
     }
 
-    public Auth toMemberAuth() {
-        return Auth.builder()
-                .auth(Role.MEMBER.getKey())
-                .build();
+    public void setAuth(String auth) {
+        this.auth = auth;
+    }
+
+    public Auth(Member member) {
+        this.member = member;
+        this.auth = Role.MEMBER.getKey();
+    }
+
+    public Auth(Member member, String auth) {
+        this.member = member;
+        this.auth = auth;
     }
 }

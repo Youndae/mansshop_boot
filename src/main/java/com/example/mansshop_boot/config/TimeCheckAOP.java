@@ -13,17 +13,16 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 @Slf4j
-@Order(1)
 public class TimeCheckAOP {
 
-    @Around("execution(* com.example.mansshop_boot..*.*(..))")
+    @Around("execution(* com.example.mansshop_boot..*(..)) && !execution(* org.springframework..*(..))")
     public Object execute(ProceedingJoinPoint joinPoint) throws Throwable {
         long start = System.currentTimeMillis();
 
         try{
             return joinPoint.proceed();
         }catch (Exception e) {
-            log.error("exception!");
+            log.error("AOP exception!");
             throw e;
         }finally {
             long finish = System.currentTimeMillis();

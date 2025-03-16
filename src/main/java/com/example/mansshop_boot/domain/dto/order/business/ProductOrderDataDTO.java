@@ -8,6 +8,7 @@ import java.util.List;
 public record ProductOrderDataDTO(
         ProductOrder productOrder
         , List<OrderProductDTO> orderProductList
-        , List<Long> orderOptionIdList
+        , List<String> orderProductIds
+        , List<Long> orderOptionIds
 ) {
 }

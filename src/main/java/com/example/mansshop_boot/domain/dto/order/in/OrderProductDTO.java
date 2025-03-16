@@ -14,7 +14,7 @@ public record OrderProductDTO(
         @Schema(name = "productId", description = "상품 아이디")
         String productId,
         @Schema(name = "detailCount", description = "상품 수량")
-        int detailCount,
+        Integer detailCount,
         @Schema(name = "detailPrice", description = "상품 총 가격")
         int detailPrice
 ) {

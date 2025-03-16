@@ -27,7 +27,7 @@ public record PaymentDTO(
         int deliveryFee,
         @Schema(name = "totalPrice", description = "결제 금액")
         int totalPrice,
-        @Schema(name = "paymentType", description = "결제 타입(cart, cash)")
+        @Schema(name = "paymentType", description = "결제 타입(card, cash)")
         @NotNull(message = "결제 타입은 필수 데이터입니다.")
         String paymentType,
         @Schema(name = "orderType", description = "주문 요청 방식(cart, direct)")

@@ -5,7 +5,7 @@ import com.example.mansshop_boot.domain.entity.Auth;
 import com.example.mansshop_boot.domain.entity.Member;
 import com.example.mansshop_boot.domain.enumuration.OAuthProvider;
 import com.example.mansshop_boot.domain.enumuration.Role;
-import com.example.mansshop_boot.repository.MemberRepository;
+import com.example.mansshop_boot.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;

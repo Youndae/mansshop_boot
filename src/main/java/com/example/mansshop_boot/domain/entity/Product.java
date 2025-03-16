@@ -6,18 +6,15 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 @Table(name = "product")
 public class Product {
 
@@ -34,9 +31,10 @@ public class Product {
     )
     private String productName;
 
+    @Column(nullable = false)
     private int productPrice;
 
-    @Column(length = 200,
+    @Column(length = 255,
             nullable = false
     )
     private String thumbnail;
@@ -49,7 +47,7 @@ public class Product {
     @Column(columnDefinition = "BIGINT DEFAULT 0",
             nullable = false
     )
-    private Long productSales;
+    private Long productSalesQuantity;
 
     @Column(columnDefinition = "INT DEFAULT 0",
             nullable = false
@@ -58,38 +56,46 @@ public class Product {
 
     @CreationTimestamp
     @Column(nullable = false)
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
     @UpdateTimestamp
     @Column(nullable = false)
-    private LocalDate updatedAt;
+    private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.PERSIST)
-    private final List<ProductOption> productOptionSet = new ArrayList<>();
+    @OneToMany(mappedBy = "product")
+    private final List<ProductOption> productOptions = new ArrayList<>();
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.PERSIST)
-    private final List<ProductThumbnail> productThumbnailSet = new ArrayList<>();
+    @OneToMany(mappedBy = "product")
+    private final List<ProductThumbnail> productThumbnails = new ArrayList<>();
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.PERSIST)
-    private final List<ProductInfoImage> productInfoImageSet = new ArrayList<>();
+    @OneToMany(mappedBy = "product")
+    private final List<ProductInfoImage> productInfoImages = new ArrayList<>();
 
-    public void addProductOption(ProductOption productOption) {
-        productOptionSet.add(productOption);
-        productOption.setProduct(this);
+    public void addProductOption(ProductOption option) {
+        productOptions.add(option);
+        option.setProduct(this);
     }
 
-    public void addProductThumbnail(ProductThumbnail productThumbnail) {
-        productThumbnailSet.add(productThumbnail);
-        productThumbnail.setProduct(this);
+    public void addProductThumbnail(ProductThumbnail thumbnail) {
+        productThumbnails.add(thumbnail);
+        thumbnail.setProduct(this);
     }
 
-    public void addProductInfoImage(ProductInfoImage productInfoImage) {
-        productInfoImageSet.add(productInfoImage);
-        productInfoImage.setProduct(this);
+    public void addProductInfoImage(ProductInfoImage infoImage) {
+        productInfoImages.add(infoImage);
+        infoImage.setProduct(this);
     }
 
-    public void setProductSales(long productSales) {
-        this.productSales = productSales;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public void setProductSalesQuantity(long productSalesQuantity) {
+        this.productSalesQuantity = productSalesQuantity;
     }
 
     public void setThumbnail(String thumbnail) {

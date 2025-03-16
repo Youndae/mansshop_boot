@@ -3,7 +3,7 @@ package com.example.mansshop_boot.auth.user;
 import com.example.mansshop_boot.config.customException.exception.CustomBadCredentialsException;
 import com.example.mansshop_boot.config.customException.ErrorCode;
 import com.example.mansshop_boot.domain.entity.Member;
-import com.example.mansshop_boot.repository.MemberRepository;
+import com.example.mansshop_boot.repository.member.MemberRepository;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

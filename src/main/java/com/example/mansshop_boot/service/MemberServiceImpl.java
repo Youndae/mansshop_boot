@@ -20,7 +20,8 @@ import com.example.mansshop_boot.domain.dto.response.UserStatusDTO;
 import com.example.mansshop_boot.domain.entity.Auth;
 import com.example.mansshop_boot.domain.entity.Member;
 import com.example.mansshop_boot.domain.enumuration.Result;
-import com.example.mansshop_boot.repository.MemberRepository;
+import com.example.mansshop_boot.domain.enumuration.Role;
+import com.example.mansshop_boot.repository.member.MemberRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.Cookie;
@@ -82,7 +83,11 @@ public class MemberServiceImpl implements MemberService{
     public String joinProc(JoinDTO joinDTO) {
 
         Member memberEntity = joinDTO.toEntity();
-        memberEntity.addMemberAuth(new Auth().toMemberAuth());
+//        memberEntity.addMemberAuth(new Auth().toMemberAuth());
+        Auth auth = Auth.builder()
+                        .auth(Role.MEMBER.getKey())
+                        .build();
+        memberEntity.addMemberAuth(auth);
 
         memberRepository.save(memberEntity);
 

@@ -9,11 +9,13 @@ import lombok.*;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Random;
 
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
 @Schema(description = "관리자의 상품 추가 및 수정 요청시 상품 데이터")
 public class AdminProductPatchDTO {
 
@@ -41,15 +43,16 @@ public class AdminProductPatchDTO {
                 .id(
                         sb.append(classification)
                             .append(
-                                    new SimpleDateFormat("yyyyMMddHHmmss").format(System.currentTimeMillis())
+                                    new SimpleDateFormat("yyyyMMddHHmmssSSS").format(System.currentTimeMillis())
                             )
+                                .append(String.format("%06d", new Random().nextInt(100000)))
                             .toString()
                 )
                 .classification(Classification.builder().id(classification).build())
                 .productName(productName)
                 .productPrice(price)
                 .isOpen(isOpen)
-                .productSales(0L)
+                .productSalesQuantity(0L)
                 .productDiscount(discount)
                 .build();
     }

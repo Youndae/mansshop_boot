@@ -4,6 +4,7 @@ import com.example.mansshop_boot.domain.entity.ProductQnA;
 import lombok.Builder;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Builder
 public record MyPageProductQnADTO(
@@ -11,7 +12,7 @@ public record MyPageProductQnADTO(
         , String productName
         , String writer
         , String qnaContent
-        , LocalDate createdAt
+        , LocalDateTime createdAt
         , boolean productQnAStat
 ) {
 
