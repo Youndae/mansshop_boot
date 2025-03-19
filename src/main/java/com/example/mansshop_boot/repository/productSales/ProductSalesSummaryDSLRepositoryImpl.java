@@ -103,7 +103,7 @@ public class ProductSalesSummaryDSLRepositoryImpl implements ProductSalesSummary
                                 productSalesSummary.salesQuantity.longValue().sum().coalesce(0L).as("productSalesQuantity")
                         )
                 )
-                .from(product)
+                .from(productOption)
                 .innerJoin(productOption.product, product)
                 .leftJoin(productSalesSummary)
                 .on(productSalesSummary.product.id.eq(product.id)
@@ -112,7 +112,7 @@ public class ProductSalesSummaryDSLRepositoryImpl implements ProductSalesSummary
                         .and(productSalesSummary.periodMonth.lt(endDate))
                 )
                 .where(product.classification.id.eq(classification))
-                .groupBy(product.productName, productOption.size, productOption.color)
+                .groupBy(product.productName, productOption.size, productOption.color, product.createdAt)
                 .orderBy(product.createdAt.desc())
                 .fetch();
     }
@@ -206,7 +206,7 @@ public class ProductSalesSummaryDSLRepositoryImpl implements ProductSalesSummary
                 .innerJoin(productSalesSummary.product, product)
                 .where(productSalesSummary.product.id.eq(productId).and(productSalesSummary.periodMonth.year().eq(year)))
                 .groupBy(productSalesSummary.periodMonth.month())
-                .orderBy(productSalesSummary.periodMonth.asc())
+                .orderBy(productSalesSummary.periodMonth.month().asc())
                 .fetch();
     }
 

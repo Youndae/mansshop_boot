@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -118,10 +119,4 @@ public class MemberDSLRepositoryImpl implements MemberDSLRepository{
                 .fetchOne();
     }
 
-    @Override
-    public List<Member> dummyMemberList() {
-        return jpaQueryFactory.selectFrom(member)
-                .where(member.userId.ne("admin"))
-                .fetch();
-    }
 }

@@ -15,7 +15,7 @@ public record MemberQnADTO(
         , boolean memberQnAStat
 ) {
 
-    public MemberQnADTO(MemberQnA memberQnA, String writer) {
+    /*public MemberQnADTO(MemberQnA memberQnA, String writer) {
         this(
                 memberQnA.getId()
                 , memberQnA.getQnAClassification().getQnaClassificationName()
@@ -25,5 +25,5 @@ public record MemberQnADTO(
                 , memberQnA.getUpdatedAt()
                 , memberQnA.isMemberQnAStat()
         );
-    }
+    }*/
 }

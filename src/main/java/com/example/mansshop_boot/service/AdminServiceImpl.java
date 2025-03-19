@@ -548,7 +548,7 @@ public class AdminServiceImpl implements AdminService {
      *
      * @param classification
      *
-     * 상품 분류에 해당하는 상품 리스트 조회.
+     * 상품 분류에 해당하는 할인 상품 리스트 조회.
      * 아이디, 상품명, 가격만 반환
      */
     @Override

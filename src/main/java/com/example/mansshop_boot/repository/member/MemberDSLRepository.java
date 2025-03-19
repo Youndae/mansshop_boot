@@ -22,6 +22,4 @@ public interface MemberDSLRepository {
 
     Long findByPassword(UserSearchPwDTO searchDTO);
 
-
-    List<Member> dummyMemberList();
 }
