@@ -12,7 +12,7 @@ public record ProductQnADetailDTO(
         , String productName
         , String writer
         , String qnaContent
-        , LocalDateTime createdAt
+        , LocalDate createdAt
         , boolean productQnAStat
         , List<MyPageQnAReplyDTO> replyList
 ) {
@@ -24,7 +24,7 @@ public record ProductQnADetailDTO(
                 , qnaDTO.productName()
                 , qnaDTO.writer()
                 , qnaDTO.qnaContent()
-                , qnaDTO.createdAt()
+                , qnaDTO.createdAt().toLocalDate()
                 , qnaDTO.productQnAStat()
                 , replyList
         );

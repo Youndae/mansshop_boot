@@ -163,7 +163,7 @@ public class ProductQnADSLRepositoryImpl implements ProductQnADSLRepository{
                                         .otherwise(productQnA.member.nickname)
                                         .as("writer")
                                 , productQnA.createdAt
-                                , productQnA.productQnAStat
+                                , productQnA.productQnAStat.as("answerStatus")
                         )
                 )
                 .from(productQnA)

@@ -13,7 +13,7 @@ public record MemberQnADetailDTO(
         , String qnaTitle
         , String writer
         , String qnaContent
-        , LocalDateTime updatedAt
+        , LocalDate updatedAt
         , boolean memberQnAStat
         , List<MyPageQnAReplyDTO> replyList
 ) {
@@ -25,7 +25,7 @@ public record MemberQnADetailDTO(
                 , memberQnADTO.qnaTitle()
                 , memberQnADTO.writer()
                 , memberQnADTO.qnaContent()
-                , memberQnADTO.updatedAt()
+                , memberQnADTO.updatedAt().toLocalDate()
                 , memberQnADTO.memberQnAStat()
                 , replyList
         );

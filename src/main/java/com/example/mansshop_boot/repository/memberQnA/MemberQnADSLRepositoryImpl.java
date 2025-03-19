@@ -141,7 +141,6 @@ public class MemberQnADSLRepositoryImpl implements MemberQnADSLRepository{
                                                 .from(qnAClassification)
                                                 .where(qnAClassification.id.eq(memberQnA.qnAClassification.id)), "classification"
                                 )
-//                                , qnAClassification.qnaClassificationName.as("classification")
                                 , memberQnA.memberQnATitle.as("title")
                                 , new CaseBuilder()
                                         .when(memberQnA.member.nickname.isNull())

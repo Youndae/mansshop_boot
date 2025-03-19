@@ -1,6 +1,7 @@
 package com.example.mansshop_boot.domain.dto.admin.out;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public record AdminReviewDetailDTO(
         long reviewId
@@ -14,4 +15,28 @@ public record AdminReviewDetailDTO(
         , LocalDate replyUpdatedAt
         , String replyContent
 ) {
+
+    public AdminReviewDetailDTO(long reviewId,
+                                String productName,
+                                String size,
+                                String color,
+                                String writer,
+                                LocalDateTime createdAt,
+                                LocalDateTime updatedAt,
+                                String content,
+                                LocalDateTime replyUpdatedAt,
+                                String replyContent) {
+        this(
+                reviewId,
+                productName,
+                size,
+                color,
+                writer,
+                createdAt.toLocalDate(),
+                updatedAt.toLocalDate(),
+                content,
+                replyUpdatedAt.toLocalDate(),
+                replyContent
+        );
+    }
 }

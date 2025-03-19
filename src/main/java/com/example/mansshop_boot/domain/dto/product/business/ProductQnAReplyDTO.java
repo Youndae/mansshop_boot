@@ -17,7 +17,7 @@ public record ProductQnAReplyDTO(
         this(
                 qnAReply.writer()
                 , qnAReply.replyContent()
-                , qnAReply.createdAt()
+                , qnAReply.createdAt().toLocalDate()
         );
     }
 }
