@@ -93,7 +93,7 @@ public class ProductOrderDSLRepositoryImpl implements ProductOrderDSLRepository{
 
     @Override
     public Long findAllOrderListCount(AdminOrderPageDTO pageDTO) {
-        return jpaQueryFactory.select(productOrder.createdAt.countDistinct())
+        return jpaQueryFactory.select(productOrder.createdAt.count())
                 .from(productOrder)
                 .where(searchAdminOrder(pageDTO))
                 .fetchOne();
@@ -117,7 +117,7 @@ public class ProductOrderDSLRepositoryImpl implements ProductOrderDSLRepository{
 
     @Override
     public Long findAllNewOrderListCount(AdminOrderPageDTO pageDTO, LocalDateTime todayLastOrderTime) {
-        return jpaQueryFactory.select(productOrder.id.countDistinct())
+        return jpaQueryFactory.select(productOrder.countDistinct())
                 .from(productOrder)
                 .where(
                         productOrder.createdAt.loe(todayLastOrderTime)
@@ -132,11 +132,7 @@ public class ProductOrderDSLRepositoryImpl implements ProductOrderDSLRepository{
                         AdminOrderDTO.class
                         , productOrder.id.as("orderId")
                         , productOrder.recipient
-                        , new CaseBuilder()
-                                .when(productOrder.member.userId.eq("Anonymous"))
-                                .then("비회원")
-                                .otherwise(productOrder.member.userId)
-                                .as("userId")
+                        , productOrder.member.userId
                         , productOrder.orderPhone.as("phone")
                         , productOrder.createdAt
                         , productOrder.orderAddress.as("address")
@@ -172,4 +168,5 @@ public class ProductOrderDSLRepositoryImpl implements ProductOrderDSLRepository{
 
         return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
     }
+
 }

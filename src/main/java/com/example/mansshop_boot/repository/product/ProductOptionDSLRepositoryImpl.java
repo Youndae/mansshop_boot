@@ -141,7 +141,7 @@ public class ProductOptionDSLRepositoryImpl implements ProductOptionDSLRepositor
                 .set(
                         productOption.stock,
                         new CaseBuilder()
-                                .when(productOption.stock.lt(1))
+                                .when(productOption.stock.lt(stockExpression))
                                 .then(0)
                                 .otherwise(productOption.stock.subtract(stockExpression))
                 )

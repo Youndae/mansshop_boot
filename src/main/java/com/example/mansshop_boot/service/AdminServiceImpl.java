@@ -6,6 +6,7 @@ import com.example.mansshop_boot.domain.dto.admin.business.AdminOptionStockDTO;
 import com.example.mansshop_boot.domain.dto.admin.business.*;
 import com.example.mansshop_boot.domain.dto.admin.in.*;
 import com.example.mansshop_boot.domain.dto.admin.out.*;
+import com.example.mansshop_boot.domain.dto.cache.CacheProperties;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyInsertDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
@@ -13,10 +14,7 @@ import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.PagingMappingDTO;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
 import com.example.mansshop_boot.domain.entity.*;
-import com.example.mansshop_boot.domain.enumuration.AdminListType;
-import com.example.mansshop_boot.domain.enumuration.OrderStatus;
-import com.example.mansshop_boot.domain.enumuration.PageAmount;
-import com.example.mansshop_boot.domain.enumuration.Result;
+import com.example.mansshop_boot.domain.enumuration.*;
 import com.example.mansshop_boot.repository.classification.ClassificationRepository;
 import com.example.mansshop_boot.repository.member.MemberRepository;
 import com.example.mansshop_boot.repository.memberQnA.MemberQnAReplyRepository;
@@ -34,6 +32,7 @@ import com.example.mansshop_boot.repository.productReview.ProductReviewReplyRepo
 import com.example.mansshop_boot.repository.productReview.ProductReviewRepository;
 import com.example.mansshop_boot.repository.productSales.ProductSalesSummaryRepository;
 import com.example.mansshop_boot.repository.qnaClassification.QnAClassificationRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,6 +40,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,11 +48,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.YearMonth;
+import java.time.*;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -101,6 +99,10 @@ public class AdminServiceImpl implements AdminService {
     private final ProductSalesSummaryRepository productSalesSummaryRepository;
 
     private final MyPageService myPageService;
+
+    private final RedisTemplate<String, Long> redisTemplate;
+
+    private final CacheProperties cacheProperties;
 
     /**
      *
@@ -176,7 +178,7 @@ public class AdminServiceImpl implements AdminService {
      * 상세 페이지와 다른점으로는 상품 분류명 리스트를 같이 전달.
      */
     @Override
-    public AdminProductPatchDataDTO getPatchProductData(String productId, Principal principal) {
+    public AdminProductPatchDataDTO getPatchProductData(String productId) {
         AdminProductDetailDTO dto = getProductData(productId);
         List<Classification> entity = classificationRepository.findAll(Sort.by("classificationStep").descending());
         List<String> classificationList = entity.stream().map(Classification::getId).toList();
@@ -206,6 +208,8 @@ public class AdminServiceImpl implements AdminService {
             String firstThumbnail = setProductFirstThumbnail(product, imageDTO.getFirstThumbnail());
             if(firstThumbnail != null)
                 saveImages.add(firstThumbnail);
+            else
+                throw new IllegalArgumentException("Failed postProduct. firstThumbnail is null");
 
             patchDTO.getProductOptionList(product).forEach(product::addProductOption);
 
@@ -334,7 +338,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     public List<String> saveThumbnail(Product product, List<MultipartFile> imageList) throws Exception{
-        List<String> thumbnailList = Collections.emptyList();
+        List<String> thumbnailList = new ArrayList<>();
 
         if(imageList != null){
             for(MultipartFile image : imageList){
@@ -353,7 +357,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     public List<String> saveInfoImage(Product product, List<MultipartFile> imageList) throws Exception{
-        List<String> infoImages = Collections.emptyList();
+        List<String> infoImages = new ArrayList<>();
 
         if(imageList != null) {
             for(MultipartFile image : imageList) {
@@ -585,8 +589,12 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public PagingListDTO<AdminOrderResponseDTO> getAllOrderList(AdminOrderPageDTO pageDTO) {
         List<AdminOrderDTO> orderDTOList = productOrderRepository.findAllOrderList(pageDTO);
-        Long totalElements = productOrderRepository.findAllOrderListCount(pageDTO);
-
+        Long totalElements = null;
+        if(pageDTO.keyword() == null)
+            totalElements = getFullScanCount(RedisCaching.ADMIN_ORDER_COUNT, pageDTO);
+        else
+            totalElements = productOrderRepository.findAllOrderListCount(pageDTO);
+        System.out.println("totalElements : " + totalElements);
         return mappingOrderDataAndPagingData(orderDTOList, totalElements, pageDTO);
     }
 
@@ -666,12 +674,18 @@ public class AdminServiceImpl implements AdminService {
      * 상품 문의 목록 조회
      * pageDTO의 SearchType은 new, all 두가지로 구분.
      * 미처리와 전체 목록을 의미. 그래서 쿼리에서는 이 SearchType에 따라 조회.
-     * keyword는 무조건 사용자 nickname을 기준. like가 아닌 equals로 조회하기 때문에 정확한 닉네임을 입력하도록 처리.
+     * 검색은 nickname OR userId로 처리. 이때, LIKE 가 아닌 equals로 처리.
      */
     @Override
     public PagingListDTO<AdminQnAListResponseDTO> getProductQnAList(AdminOrderPageDTO pageDTO) {
         List<AdminQnAListResponseDTO> responseDTO = productQnARepository.findAllByAdminProductQnA(pageDTO);
-        Long totalElements = productQnARepository.findAllByAdminProductQnACount(pageDTO);
+        Long totalElements = null;
+
+        if(pageDTO.searchType().equals("all") && pageDTO.keyword() == null)
+            totalElements = getFullScanCount(RedisCaching.ADMIN_PRODUCT_QNA_COUNT, pageDTO);
+        else
+            totalElements = productQnARepository.findAllByAdminProductQnACount(pageDTO);
+
         PagingMappingDTO pagingMappingDTO = new PagingMappingDTO(totalElements, pageDTO.page(), pageDTO.amount());
 
         return new PagingListDTO<>(responseDTO, pagingMappingDTO);
@@ -745,13 +759,17 @@ public class AdminServiceImpl implements AdminService {
      * 회원 문의 목록 조회.
      * 상품 문의와 마찬가지로 pageDTO의 SearchType은 new, all 두가지로 구분.
      * 미처리와 전체 목록을 의미. 그래서 쿼리에서는 이 SearchType에 따라 조회.
-     * keyword는 무조건 사용자 nickname을 기준. like가 아닌 equals로 조회하기 때문에 정확한 닉네임을 입력하도록 처리.
+     * 검색은 nickname OR userId로 처리. 이때 LIKE가 아닌 equals로 처리.
      */
     @Override
     public PagingListDTO<AdminQnAListResponseDTO> getMemberQnAList(AdminOrderPageDTO pageDTO) {
         List<AdminQnAListResponseDTO> responseDTO = memberQnARepository.findAllByAdminMemberQnA(pageDTO);
-        Long totalElements = memberQnARepository.findAllByAdminMemberQnACount(pageDTO);
-        System.out.println("count result : " + totalElements);
+        Long totalElements = null;
+        if(pageDTO.searchType().equals("all") && pageDTO.keyword() == null)
+            totalElements = getFullScanCount(RedisCaching.ADMIN_MEMBER_QNA_COUNT, pageDTO);
+        else
+            totalElements = memberQnARepository.findAllByAdminMemberQnACount(pageDTO);
+
         PagingMappingDTO pagingMappingDTO = new PagingMappingDTO(totalElements, pageDTO.page(), pageDTO.amount());
 
         return new PagingListDTO<>(responseDTO, pagingMappingDTO);
@@ -1172,5 +1190,57 @@ public class AdminServiceImpl implements AdminService {
                             , optionYearSalesList
                             , optionLastYearSalesList
                     );
+    }
+
+    private Map<String, Function<AdminOrderPageDTO, Long>> KEY_ACTION_MAP;
+
+    @PostConstruct
+    void init() {
+        KEY_ACTION_MAP = Map.of(
+                RedisCaching.ADMIN_PRODUCT_QNA_COUNT.getKey(), productQnARepository::findAllByAdminProductQnACount,
+                RedisCaching.ADMIN_MEMBER_QNA_COUNT.getKey(), memberQnARepository::findAllByAdminMemberQnACount,
+                RedisCaching.ADMIN_ORDER_COUNT.getKey(), productOrderRepository::findAllOrderListCount
+        );
+    }
+
+    /**
+     *
+     * @param cachingKey
+     * @param pageDTO
+     * @return
+     *
+     * Double-check 전략.
+     * 많이 사용되는 캐싱이라면 @Scheduled 를 통한 주기적인 동기화를 시행하는 것이 옳겠으나
+     * 관리자 기능인만큼 주기적인 갱신은 필요하지 않을 것이라고 생각해 Doudle-check로 처리.
+     */
+    public long getFullScanCount(RedisCaching cachingKey, AdminOrderPageDTO pageDTO) {
+        String key = cachingKey.getKey();
+
+        Long result = redisTemplate.opsForValue().get(key);
+        if(result == null){
+            synchronized (this) {
+                result = redisTemplate.opsForValue().get(key);
+                if(result == null) {
+
+                    /*result = switch (cachingKey) {
+                        case ADMIN_PRODUCT_QNA_COUNT -> productQnARepository.findAllByAdminProductQnACount(pageDTO);
+                        case ADMIN_MEMBER_QNA_COUNT -> memberQnARepository.findAllByAdminMemberQnACount(pageDTO);
+                        case ADMIN_ORDER_COUNT -> productOrderRepository.findAllOrderListCount(pageDTO);
+                        default -> throw new IllegalArgumentException("Caching key is abnormal");
+                    };*/
+
+                    Function<AdminOrderPageDTO, Long> action = KEY_ACTION_MAP.get(key);
+
+                    if(action == null)
+                        throw new IllegalArgumentException("caching Key is Abnormal");
+
+                    result = action.apply(pageDTO);
+                    long ttl = cacheProperties.getCount().get(key).getTtl();
+                    redisTemplate.opsForValue().set(key, result, Duration.ofMinutes(ttl));
+                }
+            }
+        }
+
+        return result;
     }
 }

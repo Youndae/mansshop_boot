@@ -145,7 +145,7 @@ public class MyPageServiceImpl implements MyPageService{
                                             , pageDTO.likeAmount()
                                             , Sort.by("createdAt").descending());
 
-        return productLikeRepository.findByUserId(pageDTO, userId, pageable);
+        return productLikeRepository.findByUserId(userId, pageable);
     }
 
     /**

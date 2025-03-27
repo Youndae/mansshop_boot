@@ -27,7 +27,7 @@ public class ProductLikeDSLRepositoryImpl implements ProductLikeDSLRepository{
 
     @Override
     public int countByUserIdAndProductId(String userId, String productId) {
-        List<Long> count =  jpaQueryFactory
+        /*List<Long> count =  jpaQueryFactory
                                 .select(productLike.count())
                                 .from(productLike)
                                 .where(
@@ -36,9 +36,20 @@ public class ProductLikeDSLRepositoryImpl implements ProductLikeDSLRepository{
                                                         productLike.product.id.eq(productId)
                                                 )
                                 )
-                                .fetch();
+                                .fetch();*/
 
-        return count.get(0).intValue();
+        return jpaQueryFactory.select(productLike.count())
+                .from(productLike)
+                .where(
+                        productLike.member.userId.eq(userId)
+                                .and(
+                                        productLike.product.id.eq(productId)
+                                )
+                )
+                .fetchOne()
+                .intValue();
+
+//        return count.get(0).intValue();
     }
 
     @Override
@@ -55,7 +66,7 @@ public class ProductLikeDSLRepositoryImpl implements ProductLikeDSLRepository{
     }
 
     @Override
-    public Page<ProductLikeDTO> findByUserId(LikePageDTO pageDTO, String userId, Pageable pageable) {
+    public Page<ProductLikeDTO> findByUserId(String userId, Pageable pageable) {
 
         List<ProductLikeDTO> list = jpaQueryFactory.select(
                 Projections.constructor(
@@ -78,7 +89,7 @@ public class ProductLikeDSLRepositoryImpl implements ProductLikeDSLRepository{
                 .where(productLike.member.userId.eq(userId))
                 .orderBy(productLike.id.desc())
                 .offset(pageable.getOffset())
-                .limit(pageDTO.likeAmount())
+                .limit(pageable.getPageSize())
                 .fetch();
 
         JPAQuery<Long> count = jpaQueryFactory.select(productLike.countDistinct())

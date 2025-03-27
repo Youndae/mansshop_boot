@@ -43,4 +43,13 @@ public class CartDetail {
     public void setCartCount(int cartCount) {
         this.cartCount = this.cartCount + cartCount;
     }
+
+    @Override
+    public String toString() {
+        return "CartDetail{" +
+                "id=" + id +
+                ", productOption=" + productOption +
+                ", cartCount=" + cartCount +
+                '}';
+    }
 }

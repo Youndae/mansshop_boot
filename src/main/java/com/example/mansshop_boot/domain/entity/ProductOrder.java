@@ -51,7 +51,7 @@ public class ProductOrder {
     private int deliveryFee;
 
     @CreationTimestamp
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3)")
     private LocalDateTime createdAt;
 
     @Column(length = 10,

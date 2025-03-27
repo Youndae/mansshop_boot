@@ -14,11 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
 @SpringBootTest(classes = MansShopBootApplication.class)
 @EnableJpaRepositories(basePackages = "com.example")
+@ActiveProfiles("test")
 public class AdminServiceIT {
 
     @Autowired
@@ -54,7 +56,7 @@ public class AdminServiceIT {
     @Test
     @DisplayName(value = "상품 수정 데이터 요청")
     void getPatchProductData() {
-        AdminProductPatchDataDTO result = adminService.getPatchProductData(PRODUCT_ID, null);
+        AdminProductPatchDataDTO result = adminService.getPatchProductData(PRODUCT_ID);
         Assertions.assertNotNull(result);
     }
 

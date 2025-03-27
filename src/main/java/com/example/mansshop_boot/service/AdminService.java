@@ -22,7 +22,7 @@ public interface AdminService {
 
     AdminProductDetailDTO getProductDetail(String productId);
 
-    AdminProductPatchDataDTO getPatchProductData(String productId, Principal principal);
+    AdminProductPatchDataDTO getPatchProductData(String productId);
 
     String postProduct(AdminProductPatchDTO patchDTO, AdminProductImageDTO imageDTO);
 

@@ -12,12 +12,16 @@ import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import static com.example.mansshop_boot.domain.entity.QMemberQnA.memberQnA;
@@ -28,6 +32,9 @@ import static com.example.mansshop_boot.domain.entity.QQnAClassification.qnAClas
 public class MemberQnADSLRepositoryImpl implements MemberQnADSLRepository{
 
     private final JPAQueryFactory jpaQueryFactory;
+
+    @PersistenceContext
+    private EntityManager em;
 
     @Override
     public Page<MemberQnAListDTO> findAllByUserId(String userId, Pageable pageable) {
@@ -94,72 +101,86 @@ public class MemberQnADSLRepositoryImpl implements MemberQnADSLRepository{
                 .fetchOne();
     }
 
-    /*@Override
-    public Page<AdminQnAListResponseDTO> findAllByAdminMemberQnA(AdminOrderPageDTO pageDTO, Pageable pageable) {
-
-        List<AdminQnAListResponseDTO> list = jpaQueryFactory.select(
-                                                Projections.constructor(
-                                                        AdminQnAListResponseDTO.class
-                                                        , memberQnA.id.as("qnaId")
-                                                        , qnAClassification.qnaClassificationName.as("classification")
-                                                        , memberQnA.memberQnATitle.as("title")
-                                                        , new CaseBuilder()
-                                                                .when(memberQnA.member.nickname.isNull())
-                                                                .then(memberQnA.member.userName)
-                                                                .otherwise(memberQnA.member.nickname)
-                                                                .as("writer")
-                                                        , memberQnA.updatedAt.as("createdAt")
-                                                        , memberQnA.memberQnAStat.as("answerStatus")
-                                                )
-                                        )
-                                        .from(memberQnA)
-                                        .innerJoin(qnAClassification)
-                                        .on(memberQnA.qnAClassification.id.eq(qnAClassification.id))
-                                        .where(adminMemberQnASearch(pageDTO))
-                                        .orderBy(memberQnA.updatedAt.desc())
-                                        .orderBy(memberQnA.id.desc())
-                                        .offset(pageable.getOffset())
-                                        .limit(pageable.getPageSize())
-                                        .fetch();
-
-        JPAQuery<Long> count = jpaQueryFactory.select(memberQnA.countDistinct())
-                                    .from(memberQnA)
-                                    .where(adminMemberQnASearch(pageDTO));
-
-        return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
-    }*/
-
     @Override
     public List<AdminQnAListResponseDTO> findAllByAdminMemberQnA(AdminOrderPageDTO pageDTO) {
+        StringBuilder queryBuilder = new StringBuilder();
 
-        return jpaQueryFactory.select(
-                        Projections.constructor(
-                                AdminQnAListResponseDTO.class
-                                , memberQnA.id.as("qnaId")
-                                , ExpressionUtils.as(
-                                        JPAExpressions.select(qnAClassification.qnaClassificationName)
-                                                .from(qnAClassification)
-                                                .where(qnAClassification.id.eq(memberQnA.qnAClassification.id)), "classification"
-                                )
-                                , memberQnA.memberQnATitle.as("title")
-                                , new CaseBuilder()
-                                        .when(memberQnA.member.nickname.isNull())
-                                        .then(memberQnA.member.userName)
-                                        .otherwise(memberQnA.member.nickname)
-                                        .as("writer")
-                                , memberQnA.updatedAt.as("createdAt")
-                                , memberQnA.memberQnAStat.as("answerStatus")
-                        )
-                )
-                .from(memberQnA)
-                .innerJoin(qnAClassification)
-                .on(memberQnA.qnAClassification.id.eq(qnAClassification.id))
-                .where(adminMemberQnASearch(pageDTO))
-                .orderBy(memberQnA.updatedAt.desc())
-                .orderBy(memberQnA.id.desc())
-                .offset(pageDTO.offset())
-                .limit(pageDTO.amount())
-                .fetch();
+        queryBuilder.append("SELECT q.id, ")
+                .append("qc.qnaClassificationName, ")
+                .append("q.memberQnATitle, ");
+
+        if(pageDTO.keyword() == null)
+            queryBuilder.append("CASE WHEN (m.nickname IS NULL) THEN m.userName ELSE m.nickname END, ");
+        else
+            queryBuilder.append("q.userId, ");
+
+        queryBuilder.append("q.updatedAt, ")
+                    .append("q.memberQnAStat ")
+                    .append("FROM (")
+                    .append(adminMemberQnADynamicSubQuery(pageDTO))
+                    .append(") as q ")
+                    .append("INNER JOIN qnaClassification qc ")
+                    .append("ON q.qnaClassificationId = qc.id ");
+
+        if(pageDTO.keyword() == null)
+            queryBuilder.append("LEFT JOIN member m ")
+                        .append("ON m.userId = q.userId");
+
+        Query query = em.createNativeQuery(queryBuilder.toString());
+
+        query.setParameter("offset", pageDTO.offset());
+        query.setParameter("amount", pageDTO.amount());
+
+        if(pageDTO.keyword() != null)
+            query.setParameter("keyword", pageDTO.keyword());
+
+        List<Object[]> resultList = query.getResultList();
+
+        return resultList.stream()
+                            .map(val -> new AdminQnAListResponseDTO(
+                                    ((Number) val[0]).longValue(),
+                                    (String) val[1],
+                                    (String) val[2],
+                                    (String) val[3],
+                                    ((Timestamp) val[4]).toLocalDateTime(),
+                                    (Boolean) val[5]
+                            ))
+                            .toList();
+    }
+
+    public String adminMemberQnADynamicSubQuery(AdminOrderPageDTO pageDTO) {
+        StringBuilder queryBuilder = new StringBuilder();
+
+        queryBuilder.append("SELECT mq.id, ")
+                .append("mq.qnaClassificationId, ")
+                .append("mq.memberQnATitle, ")
+                .append("mq.updatedAt, ")
+                .append("mq.memberQnAStat, ");
+
+        if(pageDTO.keyword() == null)
+            queryBuilder.append("mq.userId ")
+                    .append("FROM memberQnA mq ")
+                    .append("WHERE 1=1 ");
+        else
+            queryBuilder.append("CASE WHEN (m.nickname IS NULL) THEN m.userName ELSE m.nickname END, ")
+                    .append("FROM memberQnA mq ")
+                    .append("INNER JOIN member m ")
+                    .append("ON mq.userId = m.userId ")
+                    .append("WHERE (m.nickname = :keyword OR m.userId = :keyword) ");
+
+        queryBuilder.append(adminMemberQnASubQuerySearch(pageDTO))
+                .append("ORDER BY mq.updatedAt DESC LIMIT :offset, :amount");
+
+        return queryBuilder.toString();
+    }
+
+    public String adminMemberQnASubQuerySearch(AdminOrderPageDTO pageDTO) {
+        String query = "";
+
+        if(pageDTO.searchType().equals("new"))
+            query = "AND mq.memberQnAStat = 0 ";
+
+        return query;
     }
 
     @Override

@@ -14,6 +14,23 @@ public record AdminOrderDTO(
         , String address
         , String orderStatus
 ) {
+
+    public AdminOrderDTO(long orderId,
+                         String recipient,
+                         String userId,
+                         String phone,
+                         LocalDateTime createdAt,
+                         String address,
+                         String orderStatus) {
+        this.orderId = orderId;
+        this.recipient = recipient;
+        this.userId = userId.equals("Anonymous") ? "비회원" : userId;
+        this.phone = phone;
+        this.createdAt = createdAt;
+        this.address = address;
+        this.orderStatus = orderStatus;
+    }
+
     public AdminOrderResponseDTO toResponseDTO(List<AdminOrderDetailDTO> detailList){
         return AdminOrderResponseDTO.builder()
                 .orderId(orderId)

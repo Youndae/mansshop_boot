@@ -16,7 +16,7 @@ public record OrderProductSummaryDTO(
                 productOrderDataDTO.orderProductList(),
                 productOrderDataDTO.orderProductIds(),
                 productOrderDataDTO.orderOptionIds(),
-                LocalDate.now()
+                LocalDate.now().withDayOfMonth(1)
         );
     }
 }
