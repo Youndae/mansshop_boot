@@ -14,7 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -31,7 +30,7 @@ public class MemberDSLRepositoryImpl implements MemberDSLRepository{
     public Member findByLocalUserId(String userId) {
 
         return jpaQueryFactory.selectFrom(member)
-                .leftJoin(member.auths, auth1).fetchJoin()
+                .innerJoin(member.auths, auth1).fetchJoin()
                 .where(member.userId.eq(userId).and(member.provider.eq("local")))
                 .fetchOne();
     }
@@ -118,5 +117,4 @@ public class MemberDSLRepositoryImpl implements MemberDSLRepository{
                 )
                 .fetchOne();
     }
-
 }

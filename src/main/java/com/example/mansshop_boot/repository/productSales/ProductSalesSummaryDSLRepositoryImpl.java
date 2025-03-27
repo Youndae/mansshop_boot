@@ -8,6 +8,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberPath;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -99,20 +100,20 @@ public class ProductSalesSummaryDSLRepositoryImpl implements ProductSalesSummary
                                 product.productName.as("productName"),
                                 productOption.size.as("size"),
                                 productOption.color.as("color"),
-                                productSalesSummary.sales.longValue().sum().coalesce(0L).as("productSales"),
-                                productSalesSummary.salesQuantity.longValue().sum().coalesce(0L).as("productSalesQuantity")
+                                productSalesSummary.sales.coalesce(0L).as("productSales"),
+                                productSalesSummary.salesQuantity.coalesce(0L).as("productSalesQuantity")
                         )
                 )
                 .from(productOption)
                 .innerJoin(productOption.product, product)
                 .leftJoin(productSalesSummary)
                 .on(productSalesSummary.product.id.eq(product.id)
+                        .and(productSalesSummary.productOption.id.eq(productOption.id))
                         .and(productSalesSummary.classification.id.eq(classification))
                         .and(productSalesSummary.periodMonth.goe(startDate))
                         .and(productSalesSummary.periodMonth.lt(endDate))
                 )
                 .where(product.classification.id.eq(classification))
-                .groupBy(product.productName, productOption.size, productOption.color, product.createdAt)
                 .orderBy(product.createdAt.desc())
                 .fetch();
     }
@@ -120,27 +121,32 @@ public class ProductSalesSummaryDSLRepositoryImpl implements ProductSalesSummary
     @Override
     public Page<AdminProductSalesListDTO> findProductSalesList(AdminPageDTO pageDTO, Pageable pageable) {
 
-        List<AdminProductSalesListDTO> list = jpaQueryFactory.select(
-                        Projections.constructor(
-                                AdminProductSalesListDTO.class,
-                                product.classification.id.as("classification"),
-                                product.id.as("productId"),
-                                product.productName.as("productName"),
-                                productSalesSummary.sales.longValue().sum().coalesce(0L).as("sales"),
-                                product.productSalesQuantity.as("productSalesQuantity")
-                        )
-                )
-                .from(productSalesSummary)
-                .rightJoin(product)
-                .on(
-                        product.id.eq(productSalesSummary.product.id)
-                                .and(productSalesDynamicSearch(pageDTO))
-                )
-                .groupBy(product.classification.id, product.id, product.productName)
-                .orderBy(product.classification.classificationStep.asc())
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
+
+        JPQLQuery<AdminProductSalesListDTO> query = jpaQueryFactory.select(
+                                                            Projections.constructor(
+                                                                    AdminProductSalesListDTO.class,
+                                                                    product.classification.id.as("classification"),
+                                                                    product.id.as("productId"),
+                                                                    product.productName.as("productName"),
+                                                                    productSalesSummary.sales.longValue().sum().coalesce(0L).as("sales"),
+                                                                    product.productSalesQuantity.as("productSalesQuantity")
+                                                            )
+                                                    )
+                                                    .from(productSalesSummary);
+
+        if(pageDTO.keyword() != null)
+            query.innerJoin(product)
+                    .on(product.id.eq(productSalesSummary.product.id)
+                            .and(productSalesDynamicSearch(pageDTO)));
+        else
+            query.rightJoin(product)
+                    .on(product.id.eq(productSalesSummary.product.id));
+
+        List<AdminProductSalesListDTO> list = query.groupBy(product.classification.id, product.id, product.productName)
+                                                    .orderBy(product.classification.classificationStep.asc())
+                                                    .offset(pageable.getOffset())
+                                                    .limit(pageable.getPageSize())
+                                                    .fetch();
 
         JPAQuery<Long> count = jpaQueryFactory.select(product.countDistinct())
                                             .from(product)
@@ -152,7 +158,7 @@ public class ProductSalesSummaryDSLRepositoryImpl implements ProductSalesSummary
 
     private BooleanExpression productSalesDynamicSearch(AdminPageDTO pageDTO) {
         if(pageDTO.keyword() != null)
-            return product.productName.eq(pageDTO.keyword());
+            return product.productName.like(pageDTO.keyword());
         else
             return null;
     }

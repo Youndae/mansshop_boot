@@ -45,11 +45,11 @@ public class MemberQnA {
     private String memberQnAContent;
 
     @CreationTimestamp
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3)")
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3)")
     private LocalDateTime updatedAt;
 
     @Column(columnDefinition = "TINYINT(1) DEFAULT 0",

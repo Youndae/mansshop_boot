@@ -30,7 +30,7 @@ public record MyPageReviewDTO(
                 createdAt.toLocalDate(),
                 updatedAt.toLocalDate(),
                 replyContent,
-                replyUpdatedAt.toLocalDate()
+                replyUpdatedAt == null ? null : replyUpdatedAt.toLocalDate()
         );
     }
 }

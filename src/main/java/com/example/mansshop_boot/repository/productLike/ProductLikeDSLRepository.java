@@ -12,5 +12,5 @@ public interface ProductLikeDSLRepository {
 
     Long deleteByUserIdAndProductId(ProductLike productLike);
 
-    Page<ProductLikeDTO> findByUserId(LikePageDTO pageDTO, String userId, Pageable pageable);
+    Page<ProductLikeDTO> findByUserId(String userId, Pageable pageable);
 }

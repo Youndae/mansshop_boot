@@ -52,16 +52,17 @@ public class Member {
     private Long memberPoint;
 
     @CreationTimestamp
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3)")
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3)")
     private LocalDateTime updatedAt;
 
     @Column(length = 20)
     private String phone;
 
+    @Column(columnDefinition = "DATE")
     private LocalDate birth;
 
     @OneToMany(mappedBy = "member")

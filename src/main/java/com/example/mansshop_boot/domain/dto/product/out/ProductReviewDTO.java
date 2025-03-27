@@ -22,7 +22,7 @@ public record ProductReviewDTO(
                 reviewContent,
                 reviewCreatedAt.toLocalDate(),
                 answerContent,
-                answerCreatedAt.toLocalDate()
+                answerCreatedAt == null ? null : answerCreatedAt.toLocalDate()
         );
     }
 }

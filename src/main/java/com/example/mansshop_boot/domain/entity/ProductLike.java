@@ -30,6 +30,6 @@ public class ProductLike {
     private Product product;
 
     @CreationTimestamp
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3)")
     private LocalDateTime createdAt;
 }

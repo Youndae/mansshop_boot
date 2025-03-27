@@ -242,6 +242,7 @@ public class ProductDSLRepositoryImpl implements ProductDSLRepository{
                 .from(product)
                 .where(adminProductSearch(pageDTO))
                 .orderBy(aliasSum.asc())
+                .orderBy(product.id.asc())
                 .offset(pageDTO.offset())
                 .limit(pageDTO.amount())
                 .fetch();

@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "cart")
+@ToString
 public class Cart {
 
     @Id
@@ -29,12 +31,12 @@ public class Cart {
     private String cookieId;
 
     @CreationTimestamp
-    @Column(nullable = false)
-    private LocalDate createdAt;
+    @Column(nullable = false, columnDefinition = "DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3)")
+    private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(nullable = false)
-    private LocalDate updatedAt;
+    @Column(nullable = false, columnDefinition = "DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3)")
+    private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "cart", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private final List<CartDetail> cartDetailList = new ArrayList<>();

@@ -6,6 +6,6 @@ public record AdminPeriodSalesStatisticsDTO(
         , long monthOrderQuantity
         , long monthDeliveryFee
         , long cashTotalPrice
-        , long cartTotalPrice
+        , long cardTotalPrice
 ) {
 }

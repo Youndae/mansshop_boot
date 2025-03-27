@@ -164,7 +164,7 @@ public class AdminController {
     @GetMapping("/product/patch/{productId}")
     public ResponseEntity<ResponseDTO<AdminProductPatchDataDTO>> getPatchProductData(@PathVariable(name = "productId") String productId
                                                                                     , Principal principal) {
-        ResponseWrappingDTO<AdminProductPatchDataDTO> dto = new ResponseWrappingDTO<>(adminService.getPatchProductData(productId, principal));
+        ResponseWrappingDTO<AdminProductPatchDataDTO> dto = new ResponseWrappingDTO<>(adminService.getPatchProductData(productId));
 
         return responseMappingService.mappingResponseDTO(dto, principal);
     }

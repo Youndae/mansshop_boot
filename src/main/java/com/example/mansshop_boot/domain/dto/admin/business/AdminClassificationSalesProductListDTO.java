@@ -5,6 +5,6 @@ public record AdminClassificationSalesProductListDTO(
         , String size
         , String color
         , long productSales
-        , long productQuantity
+        , long productSalesQuantity
 ) {
 }

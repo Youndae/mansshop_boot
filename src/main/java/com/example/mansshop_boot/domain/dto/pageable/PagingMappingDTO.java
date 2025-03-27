@@ -3,9 +3,11 @@ package com.example.mansshop_boot.domain.dto.pageable;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Getter
 @NoArgsConstructor
+@ToString
 public class PagingMappingDTO{
 
     private Long totalElements;
@@ -20,7 +22,7 @@ public class PagingMappingDTO{
     public PagingMappingDTO(Long totalElements, int page, int amount) {
         long totalPages = 0;
 
-        if(totalElements != null){
+        if(totalElements != 0){
             totalPages = totalElements / amount;
 
             if(totalElements % amount != 0)
@@ -28,7 +30,7 @@ public class PagingMappingDTO{
         }
 
         this.totalElements = totalElements;
-        this.empty = totalElements == null;
+        this.empty = totalElements == 0;
         this.number = page;
         this.totalPages = totalPages;
     }

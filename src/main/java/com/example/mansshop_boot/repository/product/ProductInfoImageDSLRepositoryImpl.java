@@ -4,6 +4,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -27,6 +28,7 @@ public class ProductInfoImageDSLRepositoryImpl implements ProductInfoImageDSLRep
     }
 
     @Override
+    @Transactional
     public void deleteByImageName(List<String> deleteList) {
         jpaQueryFactory.delete(productInfoImage)
                 .where(productInfoImage.imageName.in(deleteList))
