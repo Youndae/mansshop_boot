@@ -136,6 +136,17 @@ public class MemberQnARepositoryTest {
     }
 
     @Test
+    @DisplayName(value = "관리자의 전체 문의 목록 중 검색")
+    void findAllByAllAdminMemberQnASearch() {
+        AdminOrderPageDTO pageDTO = new AdminOrderPageDTO("tester1", "all", 1);
+
+        List<AdminQnAListResponseDTO> result = memberQnARepository.findAllByAdminMemberQnA(pageDTO);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertFalse(result.isEmpty());
+    }
+
+    @Test
     @DisplayName(value = "관리자의 새로운(미처리된) 문의 목록 조회")
     void findAllByNewAdminMemberQnA() {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(null, "new", 1);
@@ -144,6 +155,17 @@ public class MemberQnARepositoryTest {
 
         Assertions.assertNotNull(result);
         Assertions.assertEquals(newDataCount, result.size());
+    }
+
+    @Test
+    @DisplayName(value = "관리자의 새로운(미처리된) 문의 목록 조회")
+    void findAllByNewAdminMemberQnASearch() {
+        AdminOrderPageDTO pageDTO = new AdminOrderPageDTO("tester1", "new", 1);
+
+        List<AdminQnAListResponseDTO> result = memberQnARepository.findAllByAdminMemberQnA(pageDTO);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertFalse(result.isEmpty());
     }
 
     @Test

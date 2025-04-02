@@ -5,10 +5,12 @@ import com.example.mansshop_boot.domain.enumuration.RabbitMQPrefix;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 
 import java.util.Map;
 
@@ -37,8 +39,8 @@ public class RabbitMQConfig {
         return rabbitTemplate;
     }
 
+    @DependsOn("orderDLQExchange")
     private Queue createQueueWithDLQExchange(String queueKey, String dlqExchangeKey) {
-
         return QueueBuilder.durable(queue.get(queueKey).getName())
                 .withArgument("x-dead-letter-exchange", exchange.get(dlqExchangeKey).getDlq())
                 .withArgument("x-dead-letter-routing-key", queue.get(queueKey).getDlqRouting())
@@ -162,10 +164,15 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public DirectExchange orderDLQExchange() {
+        return createExchange(exchange.get(RabbitMQPrefix.EXCHANGE_ORDER.getKey()).getDlq(), true);
+    }
+
+    @Bean
     public Binding orderProductDLQBinding() {
 
         return setBinding(orderProductDLQ(),
-                createExchange(exchange.get(RabbitMQPrefix.EXCHANGE_ORDER.getKey()).getDlq(), true),
+                orderDLQExchange(),
                 queue.get(RabbitMQPrefix.QUEUE_ORDER_PRODUCT.getKey()).getDlqRouting()
         );
     }
@@ -174,7 +181,7 @@ public class RabbitMQConfig {
     public Binding orderProductOptionDLQBinding() {
 
         return setBinding(orderProductOptionDLQ(),
-                createExchange(exchange.get(RabbitMQPrefix.EXCHANGE_ORDER.getKey()).getDlq(), true),
+                orderDLQExchange(),
                 queue.get(RabbitMQPrefix.QUEUE_ORDER_PRODUCT_OPTION.getKey()).getDlqRouting()
         );
     }
@@ -183,7 +190,7 @@ public class RabbitMQConfig {
     public Binding periodSummaryDLQBinding() {
 
         return setBinding(periodSummaryDLQ(),
-                createExchange(exchange.get(RabbitMQPrefix.EXCHANGE_ORDER.getKey()).getDlq(), true),
+                orderDLQExchange(),
                 queue.get(RabbitMQPrefix.QUEUE_PERIOD_SUMMARY.getKey()).getDlqRouting()
         );
     }

@@ -162,7 +162,7 @@ public class MemberQnADSLRepositoryImpl implements MemberQnADSLRepository{
                     .append("FROM memberQnA mq ")
                     .append("WHERE 1=1 ");
         else
-            queryBuilder.append("CASE WHEN (m.nickname IS NULL) THEN m.userName ELSE m.nickname END, ")
+            queryBuilder.append("CASE WHEN (m.nickname IS NULL) THEN m.userName ELSE m.nickname END as userId ")
                     .append("FROM memberQnA mq ")
                     .append("INNER JOIN member m ")
                     .append("ON mq.userId = m.userId ")

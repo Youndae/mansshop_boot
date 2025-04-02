@@ -20,7 +20,7 @@ import java.util.List;
 
 @SpringBootTest(classes = MansShopBootApplication.class)
 @EnableJpaRepositories(basePackages = "com.example")
-@ActiveProfiles("test")
+//@ActiveProfiles("test")
 public class AdminServiceIT {
 
     @Autowired
@@ -237,6 +237,8 @@ public class AdminServiceIT {
     void getProductSalesList() {
         AdminPageDTO pageDTO = new AdminPageDTO(null, 1);
         Page<AdminProductSalesListDTO> result = adminService.getProductSalesList(pageDTO);
+
+        result.getContent().forEach(System.out::println);
 
         Assertions.assertNotNull(result);
     }

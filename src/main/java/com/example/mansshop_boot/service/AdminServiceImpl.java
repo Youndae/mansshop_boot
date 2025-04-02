@@ -7,6 +7,7 @@ import com.example.mansshop_boot.domain.dto.admin.business.*;
 import com.example.mansshop_boot.domain.dto.admin.in.*;
 import com.example.mansshop_boot.domain.dto.admin.out.*;
 import com.example.mansshop_boot.domain.dto.cache.CacheProperties;
+import com.example.mansshop_boot.domain.dto.cache.CacheRequest;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyInsertDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
@@ -172,7 +173,6 @@ public class AdminServiceImpl implements AdminService {
     /**
      *
      * @param productId
-     * @param principal
      *
      * 상품 수정 페이지에 출력할 상품 정보 데이터 조회.
      * 상세 페이지와 다른점으로는 상품 분류명 리스트를 같이 전달.
@@ -591,7 +591,7 @@ public class AdminServiceImpl implements AdminService {
         List<AdminOrderDTO> orderDTOList = productOrderRepository.findAllOrderList(pageDTO);
         Long totalElements = null;
         if(pageDTO.keyword() == null)
-            totalElements = getFullScanCount(RedisCaching.ADMIN_ORDER_COUNT, pageDTO);
+            totalElements = getFullScanCount(RedisCaching.ADMIN_ORDER_COUNT, new CacheRequest(pageDTO));
         else
             totalElements = productOrderRepository.findAllOrderListCount(pageDTO);
         System.out.println("totalElements : " + totalElements);
@@ -682,7 +682,7 @@ public class AdminServiceImpl implements AdminService {
         Long totalElements = null;
 
         if(pageDTO.searchType().equals("all") && pageDTO.keyword() == null)
-            totalElements = getFullScanCount(RedisCaching.ADMIN_PRODUCT_QNA_COUNT, pageDTO);
+            totalElements = getFullScanCount(RedisCaching.ADMIN_PRODUCT_QNA_COUNT, new CacheRequest(pageDTO));
         else
             totalElements = productQnARepository.findAllByAdminProductQnACount(pageDTO);
 
@@ -766,7 +766,7 @@ public class AdminServiceImpl implements AdminService {
         List<AdminQnAListResponseDTO> responseDTO = memberQnARepository.findAllByAdminMemberQnA(pageDTO);
         Long totalElements = null;
         if(pageDTO.searchType().equals("all") && pageDTO.keyword() == null)
-            totalElements = getFullScanCount(RedisCaching.ADMIN_MEMBER_QNA_COUNT, pageDTO);
+            totalElements = getFullScanCount(RedisCaching.ADMIN_MEMBER_QNA_COUNT, new CacheRequest(pageDTO));
         else
             totalElements = memberQnARepository.findAllByAdminMemberQnACount(pageDTO);
 
@@ -867,7 +867,13 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public PagingListDTO<AdminReviewDTO> getReviewList(AdminOrderPageDTO pageDTO, AdminListType listType) {
         List<AdminReviewDTO> content = productReviewRepository.findAllByAdminReviewList(pageDTO, listType.name());
-        Long totalElements = productReviewRepository.countByAdminReviewList(pageDTO, listType.name());
+        Long totalElements = null;
+
+        if(pageDTO.keyword() == null && listType.equals(AdminListType.ALL))
+            totalElements = getFullScanCount(RedisCaching.ADMIN_REVIEW_COUNT, new CacheRequest(pageDTO, listType.name()));
+        else
+            totalElements = productReviewRepository.countByAdminReviewList(pageDTO, listType.name());
+
         PagingMappingDTO pagingMappingDTO = new PagingMappingDTO(totalElements, pageDTO.page(), pageDTO.amount());
 
         return new PagingListDTO<>(content, pagingMappingDTO);
@@ -1192,28 +1198,34 @@ public class AdminServiceImpl implements AdminService {
                     );
     }
 
-    private Map<String, Function<AdminOrderPageDTO, Long>> KEY_ACTION_MAP;
+//    private Map<String, Function<AdminOrderPageDTO, Long>> KEY_ACTION_MAP;
 
+    private Map<String, Function<CacheRequest, Long>> KEY_ACTION_MAP;
     @PostConstruct
     void init() {
         KEY_ACTION_MAP = Map.of(
-                RedisCaching.ADMIN_PRODUCT_QNA_COUNT.getKey(), productQnARepository::findAllByAdminProductQnACount,
-                RedisCaching.ADMIN_MEMBER_QNA_COUNT.getKey(), memberQnARepository::findAllByAdminMemberQnACount,
-                RedisCaching.ADMIN_ORDER_COUNT.getKey(), productOrderRepository::findAllOrderListCount
+                RedisCaching.ADMIN_PRODUCT_QNA_COUNT.getKey(),
+                            req -> productQnARepository.findAllByAdminProductQnACount(req.getPageDTO()),
+                RedisCaching.ADMIN_MEMBER_QNA_COUNT.getKey(),
+                            req -> memberQnARepository.findAllByAdminMemberQnACount(req.getPageDTO()),
+                RedisCaching.ADMIN_ORDER_COUNT.getKey(),
+                            req -> productOrderRepository.findAllOrderListCount(req.getPageDTO()),
+                RedisCaching.ADMIN_REVIEW_COUNT.getKey(),
+                            req -> productReviewRepository.countByAdminReviewList(req.getPageDTO(), req.getListType())
         );
     }
 
     /**
      *
      * @param cachingKey
-     * @param pageDTO
+     * @param request
      * @return
      *
      * Double-check 전략.
      * 많이 사용되는 캐싱이라면 @Scheduled 를 통한 주기적인 동기화를 시행하는 것이 옳겠으나
      * 관리자 기능인만큼 주기적인 갱신은 필요하지 않을 것이라고 생각해 Doudle-check로 처리.
      */
-    public long getFullScanCount(RedisCaching cachingKey, AdminOrderPageDTO pageDTO) {
+    public long getFullScanCount(RedisCaching cachingKey, CacheRequest request) {
         String key = cachingKey.getKey();
 
         Long result = redisTemplate.opsForValue().get(key);
@@ -1229,12 +1241,12 @@ public class AdminServiceImpl implements AdminService {
                         default -> throw new IllegalArgumentException("Caching key is abnormal");
                     };*/
 
-                    Function<AdminOrderPageDTO, Long> action = KEY_ACTION_MAP.get(key);
+                    Function<CacheRequest, Long> action = KEY_ACTION_MAP.get(key);
 
                     if(action == null)
                         throw new IllegalArgumentException("caching Key is Abnormal");
 
-                    result = action.apply(pageDTO);
+                    result = action.apply(request);
                     long ttl = cacheProperties.getCount().get(key).getTtl();
                     redisTemplate.opsForValue().set(key, result, Duration.ofMinutes(ttl));
                 }

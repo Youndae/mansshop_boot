@@ -11,6 +11,9 @@ import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -64,10 +67,9 @@ public class ProductSalesSummaryDSLRepositoryImpl implements ProductSalesSummary
         )
                 .from(productSalesSummary)
                 .rightJoin(classification)
-                .on(
-                        classification.id.eq(productSalesSummary.classification.id)
-                                .and(productSalesSummary.periodMonth.goe(startDate))
-                                .and(productSalesSummary.periodMonth.lt(endDate))
+                .on(classification.id.eq(productSalesSummary.classification.id))
+                .where(productSalesSummary.periodMonth.goe(startDate)
+                        .and(productSalesSummary.periodMonth.lt(endDate))
                 )
                 .groupBy(classification.id)
                 .orderBy(classification.classificationStep.asc())
@@ -107,9 +109,13 @@ public class ProductSalesSummaryDSLRepositoryImpl implements ProductSalesSummary
                 .from(productOption)
                 .innerJoin(productOption.product, product)
                 .leftJoin(productSalesSummary)
-                .on(productSalesSummary.product.id.eq(product.id)
+                /*.on(productSalesSummary.product.id.eq(product.id)
                         .and(productSalesSummary.productOption.id.eq(productOption.id))
                         .and(productSalesSummary.classification.id.eq(classification))
+                        .and(productSalesSummary.periodMonth.goe(startDate))
+                        .and(productSalesSummary.periodMonth.lt(endDate))
+                )*/
+                .on(productSalesSummary.productOption.id.eq(productOption.id)
                         .and(productSalesSummary.periodMonth.goe(startDate))
                         .and(productSalesSummary.periodMonth.lt(endDate))
                 )
@@ -118,37 +124,58 @@ public class ProductSalesSummaryDSLRepositoryImpl implements ProductSalesSummary
                 .fetch();
     }
 
+    @PersistenceContext
+    private EntityManager em;
+
     @Override
     public Page<AdminProductSalesListDTO> findProductSalesList(AdminPageDTO pageDTO, Pageable pageable) {
+        StringBuilder queryBuilder = new StringBuilder();
+        String searchCondition = pageDTO.keyword() != null ? "WHERE pr.productName LIKE :keyword " : "";
 
+        queryBuilder.append("SELECT p.classificationId, ")
+                .append("p.id, ")
+                .append("p.productName, ")
+                .append("coalesce(sum(s.sales), 0), ")
+                .append("p.productSalesQuantity ")
+                .append("FROM productSalesSummary s ")
+                .append("RIGHT JOIN")
+                .append("(")
+                    .append("SELECT pr.id, ")
+                    .append("pr.classificationId, ")
+                    .append("pr.productName, ")
+                    .append("pr.productSalesQuantity ")
+                    .append("FROM product pr ")
+                    .append("INNER JOIN classification c ")
+                    .append("ON pr.classificationId = c.id ")
+                    .append(searchCondition)
+                    .append("ORDER BY c.classificationStep ASC, ")
+                    .append("pr.createdAt DESC ")
+                    .append("LIMIT :offset, :amount")
+                .append(") as p ")
+                .append("ON p.id = s.productId ")
+                .append("GROUP BY p.classificationId, p.id, p.productName");
 
-        JPQLQuery<AdminProductSalesListDTO> query = jpaQueryFactory.select(
-                                                            Projections.constructor(
-                                                                    AdminProductSalesListDTO.class,
-                                                                    product.classification.id.as("classification"),
-                                                                    product.id.as("productId"),
-                                                                    product.productName.as("productName"),
-                                                                    productSalesSummary.sales.longValue().sum().coalesce(0L).as("sales"),
-                                                                    product.productSalesQuantity.as("productSalesQuantity")
-                                                            )
-                                                    )
-                                                    .from(productSalesSummary);
+        Query query = em.createNativeQuery(queryBuilder.toString());
+
+        query.setParameter("offset", pageDTO.offset());
+        query.setParameter("amount", pageDTO.amount());
 
         if(pageDTO.keyword() != null)
-            query.innerJoin(product)
-                    .on(product.id.eq(productSalesSummary.product.id)
-                            .and(productSalesDynamicSearch(pageDTO)));
-        else
-            query.rightJoin(product)
-                    .on(product.id.eq(productSalesSummary.product.id));
+            query.setParameter("keyword", "%" + pageDTO.keyword() + "%");
 
-        List<AdminProductSalesListDTO> list = query.groupBy(product.classification.id, product.id, product.productName)
-                                                    .orderBy(product.classification.classificationStep.asc())
-                                                    .offset(pageable.getOffset())
-                                                    .limit(pageable.getPageSize())
-                                                    .fetch();
+        List<Object[]> resultList = query.getResultList();
 
-        JPAQuery<Long> count = jpaQueryFactory.select(product.countDistinct())
+        List<AdminProductSalesListDTO> list = resultList.stream()
+                                                        .map(val -> new AdminProductSalesListDTO(
+                                                                (String) val[0],
+                                                                (String) val[1],
+                                                                (String) val[2],
+                                                                ((Number) val[3]).longValue(),
+                                                                ((Number) val[4]).longValue()
+                                                        ))
+                                                        .toList();
+
+        JPAQuery<Long> count = jpaQueryFactory.select(product.createdAt.count())
                                             .from(product)
                                             .where(productSalesDynamicSearch(pageDTO));
 

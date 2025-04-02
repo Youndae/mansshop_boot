@@ -14,6 +14,9 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -21,6 +24,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.example.mansshop_boot.domain.entity.QProductReview.productReview;
@@ -107,17 +112,17 @@ public class ProductReviewDSLRepositoryImpl implements ProductReviewDSLRepositor
         return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
     }
 
-    @Override
+    /*@Override
     public List<AdminReviewDTO> findAllByAdminReviewList(AdminOrderPageDTO pageDTO, String listType) {
         return jpaQueryFactory.select(
                         Projections.constructor(
                                 AdminReviewDTO.class
                                 , productReview.id.as("reviewId")
-                                /*, ExpressionUtils.as(
+                                *//*, ExpressionUtils.as(
                                         JPAExpressions.select(product.productName)
                                                 .from(product)
                                                 .where(product.id.eq(productReview.product.id)), "productName"
-                                )*/
+                                )*//*
                                 , product.productName
                                 , new CaseBuilder()
                                         .when(productReview.member.nickname.isNull())
@@ -136,11 +141,123 @@ public class ProductReviewDSLRepositoryImpl implements ProductReviewDSLRepositor
                 .offset(pageDTO.offset())
                 .limit(pageDTO.amount())
                 .fetch();
+    }*/
+
+    @PersistenceContext
+    private EntityManager em;
+
+    @Override
+    public List<AdminReviewDTO> findAllByAdminReviewList(AdminOrderPageDTO pageDTO, String listType) {
+        StringBuilder queryBuilder = new StringBuilder();
+
+        queryBuilder.append("SELECT r.id, ")
+                .append(reviewDynamicFieldQuery(pageDTO))
+                .append("r.updatedAt, ")
+                .append("r.status ")
+                .append("FROM ")
+                .append(reviewDynamicSubQuery(pageDTO, listType))
+                .append(reviewDynamicJoinQuery(pageDTO));
+
+        Query query = em.createNativeQuery(queryBuilder.toString());
+
+        query.setParameter("offset", pageDTO.offset());
+        query.setParameter("amount", pageDTO.amount());
+
+        if(pageDTO.keyword() != null)
+            query.setParameter("keyword", "%" + pageDTO.keyword() + "%");
+
+        List<Object[]> resultList = query.getResultList();
+
+        return resultList.stream()
+                .map(val -> new AdminReviewDTO(
+                        ((Number) val[0]).longValue(),
+                        (String) val[1],
+                        (String) val[2],
+                        ((Timestamp) val[3]).toLocalDateTime(),
+                        (Boolean) val[4]
+                ))
+                .toList();
     }
+
+    private String reviewDynamicFieldQuery(AdminOrderPageDTO pageDTO) {
+        StringBuilder queryBuilder = new StringBuilder();
+
+        if(pageDTO.searchType() == null) {
+            queryBuilder.append("p.productName, ")
+                    .append(memberCaseWhenQuery());
+        }else if(pageDTO.searchType().equals("product")){
+            queryBuilder.append("r.productName, ")
+                    .append(memberCaseWhenQuery());
+        }else if(pageDTO.searchType().equals("user")) {
+            queryBuilder.append("p.productName, ")
+                    .append("r.userId, ");
+        }
+
+        return queryBuilder.toString();
+    }
+
+    private String reviewDynamicJoinQuery(AdminOrderPageDTO pageDTO) {
+        StringBuilder queryBuilder = new StringBuilder();
+        String productJoin = "INNER JOIN product p ON p.id = r.productId ";
+        String memberJoin = "INNER JOIN member m ON m.userId = r.userId ";
+
+        if(pageDTO.searchType() == null){
+            queryBuilder.append(productJoin)
+                        .append(memberJoin);
+        }else if(pageDTO.searchType().equals("product")){
+            queryBuilder.append(memberJoin);
+        }else if(pageDTO.searchType().equals("user")){
+            queryBuilder.append(productJoin);
+        }
+
+        return queryBuilder.toString();
+    }
+
+    private String reviewDynamicSubQuery(AdminOrderPageDTO pageDTO, String listType) {
+        StringBuilder queryBuilder = new StringBuilder();
+        String listTypeCondition = listType.equals("NEW") ? "AND pr.status = 0 " : "";
+
+        queryBuilder.append("( SELECT ")
+                .append("pr.id, ")
+                .append("pr.updatedAt, ")
+                .append("pr.status, ");
+
+        if(pageDTO.searchType() == null) {
+            queryBuilder.append("pr.productId, ")
+                    .append("pr.userId ")
+                    .append("FROM productReview pr ")
+                    .append("WHERE 1=1 ");
+        }else if(pageDTO.searchType().equals("product")) {
+            queryBuilder.append("p.productName, ")
+                    .append("pr.userId ")
+                    .append("FROM productReview pr ")
+                    .append("INNER JOIN product p ")
+                    .append("ON p.id = pr.productId ")
+                    .append("WHERE p.productName LIKE :keyword ");
+        }else if(pageDTO.searchType().equals("user")) {
+            queryBuilder.append(memberCaseWhenQuery())
+                    .append("pr.productId ")
+                    .append("FROM productReview pr ")
+                    .append("INNER JOIN member m ")
+                    .append("ON m.userId = pr.userId ")
+                    .append("WHERE (m.userName LIKE :keyword OR m.nickname LIKE :keyword) ");
+        }
+
+        queryBuilder.append(listTypeCondition)
+                    .append("ORDER BY pr.updatedAt DESC ")
+                    .append("LIMIT :offset, :amount) AS r ");
+
+        return queryBuilder.toString();
+    }
+
+    private String memberCaseWhenQuery() {
+        return "CASE WHEN (m.nickname is null) THEN m.userName ELSE m.nickname END AS userId, ";
+    }
+
 
     @Override
     public Long countByAdminReviewList(AdminOrderPageDTO pageDTO, String listType) {
-        return jpaQueryFactory.select(productReview.countDistinct())
+        return jpaQueryFactory.select(productReview.updatedAt.count())
                 .from(productReview)
                 .where(adminReviewListSearch(pageDTO, listType))
                 .fetchOne();
