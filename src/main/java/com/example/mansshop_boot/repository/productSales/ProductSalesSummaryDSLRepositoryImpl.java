@@ -36,6 +36,41 @@ public class ProductSalesSummaryDSLRepositoryImpl implements ProductSalesSummary
 
     @Override
     public List<AdminBestSalesProductDTO> findPeriodBestProductOrder(LocalDate startDate, LocalDate endDate) {
+        StringBuilder queryBuilder = new StringBuilder();
+
+        queryBuilder.append("SELECT p.productName, ")
+                .append("s.sales, ")
+                .append("s.salesQuantity ")
+                .append("FROM (")
+                    .append("SELECT productId, ")
+                    .append("sum(sales) as sales, ")
+                    .append("sum(salesQuantity) as salesQuantity ")
+                    .append("FROM productSalesSummary ")
+                    .append("WHERE periodMonth >= :startDate ")
+                    .append("AND periodMonth < :endDate ")
+                    .append("GROUP BY productId ")
+                    .append("ORDER BY salesQuantity DESC ")
+                    .append("LIMIT 5")
+                .append(") as s ")
+                .append("INNER JOIN product p ")
+                .append("ON s.productId = p.id");
+
+        Query query = em.createNativeQuery(queryBuilder.toString());
+
+        query.setParameter("startDate", startDate);
+        query.setParameter("endDate", endDate);
+
+        List<Object[]> resultList = query.getResultList();
+
+        return resultList.stream()
+                        .map(val -> new AdminBestSalesProductDTO(
+                                (String) val[0],
+                                ((Number) val[1]).longValue(),
+                                ((Number) val[2]).longValue()
+                        ))
+                        .toList();
+        /*
+
         NumberPath<Long> aliasQuantity = Expressions.numberPath(Long.class, "productPeriodSalesQuantity");
 
         return jpaQueryFactory.select(
@@ -52,7 +87,7 @@ public class ProductSalesSummaryDSLRepositoryImpl implements ProductSalesSummary
                 .groupBy(product.productName)
                 .orderBy(aliasQuantity.desc())
                 .limit(5)
-                .fetch();
+                .fetch();*/
     }
 
     @Override
