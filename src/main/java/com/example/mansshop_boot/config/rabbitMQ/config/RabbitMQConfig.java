@@ -39,6 +39,11 @@ public class RabbitMQConfig {
         return rabbitTemplate;
     }
 
+    @Bean
+    public RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory) {
+        return new RabbitAdmin(connectionFactory);
+    }
+
     @DependsOn("orderDLQExchange")
     private Queue createQueueWithDLQExchange(String queueKey, String dlqExchangeKey) {
         return QueueBuilder.durable(queue.get(queueKey).getName())
