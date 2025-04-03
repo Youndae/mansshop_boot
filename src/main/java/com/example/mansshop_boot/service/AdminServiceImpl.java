@@ -1005,10 +1005,7 @@ public class AdminServiceImpl implements AdminService {
 
         AdminPeriodSalesStatisticsDTO monthStatistics = periodSalesSummaryRepository.findPeriodStatistics(startDate, endDate);
         List<AdminBestSalesProductDTO> bestProductList = productSalesSummaryRepository.findPeriodBestProductOrder(startDate, endDate);
-        long start  = System.currentTimeMillis();
         List<AdminPeriodSalesListDTO> dailySalesResponseDTO = getPeriodSalesList(lastDay, startDate, endDate);
-        long end = System.currentTimeMillis();
-        System.out.println("periodSales time : " + (end - start));
         List<AdminPeriodClassificationDTO> classificationResponseDTO = productSalesSummaryRepository.findPeriodClassification(startDate, endDate);
 
         startDate = startDate.minusYears(1);
