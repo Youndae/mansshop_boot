@@ -47,15 +47,15 @@ public class QueryTest {
 
     @Test
     void name() {
-        ExecutorService executor = Executors.newFixedThreadPool(5);
+        ExecutorService executor = Executors.newFixedThreadPool(20);
         List<CompletableFuture<Void>> futures = new ArrayList<>();
-        AdminPageDTO pageDTO = new AdminPageDTO(null, 1);
+        /*AdminPageDTO pageDTO = new AdminPageDTO(null, 1);
         Pageable pageable = PageRequest.of(pageDTO.page() - 1
                 , pageDTO.amount()
-                , Sort.by("classificationStep").ascending());
-        for(int i = 0; i < 20; i++) {
+                , Sort.by("classificationStep").ascending());*/
+        for(int i = 0; i < 100; i++) {
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-                productSalesSummaryRepository.findProductSalesList(pageDTO, pageable);
+                adminService.getPeriodSalesDetail("2024-01");
             }, executor);
 
             futures.add(future);
