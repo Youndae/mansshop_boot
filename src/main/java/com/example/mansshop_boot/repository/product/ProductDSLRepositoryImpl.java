@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static com.example.mansshop_boot.domain.entity.QProduct.product;
 import static com.example.mansshop_boot.domain.entity.QProductOption.productOption;
@@ -294,7 +293,6 @@ public class ProductDSLRepositoryImpl implements ProductDSLRepository{
     public void patchProductDiscount(AdminDiscountPatchDTO patchDTO) {
         jpaQueryFactory.update(product)
                 .set(product.productDiscount, patchDTO.discount())
-//                .set(product.updatedAt, LocalDateTime.now())
                 .where(product.id.in(patchDTO.productIdList()))
                 .execute();
 

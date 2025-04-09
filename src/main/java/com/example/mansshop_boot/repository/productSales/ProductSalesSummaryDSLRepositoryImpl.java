@@ -34,6 +34,9 @@ public class ProductSalesSummaryDSLRepositoryImpl implements ProductSalesSummary
 
     private final JPAQueryFactory jpaQueryFactory;
 
+    @PersistenceContext
+    private EntityManager em;
+
     @Override
     public List<AdminBestSalesProductDTO> findPeriodBestProductOrder(LocalDate startDate, LocalDate endDate) {
         StringBuilder queryBuilder = new StringBuilder();
@@ -69,25 +72,6 @@ public class ProductSalesSummaryDSLRepositoryImpl implements ProductSalesSummary
                                 ((Number) val[2]).longValue()
                         ))
                         .toList();
-        /*
-
-        NumberPath<Long> aliasQuantity = Expressions.numberPath(Long.class, "productPeriodSalesQuantity");
-
-        return jpaQueryFactory.select(
-                        Projections.constructor(
-                                AdminBestSalesProductDTO.class,
-                                product.productName.as("productName"),
-                                productSalesSummary.salesQuantity.longValue().sum().as(aliasQuantity),
-                                productSalesSummary.sales.longValue().sum().as("productPeriodSales")
-                        )
-                )
-                .from(productSalesSummary)
-                .innerJoin(productSalesSummary.product, product)
-                .where(productSalesSummary.periodMonth.goe(startDate).and(productSalesSummary.periodMonth.lt(endDate)))
-                .groupBy(product.productName)
-                .orderBy(aliasQuantity.desc())
-                .limit(5)
-                .fetch();*/
     }
 
     @Override
@@ -144,12 +128,6 @@ public class ProductSalesSummaryDSLRepositoryImpl implements ProductSalesSummary
                 .from(productOption)
                 .innerJoin(productOption.product, product)
                 .leftJoin(productSalesSummary)
-                /*.on(productSalesSummary.product.id.eq(product.id)
-                        .and(productSalesSummary.productOption.id.eq(productOption.id))
-                        .and(productSalesSummary.classification.id.eq(classification))
-                        .and(productSalesSummary.periodMonth.goe(startDate))
-                        .and(productSalesSummary.periodMonth.lt(endDate))
-                )*/
                 .on(productSalesSummary.productOption.id.eq(productOption.id)
                         .and(productSalesSummary.periodMonth.goe(startDate))
                         .and(productSalesSummary.periodMonth.lt(endDate))
@@ -158,9 +136,6 @@ public class ProductSalesSummaryDSLRepositoryImpl implements ProductSalesSummary
                 .orderBy(product.createdAt.desc())
                 .fetch();
     }
-
-    @PersistenceContext
-    private EntityManager em;
 
     @Override
     public Page<AdminProductSalesListDTO> findProductSalesList(AdminPageDTO pageDTO, Pageable pageable) {
@@ -309,8 +284,7 @@ public class ProductSalesSummaryDSLRepositoryImpl implements ProductSalesSummary
 
     @Override
     public List<ProductSalesSummary> findAllByProductOptionIds(LocalDate periodMonth, List<Long> productOptionIds) {
-        // 테스트 필요.
-        // 전체 fetchJoin()이 빠를지, 몇개만 하는게 빠를지 아예 안하고 프록시 객체로 처리하는게 빠를지 테스트 필요.
+
         return jpaQueryFactory.select(productSalesSummary)
                 .from(productSalesSummary)
                 .innerJoin(productSalesSummary.productOption, productOption).fetchJoin()

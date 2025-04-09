@@ -39,7 +39,8 @@
   * iamport-rest-client (아임포트 결제 API)
   * Java Mail
   * commons-io
-  * RabbitMQ (Docker)
+  * RabbitMQ 3.12 Management (Docker)
+  * Swagger ( springdoc-openapi 2.6.0)
 * FrontEnd
   * react 18.3.1
   * react-cookie

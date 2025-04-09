@@ -63,12 +63,6 @@ public class ProductOptionDSLRepositoryImpl implements ProductOptionDSLRepositor
 
     @Override
     public List<AdminOptionStockDTO> findAllOptionByProductIdList(List<String> productIdList) {
-        /*return jpaQueryFactory.selectFrom(productOption)
-//                .from(productOption)
-                .join(productOption.product).fetchJoin()
-                .where(productOption.product.id.in(productIdList))
-                .fetch();*/
-
 
         return jpaQueryFactory.select(
                 Projections.constructor(

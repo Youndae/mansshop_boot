@@ -105,6 +105,22 @@ public class AdminServiceImpl implements AdminService {
 
     private final CacheProperties cacheProperties;
 
+    private Map<String, Function<CacheRequest, Long>> KEY_ACTION_MAP;
+
+    @PostConstruct
+    void init() {
+        KEY_ACTION_MAP = Map.of(
+                RedisCaching.ADMIN_PRODUCT_QNA_COUNT.getKey(),
+                req -> productQnARepository.findAllByAdminProductQnACount(req.getPageDTO()),
+                RedisCaching.ADMIN_MEMBER_QNA_COUNT.getKey(),
+                req -> memberQnARepository.findAllByAdminMemberQnACount(req.getPageDTO()),
+                RedisCaching.ADMIN_ORDER_COUNT.getKey(),
+                req -> productOrderRepository.findAllOrderListCount(req.getPageDTO()),
+                RedisCaching.ADMIN_REVIEW_COUNT.getKey(),
+                req -> productReviewRepository.countByAdminReviewList(req.getPageDTO(), req.getListType())
+        );
+    }
+
     /**
      *
      * @param pageDTO
@@ -263,7 +279,6 @@ public class AdminServiceImpl implements AdminService {
             if(deleteOptionList != null)
                 productOptionRepository.deleteAllById(deleteOptionList);
 
-            deleteProductImage(imageDTO);
         }catch (Exception e) {
             log.warn("Filed admin patchProduct");
             e.printStackTrace();
@@ -271,6 +286,8 @@ public class AdminServiceImpl implements AdminService {
 
             throw new IllegalArgumentException("Failed patchProduct", e);
         }
+
+        deleteProductImage(imageDTO);
 
         return productId;
     }
@@ -588,12 +605,12 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public PagingListDTO<AdminOrderResponseDTO> getAllOrderList(AdminOrderPageDTO pageDTO) {
         List<AdminOrderDTO> orderDTOList = productOrderRepository.findAllOrderList(pageDTO);
-        Long totalElements = null;
+        Long totalElements;
         if(pageDTO.keyword() == null)
             totalElements = getFullScanCount(RedisCaching.ADMIN_ORDER_COUNT, new CacheRequest(pageDTO));
         else
             totalElements = productOrderRepository.findAllOrderListCount(pageDTO);
-        System.out.println("totalElements : " + totalElements);
+
         return mappingOrderDataAndPagingData(orderDTOList, totalElements, pageDTO);
     }
 
@@ -866,7 +883,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public PagingListDTO<AdminReviewDTO> getReviewList(AdminOrderPageDTO pageDTO, AdminListType listType) {
         List<AdminReviewDTO> content = productReviewRepository.findAllByAdminReviewList(pageDTO, listType.name());
-        Long totalElements = null;
+        Long totalElements;
 
         if(pageDTO.keyword() == null && listType.equals(AdminListType.ALL))
             totalElements = getFullScanCount(RedisCaching.ADMIN_REVIEW_COUNT, new CacheRequest(pageDTO, listType.name()));
@@ -1017,12 +1034,6 @@ public class AdminServiceImpl implements AdminService {
                                                     , bestProductList
                                                     , classificationResponseDTO
                                                     , dailySalesResponseDTO);
-    }
-
-    @Deprecated
-    public List<AdminPeriodClassificationDTO> getClassificationResponse(LocalDate startDate, LocalDate endDate) {
-
-        return productSalesSummaryRepository.findPeriodClassification(startDate, endDate);
     }
 
     public List<AdminPeriodSalesListDTO> getPeriodSalesList(int lastDay, LocalDate startDate, LocalDate endDate) {
@@ -1197,23 +1208,6 @@ public class AdminServiceImpl implements AdminService {
                     );
     }
 
-//    private Map<String, Function<AdminOrderPageDTO, Long>> KEY_ACTION_MAP;
-
-    private Map<String, Function<CacheRequest, Long>> KEY_ACTION_MAP;
-    @PostConstruct
-    void init() {
-        KEY_ACTION_MAP = Map.of(
-                RedisCaching.ADMIN_PRODUCT_QNA_COUNT.getKey(),
-                            req -> productQnARepository.findAllByAdminProductQnACount(req.getPageDTO()),
-                RedisCaching.ADMIN_MEMBER_QNA_COUNT.getKey(),
-                            req -> memberQnARepository.findAllByAdminMemberQnACount(req.getPageDTO()),
-                RedisCaching.ADMIN_ORDER_COUNT.getKey(),
-                            req -> productOrderRepository.findAllOrderListCount(req.getPageDTO()),
-                RedisCaching.ADMIN_REVIEW_COUNT.getKey(),
-                            req -> productReviewRepository.countByAdminReviewList(req.getPageDTO(), req.getListType())
-        );
-    }
-
     /**
      *
      * @param cachingKey
@@ -1232,14 +1226,6 @@ public class AdminServiceImpl implements AdminService {
             synchronized (this) {
                 result = redisTemplate.opsForValue().get(key);
                 if(result == null) {
-
-                    /*result = switch (cachingKey) {
-                        case ADMIN_PRODUCT_QNA_COUNT -> productQnARepository.findAllByAdminProductQnACount(pageDTO);
-                        case ADMIN_MEMBER_QNA_COUNT -> memberQnARepository.findAllByAdminMemberQnACount(pageDTO);
-                        case ADMIN_ORDER_COUNT -> productOrderRepository.findAllOrderListCount(pageDTO);
-                        default -> throw new IllegalArgumentException("Caching key is abnormal");
-                    };*/
-
                     Function<CacheRequest, Long> action = KEY_ACTION_MAP.get(key);
 
                     if(action == null)
