@@ -19,7 +19,7 @@
 <br />
 
 ## 구조
-* 통합빌드를 위한 하나의 서버
+* 통합빌드로 처리 된 하나의 서버
 * FrontEnd 위치
   * src/main/frontend
 
@@ -39,6 +39,7 @@
   * iamport-rest-client (아임포트 결제 API)
   * Java Mail
   * commons-io
+  * RabbitMQ (Docker)
 * FrontEnd
   * react 18.3.1
   * react-cookie
@@ -53,7 +54,7 @@
   * Axios
   * react-daum-postcode (Kakao 우편번호 서비스 API)
 * DataBase
-  * MySQL 8.3.0
+  * MySQL 8.3.0 (Docker)
   * Redis(Docker)
 
 <br />
@@ -75,7 +76,7 @@
 <br />
 
 ## ERD
-<img src="src/main/resources/README_image/new_Man'sShop_ERD.png">
+<img src="src/main/resources/README_image/new_ERD.jpg">
 
 <br/>
 
@@ -187,15 +188,16 @@
 
 <br/>
 
-## 기능 정리
+## 기능 및 개선 내역
 
 ### 목차
 * 백엔드
   * OAuth2 처리
   * 인증 / 인가
-  * 결제 처리와 관리자의 기간별 매출 처리의 수정
-  * 페이징 처리 수정
-  * 상품 추가 및 수정 처리 및 발생한 문제
+  * 주문 데이터 처리 개선 ( RabbitMQ )
+  * 쿼리 튜닝
+  * count 쿼리 캐싱
+  * 관리자의 상품 추가 및 수정, 파일관리
   * S3 연결로 인한 이미지 출력 처리
   * 비밀번호 찾기
 * 프론트 엔드
@@ -441,464 +443,450 @@ JWT를 사용하게 되면서 탈취에 충분하게 대응할 수 있는 방법
 
 <br />
 
-### 결제 처리 수정
+### 주문 데이터 처리 개선 ( RabbitMQ )
 <br />
 
-상품의 카드 결제 API로 아임포트 결제 API를 사용했으며 주소지 입력의 경우 Kakao 우편번호 서비스 API를 사용했습니다.   
-이전 JSP 버전의 경우 매출 요약 테이블이 존재해 주문 처리 완료 후 매출 데이터를 처리했습니다.   
-이전 버전에서는 관리자의 매출 내역에 대해 해당 년도의 월별 리스트를 출력하고 상세 정보는 따로 구현하지 않았기 때문에 요약 테이블만으로 충분했습니다.   
-그래서 배치 프로그램을 사용하는 것을 고려하고 있었는데 이번에는 좀 더 상세한 데이터를 보여주도록 수정하면서 개선하고 싶었습니다.   
-화면에 대해 설계하다보니 단순 매출만 보여주는 것이 아니다보니 요약 테이블만으로 처리할 수 없고 주문, 주문 상세 테이블에 접근해 집계해야 하는 상황이 발생했습니다.   
-여기서 고민을 많이 했었는데 그럼에도 요약 테이블이 존재한다면 조금이라도 빠르게 쿼리를 수행하고 매핑할 수 있을 것이라는 생각도 했었지만 결과적으로는 요약 테이블을 제거하는 방법을 택했습니다.   
-요약 테이블을 사용하지 않은 이유로는 각 처리에 대한 요청 발생 횟수를 고려했습니다.   
-추후 상담원이 존재한다는 전제하에 기능을 더 추가할 계획을 하고 있는데 그렇게 된다고 하더라도 매출 관련 페이지는 관리자만 접근하게 될 것이라고 생각했습니다.   
-하지만 주문 요청은 수많은 사용자가 매일 시시각각 요청을 보내게 되는 처리과정입니다.   
-또한 주문 처리과정에는 주문 내역 처리 이후에 해당 상품의 재고 수정 및 총 판매량까지 수정하고 있습니다.   
-그럼 여러건의 요청이 겹칠 수 있는 주문 처리 부분을 조금이라도 더 빠르게 처리하고 요청이 거의 겹칠일이 없는 매출 관련 처리를 좀 더 수고를 들이는 것이 맞지 않겠나 라는 생각이 들었습니다.
+상품의 결제 API로 I'mport 결제 API를 사용했으며, 주소지 API는 Kakao 우편번호 서비스 API를 사용했습니다.
+주문 데이터 처리 과정은 주문 및 상세 데이터 저장, 장바구니를 통한 결제인 경우 장바구니에서 해당 상품 데이터 삭제, 상품 판매량 수정, 구매 상품 옵션의 재고 수정, 집계 테이블 수정으로 이루어져 있습니다.   
+기존 JSP 버전에서는 매출 집계 테이블이 1개였고, 비교적 간결한 구조로 되어있었는데 Spring Boot 버전으로 재구현하면서 다양한 매출 데이터를 보여주도록 수정하며 필요성이 사라졌습니다.   
+그래서 주문 및 상세 테이블에서의 집계만으로 충분할 것이라고 생각해 집계 테이블이 없는 구조로 개선했는데 단일 요청에서는 정상적인 성능을 보였으나, JMeter를 통한 다중 요청 테스트에서는 큰 지연시간이 발생되는 것을 볼 수 있었습니다.   
+심한 경우 몇십분 간의 락이 걸리는 큰 문제였기 때문에 다시 집계 테이블을 만들게 되었고 이번에는 일별, 상품 옵션별 집계 테이블로 나눠 추가했습니다.   
 
-수정 내용으로는 요약 테이블을 제거하고 집계가 필요한 쿼리에 대해 모두 group by를 통해 집계 처리 후 최종적으로 응답할 구조의 DTO에 매핑하는 방법을 택했습니다.
+이렇게 처리하는 것으로 1차적인 문제는 해결했으나 주문 데이터 처리 과정이 너무 많아진다는 단점이 있었습니다.   
+또한, 사용자에게 필요하지 않은 판매량, 재고, 집계 처리가 같이 처리되어야 한다는 점에서 비효율적이라고 생각했고 분리할 방법에 대해 고민하게 되었습니다.   
+해결 방안으로 배치 처리와 비동기 처리가 있다고 생각하게 되었고, 배치 처리는 매출을 실시간으로 확인할 수 있어야 한다는 기능 설계에 맞지 않다고 생각해 제외했습니다.   
+비동기 처리로 전환하는 방법으로는 @Async Annotation을 사용하는 방법과 Meesage Queue를 사용하는 방법으로 나눌 수 있다고 생각했기에 Message Queue에 대해 알아보게 되었습니다.   
+알아보고 테스트 해본 결과 @Async를 사용하게 되면 의존성 추가나 설정등이 비교적 간단하기 때문에 손쉽게 사용할 수 있있다는 점이 장점이었으나, 비동기 처리 과정 중 발생하는 오류에 대해 대응하는 것이 Message Queue 방식에 비해 복잡하다고 생각했습니다.   
+처리가 실패한 경우 재시도를 수행하도록 할 수 있으나, 일정 시간 이상의 오류 상태가 지속된 경우 결국 로그를 확인해서 처리해야 한다는 점이 아쉬웠습니다.   
+Message Queue 중에서 RabbitMQ를 중점적으로 알아보고 결정하게 되었는데 RabbitMQ의 경우 의존성 추가 및 큐 관리가 필요하다는 단점이 존재하지만, 실패 메시지를 따로 보관해 장기적인 오류에도 재시도를 수행할 수 있다는 점이 장점이었습니다.   
+특히, 실패 메시지를 개발자가 직접 로그 확인 후 실행하지 않아도 애플리케이션 UI를 통해 현재 실패 메시지 상태와 재시도 요청을 처리할 수 있도록 할 수 있다는 것이 선택에 큰 이유가 되었습니다.   
+
+이러한 이유로 아래 코드처럼 RabbitMQ를 도입해 주문 처리에 적용했고, 주문 및 상세 데이터만 처리한 뒤 나머지 처리 과정은 RabbitMQ에게 맡겨 사용자는 더욱 빠른 응답을 받을 수 있도록 개선할 수 있었습니다.
 
 ```java
 // 주문 처리
-@Override
-@Transactional(rollbackFor = RuntimeException.class)
-public String payment(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO) {
-    ProductOrderDataDTO productOrderDataDTO = createOrderDataDTO(paymentDTO, cartMemberDTO);
-    productOrderRepository.save(productOrderDataDTO.productOrder());
+@Service
+@RequiredArgsConstructor
+public class OrderServiceImpl implements OrderService {
     
-    //주문 타입이 cart인 경우 장바구니에서 선택한 상품 또는 전체 상품 주문이므로 해당 상품을 장바구니에서 삭제해준다.
-    if(paymentDTO.orderType().equals("cart"))
-    deleteOrderDataToCart(cartMemberDTO, productOrderDataDTO.orderOptionIdList());
+  private final ProductOrderRepository productOrderRepository;
 
-    //ProductOption에서 재고 수정 및 Product에서 상품 판매량 수정.
-    patchOptionStockAndProduct(productOrderDataDTO.orderOptionIdList(), productOrderDataDTO.orderProductList());
+  private final RabbitTemplate rabbitTemplate;
 
+  private final RabbitMQProperties rabbitMQProperties;
+    
+  @Override
+  @Transactional(rollbackFor = RuntimeException.class)
+  public String payment(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO) {
+      ProductOrderDataDTO productOrderDataDTO = createOrderDataDTO(paymentDTO, cartMemberDTO);
+      ProductOrder order = productOrderDataDTO.productOrder();
+      productOrderRepository.save(order);
+      
+      String orderExchange = rabbitMQProperties.getExchange()
+                                              .get(RabbitMQPrefix.EXCHANGE_ORDER.getKey())
+                                              .getName();
 
-    return Result.OK.getResultKey();
-}
+      //주문 타입이 cart인 경우 장바구니에서 선택한 상품 또는 전체 상품 주문이므로 해당 상품을 장바구니에서 삭제.
+      if(paymentDTO.orderType().equals("cart"))
+          rabbitTemplate.convertAndSend(
+                  orderExchange,
+                  getQueueRoutingKey(RabbitMQPrefix.QUEUE_ORDER_CART),
+                  new OrderCartDTO(cartMemberDTO, productOrderDataDTO.orderOptionIds())
+          );
 
-public ProductOrderDataDTO createOrderDataDTO(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO) {
+      // ProductOption의 재고 수정
+      rabbitTemplate.convertAndSend(
+              orderExchange,
+              getQueueRoutingKey(RabbitMQPrefix.QUEUE_ORDER_PRODUCT_OPTION),
+              productOrderDataDTO.orderProductList()
+      );
+  
+      // Product의 salesQuantity 수정
+      rabbitTemplate.convertAndSend(
+              orderExchange,
+              getQueueRoutingKey(RabbitMQPrefix.QUEUE_ORDER_PRODUCT),
+              productOrderDataDTO.orderProductList()
+      );
+  
+      // Period Summary 처리
+      rabbitTemplate.convertAndSend(
+              orderExchange,
+              getQueueRoutingKey(RabbitMQPrefix.QUEUE_PERIOD_SUMMARY),
+              new PeriodSummaryQueueDTO(order)
+      );
+  
+      // Product Summary 처리
+      rabbitTemplate.convertAndSend(
+              orderExchange,
+              getQueueRoutingKey(RabbitMQPrefix.QUEUE_PRODUCT_SUMMARY),
+              new OrderProductSummaryDTO(productOrderDataDTO)
+      );
+  }
+
+  private String getQueueRoutingKey(RabbitMQPrefix rabbitMQPrefix) {
+    return rabbitMQProperties.getQueue()
+            .get(rabbitMQPrefix.getKey())
+            .getRouting();
+  }
+
+  public ProductOrderDataDTO createOrderDataDTO(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO) {
     ProductOrder productOrder = paymentDTO.toOrderEntity(cartMemberDTO.uid());
     List<OrderProductDTO> orderProductList = paymentDTO.orderProduct();
-    List<Long> orderOptionIdList = new ArrayList<>();// 주문한 상품 옵션 아이디를 담아줄 리스트
+    List<String> orderProductIds = new ArrayList<>();// 주문한 상품 옵션 아이디를 담아줄 리스트
+    List<Long> orderOptionIds = new ArrayList<>();
     int totalProductCount = 0;// 총 판매량
     //옵션 정보 리스트에서 각 객체를 OrderDetail Entity로 Entity화 해서 ProductOrder Entity에 담아준다.
     //주문한 옵션 번호는 추후 더 사용하기 때문에 리스트화 한다.
     //총 판매량은 기간별 매출에 필요하기 때문에 이때 같이 총 판매량을 계산한다.
     for(OrderProductDTO data : paymentDTO.orderProduct()) {
       productOrder.addDetail(data.toOrderDetailEntity());
-      orderOptionIdList.add(data.optionId());
+      if(!orderProductIds.contains(data.productId()))
+        orderProductIds.add(data.productId());
+      orderOptionIds.add(data.optionId());
       totalProductCount += data.detailCount();
     }
     productOrder.setProductCount(totalProductCount);
 
-    return new ProductOrderDataDTO(productOrder, orderProductList, orderOptionIdList);
+    return new ProductOrderDataDTO(productOrder, orderProductList, orderProductIds, orderOptionIds);
+  }
 }
+```
 
-public void deleteOrderDataToCart(CartMemberDTO cartMemberDTO, List<Long> orderOptionIdList) {
-    //사용자의 장바구니 아이디를 가져와서 장바구니 상세 리스트를 가져온다.
-    //장바구니 상세 리스트의 경우 리스트화 한 옵션 번호를 통해 가져올 수도 있으나 전체 리스트와 주문 리스트의 크기가 일치한다면
-    //장바구니의 모든 상품을 구매한 것이기 때문에 장바구니 데이터 자체를 삭제하도록 하기 위함.
-    Long cartId = cartRepository.findIdByUserId(cartMemberDTO);
-    List<CartDetail> cartDetailList = cartDetailRepository.findAllCartDetailByCartId(cartId);
+RabbitMQ를 사용하면서 필요한 exchange와 Queue, DLQ 의 이름과 Routing Key는 모두 rabbitMQ.yml에 작성해두고 RabbitMQProperties 객체에 담아 사용하며, RabbitMQPrefix라는 Enum 클래스를 같이 활용해 직접 작성하는 경우를 최소화했습니다.   
+yml은 git Ignore에 등록했지만, RabbitMQProperties와 config, consumer는 아래 각 링크들을 통해 확인하실 수 있습니다.
 
-    if(cartDetailList.size() == orderOptionIdList.size())
-        cartRepository.deleteById(cartId);
-    else{
-      List<Long> deleteCartDetailIdList = cartDetailList.stream()
-                            .filter(cartDetail ->
-                                orderOptionIdList.contains(
-                                        cartDetail.getProductOption().getId()
-                                )
-                            )
-                            .map(CartDetail::getId)
-                            .toList();
+<a href="https://github.com/Youndae/mansshop_boot/blob/master/src/main/java/com/example/mansshop_boot/domain/dto/rabbitMQ/RabbitMQProperties.java">RabbitMQProperties</a>   
+<a href="https://github.com/Youndae/mansshop_boot/blob/master/src/main/java/com/example/mansshop_boot/config/rabbitMQ/config/RabbitMQConfig.java#L18">RabbitMQConfig</a>   
+<a href="https://github.com/Youndae/mansshop_boot/blob/master/src/main/java/com/example/mansshop_boot/config/rabbitMQ/consumer/OrderConsumer.java">OrderConsumer</a>
+
+<br />
+
+### 쿼리 튜닝
+<br />
+
+다중 요청 테스트 이후 쿼리 최적화를 수행하다보니 인덱스로는 한계가 있는 쿼리들이 존재했습니다.   
+이 쿼리들의 공통점은 Pagination을 위한 LIMIT이 붙거나, 여러 테이블과 JOIN이 발생한다는 점이었습니다.   
+대부분 이 쿼리들은 관리자 기능에 존재했는데 사용자는 자신과 관련된 데이터만 조회하는 것 처럼 조건이 붙어있지만, 관리자는 전체를 조회하는 경우가 많기 때문이었습니다.   
+
+문제점 파악을 위해 EXPLAIN ANALYZE를 통해 확인했을 때 기준이 되는 테이블의 모든 데이터에 대해 JOIN이 처리된다는 점이 가장 큰 문제점이라는 것을 알 수 있었습니다.   
+이 문제를 해결하기 위해 몇가지 테스트를 해봤는데 그 중 FROM 절에서 Sub Query를 사용해 JOIN되는 양을 줄이는 것이 가장 효과적인 방법이라는 것을 알 수 있었습니다.   
+모든 데이터베이스 요청에 대해 QueryDSL을 사용하고 있었는데 QueryDSL에서는 FROM 절의 Sub Query를 사용하는 것이 어렵다는 것을 알게 되었습니다.   
+그래서 이 쿼리들에 대해서만 Native Query를 사용해 문제를 해결했습니다.   
+
+```java
+@Repository
+@RequiredArgsConstructor
+public class ProductReviewDSLRepositoryImpl implements ProductReviewDSLRepository {
+    
+  @PersistenceContext
+  private EntityManager em;
+    
+  @Override
+  public List<AdminReviewDTO> findAllByAdminReviewList(AdminOrderPageDTO pageDTO, String listType) {
+    StringBuilder queryBuilder = new StringBuilder();
+
+    queryBuilder.append("SELECT r.id, ")
+            .append(reviewDynamicFieldQuery(pageDTO))
+            .append("r.updatedAt, ")
+            .append("r.status ")
+            .append("FROM ")
+            .append(reviewDynamicSubQuery(pageDTO, listType))
+            .append(reviewDynamicJoinQuery(pageDTO));
+
+    Query query = em.createNativeQuery(queryBuilder.toString());
+
+    query.setParameter("offset", pageDTO.offset());
+    query.setParameter("amount", pageDTO.amount());
+
+    if(pageDTO.keyword() != null)
+      query.setParameter("keyword", "%" + pageDTO.keyword() + "%");
+
+    List<Object[]> resultList = query.getResultList();
+
+    return resultList.stream()
+            .map(val -> new AdminReviewDTO(
+                    ((Number) val[0]).longValue(),
+                    (String) val[1],
+                    (String) val[2],
+                    ((Timestamp) val[3]).toLocalDateTime(),
+                    (Boolean) val[4]
+            ))
+            .toList();
+  }
   
-      cartDetailRepository.deleteAllById(deleteCartDetailIdList);
+  private String reviewDynamicFieldQuery(AdminOrderPageDTO pageDTO) {
+    StringBuilder queryBuilder = new StringBuilder();
+
+    if(pageDTO.searchType() == null) {
+      queryBuilder.append("p.productName, ")
+              .append(memberCaseWhenQuery());
+    }else if(pageDTO.searchType().equals("product")){
+      queryBuilder.append("r.productName, ")
+              .append(memberCaseWhenQuery());
+    }else if(pageDTO.searchType().equals("user")) {
+      queryBuilder.append("p.productName, ")
+              .append("r.userId, ");
+    }
+
+    return queryBuilder.toString();
+  }
+
+  private String reviewDynamicJoinQuery(AdminOrderPageDTO pageDTO) {
+    StringBuilder queryBuilder = new StringBuilder();
+    String productJoin = "INNER JOIN product p ON p.id = r.productId ";
+    String memberJoin = "INNER JOIN member m ON m.userId = r.userId ";
+
+    if(pageDTO.searchType() == null){
+      queryBuilder.append(productJoin)
+              .append(memberJoin);
+    }else if(pageDTO.searchType().equals("product")){
+      queryBuilder.append(memberJoin);
+    }else if(pageDTO.searchType().equals("user")){
+      queryBuilder.append(productJoin);
+    }
+
+    return queryBuilder.toString();
+  }
+
+  private String reviewDynamicSubQuery(AdminOrderPageDTO pageDTO, String listType) {
+    StringBuilder queryBuilder = new StringBuilder();
+    String listTypeCondition = listType.equals("NEW") ? "AND pr.status = 0 " : "";
+
+    queryBuilder.append("( SELECT ")
+            .append("pr.id, ")
+            .append("pr.updatedAt, ")
+            .append("pr.status, ");
+
+    if(pageDTO.searchType() == null) {
+      queryBuilder.append("pr.productId, ")
+              .append("pr.userId ")
+              .append("FROM productReview pr ")
+              .append("WHERE 1=1 ");
+    }else if(pageDTO.searchType().equals("product")) {
+      queryBuilder.append("p.productName, ")
+              .append("pr.userId ")
+              .append("FROM productReview pr ")
+              .append("INNER JOIN product p ")
+              .append("ON p.id = pr.productId ")
+              .append("WHERE p.productName LIKE :keyword ");
+    }else if(pageDTO.searchType().equals("user")) {
+      queryBuilder.append(memberCaseWhenQuery())
+              .append("pr.productId ")
+              .append("FROM productReview pr ")
+              .append("INNER JOIN member m ")
+              .append("ON m.userId = pr.userId ")
+              .append("WHERE (m.userName LIKE :keyword OR m.nickname LIKE :keyword) ");
+    }
+
+    queryBuilder.append(listTypeCondition)
+            .append("ORDER BY pr.updatedAt DESC ")
+            .append("LIMIT :offset, :amount) AS r ");
+
+    return queryBuilder.toString();
+  }
+
+  private String memberCaseWhenQuery() {
+    return "CASE WHEN (m.nickname is null) THEN m.userName ELSE m.nickname END AS userId, ";
+  }
+}
+```
+
+Native Query를 사용하면서 가장 크게 신경쓰였던 부분은 가독성 부분이었습니다.   
+이 문제를 개선하기 위해 StringBuilder를 사용해 최대한 가독성을 높일 수 있도록 노력했습니다.   
+조건에 따른 동적 처리를 위해서는 메소드를 분리해 중복되는 코드를 최소화하고 추후 수정시에도 편하도록 유연성을 확보하고자 노력했습니다.
+
+다중 요청 시 리뷰, 문의 등 기본 리스트 조회 성능이 20 ~ 40초 가량 걸렸었는데 이렇게 Sub Query로 쿼리 튜닝을 수행 한 이후 최대 평균 20ms 까지 줄어드는 결과를 확인할 수 있었습니다.   
+특히, 관리자 매출 기능에서는 최악의 경우 수십분의 락이 걸리는 경우도 있었는데 평균 500ms 정도로 줄어드는 효율성을 볼 수 있었습니다.
+
+
+<br />
+
+### count 쿼리 캐싱
+<br />
+
+Sub Query 사용을 통해 조회 쿼리의 성능을 높이는데는 성공했지만, Pagination에 사용될 count 쿼리는 여전히 문제였습니다.   
+Full scan을 해야 하다보니 상품 문의 테이블 기준 300만개의 데이터가 있음에도 600ms 의 시간이 걸렸습니다.   
+여러 인덱스를 추가해보기도 하고 DISTINCT를 사용해보기도 했지만, 이것보다 더 빠른 속도를 볼 수는 없었고 결국 캐싱으로 처리하기로 결정했습니다.   
+
+JWT의 관리로 인해 Redis를 사용하고 있었기 때문에 Redis를 통한 캐싱을 처리하기로 결정했고, 전략은 주기적인 갱신이 아닌 요청 발생시에 확인 후 갱신하는 방법을 택했습니다.   
+관리자 요청의 경우 비교적 자주 발생하는 요청이 아니라고 생각했기 때문에 주기적인 갱신으로 리소스를 소비할 필요가 없다고 생각했기 때문입니다.   
+
+캐싱되는 데이터는 조건이 없는 Full Scan 요청입니다. 저장되는 KEY 값의 관리는 Enum을 통해 관리하고 TTL은 yml로 관리할 수 있도록 분리했습니다.   
+TTL은 @Value로 가져와서 사용하기보다 CacheProperties 객체에 담아 사용할 수 있도록 처리했습니다.
+
+```java
+@Service
+@RequiredArgsConstructor
+public class AdminServiceImpl implements AdminService {
+    
+    private final RedisTemplate<String, Long> redisTemplate;
+    
+    private final CacheProperties cacheProperties;
+    
+    private Map<String, Function<CacheRequest, Long>> KEY_ACTION_MAP;
+    
+    @PostConstructor
+    void init() {
+      KEY_ACTION_MAP = Map.of(
+              RedisCaching.ADMIN_PRODUCT_QNA_COUNT.getKey(),
+              req -> productQnARepository.findAllByAdminProductQnACount(req.getPageDTO()),
+              RedisCaching.ADMIN_MEMBER_QNA_COUNT.getKey(),
+              req -> memberQnARepository.findAllByAdminMemberQnACount(req.getPageDTO()),
+              RedisCaching.ADMIN_ORDER_COUNT.getKey(),
+              req -> productOrderRepository.findAllOrderListCount(req.getPageDTO()),
+              RedisCaching.ADMIN_REVIEW_COUNT.getKey(),
+              req -> productReviewRepository.countByAdminReviewList(req.getPageDTO(), req.getListType())
+      );
+    }
+
+    @Override
+    public PagingListDTO<AdminReviewDTO> getReviewList(AdminOrderPageDTO pageDTO, AdminListType listType) {
+      List<AdminReviewDTO> content = productReviewRepository.findAllByAdminReviewList(pageDTO, listType.name());
+      Long totalElements = null;
+      
+      //count 요청
+      if(pageDTO.keyword() == null && listType.equals(AdminListType.ALL))
+        totalElements = getFullScanCount(RedisCaching.ADMIN_REVIEW_COUNT, new CacheRequest(pageDTO, listType.name()));
+      else
+        totalElements = productReviewRepository.countByAdminReviewList(pageDTO, listType.name());
+  
+      PagingMappingDTO pagingMappingDTO = new PagingMappingDTO(totalElements, pageDTO.page(), pageDTO.amount());
+  
+      return new PagingListDTO<>(content, pagingMappingDTO);
+    }
+
+    public long getFullScanCount(RedisCaching cachingKey, CacheRequest request) {
+      String key = cachingKey.getKey();
+  
+      Long result = redisTemplate.opsForValue().get(key);
+      if(result == null){
+        synchronized (this) {
+          result = redisTemplate.opsForValue().get(key);
+          if(result == null) {
+            Function<CacheRequest, Long> action = KEY_ACTION_MAP.get(key);
+  
+            if(action == null)
+              throw new IllegalArgumentException("caching Key is Abnormal");
+  
+            result = action.apply(request);
+            long ttl = cacheProperties.getCount().get(key).getTtl();
+            redisTemplate.opsForValue().set(key, result, Duration.ofMinutes(ttl));
+          }
+        }
+      }
+  
+      return result;
     }
 }
+```
 
-public void patchOptionStockAndProduct(List<Long> orderOptionIdList, List<OrderProductDTO> orderProductList) {
-    //상품 옵션 재고 수정을 위해 주문 내역에 해당하는 상품 옵션 데이터를 조회
-    //저장 또는 수정할 데이터를 담아줄 리스트를 새로 생성
-    List<ProductOption> productOptionList = productOptionRepository.findAllById(orderOptionIdList);
-    List<ProductOption> productOptionSetList = new ArrayList<>();
+여러 Repository에 대한 처리가 필요하기 때문에 캐싱 처리 메소드 내부에서 조건문에 따라 분리하기 보다 Function 인터페이스를 통해 처리할 수 있도록 했습니다.   
+호출하는 메소드에서는 count 쿼리의 조건에 대한 매개변수를 받아야 하기 때문에 CacheRequest라는 클래스를 같이 전달하도록 처리했습니다.   
+매개변수가 무조건 1개만 존재하는 경우에는 굳이 CacheRequest 클래스를 만들 필요가 없었지만, 매개변수를 2개 이상 받는 요청이 존재했기 때문에 클래스를 만들어 처리했습니다.
 
-    //상품 테이블에 존재하는 판매량을 처리하기 위해 Map 구조로 '상품 아이디 : 해당 상품 총 주문량(옵션 별 총합)' 으로 처리한다.
-    //조회해야 할 상품 아이디를 리스트화 하기 위해 리스트를 하나 생성한다.
-    Map<String, Integer> productMap = new HashMap<>();
-    List<String> productIdList = new ArrayList<>();
+캐싱 메소드 내부에서는 최초 Redis 데이터를 확인하고 존재하지 않는다면 재 확인 이후 데이터베이스에 요청을 보내게 됩니다.   
+그리고 두번째 체크부터는 synchronized로 감싸 동시성 제어를 할 수 있도록 처리해 여러 요청이 데이터베이스에 요청을 보낼 수 없도록 처리했습니다.   
+그래서 synchronized 내부에 Redis 체크를 한번 더 추가해 최초 조회에서 데이터를 찾지 못했더라도 앞선 요청이 캐싱해둔 데이터를 바로 가져갈 수 있도록 처리했습니다.
 
+<br />
 
-    for(int i = 0; i < orderProductList.size(); i++) {
-      //주문 내역을 반복문으로 처리하면서 Map에 상품 아이디와 해당 상품 주문 총량을 처리한다.
-      //주문내역에서는 상품 아이디가 겹치는 경우가 발생하기 때문에 리스트에 담겨있지 않은 경우에만 담도록 처리한다.
-      OrderProductDTO dto = orderProductList.get(i);
-      productMap.put(
-          dto.productId()
-          , productMap.getOrDefault(dto.productId(), 0) + dto.detailCount()
-      );
-  
-      if(!productIdList.contains(dto.productId()))
-          productIdList.add(dto.productId());
-  
-      //상품 옵션 테이블에서 재고 수정을 위해 해당 옵션 상품 리스트를 반복문으로 돌리면서
-      //조회된 Entity의 재고를 수정한 뒤 리스트에 담아준다.
-      //한번 수정이 발생할 때마다 다음 루프의 횟수를 줄이기 위해 리스트 데이터를 지워나간다.
-      for(int j = 0; j < productOptionList.size(); j++) {
-        if(dto.optionId() == productOptionList.get(j).getId()){
-          ProductOption productOption = productOptionList.get(j);
-      
-          productOption.setStock(productOption.getStock() - dto.detailCount());
-          productOptionSetList.add(productOption);
-      
-          productOptionList.remove(j);
+### 관리자의 상품 추가 및 수정, 파일관리
+<br />
+
+관리자의 상품 및 수정 과정에서는 파일을 저장 및 삭제하는 처리가 포함되어 있습니다.   
+데이터베이스 요청은 @Transactional Annotation을 통해 오류 발생 시 롤백이 될 수 있지만, 파일 저장 및 삭제 처리는 그렇지 않다는 점에서 이 처리를 해결해야 한다고 생각했습니다.   
+이 문제를 해결하기 위해 대부분의 처리를 try-catch로 감싸주고 저장되는 파일명들은 saveImages 라는 리스트에 담아 따로 관리하도록 했습니다.   
+이후 내부에서 예외가 발생하는 경우 saveImages 리스트에 저장된 모든 파일명들을 통해 저장된 파일들을 삭제할 수 있도록 처리했습니다.   
+
+임시 디렉토리를 사용하는 방안도 있었지만, 그런 경우 추가적인 파일 이동 처리가 필요하고 즉시 반영되어야 한다는 기능 특성 상 시간대 별로 파일 이동을 하는 방법을 사용하기에도 적합하지 않다고 생각했습니다.   
+즉시 처리되어야 하는 만큼 여러번의 I/O가 발생하는 것 보다는 문제가 발생했을 때 삭제할 수 있도록 처리하는게 더 효율적이라고 생각해 이 방법을 택하게 되었습니다.   
+
+이 상품 관리 기능에서는 또 하나의 개선 사항이 있었습니다.   
+JPA를 사용하는 환경이었기에 Product를 참조하는 ProductOption, ProductThumbnail, ProductInfoImage 엔티티들에 대해 양방향 매핑으로 연관관계를 설정하고 CascadeType.ALL을 통한 동시저장을 처리했었습니다.   
+테스트 결과 나눠서 저장하는 것 보다 동시저장이 더 빠르게 처리되기도 하고 단순하게 바라보더라도 데이터베이스 연결 횟수도 1번으로 마무리 할 수 있었기 때문에 더 효율적이라는 생각 때문이었습니다.   
+하지만 이 설정으로 인해 Product를 단방향으로 참조하는 다른 엔티티에서 save() 요청 시 위 엔티티들을 모두 JOIN해서 조회한다는 것이 문제가 되었습니다.   
+간단한 insert 처리임에도 이 JOIN 과정 때문에 큰 지연시간이 발생하는 것을 확인했고, 이 문제를 회피하기 위해 각 엔티티들을 따로 저장하는 방법으로 개선했습니다.   
+
+그리고 양방향 매핑에 있는 엔티티들을 제외한 다른 곳에서 전혀 참조가 발생하지 않는 엔티티에 대해서는 CascadeType.PERSIST, CascadeType.MERGE를 정의해 동시 저장을 처리할 수 있도록 개선했습니다.   
+이 문제에 대해서는 블로그에 상세하게 정리해두었고, 아래 링크를 통해 확인하실 수 있습니다.   
+<a href="https://myyoun.tistory.com/242">JPA CascadeType 문제 및 해결</a>
+
+```java
+@Service
+@RequiredArgsConstructor
+public class AdminServiceImpl implements AdminService {
+  @Override
+  @Transactional(rollbackFor = Exception.class)
+  public String patchProduct(String productId, List<Long> deleteOptionList, AdminProductPatchDTO patchDTO, AdminProductImageDTO imageDTO) {
+    Product product = productRepository.findById(productId).orElseThrow(IllegalArgumentException::new);
+    product.setPatchData(patchDTO);
+    List<String> saveImages = new ArrayList<>();
+
+    try{
+      setProductOptionData(product, patchDTO);
+      saveImages = saveProductImage(product, imageDTO);
+      String firstThumbnail = setProductFirstThumbnail(product, imageDTO.getFirstThumbnail());
+
+      if(firstThumbnail != null)
+        saveImages.add(firstThumbnail);
+
+      productRepository.save(product);
+      productOptionRepository.saveAll(product.getProductOptions());
+      productThumbnailRepository.saveAll(product.getProductThumbnails());
+      productInfoImageRepository.saveAll(product.getProductInfoImages());
+
+      if(deleteOptionList != null)
+        productOptionRepository.deleteAllById(deleteOptionList);
+
+      deleteProductImage(imageDTO);
+    }catch (Exception e) {
+      log.warn("Filed admin patchProduct");
+      e.printStackTrace();
+      saveImages.forEach(this::deleteImage);
+
+      throw new IllegalArgumentException("Failed patchProduct", e);
+    }
+
+    return productId;
+  }
+
+  public void setProductOptionData(Product product, AdminProductPatchDTO patchDTO) {
+    List<PatchOptionDTO> optionDTOList = patchDTO.getOptionList();
+    List<ProductOption> optionEntities = product.getProductOptions();
+
+    for(int i = 0; i < optionDTOList.size(); i++) {
+      PatchOptionDTO dto = optionDTOList.get(i);
+      long dtoOptionId = dto.getOptionId();
+      boolean patchStatus = true;
+
+      for(int j = 0; j < optionEntities.size(); j++) {
+        ProductOption option = optionEntities.get(j);
+
+        if(dtoOptionId == option.getId()){
+          option.patchOptionData(dto);
+          patchStatus = false;
           break;
         }
       }
+
+      if(patchStatus)
+        product.addProductOption(dto.toEntity());
     }
+  }
 
-    productOptionRepository.saveAll(productOptionSetList);
+  public List<String> saveProductImage(Product product, AdminProductImageDTO imageDTO) throws Exception{
+    List<String> thumbnails = saveThumbnail(product, imageDTO.getThumbnail());
+    List<String> infoImages = saveInfoImage(product, imageDTO.getInfoImage());
 
-    patchProductSales(productIdList, productMap);
-}
+    thumbnails.addAll(infoImages);
 
-public void patchProductSales(List<String> productIdList, Map<String, Integer> productMap) {
-    List<Product> productList = productRepository.findAllByIdList(productIdList);
-    List<Product> productSetList = new ArrayList<>();
-    
-    //해당 되는 상품 Entity에 대해 판매량을 수정한 뒤 리스트에 담아준다.
-    for(Product data : productList) {
-      long productSales = data.getProductSales() + productMap.get(data.getId());
-      data.setProductSales(productSales);
-      
-      productSetList.add(data);
-    }
-    
-    productRepository.saveAll(productSetList);
+    return thumbnails;
+  }
 }
 ```
 
-처리 순서로는 주문 및 주문 상세 데이터 저장, 장바구니를 통한 구매인 경우 해당 상품을 파악해 장바구니 데이터 삭제, 상품 옵션 테이블에서 구매된 상품의 재고 수정, 상품 테이블에서 구매된 상품의 판매량 수정 순서입니다.   
-이전 버전에서는 이 이후 요약 테이블을 조회해 매출 데이터를 수정하는 과정이 포함되어 있었습니다.
-
-<br />
-
-### 관리자 매출 조회 처리 중 발생한 문제 해결
-<br />
-
-관리자의 기간별 매출 중 월별 조회가 가장 많은 데이터를 집계하고 매핑하게 됩니다.   
-월 매출 정보에 대한 조회, 당월 베스트 5 상품에 대한 조회, 상품 분류별 월 매출 정보 조회, 모든 상품 분류 리스트 조회, 당월의 일별 매출 데이터 조회, 전년 동월 매출 정보 조회, 이렇게 총 6번을 조회한 뒤 매핑하도록 처리했습니다.   
-여기서 가장 문제가 되는 조회가 베스트 5 상품 조회와 분류별 매출 조회였습니다.   
-다른 쿼리 조회들은 수월하게 처리할 수 있었는데 이 두가지 쿼리는 각각 1분이 넘게 소요되는 문제가 있었습니다.
-
-```java
-// 베스트 5 상품 조회 쿼리 수정
-@Override
-public List<AdminBestSalesProductDTO> findPeriodBestProductOrder(LocalDateTime startDate
-                                                                , LocalDateTime endDate) {
-        NumberPath<Long> aliasQuantity = Expressions.numberPath(
-                                            Long.class
-                                            , "productPeriodSalesQuantity"
-                                    );
-        
-        return jpaQueryFactory.select(
-                Projections.constructor(
-                        AdminBestSalesProductDTO.class
-                        , Expressions.as(
-                                JPAExpressions.select(product.productName)
-                                      .from(product)
-                                      .where(productOrderDetail.product.id.eq(product.id))
-                                , "productName"
-                        )
-                        , ExpressionsUtils.as(productOrderDetail
-                                          .orderDetailCount
-                                          .longValue()
-                                          .sum()
-                                          , aliasQuantity
-                        )
-                        , productOrderDetail
-                                .orderDetailPrice
-                                .longValue()
-                                .sum()
-                                .as("productPeriodSales")
-                )
-        )
-        .from(productOrder)
-        .innerJoin(productOrderDetail)
-        .on(productOrderDetail.productOrder.id.eq(productOrder.id))
-        .where(productOrder.createdAt.between(startDate, endDate))
-        .groupBy(productOrderDetail.product.id)
-        .orderBy(aliasQuantity.desc())
-        .limit(5)
-        .fetch();
-}
-```
-
-최대한 쿼리를 최적화 해보고자 여러 방향으로 테스트를 진행하면서 알아보니 조인되는 테이블의 개수가 많은 것이 포인트였습니다.   
-위 두 쿼리를 제외한 다른 쿼리들은 대부분 주문과 주문 상세 테이블만으로 조회되는 반면 상품 테이블이 추가가 되어 상품명 혹은 상품 분류명이 필요해 한번의 조인이 더 추가되었습니다.
-
-이 문제를 해결하기 위해 쿼리를 추가해 상품명과 상품 분류명을 따로 매핑하는 방법도 고려했었지만 그 시간도 무시할 수 없지 않을까 하며 좀 더 알아보니 서브쿼리를 통한 최적화가 가능하다는 내용을 보게 되어 시도해보게 되었습니다.   
-상품 테이블에 대한 처리를 서브 쿼리로 분리하고 나니 각각 70초 가량 걸리던 요청을 0.3초대까지 줄일 수 있게 되었습니다.
-
-<br />
-
-### 페이징 처리 수정
-<br />
-
-Man's Shop 프로젝트에는 많은 부분에 페이징 기능을 사용합니다.   
-이전에도 페이징 처리를 하는 프로젝트가 있었고 JPA를 사용한 프로젝트들에서는 Pageable을 통한 조회로만 처리했었습니다.   
-이유는 Pageable을 통해 조회하면 쿼리는 똑같이 작성하긴 하지만 페이징에 필요한 총 페이지, 총 데이터 개수 등을 따로 연산할 필요가 없이 같이 전달해 준다는 이유가 크게 작용했습니다.
-
-이번 프로젝트에는 테스트 이전 더미데이터를 많이 추가한 상태로 테스트를 진행했습니다.   
-가장 많이 들어간 데이터인 주문 상세 테이블의 경우 800만건의 데이터가 들어간 상태로 테스트를 수행했습니다.   
-그러다보니 매출 내역 조회에서 지연시간이 발생하는 것을 확인할 수 있었고 최적화를 고민해보게 되면서 페이징 처리에 대해서도 Pageable이 편하다고 해서 무조건 좋은 것만은 아니다라는 말이 생각나 같이 테스트를 수행해보게 되었습니다.
-
-주문 상세 내역을 페이징으로 조회하는 기능이 따로 없어 가장 많은 데이터를 대상으로 테스트를 한 것은 아니지만 한 사용자의 주문 내역 데이터 90개, 총 상품의 데이터 1016개를 기준으로 테스트 해봤습니다.   
-결과는 90개의 데이터를 Pageable을 통한 조회는 60ms, 직접 구현을 통해 동일한 쿼리를 List와 count 두번을 요청하고 count 쿼리의 결과를 토대로 필요한 페이징 데이터를 연산한 뒤 매핑하는데 까지 14ms가 걸리는 것을 확인할 수 있었습니다.   
-상품 데이터도 1016개를 기준으로 Pageable 조회는 331ms, 직접 구현은 29ms로 10배 가까이 차이가 나는 결과를 보였습니다.
-
-그래서 이 부분에 대해서도 수정이 필요하다고 생각해 운영중인 서비스라고 가정하고 포인트를 잡아봤습니다.   
-일반적으로 중계서비스가 아닌 기획에 맞는 개인 쇼핑몰이라고 한다면 상품이나 사용자의 마이페이지에서 조회하는 데이터들의 경우는 증가폭이 크지 않을 것이라고 생각했습니다.   
-하지만 주문 관련 조회나 관리자의 문의 내역 조회의 경우 증가폭이 클 것으로 생각했습니다.   
-그래서 증가폭이 클 가능성이 높은 데이터들에 대해서는 직접 구현으로 시간을 줄일 수 있도록 처리하고 증가폭이 작은 테이블에 대해서는 Pageable을 통한 처리로 좀 더 간단하게 처리할 수 있도록 수정했습니다.
-
-<br />
-
-### 상품 추가 및 수정 처리
-<br />
-
-관리자의 상품 추가 및 삭제는 JPA의 연관관계 설정을 통해 상위 Entity인 Product를 save하는 것으로 하위 Entity들을 같이 저장할 수 있도록 처리했습니다.   
-양방향 매핑으로 처리함으로써 한번의 save() 요청으로 모든 Entity들을 같이 처리할 수 있기 때문에 효율이 높다고 생각했기 때문입니다.   
-실제로 더미데이터를 넣는 과정에서 테스트 해본 결과 여러개의 Entity를 각각의 Repository를 통해 저장하는 것 보다 양방향 매핑을 통해 한번에 저장하도록 하는 것이 더 빠르게 처리되는 것을 확인할 수 있었습니다.   
-
-상품 관련된 테이블로는 Product, ProductOption, ProductThumbnail, ProductInfoImage 가 존재합니다.   
-ProductOption, ProductThumbnail, ProductInfoImage에서는 Product를 참조하고 있는 구조입니다.
-
-```java
-//상품 수정
-@Override
-@Transactional(rollbackFor = Exception.class)
-public String patchProduct(String productId, List<Long> deleteOptionList, AdminProductPatchDTO patchDTO, AdminProductImageDTO imageDTO) {
-        Product product = productRepository.findById(productId).orElseThrow(IllegalArgumentException::new);
-        product.setPatchData(patchDTO);
-        List<String> saveImages = new ArrayList<>();
-        try{
-            setProductOptionData(product, patchDTO);
-            saveImages = saveProductImage(product, imageDTO);
-            String firstThumbnail = setProductFirstThumbnail(product, imageDTO.getFirstThumbnail());
-
-            if(firstThumbnail != null)
-                saveImages.add(firstThumbnail);
-
-            productRepository.save(product);
-
-            if(deleteOptionList != null)
-                productOptionRepository.deleteAllById(deleteOptionList);
-
-            deleteProductImage(imageDTO);
-        }catch (Exception e) {
-            log.warn("Filed admin patchProduct");
-            e.printStackTrace();
-            saveImages.forEach(this::deleteImage);
-
-            throw new IllegalArgumentException("Failed patchProduct", e);
-        }
-
-        return productId;
-}
-
-//대표 썸네일 저장 및 Product Entity 필드에 set
-public String setProductFirstThumbnail(Product product, MultipartFile, firstThumbnail) throws Exception {
-        String thumbnail = null;
-
-        if(firstThumbnail != null){
-            String saveName = imageInsert(firstThumbnail);
-            thumbnail = saveName;
-            product.setThumbnail(saveName);
-        }
-
-        return thumbnail;
-}
-
-//대표 썸네일을 제외한 나머지 썸네일 파일 저장 후 상품 옵션을 ProductOption Entity List로 매핑해 반환
-public void setProductOptionData(Product product, AdminProductPatchDTO patchDTO) {
-        List<PatchOptionDTO> optionDTOList = patchDTO.getOptionList();
-        List<ProductOption> optionEntities = product.getProductOptionSet();
-        
-        for(int i = 0; i < optionDTOList.size(); i++) {
-            PatchOptionDTO dto = optionDTOList.get(i);
-            long dtoOptionId = dto.getOptionId();
-            boolean patchStatus = true;
-            
-            for(int j = 0; j < optionEntities.size(); j++) {
-                ProductOption option = optionEntities.get(j);
-                
-                if(dtoOptionId == option.getId()) {
-                    option.patchOptionData(dto);
-                    patchStatus = false;
-                    break;
-                }
-            }
-            
-            if(patchStatus)
-                product.addProductOption(dto.toEntity());
-        }
-}
-
-public void saveProductImage(Product product, AdminProductImageDTO imageDTO) throws Exception{
-        List<String> thumbnails = saveThumbnail(product, imageDTO.getThumbnail());
-        List<String> infoImages = saveInfoImage(product, imageDTO.getInfoImage());
-
-        thumbnails.addAll(infoImages);
-
-        return thumbnails;
-}
-
-public List<String> saveThumbnail(Product product, List<MultipartFile> imageList) throws Exception{
-        List<String> thumbnailList = Collections.emptyList();
-
-        if(imageList != null){
-          for(MultipartFile image : imageList){
-            String saveName = imageInsert(image);
-            thumbnailList.add(saveName);
-            product.addProductThumbnail(
-                ProductThumbnail.builder()
-                        .product(product)
-                        .imageName(saveName)
-                        .build()
-            );
-          }
-        }
-
-        return thumbnailList;
-
-}
-
-public void saveInfoImage(Product product, List<MultipartFile> imageList) throws Exception{
-        List<String> infoImages = Collections.emptyList();
-
-        if(imageList != null) {
-          for(MultipartFile image : imageList) {
-            String saveName = imageInsert(image);
-            infoImages.add(saveName);
-            product.addProductInfoImage(
-                ProductInfoImage.builder()
-                        .product(product)
-                        .imageName(saveName)
-                        .build()
-            );
-          }
-        }
-
-        return infoImages;
-}
-
-public void deleteProductImage(AdminProductImageDTO imageDTO) {
-        deleteFirstThumbnail(imageDTO.getDeleteFirstThumbnail());
-        deleteThumbnail(imageDTO.getDeleteThumbnail());
-        deleteInfoImage(imageDTO.getDeleteInfoImage());
-}
-
-public void deleteFirstThumbnail(String image) {
-        deleteImage(image);
-}
-
-public void deleteThumbnail(List<String> deleteList) {
-        if(deleteList != null){
-          productThumbnailRepository.deleteByImageName(deleteList);
-          deleteList.forEach(this::deleteImage);
-        }
-}
-
-public void deleteInfoImage(List<String> deleteList) {
-        if(deleteList != null){
-          productInfoImageRepository.deleteByImageName(deleteList);
-          deleteList.forEach(this::deleteImage);
-        }
-}
-
-//로컬에 이미지 파일을 저장
-public String imageInsert(MultipartFile image) throws Exception {
-        StringBuffer sb = new StringBuffer();
-        String saveName = sb.append(new SimpleDateFormat("yyyyMMddHHmmss")
-                            .format(System.currentTimeMillis()))
-                            .append(UUID.randomUUID())
-                            .append(
-                                    image.getOriginalFilename().substring(
-                                            image.getOriginalFilename().lastIndexOf(".")
-                                    )
-                            )
-                            .toString();
-        String saveFile = filePath + saveName;
-        image.transferTo(new File(saveFile));
-        
-        return saveName;
-}
-
-@Value("${cloud.aws.s3.bucket}")
-private String bucket;
-
-private final AmazonS3 amazonS3;
-
-private final AmazonS3Client amazonS3Client;
-
-//S3 bucket에 파일 저장
-public String imageInsert(MultipartFile image) throws Exception {
-        StringBuffer sb = new StringBuffer();
-        String saveName = sb.append(new SimpleDateFormat("yyyyMMddHHmmss")
-                            .format(System.currentTimeMillis()))
-                            .append(UUID.randomUUID())
-                            .append(
-                                    image.getOriginalFilename().substring(
-                                              image.getOriginalFilename().lastIndexOf(".")
-                                    )
-                            )
-                            .toString();
-        
-        ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentLength(image.getSize());
-        objectMetadata.setContentType(image.getContentType());
-        
-        try {
-            amazonS3.putObject(
-                    new PutObjectRequest(
-                            bucket,
-                            saveName,
-                            image.getInputStream(),
-                            objectMetadata
-                    )
-                    .withCannedAcl(CannedAccessControlList.PublicRead)
-            );
-        }catch {
-            log.warn("productImage insert IOException");
-            e.printStackTrace();
-            throw new NullPointerException();
-        }
-        
-        return saveName;
-}
-
-//로컬 이미지 파일 삭제
-public void deleteImage(String imageName) {
-        File file = new File(filePath + imageName);
-        
-        if(file.exists())
-            file.delete();
-}
-
-//S3 이미지 파일 삭제
-public void deleteImage(String imageName) {
-        amazonS3.deleteObject(new DeleteObjectRequest(bucket, imageName));
-}
-```
-
-위 코드는 상품 수정 처리 코드입니다.   
-상품 수정 처리는 등록과 대부분 비슷하게 처리되며, 수정 내역에 대한 갱신만이 추가된 구조입니다.   
-상품 옵션의 수정을 위해 조회한 Product Entity 내부의 ProductOptionList의 각 요소를 확인해 수정하도록 처리했습니다.   
-예외가 발생한다면 저장된 이미지를 제거해야 한다고 생각했기에 예외가 발생하는 경우 저장된 모든 이미지 파일을 제거할 수 있도록 처리했습니다.   
-
-파일 저장의 경우 개발 시 로컬 경로에 저장하도록 처리하면서 진행했고, 이후 테스트 과정에서 S3에 저장하도록 처리해 테스트와 배포 테스트를 진행했습니다.
+개선을 통해 위 코드와 같이 수정되었으며 전체 코드는 아래 링크를 통해 확인하실 수 있습니다.   
+<a href="https://github.com/Youndae/mansshop_boot/blob/master/src/main/java/com/example/mansshop_boot/service/AdminServiceImpl.java#L245">patchProduct 코드</a>
 
 
 <br />

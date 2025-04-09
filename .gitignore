@@ -19,6 +19,7 @@ bin/
 
 ### IntelliJ IDEA ###
 application.yml
+application-test.yml
 application-oauth.yml
 filePath.properties
 jwt.properties
@@ -33,6 +34,7 @@ out/
 !**/src/test/**/out/
 src/main/generated/
 logback-spring/
+logback-test-spring/
 
 
 ### NetBeans ###

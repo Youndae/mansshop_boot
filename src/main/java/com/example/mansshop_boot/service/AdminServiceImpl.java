@@ -303,7 +303,6 @@ public class AdminServiceImpl implements AdminService {
      * AdminProductPatchDTO에 존재하는 수정된 OptionDTO를 통해 ProductOption Entity를 수정.
      * 이렇게 처리하지 않으면 PersistenceContext에 의해 오류가 발생하기 때문에 ProductOption 리스트를 별도로 save 처리해야 함.
      */
-    @Transactional
     public void setProductOptionData(Product product, AdminProductPatchDTO patchDTO) {
         List<PatchOptionDTO> optionDTOList = patchDTO.getOptionList();
         List<ProductOption> optionEntities = product.getProductOptions();

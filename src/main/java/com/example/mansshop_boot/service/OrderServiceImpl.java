@@ -70,7 +70,7 @@ public class OrderServiceImpl implements OrderService{
      * 빠른 주문 데이터 처리를 위해 대부분의 로직은 Consumer에서 처리.
      */
     @Override
-    @Transactional(rollbackFor = RuntimeException.class, propagation = Propagation.REQUIRED)
+    @Transactional(rollbackFor = RuntimeException.class)
     public String payment(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO) {
         ProductOrderDataDTO productOrderDataDTO = createOrderDataDTO(paymentDTO, cartMemberDTO);
         ProductOrder order = productOrderDataDTO.productOrder();
