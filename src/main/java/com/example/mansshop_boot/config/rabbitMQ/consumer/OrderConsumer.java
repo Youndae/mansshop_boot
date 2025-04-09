@@ -86,7 +86,7 @@ public class OrderConsumer {
      */
     @RabbitListener(queues = "${rabbitmq.queue.orderProductOption.name}", concurrency = "1")
     public void consumeOrderProductOption(List<OrderProductDTO> orderProductList) {
-        //TODO: orderProductList를 그대로 repository로 넘기고 거기서 optionId, detailCount를 통해 재고 처리.
+
         productOptionRepository.patchOrderStock(orderProductList);
     }
 
@@ -103,7 +103,7 @@ public class OrderConsumer {
      */
     @RabbitListener(queues = "${rabbitmq.queue.periodSalesSummary.name}", concurrency = "1")
     public void consumePeriodSalesSummary(PeriodSummaryQueueDTO dto) {
-        //TODO: periodSalesSummary를 조회. period 기준으로 조회.
+
         PeriodSalesSummary entity = periodSalesSummaryRepository.findByPeriod(dto.period());
 
         if(entity != null)
@@ -134,13 +134,12 @@ public class OrderConsumer {
         List<ProductSalesSummary> summaryEntities = productSalesSummaryRepository.findAllByProductOptionIds(productSummaryDTO.periodMonth(), productSummaryDTO.productOptionIds());
 
         if(summaryEntities.size() == productSummaryDTO.orderProductDTOList().size()) {
-            //TODO: 둘의 사이즈가 같다는 것은 해당 상품에 대한 데이터가 이미 들어가 있다는 말이 되므로 기존 엔티티 수정만 처리한다.
+            //둘의 사이즈가 같다는 것은 해당 상품에 대한 데이터가 이미 들어가 있다는 말이 되므로 기존 엔티티 수정만 처리.
             patchProductSalesSummaryList(summaryEntities, productSummaryDTO.orderProductDTOList());
         }else if (summaryEntities.size() == 0){
             createProductSummaryList(summaryEntities, productSummaryDTO.orderProductDTOList(), productSummaryDTO.productIds(), productSummaryDTO.periodMonth());
         }else {
-            //TODO: 기존 엔티티 수정 처리 후
-            // 새로운 데이터에 대한 삽입을 처리하기 위해 productIds를 만든다.
+            //기존 엔티티 수정 처리 후 새로운 데이터에 대한 삽입을 처리하기 위해 productIds를 만든다.
             // 이때, 엔티티에 없는 정보만 조회해야 한다.
             patchProductSalesSummaryList(summaryEntities, productSummaryDTO.orderProductDTOList());
 
@@ -155,7 +154,7 @@ public class OrderConsumer {
 
                     if(dto.optionId() != entity.getProductOption().getId() &&
                                 dto.productId().equals(entity.getProduct().getId())){
-                        // TODO: 옵션 아이디는 불일치하지만 상품 아이디는 일치한다면
+                        // 옵션 아이디는 불일치하지만 상품 아이디는 일치한다면
                         // 이 Product, Classification을 그대로 담아서 사용할 수 있다.
 
                         newEntity = ProductSalesSummary.builder()
@@ -282,7 +281,7 @@ public class OrderConsumer {
                 cartDetailRepository.deleteAllById(deleteCartDetailIds);
             }
         }else
-            log.warn("OrderConsumer::consumeOrderCart : cartId is null. cartMemberDTO is {}", orderCartDTO.cartMemberDTO());
+            log.error("OrderConsumer::consumeOrderCart : cartId is null. cartMemberDTO is {}", orderCartDTO.cartMemberDTO());
 
     }
 

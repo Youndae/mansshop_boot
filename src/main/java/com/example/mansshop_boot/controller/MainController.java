@@ -170,21 +170,6 @@ public class MainController {
     )
     @GetMapping("/display/{imageName}")
     public ResponseEntity<byte[]> display(@PathVariable(name = "imageName") String imageName) {
-        /*File file = new File(filePath + imageName);
-        ResponseEntity<byte[]> result = null;
-
-        try{
-            HttpHeaders header = new HttpHeaders();
-            header.add("Content-Type", Files.probeContentType(file.toPath()));
-
-            result = new ResponseEntity<>(FileCopyUtils.copyToByteArray(file), HttpStatus.OK);
-        }catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return result;*/
-
-        //TODO: 우선 JMeter 테스트로 결과 확인 후 최종 결정
         File file = new File(filePath + imageName);
         ResponseEntity<byte[]> result = null;
 

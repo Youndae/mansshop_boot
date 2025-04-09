@@ -21,6 +21,7 @@ import com.example.mansshop_boot.domain.entity.Auth;
 import com.example.mansshop_boot.domain.entity.Member;
 import com.example.mansshop_boot.domain.enumuration.Result;
 import com.example.mansshop_boot.domain.enumuration.Role;
+import com.example.mansshop_boot.repository.auth.AuthRepository;
 import com.example.mansshop_boot.repository.member.MemberRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -51,6 +52,8 @@ import java.util.concurrent.TimeUnit;
 public class MemberServiceImpl implements MemberService{
 
     private final MemberRepository memberRepository;
+
+    private final AuthRepository authRepository;
 
     private final JWTTokenProvider jwtTokenProvider;
 
@@ -83,13 +86,13 @@ public class MemberServiceImpl implements MemberService{
     public String joinProc(JoinDTO joinDTO) {
 
         Member memberEntity = joinDTO.toEntity();
-//        memberEntity.addMemberAuth(new Auth().toMemberAuth());
         Auth auth = Auth.builder()
                         .auth(Role.MEMBER.getKey())
                         .build();
         memberEntity.addMemberAuth(auth);
 
         memberRepository.save(memberEntity);
+        authRepository.save(auth);
 
         return Result.OK.getResultKey();
     }
@@ -289,7 +292,7 @@ public class MemberServiceImpl implements MemberService{
             stringValueOperations.set(searchDTO.userId(), String.valueOf(certificationNo), 6L, TimeUnit.MINUTES);
 
             MimeMessage mailForm = createEmailForm(searchDTO.userEmail(), certificationNo);
-//            javaMailSender.send(mailForm);
+            javaMailSender.send(mailForm);
 
             return Result.OK.getResultKey();
         }catch (Exception e) {
@@ -311,7 +314,6 @@ public class MemberServiceImpl implements MemberService{
         String mailTitle = "Man's Shop 비밀번호 변경";
 
         MimeMessage message = javaMailSender.createMimeMessage();
-//        message.setFrom(sender);
         message.addRecipients(MimeMessage.RecipientType.TO, userEmail);
         message.setSubject(mailTitle);
 

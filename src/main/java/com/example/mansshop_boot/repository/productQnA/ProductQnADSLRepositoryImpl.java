@@ -5,15 +5,9 @@ import com.example.mansshop_boot.domain.dto.mypage.qna.business.MyPageProductQnA
 import com.example.mansshop_boot.domain.dto.mypage.qna.out.ProductQnAListDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.product.business.ProductQnADTO;
-import com.example.mansshop_boot.domain.entity.ProductQnA;
-import com.example.mansshop_boot.domain.entity.QProductQnA;
-import com.querydsl.core.Tuple;
-import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
@@ -31,7 +25,6 @@ import java.util.List;
 
 import static com.example.mansshop_boot.domain.entity.QProductQnA.productQnA;
 import static com.example.mansshop_boot.domain.entity.QProduct.product;
-import static com.example.mansshop_boot.domain.entity.QMember.member;
 
 @Repository
 @RequiredArgsConstructor

@@ -40,6 +40,9 @@ public class ProductReviewDSLRepositoryImpl implements ProductReviewDSLRepositor
 
     private final JPAQueryFactory jpaQueryFactory;
 
+    @PersistenceContext
+    private EntityManager em;
+
     @Override
     public Page<ProductReviewDTO> findByProductId(String productId, Pageable pageable) {
 
@@ -111,40 +114,6 @@ public class ProductReviewDSLRepositoryImpl implements ProductReviewDSLRepositor
 
         return PageableExecutionUtils.getPage(list, pageable, count::fetchOne);
     }
-
-    /*@Override
-    public List<AdminReviewDTO> findAllByAdminReviewList(AdminOrderPageDTO pageDTO, String listType) {
-        return jpaQueryFactory.select(
-                        Projections.constructor(
-                                AdminReviewDTO.class
-                                , productReview.id.as("reviewId")
-                                *//*, ExpressionUtils.as(
-                                        JPAExpressions.select(product.productName)
-                                                .from(product)
-                                                .where(product.id.eq(productReview.product.id)), "productName"
-                                )*//*
-                                , product.productName
-                                , new CaseBuilder()
-                                        .when(productReview.member.nickname.isNull())
-                                        .then(productReview.member.userName)
-                                        .otherwise(productReview.member.nickname)
-                                        .as("writer")
-                                , productReview.updatedAt.as("updatedAt")
-                                , productReview.status
-                        )
-                )
-                .from(productReview)
-                .innerJoin(product)
-                .on(productReview.product.id.eq(product.id))
-                .where(adminReviewListSearch(pageDTO, listType))
-                .orderBy(productReview.updatedAt.desc())
-                .offset(pageDTO.offset())
-                .limit(pageDTO.amount())
-                .fetch();
-    }*/
-
-    @PersistenceContext
-    private EntityManager em;
 
     @Override
     public List<AdminReviewDTO> findAllByAdminReviewList(AdminOrderPageDTO pageDTO, String listType) {
