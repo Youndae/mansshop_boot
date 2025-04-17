@@ -3,8 +3,12 @@ package com.example.mansshop_boot;
 import com.example.mansshop_boot.domain.dto.admin.business.AdminReviewDTO;
 import com.example.mansshop_boot.domain.dto.admin.out.AdminOrderResponseDTO;
 import com.example.mansshop_boot.domain.dto.admin.out.AdminQnAListResponseDTO;
+import com.example.mansshop_boot.domain.dto.cart.business.CartMemberDTO;
+import com.example.mansshop_boot.domain.dto.order.in.OrderProductDTO;
+import com.example.mansshop_boot.domain.dto.order.in.PaymentDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
+import com.example.mansshop_boot.domain.dto.rabbitMQ.FailedQueueDTO;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
 import com.example.mansshop_boot.domain.enumuration.AdminListType;
 import com.example.mansshop_boot.repository.member.MemberRepository;
@@ -14,6 +18,7 @@ import com.example.mansshop_boot.repository.productQnA.ProductQnARepository;
 import com.example.mansshop_boot.repository.productReview.ProductReviewRepository;
 import com.example.mansshop_boot.repository.productSales.ProductSalesSummaryRepository;
 import com.example.mansshop_boot.service.AdminService;
+import com.example.mansshop_boot.service.OrderService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -51,6 +56,9 @@ public class QueryTest {
     @Autowired
     private ProductReviewRepository productReviewRepository;
 
+    @Autowired
+    private OrderService orderService;
+
     @Test
     void name() {
         ExecutorService executor = Executors.newFixedThreadPool(10);
@@ -59,10 +67,12 @@ public class QueryTest {
         Pageable pageable = PageRequest.of(pageDTO.page() - 1
                 , pageDTO.amount()
                 , Sort.by("classificationStep").ascending());*/
-        AdminOrderPageDTO pageDTO = new AdminOrderPageDTO("테스터3닉네임", "user", 1);
-        List<AdminReviewDTO> result = productReviewRepository.findAllByAdminReviewList(pageDTO, AdminListType.ALL.name());
+//        AdminOrderPageDTO pageDTO = new AdminOrderPageDTO("테스터3닉네임", "user", 1);
+//        List<AdminReviewDTO> result = productReviewRepository.findAllByAdminReviewList(pageDTO, AdminListType.ALL.name());
 
-        result.forEach(System.out::println);
+//        result.forEach(System.out::println);
+
+//        adminService.getFailedMessageList();
 
         /*for(int i = 0; i < 1; i++) {
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
@@ -78,5 +88,8 @@ public class QueryTest {
         PagingListDTO<AdminOrderResponseDTO> result = adminService.getNewOrderList(pageDTO);*/
 
 //        System.out.println(result.content().get(0));
+
+
     }
+
 }

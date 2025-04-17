@@ -51,7 +51,7 @@ public class OrderConsumer {
 
     /**
      *
-     * @param orderProductList
+     * @param messageDTO
      *
      * 상품 주문 처리 시 Product의 productSalesQuantity 데이터 수정.
      * 동일한 상품이더라도 옵션이 다른 경우 각 OrderProductDTO에 담겨 있기 때문에 Map을 통해 전체 집계 처리.
@@ -61,13 +61,13 @@ public class OrderConsumer {
      * 또한 동시성 제어를 위해 concurrency 1로 설정.
      */
     @RabbitListener(queues = "${rabbitmq.queue.orderProduct.name}", concurrency = "1")
-    public void consumeOrderProduct(List<OrderProductDTO> orderProductList) {
+    public void consumeOrderProduct(OrderProductMessageDTO messageDTO) {
         Map<String, Integer> productMap = new HashMap<>();
 
-        for(OrderProductDTO dto : orderProductList){
+        for(OrderProductDTO dto : messageDTO.getOrderProductList()){
             productMap.put(
-                    dto.productId(),
-                    productMap.getOrDefault(dto.productId(), 0) + dto.detailCount()
+                    dto.getProductId(),
+                    productMap.getOrDefault(dto.getProductId(), 0) + dto.getDetailCount()
             );
         }
 
@@ -76,7 +76,7 @@ public class OrderConsumer {
 
     /**
      *
-     * @param orderProductList
+     * @param messageDTO
      *
      * 상품 옵션별 재고 수정.
      * OrderProductDTO 내부의 optionId, detailCount 필드를 통해 update 쿼리로 직접 수정.
@@ -85,9 +85,9 @@ public class OrderConsumer {
      * 동시성 제어를 위해 concurrency 1 로 설정.
      */
     @RabbitListener(queues = "${rabbitmq.queue.orderProductOption.name}", concurrency = "1")
-    public void consumeOrderProductOption(List<OrderProductDTO> orderProductList) {
+    public void consumeOrderProductOption(OrderProductMessageDTO messageDTO) {
 
-        productOptionRepository.patchOrderStock(orderProductList);
+        productOptionRepository.patchOrderStock(messageDTO.getOrderProductList());
     }
 
     /**
@@ -104,7 +104,7 @@ public class OrderConsumer {
     @RabbitListener(queues = "${rabbitmq.queue.periodSalesSummary.name}", concurrency = "1")
     public void consumePeriodSalesSummary(PeriodSummaryQueueDTO dto) {
 
-        PeriodSalesSummary entity = periodSalesSummaryRepository.findByPeriod(dto.period());
+        PeriodSalesSummary entity = periodSalesSummaryRepository.findByPeriod(dto.getPeriod());
 
         if(entity != null)
             entity.setPatchData(dto);
@@ -131,39 +131,39 @@ public class OrderConsumer {
      */
     @RabbitListener(queues = "${rabbitmq.queue.productSalesSummary.name}", concurrency = "1")
     public void consumeProductSalesSummary(OrderProductSummaryDTO productSummaryDTO) {
-        List<ProductSalesSummary> summaryEntities = productSalesSummaryRepository.findAllByProductOptionIds(productSummaryDTO.periodMonth(), productSummaryDTO.productOptionIds());
+        List<ProductSalesSummary> summaryEntities = productSalesSummaryRepository.findAllByProductOptionIds(productSummaryDTO.getPeriodMonth(), productSummaryDTO.getProductOptionIds());
 
-        if(summaryEntities.size() == productSummaryDTO.orderProductDTOList().size()) {
+        if(summaryEntities.size() == productSummaryDTO.getOrderProductDTOList().size()) {
             //둘의 사이즈가 같다는 것은 해당 상품에 대한 데이터가 이미 들어가 있다는 말이 되므로 기존 엔티티 수정만 처리.
-            patchProductSalesSummaryList(summaryEntities, productSummaryDTO.orderProductDTOList());
+            patchProductSalesSummaryList(summaryEntities, productSummaryDTO.getOrderProductDTOList());
         }else if (summaryEntities.size() == 0){
-            createProductSummaryList(summaryEntities, productSummaryDTO.orderProductDTOList(), productSummaryDTO.productIds(), productSummaryDTO.periodMonth());
+            createProductSummaryList(summaryEntities, productSummaryDTO.getOrderProductDTOList(), productSummaryDTO.getProductIds(), productSummaryDTO.getPeriodMonth());
         }else {
             //기존 엔티티 수정 처리 후 새로운 데이터에 대한 삽입을 처리하기 위해 productIds를 만든다.
             // 이때, 엔티티에 없는 정보만 조회해야 한다.
-            patchProductSalesSummaryList(summaryEntities, productSummaryDTO.orderProductDTOList());
+            patchProductSalesSummaryList(summaryEntities, productSummaryDTO.getOrderProductDTOList());
 
             List<String> productIds = new ArrayList<>();
             List<OrderProductDTO> remainDTO = new ArrayList<>();
 
             // 기존 데이터가 존재하지 않더라도 해당 옵션에 대해 ProductId, ClassificationId가 동일한 상품이라면 DTO에서 데이터를 찾아 파싱할 필요가 없어지므로
             // 해당 처리에 대한 체크를 수행.
-            for(OrderProductDTO dto : productSummaryDTO.orderProductDTOList()) {
+            for(OrderProductDTO dto : productSummaryDTO.getOrderProductDTOList()) {
                 ProductSalesSummary newEntity = null;
                 for(ProductSalesSummary entity : summaryEntities) {
 
-                    if(dto.optionId() != entity.getProductOption().getId() &&
-                                dto.productId().equals(entity.getProduct().getId())){
+                    if(dto.getOptionId() != entity.getProductOption().getId() &&
+                                dto.getProductId().equals(entity.getProduct().getId())){
                         // 옵션 아이디는 불일치하지만 상품 아이디는 일치한다면
                         // 이 Product, Classification을 그대로 담아서 사용할 수 있다.
 
                         newEntity = ProductSalesSummary.builder()
-                                                    .periodMonth(productSummaryDTO.periodMonth())
+                                                    .periodMonth(productSummaryDTO.getPeriodMonth())
                                                     .classification(entity.getClassification())
                                                     .product(entity.getProduct())
-                                                    .productOption(ProductOption.builder().id(dto.optionId()).build())
-                                                    .sales(dto.detailPrice())
-                                                    .salesQuantity(dto.detailCount())
+                                                    .productOption(ProductOption.builder().id(dto.getOptionId()).build())
+                                                    .sales(dto.getDetailPrice())
+                                                    .salesQuantity(dto.getDetailCount())
                                                     .orderQuantity(1)
                                                     .build();
 
@@ -173,13 +173,13 @@ public class OrderConsumer {
                 }
                 // newEntity가 그대로 null이라면 일치하는 상품이 없었다는 것이므로 상품 아이디와 OrderProductDTO를 리스트에 추가.
                 if(newEntity == null) {
-                    productIds.add(dto.productId());
+                    productIds.add(dto.getProductId());
                     remainDTO.add(dto);
                 }
             }
             // 기존 데이터와 비교 후 일치하는 데이터가 없는 요청 데이터에 대해 엔티티를 생성하고 리스트에 추가하기 위해 호출.
             if(!productIds.isEmpty())
-                createProductSummaryList(summaryEntities, remainDTO, productIds, productSummaryDTO.periodMonth());
+                createProductSummaryList(summaryEntities, remainDTO, productIds, productSummaryDTO.getPeriodMonth());
         }
 
         productSalesSummaryRepository.saveAll(summaryEntities);
@@ -198,7 +198,7 @@ public class OrderConsumer {
         for(ProductSalesSummary entity : list) {
 
             for(OrderProductDTO dto : requestDTO) {
-                if(dto.optionId() == entity.getProductOption().getId()){
+                if(dto.getOptionId() == entity.getProductOption().getId()){
                     entity.setPatchSalesData(dto);
                     requestDTO.remove(dto);
                     break;
@@ -223,7 +223,7 @@ public class OrderConsumer {
         List<ProductIdClassificationDTO> searchDTO = productRepository.findClassificationAllByProductIds(productIds);
 
         for(OrderProductDTO dto : requestDTO) {
-            String productId = dto.productId();
+            String productId = dto.getProductId();
 
             for(ProductIdClassificationDTO searchData : searchDTO) {
                 if(productId.equals(searchData.productId())) {
@@ -232,9 +232,9 @@ public class OrderConsumer {
                                     .periodMonth(periodMonth)
                                     .classification(Classification.builder().id(searchData.classificationId()).build())
                                     .product(Product.builder().id(searchData.productId()).build())
-                                    .productOption(ProductOption.builder().id(dto.optionId()).build())
-                                    .sales(dto.detailPrice())
-                                    .salesQuantity(dto.detailCount())
+                                    .productOption(ProductOption.builder().id(dto.getOptionId()).build())
+                                    .sales(dto.getDetailPrice())
+                                    .salesQuantity(dto.getDetailCount())
                                     .orderQuantity(1L)
                                     .build()
                     );
@@ -261,17 +261,17 @@ public class OrderConsumer {
     @RabbitListener(queues = "${rabbitmq.queue.orderCart.name}", concurrency = "3")
     public void consumeOrderCart(OrderCartDTO orderCartDTO) {
 
-        Long cartId = cartRepository.findIdByUserId(orderCartDTO.cartMemberDTO());
+        Long cartId = cartRepository.findIdByUserId(orderCartDTO.getCartMemberDTO());
 
         if(cartId != null){
             List<CartDetail> cartDetailList = cartDetailRepository.findAllCartDetailByCartId(cartId);
 
-            if(cartDetailList.size() == orderCartDTO.productOptionIds().size())
+            if(cartDetailList.size() == orderCartDTO.getProductOptionIds().size())
                 cartRepository.deleteById(cartId);
             else {
                 List<Long> deleteCartDetailIds = cartDetailList.stream()
                         .filter(cartDetail ->
-                                orderCartDTO.productOptionIds().contains(
+                                orderCartDTO.getProductOptionIds().contains(
                                         cartDetail.getProductOption().getId()
                                 )
                         )
@@ -281,8 +281,7 @@ public class OrderConsumer {
                 cartDetailRepository.deleteAllById(deleteCartDetailIds);
             }
         }else
-            log.error("OrderConsumer::consumeOrderCart : cartId is null. cartMemberDTO is {}", orderCartDTO.cartMemberDTO());
-
+            log.error("OrderConsumer::consumeOrderCart : cartId is null. cartMemberDTO is {}", orderCartDTO.getCartMemberDTO());
     }
 
 }

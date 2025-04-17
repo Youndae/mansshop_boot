@@ -46,8 +46,8 @@ public class ProductSalesSummary {
 
 
     public void setPatchSalesData(OrderProductDTO orderProductDTO) {
-        this.sales += orderProductDTO.detailPrice();
-        this.salesQuantity += orderProductDTO.detailCount();
+        this.sales += orderProductDTO.getDetailPrice();
+        this.salesQuantity += orderProductDTO.getDetailCount();
         this.orderQuantity += 1;
     }
 }

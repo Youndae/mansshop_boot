@@ -13,6 +13,8 @@ import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyInsertDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.PagingMappingDTO;
+import com.example.mansshop_boot.domain.dto.rabbitMQ.FailedQueueDTO;
+import com.example.mansshop_boot.domain.dto.rabbitMQ.RabbitMQProperties;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
 import com.example.mansshop_boot.domain.entity.*;
 import com.example.mansshop_boot.domain.enumuration.*;
@@ -33,9 +35,14 @@ import com.example.mansshop_boot.repository.productReview.ProductReviewReplyRepo
 import com.example.mansshop_boot.repository.productReview.ProductReviewRepository;
 import com.example.mansshop_boot.repository.productSales.ProductSalesSummaryRepository;
 import com.example.mansshop_boot.repository.qnaClassification.QnAClassificationRepository;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -45,6 +52,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.File;
 import java.security.Principal;
@@ -106,6 +114,18 @@ public class AdminServiceImpl implements AdminService {
     private final CacheProperties cacheProperties;
 
     private Map<String, Function<CacheRequest, Long>> KEY_ACTION_MAP;
+
+    private final RabbitTemplate rabbitTemplate;
+
+    private final Jackson2JsonMessageConverter converter;
+
+    @Value("${spring.rabbitmq.username}")
+    private String rabbitMQUser;
+
+    @Value("${spring.rabbitmq.password}")
+    private String rabbitMQPw;
+
+    private final RabbitMQProperties rabbitMQProperties;
 
     @PostConstruct
     void init() {
@@ -1239,5 +1259,63 @@ public class AdminServiceImpl implements AdminService {
         }
 
         return result;
+    }
+
+    @Override
+    public List<FailedQueueDTO> getFailedMessageList() {
+        List<String> dlqNames = rabbitMQProperties.getQueue().values().stream().map(RabbitMQProperties.Queue::getDlq).toList();
+        List<FailedQueueDTO> result = new ArrayList<>();
+        for(String name : dlqNames) {
+            int messageCount = getFailedMessageCount(name);
+
+            if(messageCount > 0)
+                result.add(new FailedQueueDTO(name, messageCount));
+        }
+
+        return result;
+    }
+
+    public int getFailedMessageCount(String queueName) {
+        WebClient webClient = WebClient.builder()
+                .baseUrl("http://localhost:15672")
+                .defaultHeaders(headers -> headers.setBasicAuth(rabbitMQUser, rabbitMQPw))
+                .build();
+
+        return (int) webClient.get()
+                                            .uri(builder ->
+                                                    builder.path("/api/queues/{vhost}/{queueNames}")
+                                                            .build("/", queueName)
+                                            )
+                                            .retrieve()
+                                            .bodyToMono(Map.class)
+                                            .block()
+                                            .get("messages");
+    }
+
+    @Override
+    public String retryFailedMessages(List<FailedQueueDTO> queueDTOList) {
+        //TODO: 추후 알림 기능 추가할 때 모든 메시지 처리에 대한 알림 발송하도록 개선.
+        queueDTOList.forEach(this::retryMessages);
+
+        return Result.OK.getResultKey();
+    }
+
+    private void retryMessages(FailedQueueDTO dto) {
+        for(int i = 0; i < dto.messageCount(); i++) {
+            Message message = rabbitTemplate.receive(dto.queueName());
+            if(message != null) {
+                Object data = converter.fromMessage(message);
+                Map<String, Object> headers = message.getMessageProperties().getHeaders();
+                List<Map<String, Object>> xDeathList = (List<Map<String, Object>>) headers.get("x-death");
+
+                if(xDeathList != null && !xDeathList.isEmpty()) {
+                    Map<String, Object> xDeath = xDeathList.get(0);
+                    String exchange = (String) xDeath.get("exchange");
+                    List<String> routingKeyList = (List<String>) xDeath.get("routing-keys");
+                    String routingKey = routingKeyList.get(0);
+                    rabbitTemplate.convertAndSend(exchange, routingKey, data);
+                }
+            }
+        }
     }
 }

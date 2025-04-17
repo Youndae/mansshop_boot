@@ -92,14 +92,14 @@ public class OrderServiceImpl implements OrderService{
         rabbitTemplate.convertAndSend(
                 orderExchange,
                 getQueueRoutingKey(RabbitMQPrefix.QUEUE_ORDER_PRODUCT_OPTION),
-                productOrderDataDTO.orderProductList()
+                new OrderProductMessageDTO(productOrderDataDTO)
         );
 
         // Product의 salesQuantity 수정
         rabbitTemplate.convertAndSend(
                 orderExchange,
                 getQueueRoutingKey(RabbitMQPrefix.QUEUE_ORDER_PRODUCT),
-                productOrderDataDTO.orderProductList()
+                new OrderProductMessageDTO(productOrderDataDTO)
         );
 
         // Period Summary 처리
@@ -136,10 +136,10 @@ public class OrderServiceImpl implements OrderService{
         //총 판매량은 기간별 매출에 필요하기 때문에 이때 같이 총 판매량을 계산한다.
         for(OrderProductDTO data : paymentDTO.orderProduct()) {
             productOrder.addDetail(data.toOrderDetailEntity());
-            if(!orderProductIds.contains(data.productId()))
-                orderProductIds.add(data.productId());
-            orderOptionIds.add(data.optionId());
-            totalProductCount += data.detailCount();
+            if(!orderProductIds.contains(data.getProductId()))
+                orderProductIds.add(data.getProductId());
+            orderOptionIds.add(data.getOptionId());
+            totalProductCount += data.getDetailCount();
         }
         productOrder.setProductCount(totalProductCount);
 

@@ -7,6 +7,7 @@ import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyInsertDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
+import com.example.mansshop_boot.domain.dto.rabbitMQ.FailedQueueDTO;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
 import com.example.mansshop_boot.domain.enumuration.AdminListType;
 import org.springframework.data.domain.Page;
@@ -85,4 +86,8 @@ public interface AdminService {
     AdminReviewDetailDTO getReviewDetail(long reviewId);
 
     String postReviewReply(AdminReviewRequestDTO postDTO, Principal principal);
+
+    List<FailedQueueDTO> getFailedMessageList();
+
+    String retryFailedMessages(List<FailedQueueDTO> queueDTOList);
 }

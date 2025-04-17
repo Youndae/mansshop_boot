@@ -11,6 +11,7 @@ import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyInsertDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
+import com.example.mansshop_boot.domain.dto.rabbitMQ.FailedQueueDTO;
 import com.example.mansshop_boot.domain.dto.response.*;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.ResponseWrappingDTO;
@@ -1141,5 +1142,33 @@ public class AdminController {
 
         return responseMappingService.mappingResponseDTO(responseDTO, principal);
 
+    }
+
+
+    /**
+     *
+     * @param principal
+     *
+     * 각 DLQ에 담긴 실패한 메시지 수량 반환.
+     */
+    @Operation(summary = "RabbitMQ 처리 중 실패한 메시지를 담고 있는 각 DLQ의 메시지 개수 반환. 실패 메시지가 존재하는 DLQ만 반환")
+    @DefaultApiResponse
+    @SwaggerAuthentication
+    @GetMapping("/message")
+    public ResponseEntity<ResponseListDTO<FailedQueueDTO>> getFailedQueueCount(Principal principal) {
+        List<FailedQueueDTO> result = adminService.getFailedMessageList();
+
+        return responseMappingService.mappingResponseListDTO(result, principal);
+    }
+
+    @Operation(summary = "DLQ 데이터 재시도 요청")
+    @DefaultApiResponse
+    @SwaggerAuthentication
+    @PostMapping("/message")
+    public ResponseEntity<ResponseMessageDTO> retryDLQMessages(@RequestBody List<FailedQueueDTO> failedQueueDTO) {
+        String responseMessage = adminService.retryFailedMessages(failedQueueDTO);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
     }
 }

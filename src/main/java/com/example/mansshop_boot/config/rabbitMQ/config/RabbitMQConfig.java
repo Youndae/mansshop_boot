@@ -2,12 +2,18 @@ package com.example.mansshop_boot.config.rabbitMQ.config;
 
 import com.example.mansshop_boot.domain.dto.rabbitMQ.RabbitMQProperties;
 import com.example.mansshop_boot.domain.enumuration.RabbitMQPrefix;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -27,8 +33,14 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Jackson2JsonMessageConverter jackson2JsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+    public MessageConverter jackson2JsonMessageConverter() {
+        ObjectMapper om = new ObjectMapper();
+        om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        // 이 설정을 하지 않으면 LocalDate에 대해 [2025, 2, 1] 이런식으로 처리된다. 반면, 이 설정을 하면 "2025-02-01"로 되기 떄문에 정상적인 매핑이 가능.
+        om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        om.registerModule(new JavaTimeModule());
+
+        return new Jackson2JsonMessageConverter(om);
     }
 
     @Bean

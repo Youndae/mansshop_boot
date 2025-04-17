@@ -47,12 +47,12 @@ public class PeriodSalesSummary {
     private long cardTotal;
 
     public void setPatchData(PeriodSummaryQueueDTO dto) {
-        this.period = dto.period();
-        this.sales = this.sales + dto.sales();
-        this.salesQuantity = this.salesQuantity + dto.salesQuantity();
+        this.period = dto.getPeriod();
+        this.sales = this.sales + dto.getSales();
+        this.salesQuantity = this.salesQuantity + dto.getSalesQuantity();
         this.orderQuantity = this.orderQuantity + 1;
-        this.totalDeliveryFee = this.totalDeliveryFee + dto.totalDeliveryFee();
-        this.cashTotal = this.cashTotal + dto.cashSales();
-        this.cardTotal = this.cardTotal + dto.cardSales();
+        this.totalDeliveryFee = this.totalDeliveryFee + dto.getTotalDeliveryFee();
+        this.cashTotal = this.cashTotal + dto.getCashSales();
+        this.cardTotal = this.cardTotal + dto.getCardSales();
     }
 }

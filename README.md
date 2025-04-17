@@ -2040,3 +2040,32 @@ Ino가 존재하더라도 장기간 미접속으로 AccessToken, RefreshToken이
 >>> 기존의 주문 처리에서 주문 데이터 처리를 제외한 장바구니, 상품 판매량 수정, 옵션 재고 수정, 집계 테이블 수정 처리는 모두 RabbitMQ로 처리.   
 >>> 이로 인해 주문 처리의 응답 반환속도가 많이 감소 됨.   
 >>> 그리고 관리자의 집계 처리 역시 새로 생성한 테이블로 인해 빠른 처리를 보일 것으로 예측.
+
+<br />
+
+> RabbitMQ DLQ Message Retry
+>> DLQ Message 개수 조회 기능 추가.
+>>> RabbitMQ HTTP 요청을 통해 모든 DLQ 메시지 개수를 조회.   
+>>> /api/queues/{vhost}/{queueNames} 를 통해 메시지는 조회하지 않고 수량만 조회하도록 처리.   
+>>> 이 처리를 위해 webflux 3.4.0 의존성 추가.   
+>>> 기능은 모든 DLQ를 조회하고 그 중 메시지가 존재하는 DLQ만 반환하도록 구현.   
+>>> DLQ명 리스트는 RabbitMQProperties를 활용.
+> 
+>> DLQ Message 재시도 기능 추가.
+>>> 클라이언트로부터 DLQ명과 메시지 개수를 전달받아 처리.   
+>>> 재시도 요청은 HTTP 요청으로 처리하는 경우 메시지 개수만큼 요청을 보내야 하므로 사용하지 않고 RabbitTemplate의 receive()를 통해 처리.   
+>>> payload는 Object 타입으로 convert 후 사용.   
+>>> 역직렬화 이슈로 인해 해당 기능에 사용되는 record 타입 DTO를 class 타입으로 수정.   
+>>> 기존 사용되던 ProductOrderDTO의 경우 ProductOrder 엔티티가 포함되고 있어 해당 엔티티에 대한 수정까지 필요해졌기에 불가피하게 List 타입 필드 하나만 갖고 있는 DTO를 새로 생성해서 처리.   
+>
+>> 발생한 문제 및 해결
+>>> 재시도 구현 중 payload를 제대로 역직렬화 하지 못해서 consumer에 정상적으로 접근하지 못하고 오류가 발생하는 것을 확인.   
+>>> 여러 테스트를 거쳐 확인한 결과 LocalDate 타입의 처리에서 발생한 문제라는 것을 확인.   
+>>> 기존에는 MessageConverter로 Jackson2JsonMessageConverter를 기본형 그대로 생성해서 처리했는데 이 과정에서 LocalDate 타입이 [2025, 2, 1] 과 같은 형태로 처리되는 것이 문제라는 것을 알게 되었고,    
+>>> 이 처리를 위해 ObjectMapper의 disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) 설정을 통해 해결.   
+>>> 이후 "2025-02-01"과 같은 형태로 처리되는 것을 확인할 수 있었고 정상적인 역직렬화가 처리되는 것을 확인.   
+>>> 또 다른 문제로 List<?> 타입의 매개변수를 받는 메시지의 경우 TypeId가 ArrayList로 나올 뿐 세부 타입에 대한 처리가 안된다는 것을 확인.   
+>>> 메시지 변환 과정에서 이런 제네릭 타입을 Jackson이 제대로 처리하지 못하게 되면서 ArrayList 또는 String으로 처리해 역직렬화에서 오류가 발생하는 것이 원인.   
+>>> 이 문제 해결을 위해 불가피하게 해당 리스트 객체를 필드로 갖는 DTO를 추가 생성함으로 문제 해결.
+
+<br />

@@ -6,9 +6,9 @@ import com.example.mansshop_boot.domain.entity.ProductOrder;
 import java.util.List;
 
 public record ProductOrderDataDTO(
-        ProductOrder productOrder
-        , List<OrderProductDTO> orderProductList
-        , List<String> orderProductIds
-        , List<Long> orderOptionIds
-) {
+        ProductOrder productOrder,
+        List<OrderProductDTO> orderProductList,
+        List<String> orderProductIds,
+        List<Long> orderOptionIds
+){
 }

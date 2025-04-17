@@ -2,26 +2,30 @@ package com.example.mansshop_boot.domain.dto.order.business;
 
 import com.example.mansshop_boot.domain.entity.PeriodSalesSummary;
 import com.example.mansshop_boot.domain.entity.ProductOrder;
+import lombok.*;
 
 import java.time.LocalDate;
 
-public record PeriodSummaryQueueDTO(
-        LocalDate period,
-        long sales,
-        long salesQuantity,
-        long totalDeliveryFee,
-        long cashSales,
-        long cardSales
-) {
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+public class PeriodSummaryQueueDTO{
+        private LocalDate period;
+        private long sales;
+        private long salesQuantity;
+        private long totalDeliveryFee;
+        private long cashSales;
+        private long cardSales;
+
     public PeriodSummaryQueueDTO(ProductOrder productOrder) {
-        this(
-                LocalDate.now(),
-                productOrder.getOrderTotalPrice(),
-                productOrder.getProductCount(),
-                productOrder.getDeliveryFee(),
-                productOrder.getPaymentType().equals("cash") ? productOrder.getOrderTotalPrice() : 0L,
-                productOrder.getPaymentType().equals("card") ? productOrder.getOrderTotalPrice() : 0L
-        );
+        this.period = LocalDate.now();
+        this.sales = productOrder.getOrderTotalPrice();
+        this.salesQuantity = productOrder.getProductCount();
+        this.totalDeliveryFee = productOrder.getDeliveryFee();
+        this.cashSales = productOrder.getPaymentType().equals("cash") ? productOrder.getOrderTotalPrice() : 0L;
+        this.cardSales = productOrder.getPaymentType().equals("card") ? productOrder.getOrderTotalPrice() : 0L;
     }
 
     public PeriodSalesSummary toEntity() {

@@ -121,16 +121,16 @@ public class ProductOptionDSLRepositoryImpl implements ProductOptionDSLRepositor
 
         for(OrderProductDTO dto : orderProductList) {
             if(caseExpression == null)
-                caseExpression = caseBuilder.when(productOption.id.eq(dto.optionId()))
-                        .then(dto.detailCount());
+                caseExpression = caseBuilder.when(productOption.id.eq(dto.getOptionId()))
+                        .then(dto.getDetailCount());
             else
                 caseExpression = caseExpression
-                        .when(productOption.id.eq(dto.optionId()))
-                        .then(dto.detailCount());
+                        .when(productOption.id.eq(dto.getOptionId()))
+                        .then(dto.getDetailCount());
         }
 
         NumberExpression<Integer> stockExpression = caseExpression.otherwise(0);
-        List<Long> ids = orderProductList.stream().map(OrderProductDTO::optionId).toList();
+        List<Long> ids = orderProductList.stream().map(OrderProductDTO::getOptionId).toList();
         jpaQueryFactory.update(productOption)
                 .set(
                         productOption.stock,
