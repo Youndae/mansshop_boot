@@ -88,8 +88,5 @@ public class QueryTest {
         PagingListDTO<AdminOrderResponseDTO> result = adminService.getNewOrderList(pageDTO);*/
 
 //        System.out.println(result.content().get(0));
-
-
     }
-
 }

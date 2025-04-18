@@ -1166,9 +1166,14 @@ public class AdminController {
     @SwaggerAuthentication
     @PostMapping("/message")
     public ResponseEntity<ResponseMessageDTO> retryDLQMessages(@RequestBody List<FailedQueueDTO> failedQueueDTO) {
-        String responseMessage = adminService.retryFailedMessages(failedQueueDTO);
+        /*String responseMessage = adminService.retryFailedMessages(failedQueueDTO);
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(new ResponseMessageDTO(responseMessage));
+                .body(new ResponseMessageDTO(responseMessage));*/
+
+        failedQueueDTO.forEach(v -> log.info("AdminController.retryDLQMessages :: dto : {}", v));
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO("OK"));
     }
 }

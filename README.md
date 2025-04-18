@@ -1999,7 +1999,7 @@ Ino가 존재하더라도 장기간 미접속으로 AccessToken, RefreshToken이
 
 <br />
 
-### 2025/02/19 ~
+### 2025/02/19 ~ 2025/03/16
 > ver 1.4 리팩토링
 > 목표
 >> 1. Swagger 적용.   
@@ -2043,6 +2043,7 @@ Ino가 존재하더라도 장기간 미접속으로 AccessToken, RefreshToken이
 
 <br />
 
+### 2025/04/17
 > RabbitMQ DLQ Message Retry
 >> DLQ Message 개수 조회 기능 추가.
 >>> RabbitMQ HTTP 요청을 통해 모든 DLQ 메시지 개수를 조회.   
@@ -2069,3 +2070,9 @@ Ino가 존재하더라도 장기간 미접속으로 AccessToken, RefreshToken이
 >>> 이 문제 해결을 위해 불가피하게 해당 리스트 객체를 필드로 갖는 DTO를 추가 생성함으로 문제 해결.
 
 <br />
+
+### 2025/04/18
+> RabbitMQ DLQ Message Retry
+>> DLQ 처리 UI 추가.
+>>> 관리자 페이지에 추가했고, AdminSideNav에 메시지 관리 탭 추가.   
+>>> 메시지 조회 및 재시도 요청 정상 처리 확인.

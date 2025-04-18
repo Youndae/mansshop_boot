@@ -61,6 +61,7 @@ import AdminPeriodSalesDetail from "./component/page/admin/AdminPeriodSalesDetai
 import AdminPeriodSalesDailyDetail from "./component/page/admin/AdminPeriodSalesDailyDetail";
 import AdminProductSales from "./component/page/admin/AdminProductSales";
 import AdminProductSalesDetail from "./component/page/admin/AdminProductSalesDetail";
+import FailedQueueList from "./component/page/admin/FailedQueueList";
 
 import Error from "./component/ui/Error";
 
@@ -174,6 +175,8 @@ function App() {
               <Route path='admin/sales/product?page=:page' element={<AdminProductSales />} />
               <Route path='admin/sales/product?keyword=:keyword&page=:page' element={<AdminProductSales />} />
               <Route path='admin/sales/product/:productId' element={<AdminProductSalesDetail />} />
+
+              <Route path='admin/failedQueue' element={<FailedQueueList/>} />
 
               <Route path='/error' element={<Error />}/>
               <Route path='/*' element={<Error />}/>

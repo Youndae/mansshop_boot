@@ -47,6 +47,7 @@ function AdminSideNav(props) {
                     <Link to={'/admin/sales/period'}>매출 관리</Link>
                     <SideMenuCategory categoryStatus={categoryStatus} status={'sales'}/>
                 </li>
+                <li><Link to={'/admin/failedQueue'}>메시지 관리</Link></li>
             </ul>
         </div>
     )
