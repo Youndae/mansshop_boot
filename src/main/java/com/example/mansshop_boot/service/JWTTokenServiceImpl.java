@@ -90,31 +90,38 @@ public class JWTTokenServiceImpl implements JWTTokenService{
      */
     @Override
     public String reIssueToken(TokenDTO tokenDTO, HttpServletResponse response) {
-        String decodeAccessToken = jwtTokenProvider.decodeToken(tokenDTO.accessTokenValue());
 
-        if(decodeAccessToken.equals(Result.WRONG_TOKEN.getResultKey())){
-            String decodeRefreshToken = jwtTokenProvider.decodeToken(tokenDTO.refreshTokenValue());
-
-            if(decodeRefreshToken.equals(Result.WRONG_TOKEN.getResultKey())){
-                jwtTokenProvider.deleteCookie(response);
-
-                return Result.FAIL.getResultKey();
-            }
+        // ino가 존재하지 않는다면 무조건 탈취로 판단.
+        if(tokenDTO.inoValue() == null) {
+            deleteCookieAndThrowException(response);
+            return Result.FAIL.getResultKey();
         }else {
-            String claimByRefreshToken = jwtTokenProvider.verifyRefreshToken(
-                    tokenDTO.refreshTokenValue()
-                    , tokenDTO.inoValue()
-                    , decodeAccessToken
-            );
+            String accessTokenClaim = jwtTokenProvider.decodeToken(tokenDTO.accessTokenValue());
 
-            if(claimByRefreshToken.equals(Result.TOKEN_STEALING.getResultKey())
-                    || claimByRefreshToken.equals(Result.WRONG_TOKEN.getResultKey())) {
-                deleteCookieAndThrowException(response);
+            if(accessTokenClaim.equals(Result.WRONG_TOKEN.getResultKey())){
+                String refreshTokenClaim = jwtTokenProvider.decodeToken(tokenDTO.refreshTokenValue());
+
+                if(refreshTokenClaim.equals(Result.WRONG_TOKEN.getResultKey()))
+                    jwtTokenProvider.deleteCookie(response);
+                else
+                    deleteTokenAndCookieAndThrowException(refreshTokenClaim, tokenDTO.inoValue(), response);
+
                 return Result.FAIL.getResultKey();
-            }else
-                jwtTokenProvider.issueTokens(decodeAccessToken, tokenDTO.inoValue(), response);
-        }
+            }else {
+                String claimByRefreshToken = jwtTokenProvider.verifyRefreshToken(
+                        tokenDTO.refreshTokenValue()
+                        , tokenDTO.inoValue()
+                        , accessTokenClaim
+                );
 
-        return Result.OK.getResultKey();
+                if(accessTokenClaim.equals(claimByRefreshToken)) {
+                    jwtTokenProvider.issueTokens(accessTokenClaim, tokenDTO.inoValue(), response);
+                    return Result.OK.getResultKey();
+                }else {
+                    deleteTokenAndCookieAndThrowException(accessTokenClaim, tokenDTO.inoValue(), response);
+                    return Result.FAIL.getResultKey();
+                }
+            }
+        }
     }
 }
