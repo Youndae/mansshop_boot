@@ -1,8 +1,9 @@
-package com.example.mansshop_boot.service;
+package com.example.mansshop_boot.service.integration;
 
 import com.example.mansshop_boot.MansShopBootApplication;
 import com.example.mansshop_boot.domain.dto.cart.business.CartMemberDTO;
 import com.example.mansshop_boot.domain.dto.cart.out.CartDetailDTO;
+import com.example.mansshop_boot.service.CartService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

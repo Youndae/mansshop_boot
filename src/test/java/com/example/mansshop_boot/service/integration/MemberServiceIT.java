@@ -1,4 +1,4 @@
-package com.example.mansshop_boot.service;
+package com.example.mansshop_boot.service.integration;
 
 import com.example.mansshop_boot.MansShopBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;

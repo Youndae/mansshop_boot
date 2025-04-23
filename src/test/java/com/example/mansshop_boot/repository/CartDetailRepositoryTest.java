@@ -103,13 +103,12 @@ public class CartDetailRepositoryTest {
     }
 
     @Test
-    @DisplayName(value = "cartId를 통한 장바구니의 상세 데이터 개수 조회")
+    @DisplayName(value = "cartId를 통한 CartDetailId 리스트 조회")
     void countByCartId() {
-        Long result = cartDetailRepository.countByCartId(memberCart.getId());
+        List<Long> result = cartDetailRepository.findAllIdByCartId(memberCart.getId());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertNotEquals(0L, result);
-        Assertions.assertEquals(memberCart.getCartDetailList().size(), result);
+        Assertions.assertFalse(result.isEmpty());
+        Assertions.assertEquals(memberCart.getCartDetailList().size(), result.size());
     }
 
     @Test

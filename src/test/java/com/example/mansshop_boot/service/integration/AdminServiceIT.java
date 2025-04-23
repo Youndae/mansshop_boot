@@ -1,4 +1,4 @@
-package com.example.mansshop_boot.service;
+package com.example.mansshop_boot.service.integration;
 
 import com.example.mansshop_boot.MansShopBootApplication;
 import com.example.mansshop_boot.domain.dto.admin.business.AdminReviewDTO;
@@ -7,6 +7,7 @@ import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
 import com.example.mansshop_boot.domain.enumuration.AdminListType;
+import com.example.mansshop_boot.service.AdminService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

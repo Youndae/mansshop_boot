@@ -1,10 +1,11 @@
-package com.example.mansshop_boot.service;
+package com.example.mansshop_boot.service.integration;
 
 import com.example.mansshop_boot.MansShopBootApplication;
 import com.example.mansshop_boot.domain.dto.pageable.ProductDetailPageDTO;
 import com.example.mansshop_boot.domain.dto.product.out.ProductDetailDTO;
 import com.example.mansshop_boot.domain.dto.product.out.ProductQnAResponseDTO;
 import com.example.mansshop_boot.domain.dto.product.out.ProductReviewDTO;
+import com.example.mansshop_boot.service.ProductService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

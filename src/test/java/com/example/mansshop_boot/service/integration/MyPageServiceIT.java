@@ -1,4 +1,4 @@
-package com.example.mansshop_boot.service;
+package com.example.mansshop_boot.service.integration;
 
 import com.example.mansshop_boot.MansShopBootApplication;
 import com.example.mansshop_boot.domain.dto.mypage.business.MemberOrderDTO;
@@ -8,6 +8,7 @@ import com.example.mansshop_boot.domain.dto.mypage.qna.out.*;
 import com.example.mansshop_boot.domain.dto.pageable.LikePageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
+import com.example.mansshop_boot.service.MyPageService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

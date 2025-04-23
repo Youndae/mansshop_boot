@@ -133,7 +133,7 @@ public class CartServiceImpl implements CartService{
                 for(int i = 0; i < optionListDetail.size(); i++) {
                     CartDetail listObject = optionListDetail.get(i);
                     if(detailValue.optionId().equals(listObject.getProductOption().getId())){
-                        listObject.setCartCount(detailValue.count());
+                        listObject.addCartCount(detailValue.count());
 
                         addDetail = listObject;
                         optionListDetail.remove(i);
@@ -164,6 +164,9 @@ public class CartServiceImpl implements CartService{
     public String deleteAllCart(CartMemberDTO cartMemberDTO, HttpServletResponse response) {
 
         Long cartId = cartRepository.findIdByUserId(cartMemberDTO);
+
+        if (cartId == null)
+            throw new CustomNotFoundException(ErrorCode.NOT_FOUND, ErrorCode.NOT_FOUND.getMessage());
 
         cartRepository.deleteById(cartId);
 
@@ -229,13 +232,20 @@ public class CartServiceImpl implements CartService{
     public String deleteCartSelect(CartMemberDTO cartMemberDTO, List<Long> deleteCartDetailId) {
 
         Long cartId = cartRepository.findIdByUserId(cartMemberDTO);
-        Long cartDetailSize = cartDetailRepository.countByCartId(cartId);
 
-        if(cartDetailSize == deleteCartDetailId.size())
+        if(cartId == null)
+            throw new CustomNotFoundException(ErrorCode.NOT_FOUND, ErrorCode.NOT_FOUND.getMessage());
+
+        List<Long> detailIds = cartDetailRepository.findAllIdByCartId(cartId);
+
+        for(Long detailId : deleteCartDetailId)
+            if(!detailIds.contains(detailId))
+                throw new IllegalArgumentException("Invalid CartDetailId");
+
+        if(detailIds.size() == deleteCartDetailId.size())
             cartRepository.deleteById(cartId);
         else
             cartDetailRepository.deleteAllById(deleteCartDetailId);
-
 
         return Result.OK.getResultKey();
     }

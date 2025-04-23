@@ -49,11 +49,11 @@ public class CartDetailDSLRepositoryImpl implements CartDetailDSLRepository{
     }
 
     @Override
-    public Long countByCartId(long cartId) {
-        return jpaQueryFactory.select(cartDetail.count())
+    public List<Long> findAllIdByCartId(long cartId) {
+        return jpaQueryFactory.select(cartDetail.id)
                 .from(cartDetail)
                 .where(cartDetail.cart.id.eq(cartId))
-                .fetchOne();
+                .fetch();
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.example.mansshop_boot.service;
+package com.example.mansshop_boot.service.unit;
 
 import com.example.mansshop_boot.Fixture.ClassificationFixture;
 import com.example.mansshop_boot.Fixture.MemberAndAuthFixture;
@@ -34,6 +34,7 @@ import com.example.mansshop_boot.repository.productReview.ProductReviewReplyRepo
 import com.example.mansshop_boot.repository.productReview.ProductReviewRepository;
 import com.example.mansshop_boot.repository.productSales.ProductSalesSummaryRepository;
 import com.example.mansshop_boot.repository.qnaClassification.QnAClassificationRepository;
+import com.example.mansshop_boot.service.AdminServiceImpl;
 import org.junit.jupiter.api.*;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;

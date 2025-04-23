@@ -9,7 +9,7 @@ public interface CartDetailDSLRepository {
 
     List<CartDetailDTO> findAllByCartId(long cartId);
 
-    Long countByCartId(long cartId);
+    List<Long> findAllIdByCartId(long cartId);
 
     List<CartDetail> findAllCartDetailByCartId(long cartId);
 

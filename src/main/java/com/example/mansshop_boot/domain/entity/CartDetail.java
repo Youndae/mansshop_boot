@@ -32,7 +32,8 @@ public class CartDetail {
         if(type.equals("up"))
             this.cartCount = cartCount + 1;
         else
-            this.cartCount = cartCount - 1;
+            this.cartCount = cartCount < 2 ? 1 : cartCount - 1;
+
 
     }
 
@@ -40,7 +41,7 @@ public class CartDetail {
         this.cart = cart;
     }
 
-    public void setCartCount(int cartCount) {
+    public void addCartCount(int cartCount) {
         this.cartCount = this.cartCount + cartCount;
     }
 
