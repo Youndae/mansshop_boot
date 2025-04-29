@@ -1,6 +1,5 @@
 package com.example.mansshop_boot.service.unit;
 
-import com.example.mansshop_boot.config.jwt.JWTTokenProvider;
 import com.example.mansshop_boot.domain.dto.member.business.UserSearchDTO;
 import com.example.mansshop_boot.domain.dto.member.business.UserSearchPwDTO;
 import com.example.mansshop_boot.domain.dto.member.in.JoinDTO;

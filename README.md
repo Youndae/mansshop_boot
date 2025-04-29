@@ -2176,4 +2176,5 @@ Ino가 존재하더라도 장기간 미접속으로 AccessToken, RefreshToken이
 >>>> UserStatus를 같이 보내주느라 사용하던 매핑 메소드 제거 및 ResponseDTO 제거 및 개선.   
 >>>> Pagination을 처리하는 ResponseDTO들은 UserStatus만 제거하고 처리 방식 유지.
 >>
->>> MemberService 단위 테스트 완료.
+>>> MemberService 단위 테스트 완료.   
+>>> MyPageService 단위 테스트 완료.

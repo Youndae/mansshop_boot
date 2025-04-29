@@ -2,6 +2,7 @@ package com.example.mansshop_boot.service;
 
 import com.example.mansshop_boot.config.customException.ErrorCode;
 import com.example.mansshop_boot.config.customException.exception.CustomAccessDeniedException;
+import com.example.mansshop_boot.config.customException.exception.CustomNotFoundException;
 import com.example.mansshop_boot.domain.dto.mypage.business.MemberOrderDTO;
 import com.example.mansshop_boot.domain.dto.mypage.business.MyPageOrderDetailDTO;
 import com.example.mansshop_boot.domain.dto.mypage.business.MyPagePageDTO;
@@ -197,6 +198,10 @@ public class MyPageServiceImpl implements MyPageService{
     @Override
     public ProductQnADetailDTO getProductQnADetailData(long qnaId) {
         MyPageProductQnADTO qnaDTO = productQnARepository.findByQnAId(qnaId);
+
+        if(qnaDTO == null)
+            throw new CustomNotFoundException(ErrorCode.NOT_FOUND, ErrorCode.NOT_FOUND.getMessage());
+
         List<MyPageQnAReplyDTO> replyDTOList = productQnAReplyRepository.findAllByQnAId(qnaId);
 
         return new ProductQnADetailDTO(qnaDTO, replyDTOList);
@@ -215,7 +220,7 @@ public class MyPageServiceImpl implements MyPageService{
         ProductQnA productQnA = productQnARepository.findById(qnaId).orElseThrow(IllegalArgumentException::new);
 
         if(!productQnA.getMember().getUserId().equals(userId))
-            throw new IllegalArgumentException();
+            throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
 
         productQnARepository.deleteById(qnaId);
 
@@ -271,9 +276,10 @@ public class MyPageServiceImpl implements MyPageService{
      */
     @Override
     public MemberQnADetailDTO getMemberQnADetail(long memberQnAId, Principal principal) {
-        String uid = principalService.getNicknameByPrincipal(principal);
+        String nickname = principalService.getNicknameByPrincipal(principal);
         MemberQnADetailDTO dto = getMemberQnADetailData(memberQnAId);
-        if(!dto.writer().equals(uid))
+
+        if(!dto.writer().equals(nickname))
             throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
 
         return dto;
@@ -289,6 +295,10 @@ public class MyPageServiceImpl implements MyPageService{
     @Override
     public MemberQnADetailDTO getMemberQnADetailData(long qnaId) {
         MemberQnADTO qnaDTO = memberQnARepository.findByQnAId(qnaId);
+
+        if(qnaDTO == null)
+            throw new CustomNotFoundException(ErrorCode.NOT_FOUND, ErrorCode.NOT_FOUND.getMessage());
+
         List<MyPageQnAReplyDTO> replyDTOList = memberQnAReplyRepository.findAllByQnAId(qnaId);
 
         return new MemberQnADetailDTO(qnaDTO, replyDTOList);
@@ -357,12 +367,11 @@ public class MyPageServiceImpl implements MyPageService{
 
         String userId = principalService.getUserIdByPrincipal(principal);
         MemberQnA memberQnA = memberQnARepository.findModifyDataByIdAndUserId(qnaId, userId);
-        List<QnAClassification> qnaClassification = qnAClassificationRepository.findAll();
-        List<QnAClassificationDTO> classificationDTO = qnaClassification.stream()
-                                                            .map(entity ->
-                                                                    new QnAClassificationDTO(entity.getId(), entity.getQnaClassificationName())
-                                                            )
-                                                            .toList();
+
+        if(memberQnA == null)
+            throw new IllegalArgumentException("MemberQnA Modify Data is not Found");
+
+        List<QnAClassificationDTO> classificationDTO = qnAClassificationRepository.getAllQnAClassificationDTOs();
 
         return new MemberQnAModifyDataDTO(memberQnA, classificationDTO);
     }
@@ -420,13 +429,7 @@ public class MyPageServiceImpl implements MyPageService{
      */
     @Override
     public List<QnAClassificationDTO> getQnAClassification(Principal principal) {
-        List<QnAClassification> classificationList = qnAClassificationRepository.findAll();
-
-        return classificationList.stream()
-                                .map(entity ->
-                                        new QnAClassificationDTO(entity.getId(), entity.getQnaClassificationName())
-                                )
-                                .toList();
+        return qnAClassificationRepository.getAllQnAClassificationDTOs();
     }
 
     /**
@@ -484,6 +487,7 @@ public class MyPageServiceImpl implements MyPageService{
         Member member = memberRepository.findById(principal.getName()).orElseThrow(IllegalArgumentException::new);
         Product product = productRepository.findById(reviewDTO.productId()).orElseThrow(IllegalArgumentException::new);
         ProductOption productOption = productOptionRepository.findById(reviewDTO.optionId()).orElseThrow(IllegalArgumentException::new);
+        ProductOrderDetail productOrderDetail = productOrderDetailRepository.findById(reviewDTO.detailId()).orElseThrow(IllegalArgumentException::new);
         ProductReview productReview = ProductReview.builder()
                                                     .member(member)
                                                     .product(product)
@@ -492,7 +496,6 @@ public class MyPageServiceImpl implements MyPageService{
                                                     .build();
 
         productReviewRepository.save(productReview);
-        ProductOrderDetail productOrderDetail = productOrderDetailRepository.findById(reviewDTO.detailId()).orElseThrow(IllegalArgumentException::new);
         productOrderDetail.setOrderReviewStatus(true);
         productOrderDetailRepository.save(productOrderDetail);
 

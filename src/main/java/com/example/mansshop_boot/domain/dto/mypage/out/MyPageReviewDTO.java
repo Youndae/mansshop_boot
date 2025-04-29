@@ -4,14 +4,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record MyPageReviewDTO(
-        long reviewId
-        , String thumbnail
-        , String productName
-        , String content
-        , LocalDate createdAt
-        , LocalDate updatedAt
-        , String replyContent
-        , LocalDate replyUpdatedAt
+        long reviewId,
+        String thumbnail,
+        String productName,
+        String content,
+        LocalDate createdAt,
+        LocalDate updatedAt,
+        String replyContent,
+        LocalDate replyUpdatedAt
 ) {
 
     public MyPageReviewDTO(long reviewId,
