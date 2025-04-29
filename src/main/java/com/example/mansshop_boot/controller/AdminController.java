@@ -14,8 +14,7 @@ import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.rabbitMQ.FailedQueueDTO;
 import com.example.mansshop_boot.domain.dto.response.*;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
-import com.example.mansshop_boot.domain.dto.response.serviceResponse.ResponseWrappingDTO;
-import com.example.mansshop_boot.domain.enumuration.AdminListType;
+import com.example.mansshop_boot.domain.enumeration.AdminListType;
 import com.example.mansshop_boot.service.AdminService;
 import com.example.mansshop_boot.service.MyPageService;
 import com.example.mansshop_boot.service.ResponseMappingService;
@@ -52,7 +51,6 @@ public class AdminController {
      *
      * @param keyword
      * @param page
-     * @param principal
      *
      * 관리자 상품 목록 리스트 조회
      */
@@ -72,13 +70,12 @@ public class AdminController {
             )
     })
     @GetMapping("/product")
-    public ResponseEntity<PagingResponseDTO<AdminProductListDTO>> getProductList(@RequestParam(name = "keyword", required = false) String keyword
-                                                                                , @RequestParam(name = "page", required = false, defaultValue = "1") int page
-                                                                                , Principal principal){
+    public ResponseEntity<PagingResponseDTO<AdminProductListDTO>> getProductList(@RequestParam(name = "keyword", required = false) String keyword,
+                                                                                @RequestParam(name = "page", required = false, defaultValue = "1") int page){
 
         PagingListDTO<AdminProductListDTO> responseDTO = adminService.getProductList(new AdminPageDTO(keyword, page));
 
-        return responseMappingService.mappingPagingResponseDTO(responseDTO, principal);
+        return responseMappingService.mappingPagingResponseDTO(responseDTO);
     }
 
     /**
@@ -91,10 +88,11 @@ public class AdminController {
     @DefaultApiResponse
     @SwaggerAuthentication
     @GetMapping("/product/classification")
-    public ResponseEntity<ResponseListDTO<String>> getProductClassification(Principal principal) {
+    public ResponseEntity<List<String>> getProductClassification() {
         List<String> responseDTO = adminService.getClassification();
 
-        return responseMappingService.mappingResponseListDTO(responseDTO, principal);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     /**
@@ -113,14 +111,11 @@ public class AdminController {
                 in = ParameterIn.PATH
     )
     @GetMapping("/product/detail/{productId}")
-    public ResponseEntity<ResponseDTO<AdminProductDetailDTO>> getProductDetail(@PathVariable(name = "productId") String productId
-                                                            , Principal principal){
+    public ResponseEntity<AdminProductDetailDTO> getProductDetail(@PathVariable(name = "productId") String productId){
+        AdminProductDetailDTO responseDTO = adminService.getProductDetail(productId);
 
-        ResponseWrappingDTO<AdminProductDetailDTO> dto = new ResponseWrappingDTO<>(
-                                                                    adminService.getProductDetail(productId)
-                                                            );
-
-        return responseMappingService.mappingResponseDTO(dto, principal);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     /**
@@ -149,7 +144,6 @@ public class AdminController {
     /**
      *
      * @param productId
-     * @param principal
      *
      * 관리자의 상품 수정 페이지에서 상품 정보 요청
      */
@@ -163,11 +157,12 @@ public class AdminController {
                 in = ParameterIn.PATH
     )
     @GetMapping("/product/patch/{productId}")
-    public ResponseEntity<ResponseDTO<AdminProductPatchDataDTO>> getPatchProductData(@PathVariable(name = "productId") String productId
-                                                                                    , Principal principal) {
-        ResponseWrappingDTO<AdminProductPatchDataDTO> dto = new ResponseWrappingDTO<>(adminService.getPatchProductData(productId));
+    public ResponseEntity<AdminProductPatchDataDTO> getPatchProductData(@PathVariable(name = "productId") String productId) {
 
-        return responseMappingService.mappingResponseDTO(dto, principal);
+        AdminProductPatchDataDTO responseDTO = adminService.getPatchProductData(productId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     /**
@@ -194,10 +189,10 @@ public class AdminController {
             )
     })
     @PatchMapping(value = "/product/{productId}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<ResponseIdDTO<String>> patchProduct(@PathVariable(name = "productId") String productId
-                                        , @RequestPart(value = "deleteOptionList", required = false) List<Long> deleteOptionList
-                                        , @ModelAttribute AdminProductPatchDTO patchDTO
-                                        , @ModelAttribute AdminProductImageDTO imageDTO) {
+    public ResponseEntity<ResponseIdDTO<String>> patchProduct(@PathVariable(name = "productId") String productId,
+                                        @RequestPart(value = "deleteOptionList", required = false) List<Long> deleteOptionList,
+                                        @ModelAttribute AdminProductPatchDTO patchDTO,
+                                        @ModelAttribute AdminProductImageDTO imageDTO) {
 
         ResponseIdDTO<String> responseDTO = new ResponseIdDTO<>(
                                                 adminService.patchProduct(productId, deleteOptionList, patchDTO, imageDTO)
@@ -233,13 +228,13 @@ public class AdminController {
             )
     })
     @GetMapping("/product/stock")
-    public ResponseEntity<PagingResponseDTO<AdminProductStockDTO>> getProductStock(@RequestParam(name = "keyword", required = false) String keyword
-                                                                , @RequestParam(name = "page", required = false, defaultValue = "1") int page
-                                                                , Principal principal) {
+    public ResponseEntity<PagingResponseDTO<AdminProductStockDTO>> getProductStock(@RequestParam(name = "keyword", required = false) String keyword,
+                                                                @RequestParam(name = "page", required = false, defaultValue = "1") int page) {
+
         AdminPageDTO pageDTO = new AdminPageDTO(keyword, page);
         PagingListDTO<AdminProductStockDTO> responseDTO = adminService.getProductStock(pageDTO);
 
-        return responseMappingService.mappingPagingResponseDTO(responseDTO, principal);
+        return responseMappingService.mappingPagingResponseDTO(responseDTO);
     }
 
     /**
@@ -265,15 +260,14 @@ public class AdminController {
             )
     })
     @GetMapping("/product/discount")
-    public ResponseEntity<PagingResponseDTO<AdminDiscountResponseDTO>> getDiscountProductList(@RequestParam(name = "keyword", required = false) String keyword
-                                                                                            , @RequestParam(name = "page", required = false, defaultValue = "1") int page
-                                                                                            , Principal principal) {
+    public ResponseEntity<PagingResponseDTO<AdminDiscountResponseDTO>> getDiscountProductList(@RequestParam(name = "keyword", required = false) String keyword,
+                                                                                            @RequestParam(name = "page", required = false, defaultValue = "1") int page) {
 
         AdminPageDTO pageDTO = new AdminPageDTO(keyword, page);
 
         PagingListDTO<AdminDiscountResponseDTO> responseDTO = adminService.getDiscountProduct(pageDTO);
 
-        return responseMappingService.mappingPagingResponseDTO(responseDTO, principal);
+        return responseMappingService.mappingPagingResponseDTO(responseDTO);
     }
 
     /**
@@ -293,12 +287,12 @@ public class AdminController {
                 in = ParameterIn.PATH
     )
     @GetMapping("/product/discount/select/{classification}")
-    public ResponseEntity<ResponseListDTO<AdminDiscountProductDTO>> getDiscountProductSelectList(@PathVariable(name = "classification") String classification
-                                                                            , Principal principal) {
+    public ResponseEntity<List<AdminDiscountProductDTO>> getDiscountProductSelectList(@PathVariable(name = "classification") String classification) {
 
         List<AdminDiscountProductDTO> responseDTO = adminService.getSelectDiscountProduct(classification);
 
-        return responseMappingService.mappingResponseListDTO(responseDTO, principal);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     /**
@@ -352,15 +346,14 @@ public class AdminController {
             )
     })
     @GetMapping("/order/all")
-    public ResponseEntity<PagingResponseDTO<AdminOrderResponseDTO>> getAllOrder(@RequestParam(name = "searchType", required = false) String searchType
-                                        , @RequestParam(value = "keyword", required = false) String keyword
-                                        , @RequestParam(name = "page", required = false, defaultValue = "1") int page
-                                        , Principal principal) {
+    public ResponseEntity<PagingResponseDTO<AdminOrderResponseDTO>> getAllOrder(@RequestParam(name = "searchType", required = false) String searchType,
+                                        @RequestParam(value = "keyword", required = false) String keyword,
+                                        @RequestParam(name = "page", required = false, defaultValue = "1") int page) {
 
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(keyword, searchType, page);
         PagingListDTO<AdminOrderResponseDTO> responseDTO = adminService.getAllOrderList(pageDTO);
 
-        return responseMappingService.mappingPagingResponseDTO(responseDTO, principal);
+        return responseMappingService.mappingPagingResponseDTO(responseDTO);
     }
 
     /**
@@ -392,15 +385,14 @@ public class AdminController {
             )
     })
     @GetMapping("/order/new")
-    public ResponseEntity<PagingElementsResponseDTO<AdminOrderResponseDTO>> getNewOrder(@RequestParam(name = "searchType", required = false) String searchType
-            , @RequestParam(name = "keyword", required = false) String keyword
-            , @RequestParam(name = "page", required = false, defaultValue = "1") int page
-            , Principal principal) {
+    public ResponseEntity<PagingElementsResponseDTO<AdminOrderResponseDTO>> getNewOrder(@RequestParam(name = "searchType", required = false) String searchType,
+            @RequestParam(name = "keyword", required = false) String keyword,
+            @RequestParam(name = "page", required = false, defaultValue = "1") int page) {
 
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(keyword, searchType, page);
         PagingListDTO<AdminOrderResponseDTO> responseDTO = adminService.getNewOrderList(pageDTO);
 
-        return responseMappingService.mappingPagingElementsResponseDTO(responseDTO, principal);
+        return responseMappingService.mappingPagingElementsResponseDTO(responseDTO);
     }
 
     /**
@@ -459,15 +451,14 @@ public class AdminController {
             )
     })
     @GetMapping("/qna/product")
-    public ResponseEntity<PagingResponseDTO<AdminQnAListResponseDTO>> getProductQnA(@RequestParam(name = "keyword", required = false) String keyword
-                                        , @RequestParam(name = "page", required = false, defaultValue = "1") int page
-                                        , @RequestParam(name = "type") String listType
-                                        , Principal principal) {
+    public ResponseEntity<PagingResponseDTO<AdminQnAListResponseDTO>> getProductQnA(@RequestParam(name = "keyword", required = false) String keyword,
+                                        @RequestParam(name = "page", required = false, defaultValue = "1") int page,
+                                        @RequestParam(name = "type") String listType) {
 
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(keyword, listType, page);
         PagingListDTO<AdminQnAListResponseDTO> responseDTO = adminService.getProductQnAList(pageDTO);
 
-        return responseMappingService.mappingPagingResponseDTO(responseDTO, principal);
+        return responseMappingService.mappingPagingResponseDTO(responseDTO);
     }
 
     /**
@@ -486,15 +477,13 @@ public class AdminController {
             in = ParameterIn.PATH
     )
     @GetMapping("/qna/product/{qnaId}")
-    public ResponseEntity<ResponseDTO<ProductQnADetailDTO>> getProductDetail(@PathVariable(name = "qnaId") long qnaId
-                                                                , Principal principal) {
+    public ResponseEntity<ProductQnADetailDTO> getProductDetail(@PathVariable(name = "qnaId") long qnaId) {
 
 
-        ResponseWrappingDTO<ProductQnADetailDTO> dto = new ResponseWrappingDTO<>(
-                                                                myPageService.getProductQnADetailData(qnaId)
-                                                        );
+        ProductQnADetailDTO responseDTO = myPageService.getProductQnADetailData(qnaId);
 
-        return responseMappingService.mappingResponseDTO(dto, principal);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     /**
@@ -589,15 +578,14 @@ public class AdminController {
             )
     })
     @GetMapping("/qna/member")
-    public ResponseEntity<PagingResponseDTO<AdminQnAListResponseDTO>> getMemberQnA(@RequestParam(name = "keyword", required = false) String keyword
-                                        , @RequestParam(name = "page", required = false, defaultValue = "1") int page
-                                        , @RequestParam(name = "type") String listType
-                                        , Principal principal) {
+    public ResponseEntity<PagingResponseDTO<AdminQnAListResponseDTO>> getMemberQnA(@RequestParam(name = "keyword", required = false) String keyword,
+                                        @RequestParam(name = "page", required = false, defaultValue = "1") int page,
+                                        @RequestParam(name = "type") String listType) {
 
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(keyword, listType, page);
         PagingListDTO<AdminQnAListResponseDTO> responseDTO = adminService.getMemberQnAList(pageDTO);
 
-        return responseMappingService.mappingPagingResponseDTO(responseDTO, principal);
+        return responseMappingService.mappingPagingResponseDTO(responseDTO);
     }
 
     /**
@@ -616,15 +604,12 @@ public class AdminController {
             in = ParameterIn.PATH
     )
     @GetMapping("/qna/member/{qnaId}")
-    public ResponseEntity<ResponseDTO<MemberQnADetailDTO>> getMemberDetail(@PathVariable(name = "qnaId") long qnaId
-                                                            , Principal principal) {
+    public ResponseEntity<MemberQnADetailDTO> getMemberDetail(@PathVariable(name = "qnaId") long qnaId) {
 
+        MemberQnADetailDTO responseDTO = myPageService.getMemberQnADetailData(qnaId);
 
-        ResponseWrappingDTO<MemberQnADetailDTO> dto = new ResponseWrappingDTO<>(
-                                                                myPageService.getMemberQnADetailData(qnaId)
-                                                        );
-
-        return responseMappingService.mappingResponseDTO(dto, principal);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     /**
@@ -698,11 +683,12 @@ public class AdminController {
     @DefaultApiResponse
     @SwaggerAuthentication
     @GetMapping("/qna/classification")
-    public ResponseEntity<ResponseListDTO<AdminQnAClassificationDTO>> getQnAClassification(Principal principal) {
+    public ResponseEntity<List<AdminQnAClassificationDTO>> getQnAClassification() {
 
         List<AdminQnAClassificationDTO> responseDTO = adminService.getQnAClassification();
 
-        return responseMappingService.mappingResponseListDTO(responseDTO, principal);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     /**
@@ -778,14 +764,14 @@ public class AdminController {
             )
     })
     @GetMapping("/review")
-    public ResponseEntity<PagingResponseDTO<AdminReviewDTO>> getNewReviewList(@RequestParam(name = "keyword", required = false) String keyword
-                                        , @RequestParam(name = "page", required = false, defaultValue = "1") int page
-                                        , @RequestParam(name = "searchType", required = false) String searchType
-                                        , Principal principal) {
+    public ResponseEntity<PagingResponseDTO<AdminReviewDTO>> getNewReviewList(@RequestParam(name = "keyword", required = false) String keyword,
+                                        @RequestParam(name = "page", required = false, defaultValue = "1") int page,
+                                        @RequestParam(name = "searchType", required = false) String searchType) {
+
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(keyword, searchType, page);
         PagingListDTO<AdminReviewDTO> responseDTO = adminService.getReviewList(pageDTO, AdminListType.NEW);
 
-        return responseMappingService.mappingPagingResponseDTO(responseDTO, principal);
+        return responseMappingService.mappingPagingResponseDTO(responseDTO);
     }
 
     /**
@@ -793,7 +779,6 @@ public class AdminController {
      * @param keyword
      * @param page
      * @param searchType
-     * @param principal
      *
      * 전체 리뷰 조회.
      */
@@ -820,20 +805,18 @@ public class AdminController {
             )
     })
     @GetMapping("/review/all")
-    public ResponseEntity<PagingResponseDTO<AdminReviewDTO>> getAllReviewList(@RequestParam(name = "keyword", required = false) String keyword
-                                            , @RequestParam(name = "page", required = false, defaultValue = "1") int page
-                                            , @RequestParam(name = "searchType", required = false) String searchType
-                                            , Principal principal) {
+    public ResponseEntity<PagingResponseDTO<AdminReviewDTO>> getAllReviewList(@RequestParam(name = "keyword", required = false) String keyword,
+                                            @RequestParam(name = "page", required = false, defaultValue = "1") int page,
+                                            @RequestParam(name = "searchType", required = false) String searchType) {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(keyword, searchType, page);
         PagingListDTO<AdminReviewDTO> responseDTO = adminService.getReviewList(pageDTO, AdminListType.ALL);
 
-        return responseMappingService.mappingPagingResponseDTO(responseDTO, principal);
+        return responseMappingService.mappingPagingResponseDTO(responseDTO);
     }
 
     /**
      *
      * @param reviewId
-     * @param principal
      *
      * 리뷰 상세 데이터 조회
      */
@@ -847,11 +830,11 @@ public class AdminController {
             in = ParameterIn.PATH
     )
     @GetMapping("/review/detail/{reviewId}")
-    public ResponseEntity<ResponseDTO<AdminReviewDetailDTO>> getReviewDetail(@PathVariable("reviewId") long reviewId
-                                                            , Principal principal) {
-        ResponseWrappingDTO<AdminReviewDetailDTO> dto = new ResponseWrappingDTO<>(adminService.getReviewDetail(reviewId));
+    public ResponseEntity<AdminReviewDetailDTO> getReviewDetail(@PathVariable("reviewId") long reviewId) {
+        AdminReviewDetailDTO responseDTO = adminService.getReviewDetail(reviewId);
 
-        return responseMappingService.mappingResponseDTO(dto, principal);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     /**
@@ -865,8 +848,9 @@ public class AdminController {
     @DefaultApiResponse
     @SwaggerAuthentication
     @PostMapping("/review")
-    public ResponseEntity<ResponseMessageDTO> postReviewReply(@RequestBody AdminReviewRequestDTO postDTO
-                                                            , Principal principal) {
+    public ResponseEntity<ResponseMessageDTO> postReviewReply(@RequestBody AdminReviewRequestDTO postDTO,
+                                                            Principal principal) {
+
         String responseMessage = adminService.postReviewReply(postDTO, principal);
 
         return ResponseEntity.status(HttpStatus.OK)
@@ -904,15 +888,14 @@ public class AdminController {
             )
     })
     @GetMapping("/member")
-    public ResponseEntity<PagingResponseDTO<AdminMemberDTO>> getMember(@RequestParam(name = "keyword", required = false) String keyword
-                                                                    , @RequestParam(name = "searchType", required = false) String searchType
-                                                                    , @RequestParam(name = "page", required = false, defaultValue = "1") int page
-                                                                    , Principal principal) {
+    public ResponseEntity<PagingResponseDTO<AdminMemberDTO>> getMember(@RequestParam(name = "keyword", required = false) String keyword,
+                                                                    @RequestParam(name = "searchType", required = false) String searchType,
+                                                                    @RequestParam(name = "page", required = false, defaultValue = "1") int page) {
 
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(keyword, searchType, page);
         Page<AdminMemberDTO> responseDTO = adminService.getMemberList(pageDTO);
 
-        return responseMappingService.mappingPageableResponseDTO(responseDTO, principal);
+        return responseMappingService.mappingPageableResponseDTO(responseDTO);
     }
 
     /**
@@ -952,11 +935,12 @@ public class AdminController {
             in = ParameterIn.PATH
     )
     @GetMapping("/sales/period/{term}")
-    public ResponseEntity<ResponseDTO<AdminPeriodSalesResponseDTO>> getPeriodSales(@PathVariable(name = "term") int term
-                                                        , Principal principal) {
+    public ResponseEntity<AdminPeriodSalesResponseDTO> getPeriodSales(@PathVariable(name = "term") int term) {
 
-        ResponseWrappingDTO<AdminPeriodSalesResponseDTO> dto = new ResponseWrappingDTO<>(adminService.getPeriodSales(term));
-        return responseMappingService.mappingResponseDTO(dto, principal);
+        AdminPeriodSalesResponseDTO responseDTO = adminService.getPeriodSales(term);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
 
@@ -979,11 +963,12 @@ public class AdminController {
             in = ParameterIn.PATH
     )
     @GetMapping("sales/period/detail/{term}")
-    public ResponseEntity<ResponseDTO<AdminPeriodMonthDetailResponseDTO>> getPeriodSalesDetail(@PathVariable(name = "term") String term
-                                                                , Principal principal) {
+    public ResponseEntity<AdminPeriodMonthDetailResponseDTO> getPeriodSalesDetail(@PathVariable(name = "term") String term) {
 
-        ResponseWrappingDTO<AdminPeriodMonthDetailResponseDTO> dto = new ResponseWrappingDTO<>(adminService.getPeriodSalesDetail(term));
-        return responseMappingService.mappingResponseDTO(dto, principal);
+        AdminPeriodMonthDetailResponseDTO responseDTO = adminService.getPeriodSalesDetail(term);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     /**
@@ -1012,8 +997,8 @@ public class AdminController {
             )
     })
     @GetMapping("/sales/period/detail/classification")
-    public ResponseEntity<AdminClassificationSalesResponseDTO> getSalesByClassification(@RequestParam(value = "term")String term
-                                                , @RequestParam(value = "classification") String classification) {
+    public ResponseEntity<AdminClassificationSalesResponseDTO> getSalesByClassification(@RequestParam(value = "term")String term,
+                                                @RequestParam(value = "classification") String classification) {
 
         AdminClassificationSalesResponseDTO responseDTO = adminService.getSalesByClassification(term, classification);
 
@@ -1072,13 +1057,12 @@ public class AdminController {
             )
     })
     @GetMapping("/sales/period/order-list")
-    public ResponseEntity<PagingElementsResponseDTO<AdminDailySalesResponseDTO>> getOrderListByDay(@RequestParam(value = "term") String term
-                                                                        , @RequestParam(value = "page") int page
-                                                                        , Principal principal) {
+    public ResponseEntity<PagingElementsResponseDTO<AdminDailySalesResponseDTO>> getOrderListByDay(@RequestParam(value = "term") String term,
+                                                                        @RequestParam(value = "page") int page) {
 
 
         PagingListDTO<AdminDailySalesResponseDTO> responseDTO = adminService.getOrderListByDay(term, page);
-        return responseMappingService.mappingPagingElementsResponseDTO(responseDTO, principal);
+        return responseMappingService.mappingPagingElementsResponseDTO(responseDTO);
     }
 
 
@@ -1108,14 +1092,13 @@ public class AdminController {
             )
     })
     @GetMapping("/sales/product")
-    public ResponseEntity<PagingResponseDTO<AdminProductSalesListDTO>> getProductSales(@RequestParam(value = "keyword", required = false) String keyword
-                                            , @RequestParam(value = "page", required = false, defaultValue = "1") int page
-                                            , Principal principal) {
+    public ResponseEntity<PagingResponseDTO<AdminProductSalesListDTO>> getProductSales(@RequestParam(value = "keyword", required = false) String keyword,
+                                            @RequestParam(value = "page", required = false, defaultValue = "1") int page) {
 
         AdminPageDTO pageDTO = new AdminPageDTO(keyword, page);
 
         Page<AdminProductSalesListDTO> responseDTO = adminService.getProductSalesList(pageDTO);
-        return responseMappingService.mappingPageableResponseDTO(responseDTO, principal);
+        return responseMappingService.mappingPageableResponseDTO(responseDTO);
     }
 
     /**
@@ -1135,19 +1118,18 @@ public class AdminController {
             in = ParameterIn.PATH
     )
     @GetMapping("/sales/product/{productId}")
-    public ResponseEntity<ResponseDTO<AdminProductSalesDetailDTO>> getProductSales(@PathVariable(name = "productId") String productId
-                                            , Principal principal) {
+    public ResponseEntity<AdminProductSalesDetailDTO> getProductSales(@PathVariable(name = "productId") String productId) {
 
-        ResponseWrappingDTO<AdminProductSalesDetailDTO> responseDTO = new ResponseWrappingDTO<>(adminService.getProductSalesDetail(productId));
+        AdminProductSalesDetailDTO responseDTO = adminService.getProductSalesDetail(productId);
 
-        return responseMappingService.mappingResponseDTO(responseDTO, principal);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
 
     }
 
 
     /**
      *
-     * @param principal
      *
      * 각 DLQ에 담긴 실패한 메시지 수량 반환.
      */
@@ -1155,10 +1137,11 @@ public class AdminController {
     @DefaultApiResponse
     @SwaggerAuthentication
     @GetMapping("/message")
-    public ResponseEntity<ResponseListDTO<FailedQueueDTO>> getFailedQueueCount(Principal principal) {
-        List<FailedQueueDTO> result = adminService.getFailedMessageList();
+    public ResponseEntity<List<FailedQueueDTO>> getFailedQueueCount() {
+        List<FailedQueueDTO> responseDTO = adminService.getFailedMessageList();
 
-        return responseMappingService.mappingResponseListDTO(result, principal);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     @Operation(summary = "DLQ 데이터 재시도 요청")
@@ -1166,14 +1149,9 @@ public class AdminController {
     @SwaggerAuthentication
     @PostMapping("/message")
     public ResponseEntity<ResponseMessageDTO> retryDLQMessages(@RequestBody List<FailedQueueDTO> failedQueueDTO) {
-        /*String responseMessage = adminService.retryFailedMessages(failedQueueDTO);
+        String responseMessage = adminService.retryFailedMessages(failedQueueDTO);
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(new ResponseMessageDTO(responseMessage));*/
-
-        failedQueueDTO.forEach(v -> log.info("AdminController.retryDLQMessages :: dto : {}", v));
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new ResponseMessageDTO("OK"));
+                .body(new ResponseMessageDTO(responseMessage));
     }
 }

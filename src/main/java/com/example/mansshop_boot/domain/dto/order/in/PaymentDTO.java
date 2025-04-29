@@ -2,7 +2,7 @@ package com.example.mansshop_boot.domain.dto.order.in;
 
 import com.example.mansshop_boot.domain.entity.Member;
 import com.example.mansshop_boot.domain.entity.ProductOrder;
-import com.example.mansshop_boot.domain.enumuration.OrderStatus;
+import com.example.mansshop_boot.domain.enumeration.OrderStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 

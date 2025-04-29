@@ -39,7 +39,6 @@ public class MainServiceUnitTest {
                 .classification("BEST")
                 .keyword(null)
                 .build();
-        Principal principal = mock(Principal.class);
         List<MainListDTO> resultList = List.of(
                 new MainListDTO(
                         "testProductId",
@@ -53,7 +52,7 @@ public class MainServiceUnitTest {
 
         when(productRepository.findListDefault(pageDTO)).thenReturn(resultList);
 
-        List<MainListResponseDTO> result = Assertions.assertDoesNotThrow(() -> mainService.getBestAndNewList(pageDTO, principal));
+        List<MainListResponseDTO> result = Assertions.assertDoesNotThrow(() -> mainService.getBestAndNewList(pageDTO));
 
         Assertions.assertEquals(resultList.size(), result.size());
     }
@@ -66,7 +65,6 @@ public class MainServiceUnitTest {
                 .classification("NEW")
                 .keyword(null)
                 .build();
-        Principal principal = mock(Principal.class);
         List<MainListDTO> resultList = List.of(
                 new MainListDTO(
                         "testProductId",
@@ -80,7 +78,7 @@ public class MainServiceUnitTest {
 
         when(productRepository.findListDefault(pageDTO)).thenReturn(resultList);
 
-        List<MainListResponseDTO> result = Assertions.assertDoesNotThrow(() -> mainService.getBestAndNewList(pageDTO, principal));
+        List<MainListResponseDTO> result = Assertions.assertDoesNotThrow(() -> mainService.getBestAndNewList(pageDTO));
 
         Assertions.assertEquals(resultList.size(), result.size());
     }
@@ -93,12 +91,11 @@ public class MainServiceUnitTest {
                 .classification("NEW")
                 .keyword(null)
                 .build();
-        Principal principal = mock(Principal.class);
         List<MainListDTO> resultList = Collections.emptyList();
 
         when(productRepository.findListDefault(pageDTO)).thenReturn(resultList);
 
-        List<MainListResponseDTO> result = Assertions.assertDoesNotThrow(() -> mainService.getBestAndNewList(pageDTO, principal));
+        List<MainListResponseDTO> result = Assertions.assertDoesNotThrow(() -> mainService.getBestAndNewList(pageDTO));
 
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.isEmpty());
@@ -112,7 +109,6 @@ public class MainServiceUnitTest {
                 .classification("OUTER")
                 .keyword(null)
                 .build();
-        Principal principal = mock(Principal.class);
         List<MainListDTO> resultList = List.of(
                 new MainListDTO(
                         "testProductId",
@@ -131,7 +127,7 @@ public class MainServiceUnitTest {
 
         when(productRepository.findListPageable(pageDTO, pageable)).thenReturn(resultPages);
 
-        PagingListDTO<MainListResponseDTO> result = Assertions.assertDoesNotThrow(() ->mainService.getClassificationAndSearchList(pageDTO, principal));
+        PagingListDTO<MainListResponseDTO> result = Assertions.assertDoesNotThrow(() ->mainService.getClassificationAndSearchList(pageDTO));
 
         Assertions.assertNotNull(result);
         Assertions.assertEquals(resultList.size(), result.pagingData().getTotalElements());

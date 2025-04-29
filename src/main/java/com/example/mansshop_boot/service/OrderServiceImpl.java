@@ -11,8 +11,8 @@ import com.example.mansshop_boot.domain.dto.order.in.PaymentDTO;
 import com.example.mansshop_boot.domain.dto.order.out.OrderDataResponseDTO;
 import com.example.mansshop_boot.domain.dto.rabbitMQ.RabbitMQProperties;
 import com.example.mansshop_boot.domain.entity.*;
-import com.example.mansshop_boot.domain.enumuration.RabbitMQPrefix;
-import com.example.mansshop_boot.domain.enumuration.Result;
+import com.example.mansshop_boot.domain.enumeration.RabbitMQPrefix;
+import com.example.mansshop_boot.domain.enumeration.Result;
 import com.example.mansshop_boot.repository.cart.CartDetailRepository;
 import com.example.mansshop_boot.repository.cart.CartRepository;
 import com.example.mansshop_boot.repository.product.ProductOptionRepository;
@@ -22,13 +22,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor

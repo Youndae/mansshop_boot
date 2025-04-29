@@ -6,40 +6,34 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public record PagingResponseDTO<T>(
-        List<T> content
-        , boolean empty
-        , long number
-        , long totalPages
-        , UserStatusDTO userStatus
+        List<T> content,
+        boolean empty,
+        long number,
+        long totalPages
 ) {
 
-    public PagingResponseDTO(Page<T> pageableResponse, UserStatusDTO userStatusDTO){
+    public PagingResponseDTO(Page<T> pageableResponse){
         this(
                 pageableResponse.getContent()
                 , pageableResponse.isEmpty()
                 , pageableResponse.getNumber()
                 , pageableResponse.getTotalPages()
-                , userStatusDTO
         );
     }
 
-    public PagingResponseDTO(List<T> content, boolean isEmpty, long number, long totalPages, String nickname) {
-        this(
-                content
-                , isEmpty
-                , number
-                , totalPages
-                , new UserStatusDTO(nickname)
-        );
+    public PagingResponseDTO(List<T> content, boolean empty, long number, long totalPages) {
+        this.content = content;
+        this.empty = empty;
+        this.number = number;
+        this.totalPages = totalPages;
     }
 
-    public PagingResponseDTO(PagingListDTO<T> dto, UserStatusDTO userStatusDTO) {
+    public PagingResponseDTO(PagingListDTO<T> dto) {
         this(
                 dto.content()
                 , dto.pagingData().isEmpty()
                 , dto.pagingData().getNumber()
                 , dto.pagingData().getTotalPages()
-                , userStatusDTO
         );
     }
 }

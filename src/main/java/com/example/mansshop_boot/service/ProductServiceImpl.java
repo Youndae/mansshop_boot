@@ -10,7 +10,7 @@ import com.example.mansshop_boot.domain.dto.product.out.ProductDetailDTO;
 import com.example.mansshop_boot.domain.dto.product.out.ProductQnAResponseDTO;
 import com.example.mansshop_boot.domain.dto.product.out.ProductReviewDTO;
 import com.example.mansshop_boot.domain.entity.*;
-import com.example.mansshop_boot.domain.enumuration.Result;
+import com.example.mansshop_boot.domain.enumeration.Result;
 import com.example.mansshop_boot.repository.member.MemberRepository;
 import com.example.mansshop_boot.repository.product.ProductInfoImageRepository;
 import com.example.mansshop_boot.repository.product.ProductOptionRepository;
@@ -154,22 +154,17 @@ public class ProductServiceImpl implements ProductService{
         Page<ProductQnADTO> productQnA = productQnARepository.findByProductId(productId, qnaPageable);
         List<Long> qnaIdList = productQnA.getContent().stream().map(ProductQnADTO::qnaId).toList();
         List<ProductQnAResponseDTO> productQnADTOList = new ArrayList<>();
-        // TODO: writer, replyContent, createdAt, qnaId
         List<ProductQnAReplyListDTO> qnaReplyList = productQnAReplyRepository.getQnAReply(qnaIdList);
-        int replyIdx = 0;
 
         for(int i = 0; i < productQnA.getContent().size(); i++) {
             List<ProductQnAReplyDTO> replyList = new ArrayList<>();
             ProductQnADTO dto = productQnA.getContent().get(i);
 
-            for(int j = replyIdx; j < qnaReplyList.size(); j++) {
-                if(dto.qnaId() == qnaReplyList.get(j).qnaId()){
+            for(int j = 0; j < qnaReplyList.size(); j++) {
+                if(dto.qnaId().equals(qnaReplyList.get(j).qnaId())){
                     replyList.add(
                             new ProductQnAReplyDTO(qnaReplyList.get(j))
                     );
-                }else{
-                    replyIdx = j;
-                    break;
                 }
             }
             productQnADTOList.add(new ProductQnAResponseDTO(dto, replyList));

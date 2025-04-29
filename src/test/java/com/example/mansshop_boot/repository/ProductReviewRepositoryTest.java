@@ -14,7 +14,7 @@ import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.ProductDetailPageDTO;
 import com.example.mansshop_boot.domain.dto.product.out.ProductReviewDTO;
 import com.example.mansshop_boot.domain.entity.*;
-import com.example.mansshop_boot.domain.enumuration.AdminListType;
+import com.example.mansshop_boot.domain.enumeration.AdminListType;
 import com.example.mansshop_boot.repository.auth.AuthRepository;
 import com.example.mansshop_boot.repository.classification.ClassificationRepository;
 import com.example.mansshop_boot.repository.member.MemberRepository;

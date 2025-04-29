@@ -6,49 +6,30 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public record PagingElementsResponseDTO<T>(
-        List<T> content
-        , boolean empty
-        , long number
-        , long totalPages
-        , long totalElements
-        , UserStatusDTO userStatus
+        List<T> content,
+        boolean empty,
+        long number,
+        long totalPages,
+        long totalElements
 ) {
 
-    public PagingElementsResponseDTO(Page<T> pageableResponse, UserStatusDTO userStatusDTO) {
+    public PagingElementsResponseDTO(Page<T> pageableResponse) {
         this(
-                pageableResponse.getContent()
-                , pageableResponse.isEmpty()
-                , pageableResponse.getNumber()
-                , pageableResponse.getTotalPages()
-                , pageableResponse.getTotalElements()
-                , userStatusDTO
+                pageableResponse.getContent(),
+                pageableResponse.isEmpty(),
+                pageableResponse.getNumber(),
+                pageableResponse.getTotalPages(),
+                pageableResponse.getTotalElements()
         );
     }
 
-    public PagingElementsResponseDTO(List<T> content
-                                    , boolean isEmpty
-                                    , long number
-                                    , long totalPages
-                                    , long totalElements
-                                    , String nickname) {
+    public PagingElementsResponseDTO(PagingListDTO<T> dto) {
         this(
-                content
-                , isEmpty
-                , number
-                , totalPages
-                , totalElements
-                , new UserStatusDTO(nickname)
-        );
-    }
-
-    public PagingElementsResponseDTO(PagingListDTO<T> dto, UserStatusDTO userStatusDTO) {
-        this(
-                dto.content()
-                , dto.pagingData().isEmpty()
-                , dto.pagingData().getNumber()
-                , dto.pagingData().getTotalPages()
-                , dto.pagingData().getTotalElements()
-                , userStatusDTO
+                dto.content(),
+                dto.pagingData().isEmpty(),
+                dto.pagingData().getNumber(),
+                dto.pagingData().getTotalPages(),
+                dto.pagingData().getTotalElements()
         );
     }
 }

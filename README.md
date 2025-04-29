@@ -25,38 +25,57 @@
 
 <br />
 
-## 환경
-* BackEnd Server
-  * Spring Boot 3.2.5
-  * JDK 17
-  * Gradle
-  * Spring Security
-  * JWT
-  * Spring Data JPA
-  * QueryDSL
-  * OAuth2 (Google, Kakao, Naver)
-  * Lombok
-  * iamport-rest-client (아임포트 결제 API)
-  * Java Mail
-  * commons-io
-  * RabbitMQ 3.12 Management (Docker)
-  * Swagger ( springdoc-openapi 2.6.0)
-* FrontEnd
-  * react 18.3.1
-  * react-cookie
-  * react-dom
-  * react-router-dom
-  * react-redux
-  * redux
-  * redux-persist
-  * styled-components
-  * http-proxy-middleware
-  * dayjs
-  * Axios
-  * react-daum-postcode (Kakao 우편번호 서비스 API)
-* DataBase
-  * MySQL 8.3.0 (Docker)
-  * Redis(Docker)
+## 프로젝트 및 개발 환경
+<details>
+  <summary>Backend Server</summary>
+
+  - Spring Boot 3.2.5
+  - JDK 17
+  - Gradle
+  - Spring Security
+  - JWT
+  - Sprint Data JPA
+  - QueryDSL
+  - OAuth2 ( Google, Kakao, Naver )
+  - Lombok
+  - iamport-rest-client ( I'mport 결제 API )
+  - Java Mail
+  - commons-io
+  - RabbitMQ 3.12 Management
+  - Swagger ( springdoc-openapi 2.6.0 )
+</details>
+<br/>
+<details>
+  <summary>Frontend</summary>
+  
+  - React 18.3.1
+  - react-cookie
+  - react-dom
+  - react-router-dom
+  - react-redux
+  - redux-persist
+  - @reduxjs-???
+  - styled-components
+  - http-proxy-middleware
+  - dayjs
+  - Axios
+  - react-duam-postcode ( Kakao 우편번호 서비스 API )
+</details>
+<br/>
+<details>
+  <summary>Database</summary>
+
+  - MySQL
+  - Redis
+</details>
+<br/>
+<details>
+  <summary>Environment</summary>
+  
+  - IntelliJ IDEA
+  - GitHub
+  - Docker ( MySQL, Redis, RabbitMQ Container )
+</details>
 
 <br />
 
@@ -86,7 +105,60 @@
 
 <br />
 
-## 기능
+## 페이지별 기능 상세
+
+<details>
+  <summary>메인</summary>
+
+  * BEST, NEW, 상품 분류별 목록 출력
+  * 상품 리스트 페이징
+  * 상품명 검색
+  * 장바구니
+    * 장바구니 상품 수량 증감
+    * 장바구니 상품 선택 또는 전체 삭제
+    * 장바구니 상품 선택 또는 전체 구매
+  * 주문 조회(비 로그인시에만 출력. 로그인 시 마이페이지에서 조회 가능)
+</details>
+
+<details>
+  <summary>상품 상세</summary>
+
+* 상품 정보 출력
+* 상품 옵션 선택
+* 장바구니 담기
+* 관심상품 등록
+* 선택 상품 수량 증감
+* 선택 상품 결제
+* 상품 리뷰 리스트
+* 상품 문의 목록 출력 및 작성
+</details>
+
+<details>
+  <summary>마이페이지</summary>
+
+* 주문 목록
+  * 배송완료 상품 리뷰 작성
+* 관심 상품 목록
+* 문의 내역
+  * 상품 문의 내역
+    * 문의 상세 정보
+    * 문의 삭제
+  * 회원 문의 내역
+    * 문의 작성
+    * 문의 상세 정보
+      * 답변 작성
+      * 문의 삭제
+* 작성한 리뷰 목록
+  * 작성한 리뷰 상세 및 삭제
+  * 리뷰 수정
+* 정보 수정
+</details>
+
+<details>
+  <summary>로그인</summary>
+</details>
+
+
 * 메인화면
   * BEST, NEW, 상품 분류별 목록 출력
   * 상품 리스트 페이징
@@ -2092,3 +2164,14 @@ Ino가 존재하더라도 장기간 미접속으로 AccessToken, RefreshToken이
 >>>> JWTTokenService의 reissueToken 메소드 수정.   
 >>>> ino가 없는 경우의 처리와 AccessToken decode에 실패했을 시 RefreshToken decode 성공 여부에 따른 처리 분기 나눠서 처리할 수 있도록 개선.   
 >>> MemberService 단위 테스트 작성 중.
+> 
+>> 4/27 ~ 4/29
+>>> Frontend Redux 개선.   
+>>>> Redux 대신 Redux/toolkit 사용.   
+>>>> 기존의 잘못된 설계로 인해 Backend에서 get 요청마다 UserStatus를 같이 반환하던 부분들을 전체 수정.   
+>>>> Frontend에서 요청마다 state 확인 후 dispatch 하는 부분들도 모두 제거.   
+>>>> 테스트 결과 정상 동작 화인.   
+>>>> Frontend 주석 추가.   
+>>>> Backend UserStatusDTO 제거 및 MappingService 개선.   
+>>>> UserStatus를 같이 보내주느라 사용하던 매핑 메소드 제거 및 ResponseDTO 제거 및 개선.   
+>>>> Pagination을 처리하는 ResponseDTO들은 UserStatus만 제거하고 처리 방식 유지.

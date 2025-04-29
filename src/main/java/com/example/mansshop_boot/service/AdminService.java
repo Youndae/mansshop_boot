@@ -9,7 +9,7 @@ import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.rabbitMQ.FailedQueueDTO;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
-import com.example.mansshop_boot.domain.enumuration.AdminListType;
+import com.example.mansshop_boot.domain.enumeration.AdminListType;
 import org.springframework.data.domain.Page;
 
 import java.security.Principal;

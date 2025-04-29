@@ -14,13 +14,12 @@ import com.example.mansshop_boot.domain.dto.member.in.LoginDTO;
 import com.example.mansshop_boot.domain.dto.member.in.UserCertificationDTO;
 import com.example.mansshop_boot.domain.dto.member.in.UserResetPwDTO;
 import com.example.mansshop_boot.domain.dto.member.out.UserSearchIdResponseDTO;
+import com.example.mansshop_boot.domain.dto.member.out.UserStatusResponseDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
-import com.example.mansshop_boot.domain.dto.response.ResponseUserStatusDTO;
-import com.example.mansshop_boot.domain.dto.response.UserStatusDTO;
 import com.example.mansshop_boot.domain.entity.Auth;
 import com.example.mansshop_boot.domain.entity.Member;
-import com.example.mansshop_boot.domain.enumuration.Result;
-import com.example.mansshop_boot.domain.enumuration.Role;
+import com.example.mansshop_boot.domain.enumeration.Result;
+import com.example.mansshop_boot.domain.enumeration.Role;
 import com.example.mansshop_boot.repository.auth.AuthRepository;
 import com.example.mansshop_boot.repository.member.MemberRepository;
 import jakarta.mail.MessagingException;
@@ -108,7 +107,7 @@ public class MemberServiceImpl implements MemberService{
      *
      */
     @Override
-    public ResponseEntity<ResponseUserStatusDTO> loginProc(LoginDTO dto, HttpServletRequest request, HttpServletResponse response) {
+    public UserStatusResponseDTO loginProc(LoginDTO dto, HttpServletRequest request, HttpServletResponse response) {
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(dto.userId(), dto.userPw());
         Authentication authentication =
@@ -116,17 +115,9 @@ public class MemberServiceImpl implements MemberService{
         CustomUser customUser = (CustomUser) authentication.getPrincipal();
         String userId = customUser.getUsername();
 
-        if(userId != null) {
-            if (checkInoAndIssueToken(userId, request, response)) {
-                String uid = customUser.getMember().getNickname() == null ?
-                        customUser.getMember().getUserName() : customUser.getMember().getNickname();
-
-                return ResponseEntity.status(HttpStatus.OK)
-                        .body(
-                                new ResponseUserStatusDTO(new UserStatusDTO(uid))
-                        );
-            }
-        }
+        if(userId != null)
+            if (checkInoAndIssueToken(userId, request, response))
+                return new UserStatusResponseDTO(customUser);
 
         throw new CustomBadCredentialsException(ErrorCode.BAD_CREDENTIALS, ErrorCode.BAD_CREDENTIALS.getMessage());
     }

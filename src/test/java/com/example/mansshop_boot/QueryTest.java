@@ -1,16 +1,5 @@
 package com.example.mansshop_boot;
 
-import com.example.mansshop_boot.domain.dto.admin.business.AdminReviewDTO;
-import com.example.mansshop_boot.domain.dto.admin.out.AdminOrderResponseDTO;
-import com.example.mansshop_boot.domain.dto.admin.out.AdminQnAListResponseDTO;
-import com.example.mansshop_boot.domain.dto.cart.business.CartMemberDTO;
-import com.example.mansshop_boot.domain.dto.order.in.OrderProductDTO;
-import com.example.mansshop_boot.domain.dto.order.in.PaymentDTO;
-import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
-import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
-import com.example.mansshop_boot.domain.dto.rabbitMQ.FailedQueueDTO;
-import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
-import com.example.mansshop_boot.domain.enumuration.AdminListType;
 import com.example.mansshop_boot.repository.member.MemberRepository;
 import com.example.mansshop_boot.repository.memberQnA.MemberQnARepository;
 import com.example.mansshop_boot.repository.productOrder.ProductOrderRepository;
@@ -22,9 +11,6 @@ import com.example.mansshop_boot.service.OrderService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
 import java.util.ArrayList;
 import java.util.List;

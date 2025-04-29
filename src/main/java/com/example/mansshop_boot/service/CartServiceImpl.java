@@ -9,7 +9,7 @@ import com.example.mansshop_boot.domain.dto.cart.out.CartDetailDTO;
 import com.example.mansshop_boot.domain.entity.Cart;
 import com.example.mansshop_boot.domain.entity.CartDetail;
 import com.example.mansshop_boot.domain.entity.Member;
-import com.example.mansshop_boot.domain.enumuration.Result;
+import com.example.mansshop_boot.domain.enumeration.Result;
 import com.example.mansshop_boot.repository.cart.CartDetailRepository;
 import com.example.mansshop_boot.repository.cart.CartRepository;
 import com.example.mansshop_boot.repository.member.MemberRepository;

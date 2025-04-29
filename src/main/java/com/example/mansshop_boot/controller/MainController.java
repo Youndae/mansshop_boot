@@ -6,7 +6,6 @@ import com.example.mansshop_boot.domain.dto.mypage.business.MemberOrderDTO;
 import com.example.mansshop_boot.domain.dto.mypage.out.MyPageOrderDTO;
 import com.example.mansshop_boot.domain.dto.pageable.MainPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;
-import com.example.mansshop_boot.domain.dto.response.ResponseListDTO;
 import com.example.mansshop_boot.domain.dto.response.PagingResponseDTO;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
 import com.example.mansshop_boot.service.MainService;
@@ -16,23 +15,18 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -59,28 +53,30 @@ public class MainController {
     @Operation(summary = "메인 BEST 상품 조회")
     @DefaultApiResponse
     @GetMapping("/")
-    public ResponseEntity<ResponseListDTO<MainListResponseDTO>> mainList(Principal principal) {
+    public ResponseEntity<List<MainListResponseDTO>> mainList() {
         MainPageDTO mainPageDTO = new MainPageDTO("BEST");
-        List<MainListResponseDTO> responseDTO = mainService.getBestAndNewList(mainPageDTO, principal);
+        List<MainListResponseDTO> responseDTO = mainService.getBestAndNewList(mainPageDTO);
 
-        return responseMappingService.mappingResponseListDTO(responseDTO, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     @Operation(summary = "메인 NEW 상품 카테고리 조회")
     @DefaultApiResponse
     @GetMapping("/new")
-    public ResponseEntity<ResponseListDTO<MainListResponseDTO>> mainNewList(Principal principal) {
+    public ResponseEntity<List<MainListResponseDTO>> mainNewList() {
         MainPageDTO mainPageDTO = new MainPageDTO("NEW");
-        List<MainListResponseDTO> responseDTO = mainService.getBestAndNewList(mainPageDTO, principal);
+        List<MainListResponseDTO> responseDTO = mainService.getBestAndNewList(mainPageDTO);
 
-        return responseMappingService.mappingResponseListDTO(responseDTO, principal);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     /**
      *
      * @param classification
      * @param page
-     * @param principal
      *
      * 메인의 상품 리스트 중 상품 카테고리 선택으로 인한 리스트 조회.
      */
@@ -102,9 +98,8 @@ public class MainController {
             )
     })
     @GetMapping("/{classification}")
-    public ResponseEntity<PagingResponseDTO<MainListResponseDTO>> mainClassificationList(@PathVariable(name = "classification") String classification
-                                                            , @RequestParam(name = "page", required = false, defaultValue = "1") int page
-                                                            , Principal principal){
+    public ResponseEntity<PagingResponseDTO<MainListResponseDTO>> mainClassificationList(@PathVariable(name = "classification") String classification,
+                                                            @RequestParam(name = "page", required = false, defaultValue = "1") int page){
 
         MainPageDTO mainPageDTO = MainPageDTO.builder()
                                                 .pageNum(page)
@@ -112,9 +107,9 @@ public class MainController {
                                                 .classification(classification)
                                                 .build();
 
-        PagingListDTO<MainListResponseDTO> responseDTO = mainService.getClassificationAndSearchList(mainPageDTO, principal);
+        PagingListDTO<MainListResponseDTO> responseDTO = mainService.getClassificationAndSearchList(mainPageDTO);
 
-        return responseMappingService.mappingPagingResponseDTO(responseDTO, principal);
+        return responseMappingService.mappingPagingResponseDTO(responseDTO);
     }
 
     /**
@@ -140,18 +135,17 @@ public class MainController {
             )
     })
     @GetMapping("/search")
-    public ResponseEntity<PagingResponseDTO<MainListResponseDTO>> searchList(@RequestParam(name = "page", required = false, defaultValue = "1") int page
-                                                                    , @RequestParam(name = "keyword") String keyword
-                                                                    , Principal principal){
+    public ResponseEntity<PagingResponseDTO<MainListResponseDTO>> searchList(@RequestParam(name = "page", required = false, defaultValue = "1") int page,
+                                                                    @RequestParam(name = "keyword") String keyword){
 
         MainPageDTO mainPageDTO = MainPageDTO.builder()
                                                 .pageNum(page)
                                                 .keyword(keyword)
                                                 .classification(null)
                                                 .build();
-        PagingListDTO<MainListResponseDTO> responseDTO = mainService.getClassificationAndSearchList(mainPageDTO, principal);
+        PagingListDTO<MainListResponseDTO> responseDTO = mainService.getClassificationAndSearchList(mainPageDTO);
 
-        return responseMappingService.mappingPagingResponseDTO(responseDTO, principal);
+        return responseMappingService.mappingPagingResponseDTO(responseDTO);
     }
 
     /**
@@ -252,14 +246,13 @@ public class MainController {
             )
     })
     @GetMapping("/order/{term}/{page}")
-    public ResponseEntity<PagingResponseDTO<MyPageOrderDTO>> nonMemberOrderList(@RequestParam(name = "recipient") String recipient
-                                                , @RequestParam(name = "phone") String phone
-                                                , @PathVariable(name = "term") String term
-                                                , @PathVariable(name = "page") int page
-                                                , Principal principal){
+    public ResponseEntity<PagingResponseDTO<MyPageOrderDTO>> nonMemberOrderList(@RequestParam(name = "recipient") String recipient,
+                                                @RequestParam(name = "phone") String phone,
+                                                @PathVariable(name = "term") String term,
+                                                @PathVariable(name = "page") int page){
 
         MemberOrderDTO memberOrderDTO = MemberOrderDTO.builder()
-                                            .userId(null)
+                                            .userId("Anonymous")
                                             .recipient(recipient)
                                             .phone(phone)
                                             .build();
@@ -271,6 +264,6 @@ public class MainController {
 
         PagingListDTO<MyPageOrderDTO> responseDTO = myPageService.getOrderList(orderPageDTO, memberOrderDTO);
 
-        return responseMappingService.mappingPagingResponseDTO(responseDTO, principal);
+        return responseMappingService.mappingPagingResponseDTO(responseDTO);
     }
 }

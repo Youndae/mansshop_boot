@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -51,9 +50,9 @@ public class OrderController {
             in = ParameterIn.COOKIE
     )
     @PostMapping("/")
-    public ResponseEntity<?> payment(@RequestBody PaymentDTO paymentDTO
-                                    , HttpServletRequest request
-                                    , Principal principal) {
+    public ResponseEntity<?> payment(@RequestBody PaymentDTO paymentDTO,
+                                    HttpServletRequest request,
+                                    Principal principal) {
 
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
 
@@ -95,9 +94,9 @@ public class OrderController {
     )
     @PostMapping("/cart")
     public ResponseEntity<OrderDataResponseDTO> orderCart(@Schema(name = "장바구니 상세 데이터 아이디 리스트", type = "array")
-                                                          @RequestBody List<Long> cartDetailIds
-                                        , HttpServletRequest request
-                                        , Principal principal) {
+                                                          @RequestBody List<Long> cartDetailIds,
+                                                            HttpServletRequest request,
+                                                            Principal principal) {
 
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
         OrderDataResponseDTO responseDTO = orderService.getCartOrderData(cartDetailIds, cartMemberDTO);

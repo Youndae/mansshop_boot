@@ -1,6 +1,6 @@
 package com.example.mansshop_boot.domain.entity;
 
-import com.example.mansshop_boot.domain.enumuration.Role;
+import com.example.mansshop_boot.domain.enumeration.Role;
 import jakarta.persistence.*;
 import lombok.*;
 

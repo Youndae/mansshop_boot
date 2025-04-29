@@ -9,7 +9,7 @@ public record AdminClassificationSalesResponseDTO(
         String classification
         , long totalSales
         , long totalSalesQuantity
-        , List<AdminClassificationSalesProductListDTO> product
+        , List<AdminClassificationSalesProductListDTO> productList
 ) {
 
     public AdminClassificationSalesResponseDTO(String classification

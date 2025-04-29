@@ -1,7 +1,4 @@
-package com.example.mansshop_boot.domain.enumuration;
-
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+package com.example.mansshop_boot.domain.enumeration;
 
 public enum AdminListType {
     NEW, ALL;

@@ -5,7 +5,7 @@ import com.example.mansshop_boot.auth.oAuth.CustomOAuth2User;
 import com.example.mansshop_boot.auth.user.CustomUserDetails;
 import com.example.mansshop_boot.auth.user.CustomUser;
 import com.example.mansshop_boot.domain.entity.Member;
-import com.example.mansshop_boot.domain.enumuration.Result;
+import com.example.mansshop_boot.domain.enumeration.Result;
 import com.example.mansshop_boot.repository.member.MemberRepository;
 import com.example.mansshop_boot.service.JWTTokenService;
 import jakarta.servlet.FilterChain;

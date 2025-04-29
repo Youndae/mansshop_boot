@@ -2,7 +2,6 @@ package com.example.mansshop_boot.service.unit;
 
 import com.example.mansshop_boot.config.customException.ErrorCode;
 import com.example.mansshop_boot.config.customException.exception.CustomNotFoundException;
-import com.example.mansshop_boot.config.jwt.JWTTokenProvider;
 import com.example.mansshop_boot.domain.dto.cart.business.CartMemberDTO;
 import com.example.mansshop_boot.domain.dto.cart.in.AddCartDTO;
 import com.example.mansshop_boot.domain.dto.cart.out.CartDetailDTO;
@@ -10,7 +9,7 @@ import com.example.mansshop_boot.domain.entity.Cart;
 import com.example.mansshop_boot.domain.entity.CartDetail;
 import com.example.mansshop_boot.domain.entity.Member;
 import com.example.mansshop_boot.domain.entity.ProductOption;
-import com.example.mansshop_boot.domain.enumuration.Result;
+import com.example.mansshop_boot.domain.enumeration.Result;
 import com.example.mansshop_boot.repository.cart.CartDetailRepository;
 import com.example.mansshop_boot.repository.cart.CartRepository;
 import com.example.mansshop_boot.repository.member.MemberRepository;

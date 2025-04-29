@@ -1,6 +1,6 @@
 package com.example.mansshop_boot.auth.oAuth.response;
 
-import com.example.mansshop_boot.domain.enumuration.OAuthProvider;
+import com.example.mansshop_boot.domain.enumeration.OAuthProvider;
 
 import java.util.Map;
 

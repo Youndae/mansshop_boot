@@ -1,4 +1,4 @@
-package com.example.mansshop_boot.domain.enumuration;
+package com.example.mansshop_boot.domain.enumeration;
 
 import lombok.RequiredArgsConstructor;
 

@@ -11,9 +11,9 @@ import java.util.List;
 
 public interface MainService {
 
-    List<MainListResponseDTO> getBestAndNewList(MainPageDTO pageDTO, Principal principal);
+    List<MainListResponseDTO> getBestAndNewList(MainPageDTO pageDTO);
 
-    PagingListDTO<MainListResponseDTO> getClassificationAndSearchList(MainPageDTO pageDTO, Principal principal);
+    PagingListDTO<MainListResponseDTO> getClassificationAndSearchList(MainPageDTO pageDTO);
 
     /*URL getSignedUrl(String imageName);*/
 

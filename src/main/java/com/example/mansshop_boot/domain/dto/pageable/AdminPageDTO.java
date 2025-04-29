@@ -1,6 +1,6 @@
 package com.example.mansshop_boot.domain.dto.pageable;
 
-import com.example.mansshop_boot.domain.enumuration.PageAmount;
+import com.example.mansshop_boot.domain.enumeration.PageAmount;
 
 public record AdminPageDTO(
         String keyword

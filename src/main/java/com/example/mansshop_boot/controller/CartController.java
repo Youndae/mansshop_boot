@@ -5,14 +5,11 @@ import com.example.mansshop_boot.annotation.swagger.SwaggerAuthentication;
 import com.example.mansshop_boot.domain.dto.cart.in.AddCartDTO;
 import com.example.mansshop_boot.domain.dto.cart.out.CartDetailDTO;
 import com.example.mansshop_boot.domain.dto.cart.business.CartMemberDTO;
-import com.example.mansshop_boot.domain.dto.response.ResponseListDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
 import com.example.mansshop_boot.service.CartService;
-import com.example.mansshop_boot.service.ResponseMappingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/cart")
@@ -32,8 +28,6 @@ import java.util.Map;
 public class CartController {
 
     private final CartService cartService;
-
-    private final ResponseMappingService responseMappingService;
 
     /**
      *
@@ -51,15 +45,17 @@ public class CartController {
             in = ParameterIn.COOKIE
     )
     @GetMapping("/")
-    public ResponseEntity<ResponseListDTO<CartDetailDTO>> getCartList(HttpServletRequest request,
+    public ResponseEntity<List<CartDetailDTO>> getCartList(HttpServletRequest request,
                                                                       Principal principal) {
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
 
-        if(cartMemberDTO.uid() == null && cartMemberDTO.cartCookieValue() == null)
+        if(cartMemberDTO.uid().equals("Anonymous") && cartMemberDTO.cartCookieValue() == null)
             return ResponseEntity.status(HttpStatus.OK).body(null);
 
         List<CartDetailDTO> responseDTO = cartService.getCartList(cartMemberDTO);
-        return responseMappingService.mappingResponseListDTO(responseDTO, principal);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     /**

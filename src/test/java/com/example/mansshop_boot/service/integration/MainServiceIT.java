@@ -24,7 +24,7 @@ public class MainServiceIT {
     @DisplayName(value = "메인 베스트 상품 리스트 조회")
     void getBestList() {
         MainPageDTO pageDTO = new MainPageDTO("BEST");
-        List<MainListResponseDTO> result = mainService.getBestAndNewList(pageDTO, null);
+        List<MainListResponseDTO> result = mainService.getBestAndNewList(pageDTO);
 
         Assertions.assertNotNull(result);
         Assertions.assertEquals(pageDTO.mainProductAmount(), result.size());
@@ -34,7 +34,7 @@ public class MainServiceIT {
     @DisplayName(value = "메인 새로운 상품 리스트")
     void getNewList() {
         MainPageDTO pageDTO = new MainPageDTO("NEW");
-        List<MainListResponseDTO> result = mainService.getBestAndNewList(pageDTO, null);
+        List<MainListResponseDTO> result = mainService.getBestAndNewList(pageDTO);
 
         Assertions.assertNotNull(result);
         Assertions.assertEquals(pageDTO.mainProductAmount(), result.size());
@@ -44,7 +44,7 @@ public class MainServiceIT {
     @DisplayName(value = "메인 선택한 상품 분류(OUTER) 리스트")
     void getOUTERList() {
         MainPageDTO pageDTO = new MainPageDTO(1, null, "OUTER");
-        List<MainListResponseDTO> result = mainService.getBestAndNewList(pageDTO, null);
+        List<MainListResponseDTO> result = mainService.getBestAndNewList(pageDTO);
 
         Assertions.assertNotNull(result);
         Assertions.assertEquals(pageDTO.mainProductAmount(), result.size());

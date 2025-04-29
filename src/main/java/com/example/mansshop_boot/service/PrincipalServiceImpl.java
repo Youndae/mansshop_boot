@@ -2,7 +2,6 @@ package com.example.mansshop_boot.service;
 
 import com.example.mansshop_boot.config.customException.ErrorCode;
 import com.example.mansshop_boot.config.customException.exception.CustomAccessDeniedException;
-import com.example.mansshop_boot.domain.dto.response.UserStatusDTO;
 import com.example.mansshop_boot.domain.entity.Member;
 import com.example.mansshop_boot.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -45,10 +44,10 @@ public class PrincipalServiceImpl implements PrincipalService {
      *
      * 사용자 아이디를 통해 닉네임을 조회해 반환
      */
-    @Override
+    /*@Override
     public String getNicknameByUserId(String userId) {
         return getUserNameOrNickname(userId);
-    }
+    }*/
 
     /**
      *
@@ -98,9 +97,9 @@ public class PrincipalServiceImpl implements PrincipalService {
      *
      * Principal을 통해 사용자 닉네임을 조회하고 UserStatusDTO를 생성해 반환.
      */
-    @Override
+    /*@Override
     public UserStatusDTO getUserStatusDTOByPrincipal(Principal principal) {
 
         return new UserStatusDTO(getNicknameByPrincipal(principal));
-    }
+    }*/
 }

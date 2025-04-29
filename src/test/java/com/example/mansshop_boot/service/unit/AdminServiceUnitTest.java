@@ -10,13 +10,12 @@ import com.example.mansshop_boot.domain.dto.admin.in.AdminDiscountPatchDTO;
 import com.example.mansshop_boot.domain.dto.admin.in.AdminProductImageDTO;
 import com.example.mansshop_boot.domain.dto.admin.in.AdminProductPatchDTO;
 import com.example.mansshop_boot.domain.dto.admin.out.*;
-import com.example.mansshop_boot.domain.dto.cache.CacheProperties;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
 import com.example.mansshop_boot.domain.entity.*;
-import com.example.mansshop_boot.domain.enumuration.RedisCaching;
-import com.example.mansshop_boot.domain.enumuration.Result;
+import com.example.mansshop_boot.domain.enumeration.RedisCaching;
+import com.example.mansshop_boot.domain.enumeration.Result;
 import com.example.mansshop_boot.repository.classification.ClassificationRepository;
 import com.example.mansshop_boot.repository.member.MemberRepository;
 import com.example.mansshop_boot.repository.memberQnA.MemberQnAReplyRepository;
@@ -48,7 +47,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
-import java.util.function.Function;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;

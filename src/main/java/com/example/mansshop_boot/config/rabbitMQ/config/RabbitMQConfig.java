@@ -1,14 +1,12 @@
 package com.example.mansshop_boot.config.rabbitMQ.config;
 
 import com.example.mansshop_boot.domain.dto.rabbitMQ.RabbitMQProperties;
-import com.example.mansshop_boot.domain.enumuration.RabbitMQPrefix;
+import com.example.mansshop_boot.domain.enumeration.RabbitMQPrefix;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.*;
-import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

@@ -13,11 +13,9 @@ import com.example.mansshop_boot.domain.dto.member.in.LoginDTO;
 import com.example.mansshop_boot.domain.dto.member.in.UserCertificationDTO;
 import com.example.mansshop_boot.domain.dto.member.in.UserResetPwDTO;
 import com.example.mansshop_boot.domain.dto.member.out.UserSearchIdResponseDTO;
+import com.example.mansshop_boot.domain.dto.member.out.UserStatusResponseDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
-import com.example.mansshop_boot.domain.dto.response.ResponseUserStatusDTO;
-import com.example.mansshop_boot.domain.dto.response.UserStatusDTO;
 import com.example.mansshop_boot.service.MemberService;
-import com.example.mansshop_boot.service.PrincipalService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -34,6 +32,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.WebUtils;
 
@@ -52,8 +51,6 @@ public class MemberController {
     private String inoHeader;
 
     private final MemberService memberService;
-
-    private final PrincipalService principalService;
 
     /**
      *
@@ -77,11 +74,14 @@ public class MemberController {
             )
     })
     @PostMapping("/login")
-    public ResponseEntity<ResponseUserStatusDTO> loginProc(@RequestBody LoginDTO loginDTO
-                                        , HttpServletRequest request
-                                        , HttpServletResponse response){
+    public ResponseEntity<UserStatusResponseDTO> loginProc(@RequestBody LoginDTO loginDTO,
+                                        HttpServletRequest request,
+                                        HttpServletResponse response){
 
-        return memberService.loginProc(loginDTO, request, response);
+        UserStatusResponseDTO result = memberService.loginProc(loginDTO, request, response);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(result);
     }
 
     /**
@@ -97,9 +97,9 @@ public class MemberController {
     @SwaggerAuthentication
     @PostMapping("/logout")
     @PreAuthorize("hasAnyRole('ROLE_MEMBER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
-    public ResponseEntity<ResponseMessageDTO> logoutProc(HttpServletRequest request
-                                        , HttpServletResponse response
-                                        , Principal principal) {
+    public ResponseEntity<ResponseMessageDTO> logoutProc(HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        Principal principal) {
 
         try{
             LogoutDTO dto = LogoutDTO.builder()
@@ -208,22 +208,18 @@ public class MemberController {
 
     /**
      *
-     * @param principal
+     * @param authentication
      *
      * 클라이언트에서 로그인 상태 체크 요청
-     * 별다른 데이터는 필요하지 않으나 새로고침에 대한 Redux의 처리를 위함.
+     * 새로고침에 대한 Redux의 처리를 위함.
      */
     @Operation(hidden = true)
-    @GetMapping("/check-login")
-    public ResponseEntity<ResponseUserStatusDTO> checkLoginStatus(Principal principal) {
-
-        String nickname = null;
-
-        if(principal != null)
-            nickname = principalService.getNicknameByPrincipal(principal);
+    @GetMapping("/status")
+    @PreAuthorize("hasAnyRole('ROLE_MEMBER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
+    public ResponseEntity<UserStatusResponseDTO> checkLoginStatus(Authentication authentication) {
 
         return ResponseEntity.status(HttpStatus.OK)
-                            .body(new ResponseUserStatusDTO(new UserStatusDTO(nickname)));
+                            .body(new UserStatusResponseDTO(authentication));
     }
 
     /**
@@ -257,9 +253,9 @@ public class MemberController {
             )
     })
     @GetMapping("/search-id")
-    public ResponseEntity<UserSearchIdResponseDTO> searchId(@RequestParam(name = "userName") String userName
-                                    , @RequestParam(name = "userPhone", required = false) String userPhone
-                                    , @RequestParam(name = "userEmail", required = false) String userEmail) {
+    public ResponseEntity<UserSearchIdResponseDTO> searchId(@RequestParam(name = "userName") String userName,
+                                    @RequestParam(name = "userPhone", required = false) String userPhone,
+                                    @RequestParam(name = "userEmail", required = false) String userEmail) {
 
         UserSearchDTO searchDTO = new UserSearchDTO(userName, userPhone, userEmail);
 
@@ -303,9 +299,9 @@ public class MemberController {
             )
     })
     @GetMapping("/search-pw")
-    public ResponseEntity<ResponseMessageDTO> searchPw(@RequestParam(name = "id") String userId
-                                                        , @RequestParam(name = "name") String userName
-                                                        , @RequestParam(name = "email") String userEmail) {
+    public ResponseEntity<ResponseMessageDTO> searchPw(@RequestParam(name = "id") String userId,
+                                                        @RequestParam(name = "name") String userName,
+                                                        @RequestParam(name = "email") String userEmail) {
 
         UserSearchPwDTO searchDTO = new UserSearchPwDTO(userId, userName, userEmail);
 

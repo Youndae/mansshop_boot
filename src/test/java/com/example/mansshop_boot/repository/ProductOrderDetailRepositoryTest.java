@@ -9,7 +9,7 @@ import com.example.mansshop_boot.MansShopBootApplication;
 import com.example.mansshop_boot.domain.dto.admin.business.AdminOrderDetailListDTO;
 import com.example.mansshop_boot.domain.dto.mypage.business.MyPageOrderDetailDTO;
 import com.example.mansshop_boot.domain.entity.*;
-import com.example.mansshop_boot.domain.enumuration.OrderStatus;
+import com.example.mansshop_boot.domain.enumeration.OrderStatus;
 import com.example.mansshop_boot.repository.auth.AuthRepository;
 import com.example.mansshop_boot.repository.classification.ClassificationRepository;
 import com.example.mansshop_boot.repository.member.MemberRepository;

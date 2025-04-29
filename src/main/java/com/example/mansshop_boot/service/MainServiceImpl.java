@@ -40,14 +40,13 @@ public class MainServiceImpl implements MainService{
     /**
      *
      * @param pageDTO
-     * @param principal
      *
      * 메인 상품 목록에서 BEST 상품과 NEW 상품의 목록 조회.
      * 해당 카테고리들은 페이징처리 없이 12개의 데이터만 필요하므로 따로 분리해서 처리.
      *
      */
     @Override
-    public List<MainListResponseDTO> getBestAndNewList(MainPageDTO pageDTO, Principal principal) {
+    public List<MainListResponseDTO> getBestAndNewList(MainPageDTO pageDTO) {
         List<MainListDTO> listDto = productRepository.findListDefault(pageDTO);
 
         return mainListDataMapping(listDto);
@@ -62,7 +61,7 @@ public class MainServiceImpl implements MainService{
      * 개인 쇼핑몰 컨셉이기 때문에 상품 목록이 엄청 많지 않을 것이라고 생각해 페이징의 직접 구현이 아닌 Pageable을 통한 처리.
      */
     @Override
-    public PagingListDTO<MainListResponseDTO> getClassificationAndSearchList(MainPageDTO pageDTO, Principal principal) {
+    public PagingListDTO<MainListResponseDTO> getClassificationAndSearchList(MainPageDTO pageDTO) {
         Pageable pageable =  PageRequest.of(pageDTO.pageNum() - 1
                                             , pageDTO.mainProductAmount()
                                             , Sort.by("createdAt").descending()

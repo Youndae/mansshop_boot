@@ -5,7 +5,7 @@ import com.example.mansshop_boot.domain.dto.mypage.business.MemberOrderDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;
 import com.example.mansshop_boot.domain.entity.ProductOrder;
-import com.example.mansshop_boot.domain.enumuration.OrderStatus;
+import com.example.mansshop_boot.domain.enumeration.OrderStatus;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.*;

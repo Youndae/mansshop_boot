@@ -3,7 +3,7 @@ package com.example.mansshop_boot.service.unit;
 import com.example.mansshop_boot.config.customException.ErrorCode;
 import com.example.mansshop_boot.config.jwt.JWTTokenProvider;
 import com.example.mansshop_boot.domain.dto.token.TokenDTO;
-import com.example.mansshop_boot.domain.enumuration.Result;
+import com.example.mansshop_boot.domain.enumeration.Result;
 import com.example.mansshop_boot.service.JWTTokenServiceImpl;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Assertions;

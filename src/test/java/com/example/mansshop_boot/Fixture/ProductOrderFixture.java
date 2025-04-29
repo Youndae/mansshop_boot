@@ -4,7 +4,7 @@ import com.example.mansshop_boot.domain.entity.Member;
 import com.example.mansshop_boot.domain.entity.ProductOption;
 import com.example.mansshop_boot.domain.entity.ProductOrder;
 import com.example.mansshop_boot.domain.entity.ProductOrderDetail;
-import com.example.mansshop_boot.domain.enumuration.OrderStatus;
+import com.example.mansshop_boot.domain.enumeration.OrderStatus;
 
 import java.util.ArrayList;
 import java.util.List;

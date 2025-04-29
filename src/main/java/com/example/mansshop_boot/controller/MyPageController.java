@@ -17,7 +17,6 @@ import com.example.mansshop_boot.domain.dto.pageable.LikePageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;
 import com.example.mansshop_boot.domain.dto.response.*;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
-import com.example.mansshop_boot.domain.dto.response.serviceResponse.ResponseWrappingDTO;
 import com.example.mansshop_boot.service.MyPageService;
 import com.example.mansshop_boot.service.ResponseMappingService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -74,9 +73,9 @@ public class MyPageController {
             )
     })
     @GetMapping("/order/{term}")
-    public ResponseEntity<PagingResponseDTO<MyPageOrderDTO>> getOrderList(@PathVariable(name = "term") String term
-                                        , @RequestParam(name = "page", required = false, defaultValue = "1") int page
-                                        , Principal principal) {
+    public ResponseEntity<PagingResponseDTO<MyPageOrderDTO>> getOrderList(@PathVariable(name = "term") String term,
+                                        @RequestParam(name = "page", required = false, defaultValue = "1") int page,
+                                        Principal principal) {
 
         OrderPageDTO orderPageDTO = OrderPageDTO.builder()
                                         .term(term)
@@ -90,7 +89,7 @@ public class MyPageController {
                                         .build();
 
         PagingListDTO<MyPageOrderDTO> responseDTO = myPageService.getOrderList(orderPageDTO, memberOrderDTO);
-        return responseMappingService.mappingPagingResponseDTO(responseDTO, principal);
+        return responseMappingService.mappingPagingResponseDTO(responseDTO);
     }
 
     /**
@@ -114,7 +113,7 @@ public class MyPageController {
         LikePageDTO pageDTO = new LikePageDTO(page);
         Page<ProductLikeDTO> responseDTO = myPageService.getLikeList(pageDTO, principal);
 
-        return responseMappingService.mappingPageableResponseDTO(responseDTO, principal);
+        return responseMappingService.mappingPageableResponseDTO(responseDTO);
     }
 
     /**
@@ -137,7 +136,7 @@ public class MyPageController {
         MyPagePageDTO pageDTO = new MyPagePageDTO(page);
         Page<ProductQnAListDTO> responseDTO = myPageService.getProductQnAList(pageDTO, principal);
 
-        return responseMappingService.mappingPageableResponseDTO(responseDTO, principal);
+        return responseMappingService.mappingPageableResponseDTO(responseDTO);
     }
 
     /**
@@ -157,10 +156,11 @@ public class MyPageController {
             in = ParameterIn.PATH
     )
     @GetMapping("/qna/product/detail/{qnaId}")
-    public ResponseEntity<ResponseDTO<ProductQnADetailDTO>> getProductQnADetail(@PathVariable(name = "qnaId") long qnaId, Principal principal) {
-        ResponseWrappingDTO<ProductQnADetailDTO> wrappingDTO = new ResponseWrappingDTO<>(myPageService.getProductQnADetail(qnaId, principal));
+    public ResponseEntity<ProductQnADetailDTO> getProductQnADetail(@PathVariable(name = "qnaId") long qnaId, Principal principal) {
+        ProductQnADetailDTO responseDTO = myPageService.getProductQnADetail(qnaId, principal);
 
-        return responseMappingService.mappingResponseDTO(wrappingDTO, principal);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     /**
@@ -211,7 +211,7 @@ public class MyPageController {
 
         Page<MemberQnAListDTO> responseDTO = myPageService.getMemberQnAList(pageDTO, principal);
 
-        return responseMappingService.mappingPageableResponseDTO(responseDTO, principal);
+        return responseMappingService.mappingPageableResponseDTO(responseDTO);
     }
 
     /**
@@ -250,10 +250,11 @@ public class MyPageController {
             in = ParameterIn.PATH
     )
     @GetMapping("/qna/member/detail/{qnaId}")
-    public ResponseEntity<ResponseDTO<MemberQnADetailDTO>> getMemberQnADetail(@PathVariable(name = "qnaId") long qnaId, Principal principal) {
-        ResponseWrappingDTO<MemberQnADetailDTO> wrappingDTO = new ResponseWrappingDTO<>(myPageService.getMemberQnADetail(qnaId, principal));
+    public ResponseEntity<MemberQnADetailDTO> getMemberQnADetail(@PathVariable(name = "qnaId") long qnaId, Principal principal) {
+        MemberQnADetailDTO responseDTO = myPageService.getMemberQnADetail(qnaId, principal);
 
-        return responseMappingService.mappingResponseDTO(wrappingDTO, principal);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     /**
@@ -311,11 +312,13 @@ public class MyPageController {
             in = ParameterIn.PATH
     )
     @GetMapping("/qna/member/modify/{qnaId}")
-    public ResponseEntity<ResponseDTO<MemberQnAModifyDataDTO>> getModifyData(@PathVariable(name = "qnaId") long qnaId, Principal principal) {
-        ResponseWrappingDTO<MemberQnAModifyDataDTO> wrappingDTO = new ResponseWrappingDTO<>(myPageService.getModifyData(qnaId, principal));
+    public ResponseEntity<MemberQnAModifyDataDTO> getModifyData(@PathVariable(name = "qnaId") long qnaId, Principal principal) {
+        MemberQnAModifyDataDTO responseDTO = myPageService.getModifyData(qnaId, principal);
 
-        return responseMappingService.mappingResponseDTO(wrappingDTO, principal);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
+
 
     /**
      *
@@ -373,10 +376,11 @@ public class MyPageController {
     @DefaultApiResponse
     @SwaggerAuthentication
     @GetMapping("/classification")
-    public ResponseEntity<ResponseListDTO<QnAClassificationDTO>> getQnAClassification(Principal principal) {
+    public ResponseEntity<List<QnAClassificationDTO>> getQnAClassification(Principal principal) {
         List<QnAClassificationDTO> responseDTO = myPageService.getQnAClassification(principal);
 
-        return responseMappingService.mappingResponseListDTO(responseDTO, principal);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     /**
@@ -401,7 +405,7 @@ public class MyPageController {
         MyPagePageDTO pageDTO = new MyPagePageDTO(page);
         Page<MyPageReviewDTO> responseDTO = myPageService.getReview(pageDTO, principal);
 
-        return responseMappingService.mappingPageableResponseDTO(responseDTO, principal);
+        return responseMappingService.mappingPageableResponseDTO(responseDTO);
     }
 
     /**
@@ -421,10 +425,11 @@ public class MyPageController {
             in = ParameterIn.PATH
     )
     @GetMapping("/review/modify/{reviewId}")
-    public ResponseEntity<ResponseDTO<MyPagePatchReviewDataDTO>> getPatchReviewData(@PathVariable(name = "reviewId") long reviewId, Principal principal) {
-        ResponseWrappingDTO<MyPagePatchReviewDataDTO> wrappingDTO = new ResponseWrappingDTO<>(myPageService.getPatchReview(reviewId, principal));
+    public ResponseEntity<MyPagePatchReviewDataDTO> getPatchReviewData(@PathVariable(name = "reviewId") long reviewId, Principal principal) {
+        MyPagePatchReviewDataDTO responseDTO = myPageService.getPatchReview(reviewId, principal);
 
-        return responseMappingService.mappingResponseDTO(wrappingDTO, principal);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     /**
@@ -458,7 +463,6 @@ public class MyPageController {
     @SwaggerAuthentication
     @PatchMapping("/review")
     public ResponseEntity<ResponseMessageDTO> patchReview(@RequestBody MyPagePatchReviewDTO reviewDTO, Principal principal) {
-
 
         String responseMessage = myPageService.patchReview(reviewDTO, principal);
 
@@ -501,10 +505,11 @@ public class MyPageController {
     @DefaultApiResponse
     @SwaggerAuthentication
     @GetMapping("/info")
-    public ResponseEntity<ResponseDTO<MyPageInfoDTO>> getInfo(Principal principal) {
-        ResponseWrappingDTO<MyPageInfoDTO> wrappingDTO = new ResponseWrappingDTO<>(myPageService.getInfo(principal));
+    public ResponseEntity<MyPageInfoDTO> getInfo(Principal principal) {
+        MyPageInfoDTO responseDTO = myPageService.getInfo(principal);
 
-        return responseMappingService.mappingResponseDTO(wrappingDTO, principal);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     /**

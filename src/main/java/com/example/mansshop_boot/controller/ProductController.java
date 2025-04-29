@@ -8,9 +8,7 @@ import com.example.mansshop_boot.domain.dto.product.out.ProductDetailDTO;
 import com.example.mansshop_boot.domain.dto.product.out.ProductQnAResponseDTO;
 import com.example.mansshop_boot.domain.dto.product.out.ProductReviewDTO;
 import com.example.mansshop_boot.domain.dto.response.PagingElementsResponseDTO;
-import com.example.mansshop_boot.domain.dto.response.ResponseDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
-import com.example.mansshop_boot.domain.dto.response.serviceResponse.ResponseWrappingDTO;
 import com.example.mansshop_boot.service.ProductService;
 import com.example.mansshop_boot.service.ResponseMappingService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,7 +27,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/product")
@@ -85,10 +82,11 @@ public class ProductController {
             @SecurityRequirement(name = "Authorization_ino")
     })
     @GetMapping("/{productId}")
-    public ResponseEntity<ResponseDTO<ProductDetailDTO>> getDetail(@PathVariable(name = "productId") String productId, Principal principal) {
-        ResponseWrappingDTO<ProductDetailDTO> wrappingDTO = new ResponseWrappingDTO<>(productService.getDetail(productId, principal));
+    public ResponseEntity<ProductDetailDTO> getDetail(@PathVariable(name = "productId") String productId, Principal principal) {
+        ProductDetailDTO responseDTO = productService.getDetail(productId, principal);
 
-        return responseMappingService.mappingResponseDTO(wrappingDTO, principal);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 
     /**
@@ -141,13 +139,12 @@ public class ProductController {
             @SecurityRequirement(name = "Authorization_ino")
     })
     @GetMapping("/{productId}/review")
-    public ResponseEntity<PagingElementsResponseDTO<ProductReviewDTO>> getReview(@PathVariable(name = "productId") String productId
-                                                        , @RequestParam(name = "page") int page
-                                                        , Principal principal) {
+    public ResponseEntity<PagingElementsResponseDTO<ProductReviewDTO>> getReview(@PathVariable(name = "productId") String productId,
+                                                        @RequestParam(name = "page") int page) {
         ProductDetailPageDTO pageDTO = new ProductDetailPageDTO(page);
         Page<ProductReviewDTO> responseDTO = productService.getDetailReview(pageDTO, productId);
 
-        return responseMappingService.mappingPageableElementsResponseDTO(responseDTO, principal);
+        return responseMappingService.mappingPageableElementsResponseDTO(responseDTO);
     }
 
     /**
@@ -198,13 +195,13 @@ public class ProductController {
             @SecurityRequirement(name = "Authorization_ino")
     })
     @GetMapping("/{productId}/qna")
-    public ResponseEntity<PagingElementsResponseDTO<ProductQnAResponseDTO>> getQnA(@PathVariable(name = "productId") String productId
-                                                    , @RequestParam(name = "page") int page
-                                                    , Principal principal) {
+    public ResponseEntity<PagingElementsResponseDTO<ProductQnAResponseDTO>> getQnA(@PathVariable(name = "productId") String productId,
+                                                    @RequestParam(name = "page") int page) {
+
         ProductDetailPageDTO pageDTO = new ProductDetailPageDTO(page);
         Page<ProductQnAResponseDTO> responseDTO = productService.getDetailQnA(pageDTO, productId);
 
-        return responseMappingService.mappingPageableElementsResponseDTO(responseDTO, principal);
+        return responseMappingService.mappingPageableElementsResponseDTO(responseDTO);
     }
 
     /**
@@ -242,8 +239,8 @@ public class ProductController {
     @PostMapping("/like")
     @PreAuthorize("hasAnyRole('ROLE_MEMBER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
     public ResponseEntity<ResponseMessageDTO> likeProduct(@Schema(name = "productId", description = "상품 아이디")
-                                             @RequestBody String productId
-                                        , Principal principal) {
+                                             @RequestBody String productId,
+                                        Principal principal) {
         String responseMessage = productService.likeProduct(productId, principal);
 
         return ResponseEntity.status(HttpStatus.OK)
@@ -269,8 +266,8 @@ public class ProductController {
     )
     @DeleteMapping("/like/{productId}")
     @PreAuthorize("hasAnyRole('ROLE_MEMBER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
-    public ResponseEntity<ResponseMessageDTO> deLikeProduct(@PathVariable(name = "productId") String productId
-            , Principal principal) {
+    public ResponseEntity<ResponseMessageDTO> deLikeProduct(@PathVariable(name = "productId") String productId,
+                                                            Principal principal) {
 
         String responseMessage = productService.deLikeProduct(productId, principal);
 
