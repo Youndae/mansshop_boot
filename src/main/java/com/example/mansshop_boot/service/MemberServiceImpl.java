@@ -235,7 +235,7 @@ public class MemberServiceImpl implements MemberService{
 
         String responseMessage = checkDuplicatedResponseMessage;
 
-        if(member == null || principal != null && member.getUserId().equals(principal.getName()))
+        if(member == null || (principal != null && member.getUserId().equals(principal.getName())))
             responseMessage = checkNoDuplicatesResponseMessage;
 
 

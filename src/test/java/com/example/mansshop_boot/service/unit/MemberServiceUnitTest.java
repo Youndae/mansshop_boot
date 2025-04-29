@@ -43,9 +43,6 @@ public class MemberServiceUnitTest {
     
     @Mock
     private MemberRepository memberRepository;
-
-    @Mock
-    private JWTTokenProvider tokenProvider;
     
     @Mock
     private AuthRepository authRepository;
@@ -93,7 +90,7 @@ public class MemberServiceUnitTest {
     @Test
     @DisplayName(value = "회원가입시 아이디 중복체크. 정상인 경우")
     void checkJoinId() {
-        when(memberRepository.findById("userId")).thenReturn(null);
+        when(memberRepository.findById("userId")).thenReturn(Optional.ofNullable(null));
 
         String result = Assertions.assertDoesNotThrow(() -> memberService.checkJoinId("userId"));
 
@@ -129,7 +126,7 @@ public class MemberServiceUnitTest {
 
         when(memberRepository.findByNickname("nickname")).thenReturn(member);
 
-        String result = Assertions.assertDoesNotThrow(() -> memberService.checkNickname(member.getUserId(), null));
+        String result = Assertions.assertDoesNotThrow(() -> memberService.checkNickname("nickname", null));
 
         Assertions.assertEquals(DUPLICATED_RESPONSE_MESSAGE, result);
     }
@@ -139,10 +136,9 @@ public class MemberServiceUnitTest {
     void checkNickname() {
         Principal principal = mock(Principal.class);
 
-        when(principal.getName()).thenReturn("nickname");
         when(memberRepository.findByNickname("nicknameElse")).thenReturn(null);
 
-        String result = Assertions.assertDoesNotThrow(() -> memberService.checkNickname("nickname", null));
+        String result = Assertions.assertDoesNotThrow(() -> memberService.checkNickname("nicknameElse", principal));
 
         Assertions.assertEquals(NO_DUPLICATED_RESPONSE_MESSAGE, result);
     }
@@ -157,9 +153,27 @@ public class MemberServiceUnitTest {
         when(principal.getName()).thenReturn("nickname");
         when(memberRepository.findByNickname("nickname")).thenReturn(member);
 
-        String result = Assertions.assertDoesNotThrow(() -> memberService.checkNickname("nickname", null));
+        String result = Assertions.assertDoesNotThrow(() -> memberService.checkNickname("nickname", principal));
 
         Assertions.assertEquals(DUPLICATED_RESPONSE_MESSAGE, result);
+    }
+
+    @Test
+    @DisplayName(value = "정보 수정시 닉네임 중복체크. 중복이지만 자신이 사용하고 있는 닉네임인 경우")
+    void checkNicknameIsNotDuplicated() {
+        Member member = Member.builder()
+                .userId("coco")
+                .nickname("cocoNickname")
+                .build();
+
+        Principal principal = mock(Principal.class);
+
+        when(principal.getName()).thenReturn(member.getUserId());
+        when(memberRepository.findByNickname(member.getNickname())).thenReturn(member);
+
+        String result = Assertions.assertDoesNotThrow(() -> memberService.checkNickname(member.getNickname(), principal));
+
+        Assertions.assertEquals(NO_DUPLICATED_RESPONSE_MESSAGE, result);
     }
 
     @Test
@@ -228,7 +242,7 @@ public class MemberServiceUnitTest {
         when(memberRepository.findByPassword(searchDTO)).thenReturn(1L);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         doNothing().when(valueOperations).set(anyString(), anyString(), anyLong(), eq(TimeUnit.MINUTES));
-        when(javaMailSender.createMimeMessage()).thenThrow(new MessagingException("Mail send Fail"));
+        when(javaMailSender.createMimeMessage()).thenThrow(new RuntimeException("Mail send Fail"));
 
         String result = Assertions.assertDoesNotThrow(() -> memberService.searchPw(searchDTO));
 
