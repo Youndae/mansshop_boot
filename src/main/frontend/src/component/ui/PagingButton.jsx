@@ -15,6 +15,7 @@ const PagingActiveButtonWrapper = styled.button`
     cursor: pointer;
 `
 
+// 페이지네이션의 버튼 폼
 function PagingButton(props) {
     const {btnText, onClick, className} = props;
 

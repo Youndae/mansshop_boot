@@ -14,6 +14,10 @@ import dayjs from "dayjs";
 import AdminOrderModal from "./modal/AdminOrderModal";
 import Paging from "../../ui/Paging";
 
+/*
+    주문 목록 List Component
+    미처리와 전체 주문 목록에 사용
+ */
 function AdminOrderListForm(props) {
     const { header
         , data
@@ -32,18 +36,22 @@ function AdminOrderListForm(props) {
 
     const navigate = useNavigate();
 
+    //페이지네이션 버튼 이벤트
     const handlePageBtn = (e) => {
         handlePagingSubmit(getClickNumber(e));
     }
 
+    //페이지네이션 이전 버튼 이벤트
     const handlePagePrev = () => {
         handlePagingSubmit(getPrevNumber(pagingData));
     }
 
+    //페이지네이션 다음 버튼 이벤트
     const handlePageNext = () => {
         handlePagingSubmit(getNextNumber(pagingData));
     }
 
+    //페이지네이션 이벤트 제어
     const handlePagingSubmit = (pageNum) => {
         if(keyword == null)
             pageSubmit(pageNum, navigate);
@@ -51,6 +59,7 @@ function AdminOrderListForm(props) {
             searchTypePageSubmit(searchType, keyword, pageNum, navigate);
     }
 
+    //검색 이벤트
     const handleSearchOnClick = () => {
         searchTypeSubmit(keywordSelectValue, keywordInput, navigate);
     }

@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import {useNavigate, useParams, useSearchParams} from "react-router-dom";
-import {useDispatch, useSelector} from "react-redux";
 
 import { axiosInstance } from "../../../modules/customAxios";
 import {
@@ -10,14 +9,16 @@ import {
     getNextNumber,
     pageSubmit
 } from "../../../modules/pagingModule";
-import {setMemberObject} from "../../../modules/loginModule";
 import {createPageParam} from "../../../modules/requestUrlModule";
 
 import MainContent from "../../ui/MainContent";
 import Paging from "../../ui/Paging";
 
+/*
+    분류별 상품 목록 페이지
+    선택한 상품 분류에 따라 해당하는 상품 목록 출력
+ */
 function MainClassification() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const { classification } = useParams();
     const [params] = useSearchParams();
     const page = params.get('page');
@@ -31,13 +32,13 @@ function MainClassification() {
         activeNo: page,
     });
 
-    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
         getClassificationList();
     }, [page, classification]);
 
+    //상품 목록 조회
     const getClassificationList = async() => {
 
         await axiosInstance.get(`main/${classification}${createPageParam(page)}`)
@@ -54,22 +55,20 @@ function MainClassification() {
                     activeNo: pagingObject.activeNo,
                 });
 
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
-
             })
     }
 
+    //페이지네이션 버튼 이벤트
     const handlePageBtn = (e) => {
         pageSubmit(getClickNumber(e), navigate);
     }
 
+    //페이지네이션 이전 버튼 이벤트
     const handlePagePrev = () => {
         pageSubmit(getPrevNumber(pagingData), navigate);
     }
 
+    //페이지네이션 다음 버튼 이벤트
     const handlePageNext = () => {
         pageSubmit(getNextNumber(pagingData));
     }

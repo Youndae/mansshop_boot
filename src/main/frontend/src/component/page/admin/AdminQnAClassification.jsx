@@ -1,50 +1,45 @@
 import React, {useState, useEffect} from 'react';
-import {useDispatch, useSelector} from "react-redux";
 
 import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
-import {setMemberObject} from "../../../modules/loginModule";
 
 import AdminSideNav from "../../ui/nav/AdminSideNav";
 import DefaultBtn from "../../ui/DefaultBtn";
 
 /*
-        AdminClassification과 동일한 구조로 처리.
-     */
-
+    회원 문의에 사용되는 카테고리 관리 페이지
+    현재 설정된 회원 문의 카테고리 리스트 출력
+    추가 버튼을 통해 새로운 문의 카테고리 추가 가능
+ */
 function AdminQnAClassification() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
-
     const [data, setData] = useState([]);
     const [inputStatus, setInputStatus] = useState(false);
     const [inputValue, setInputValue] = useState('');
-
-    const dispatch = useDispatch();
 
     useEffect(() => {
         getQnAClassification();
     }, []);
 
+    //문의 분류 리스트 조회
     const getQnAClassification = async () => {
 
         await axiosInstance.get(`admin/qna/classification`)
             .then(res => {
-                setData(res.data.content);
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
+                setData(res.data);
             })
     }
 
+    //추가 버튼 이벤트
+    //추가 elements 출력
     const handleAddBtn = () => {
         setInputStatus(!inputStatus);
     }
 
+    //추가시 문의명 input 입력 이벤트
     const handleOnChange = (e) => {
         setInputValue(e.target.value);
     }
 
+    //문의 분류 추가 이벤트
     const handleSubmit = async () => {
 
         await axiosInstance.post(`admin/qna/classification`, JSON.stringify(inputValue), {
@@ -61,6 +56,7 @@ function AdminQnAClassification() {
             })
     }
 
+    //문의 분류 제거 이벤트
     const handleDelete = async (e) => {
         const classificationName = e.target.value;
 

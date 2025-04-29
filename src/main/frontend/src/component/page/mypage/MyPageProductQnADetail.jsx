@@ -1,15 +1,18 @@
 import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
 
 import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
-import {setMemberObject} from "../../../modules/loginModule";
 
 import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import QnADetail from "./QnADetail";
 
+/*
+    상품 문의 상세 페이지
+    사용자는 답변 작성 불가.
+
+    단순히 작성한 문의 내용을 보여주고 삭제만 가능.
+ */
 function MyPageProductQnADetail() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const { qnaId } = useParams();
 
     const [data, setData] = useState({
@@ -21,16 +24,14 @@ function MyPageProductQnADetail() {
         , qnaStatus: ''
     });
     const [replyData, setReplyData] = useState([]);
-    const [modifyTextValue, setModifyTextValue] = useState('');
-    const [inputValue, setInputValue] = useState('');
 
-    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
         getProductQnADetail();
     }, [qnaId]);
 
+    //상품 문의 상세 데이터 조회
     const getProductQnADetail = async () => {
 
         await axiosInstance.get(`my-page/qna/product/detail/${qnaId}`)
@@ -58,74 +59,10 @@ function MyPageProductQnADetail() {
                 }
 
                 setReplyData(replyArr);
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
-    const handleReplyModifyOpen = (e) => {
-        setReplyModifyStatus(e, true);
-    }
-
-    const handleReplyModifyClose = (e) => {
-        setReplyModifyStatus(e, false);
-    }
-
-    const setReplyModifyStatus = (e, status) => {
-        const idx = e.target.value;
-
-        replyData[idx] = {
-            replyId: replyData[idx].replyId,
-            writer: replyData[idx].writer,
-            replyContent: replyData[idx].replyContent,
-            updatedAt: replyData[idx].updatedAt,
-            inputStatus: status,
-        }
-
-        setReplyData([...replyData]);
-
-        if(status)
-            setModifyTextValue(replyData[idx].replyContent);
-    }
-
-    const handleModifyOnChange = (e) => {
-        setModifyTextValue(e.target.value);
-    }
-
-    const handleModifySubmit = async (e) => {
-        const idx = e.target.value;
-        const replyId = replyData[idx].replyId;
-
-        await axiosInstance.patch(`my-page/qna/product/reply`, {
-            replyId: replyId
-            , content: modifyTextValue,
-        }, {
-            headers: {'Content-Type': 'application/json'},
-        })
-            .then(res => {
-                if(checkResponseMessageOk(res))
-                    getProductQnADetail();
-            })
-    }
-
-    const handleInputOnChange = (e) => {
-        setInputValue(e.target.value);
-    }
-
-    const handleInputSubmit = async () => {
-        await axiosInstance.post(`my-page/qna/product/reply`, {
-            qnaId: data.productQnAId,
-            content: inputValue,
-        })
-            .then(res => {
-                if(checkResponseMessageOk(res))
-                    getProductQnADetail();
-            })
-    }
-
+    //문의 삭제 버튼 이벤트
     const handleDeleteBtn = async () => {
 
         await axiosInstance.delete(`my-page/qna/product/${data.productQnAId}`)
@@ -143,14 +80,14 @@ function MyPageProductQnADetail() {
             <QnADetail
                 data={data}
                 replyData={replyData}
-                handleReplyModifyOpen={handleReplyModifyOpen}
-                handleReplyModifyClose={handleReplyModifyClose}
-                handleModifyOnChange={handleModifyOnChange}
-                modifyTextValue={modifyTextValue}
-                handleModifySubmit={handleModifySubmit}
-                handleInputOnChange={handleInputOnChange}
-                inputValue={inputValue}
-                handleInputSubmit={handleInputSubmit}
+                handleReplyModifyOpen={null}
+                handleReplyModifyClose={null}
+                handleModifyOnChange={null}
+                modifyTextValue={null}
+                handleModifySubmit={null}
+                handleInputOnChange={null}
+                inputValue={null}
+                handleInputSubmit={null}
                 titleText={'상품 문의'}
                 handleDeleteBtn={handleDeleteBtn}
                 replyStatus={false}

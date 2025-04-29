@@ -1,15 +1,17 @@
 import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
 
 import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
-import {setMemberObject} from "../../../modules/loginModule";
 
 import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import QnADetail from "./QnADetail";
 
+/*
+    회원 문의 상세 페이지
+    답변 작성 및 수정이 가능
+    회원이 답변을 작성하는 경우 다시 미답변으로 수정 됨.
+ */
 function MemberQnADetail() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const { qnaId } = useParams();
 
     const [data, setData] = useState({
@@ -24,13 +26,13 @@ function MemberQnADetail() {
     const [modifyTextValue, setModifyTextValue] = useState('');
     const [inputValue, setInputValue] = useState('');
 
-    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
         getMemberQnADetail();
     }, [qnaId]);
 
+    //문의 상세 정보 조회
     const getMemberQnADetail = async () => {
 
         await axiosInstance.get(`my-page/qna/member/detail/${qnaId}`)
@@ -58,23 +60,20 @@ function MemberQnADetail() {
                 }
 
                 setReplyData(replyArr);
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //답변 수정 폼 오픈 이벤트
     const handleReplyModifyOpen = (e) => {
         setReplyModifyStatus(e, true);
-
     }
 
+    //답변 수정 폼 close 이벤트
     const handleReplyModifyClose = (e) => {
         setReplyModifyStatus(e, false);
     }
 
+    //답변 수정 폼 세팅
     const setReplyModifyStatus = (e, status) => {
         const idx = e.target.value;
 
@@ -92,10 +91,12 @@ function MemberQnADetail() {
             setModifyTextValue(replyData[idx].replyContent);
     }
 
+    //답변 수정 textarea 입력 이벤트
     const handleModifyOnChange = (e) => {
         setModifyTextValue(e.target.value);
     }
 
+    //답변 수정 submit 이벤트
     const handleModifySubmit = async (e) => {
         const idx = e.target.value;
         const replyId = replyData[idx].replyId;
@@ -112,10 +113,12 @@ function MemberQnADetail() {
             })
     }
 
+    //답변 작성 input 입력 이벤트
     const handleInputOnChange = (e) => {
         setInputValue(e.target.value);
     }
 
+    //답변 작성 입력 submit 이벤트
     const handleInputSubmit = async () => {
         await axiosInstance.post(`my-page/qna/member/reply`, {
             qnaId: data.memberQnAId,
@@ -127,6 +130,7 @@ function MemberQnADetail() {
             })
     }
 
+    //문의 삭제 버튼 이벤트
     const handleDeleteBtn = async () => {
 
         await axiosInstance.delete(`my-page/qna/member/${data.memberQnAId}`)

@@ -6,6 +6,7 @@ import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxio
 import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import MyPageReviewWriteForm from "./MyPageReviewWriteForm";
 
+// 리뷰 작성
 function MyPageReviewWrite() {
     const location = useLocation();
     const state = location.state;
@@ -19,10 +20,12 @@ function MyPageReviewWrite() {
         setProductName(state.productName);
     }, [state]);
 
+    //내용 input 입력 이벤트
     const handleInputOnChange = (e) => {
         setInputData(e.target.value);
     }
 
+    //리뷰 작성 요청 이벤트
     const handleSubmit = async () => {
         await axiosInstance.post(`my-page/review`, {
             productId: state.productId

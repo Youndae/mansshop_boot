@@ -1,9 +1,7 @@
 import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
 
 import {axiosInstance} from "../../../modules/customAxios";
-import {setMemberObject} from "../../../modules/loginModule";
 import {numberComma} from "../../../modules/numberCommaModule";
 
 import AdminSideNav from "../../ui/nav/AdminSideNav";
@@ -11,15 +9,9 @@ import DefaultBtn from "../../ui/DefaultBtn";
 import Image from "../../ui/Image";
 
 /*
-        useParams로 productId를 받는다.
-
-        분류, 상품명, 옵션 정보 테이블(사이즈, 컬러, 재고, 공개여부), 가격, 공개여부, 판매량을 보여준다.
-        상단에는 상품 수정 및 공개 || 비공개 처리 버튼을 배치한다.
-        가장 최근 판매일도 넣을까???
-
-     */
+    상품 정보 페이지
+ */
 function AdminProductDetail() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const { productId } = useParams();
 
     const [productData, setProductData] = useState({
@@ -36,18 +28,18 @@ function AdminProductDetail() {
     const [thumbnail, setThumbnail] = useState([]);
     const [infoImage, setInfoImage] = useState([]);
 
-    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
         getDetail(productId);
     }, [productId]);
 
+    //상품 정보 조회
     const getDetail = async (productId) => {
 
         await axiosInstance.get(`admin/product/detail/${productId}`)
             .then(res => {
-                const dataContent = res.data.content;
+                const dataContent = res.data;
                 const disCountPrice = dataContent.price * (1 - dataContent.discount / 100);
 
                 setProductData({
@@ -64,14 +56,10 @@ function AdminProductDetail() {
                 setFirstThumbnail(dataContent.firstThumbnail);
                 setThumbnail(dataContent.thumbnailList);
                 setInfoImage(dataContent.infoImageList);
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //수정 버튼 이벤트
     const handleUpdateBtnOnClick = () => {
         navigate(`/admin/product/update/${productId}`);
     }

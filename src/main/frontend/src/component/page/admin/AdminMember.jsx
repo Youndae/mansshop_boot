@@ -23,25 +23,10 @@ import DefaultBtn from "../../ui/DefaultBtn";
         아이디, 가입일만 테이블 구조로 출력.
         클릭시 상세페이지 이동.
 
-        data
-
-        content : [
-            {
-                userId
-                nickname
-                createdAt
-                point
-                phone
-                addr
-                email
-                birth
-            }
-        ]
-
-        검색은 아이디로만.
+        검색 타입은 사용자 아이디, 사용자 이름, 닉네임
      */
 function AdminMember() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
+    // const loginStatus = useSelector((state) => state.member.loginStatus);
     const [params] = useSearchParams();
     const page = params.get('page');
     const keyword = params.get('keyword');
@@ -72,7 +57,6 @@ function AdminMember() {
 
     const modalRef = useRef(null);
 
-    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -80,6 +64,7 @@ function AdminMember() {
         getMemberList();
     }, [page, keyword, searchType]);
 
+    //회원 목록 조회
     const getMemberList = async () => {
         let url = `admin/member${createPageAndSearchTypeKeyword(page, keyword, searchType)}`;
 
@@ -95,14 +80,11 @@ function AdminMember() {
                     next: pagingObject.next,
                     activeNo: pagingObject.activeNo,
                 });
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //리스트 Element 클릭 이벤트
+    //사용자 정보 Modal 오픈
     const handleOnClick = (userId) => {
         const arr = [...data];
         const userData = arr.find(function (item) {
@@ -113,18 +95,22 @@ function AdminMember() {
         setModalIsOpen(true);
     }
 
+    //페이지네이션 버튼 이벤트
     const handlePageBtn = (e) => {
         handlePagingSubmit(getClickNumber(e));
     }
 
+    //페이지네이션 이전 버튼 이벤트
     const handlePagePrev = () => {
         handlePagingSubmit(getPrevNumber(pagingData));
     }
 
+    //페이지네이션 다음 버튼 이벤트
     const handlePageNext = () => {
         handlePagingSubmit(getNextNumber(pagingData));
     }
 
+    //페이지네이션 이벤트 제어
     const handlePagingSubmit = (pageNum) => {
         if(keyword == null)
             pageSubmit(pageNum, navigate);
@@ -132,14 +118,17 @@ function AdminMember() {
             searchTypePageSubmit(searchType, keyword, pageNum, navigate);
     }
 
+    //검색 이벤트
     const handleSearchOnClick = () => {
         searchTypeSubmit(keywordSelectValue, keywordInput, navigate);
     }
 
+    //검색 input 입력 이벤트
     const handleKeywordOnChange = (e) => {
         setKeywordInput(e.target.value);
     }
 
+    //사용자 정보 Modal Close 이벤트
     const closeModal = (e) => {
         if(modalIsOpen && modalRef.current && !modalRef.current.contains(e.target)){
             setModalIsOpen(false);
@@ -148,10 +137,12 @@ function AdminMember() {
         }
     }
 
+    //포인트 지급 input 이벤트
     const handlePointOnChange = (e) => {
         setPointValue(e.target.value);
     }
 
+    //포인트 지급 submit 이벤트
     const handlePostPoint = async () => {
         const uid = modalData.userId;
 
@@ -165,6 +156,7 @@ function AdminMember() {
             })
     }
 
+    //Modal 내 주문정보 버튼 이벤트
     const handleMemberOrder = () => {
         const uid = modalData.userId;
         modalClose();
@@ -172,6 +164,7 @@ function AdminMember() {
         navigate(`/admin/order/all?page=1&keyword=${uid}&type=userId`);
     }
 
+    //Modal 내 상품 문의 목록 버튼 이벤트
     const handleMemberProductQnA = () => {
         const uid = modalData.nickname;
         modalClose();
@@ -179,6 +172,7 @@ function AdminMember() {
         navigate(`/admin/qna/product?type=all&keyword=${uid}&page=1`);
     }
 
+    //Modal 내 문의 목록 버튼 이벤트
     const handleMemberQnA = () => {
         const uid = modalData.nickname;
         modalClose();
@@ -186,11 +180,13 @@ function AdminMember() {
         navigate(`/admin/qna/member?type=all&keyword=${uid}&page=1`)
     }
 
+    //Modal Close 이벤트
     const modalClose = () => {
         setModalIsOpen(false);
         document.body.style.cssText = '';
     }
 
+    //검색 타입 select box 이벤트
     const handleSelectOnChange = (e) => {
         const value = e.target.value;
 

@@ -1,11 +1,9 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
-import {useNavigate, useSearchParams} from "react-router-dom";
+import { useSearchParams} from "react-router-dom";
 
 import {numberComma} from "../../../modules/numberCommaModule";
 import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {mainProductPagingObject} from "../../../modules/pagingModule";
-import {setMemberObject} from "../../../modules/loginModule";
 import {createPageAndSearchTypeKeyword} from "../../../modules/requestUrlModule";
 
 import dayjs from "dayjs";
@@ -23,9 +21,10 @@ import AdminOrderModalDetail from "./modal/AdminOrderModalDetail";
 
         modal에서는 주문 상세정보와 주문자 정보를 보여주며
         하단에 주문 확인 버튼을 통해 배송 준비 단계로 넘어갈 수 있다.
+
+        검색 타입은 사용자 아이디 및 받는 사람.
      */
 function AdminOrder() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const [params] = useSearchParams();
     const page = params.get('page');
     const keyword = params.get('keyword');
@@ -56,20 +55,18 @@ function AdminOrder() {
 
     const modalRef = useRef(null);
 
-    const dispatch = useDispatch();
-
     useEffect(() => {
         setKeywordSelectValue(searchType);
         getOrderList();
     }, [page, keyword]);
 
+    //미처리 주문 목록 조회
     const getOrderList = async () => {
         let url = `admin/order/new${createPageAndSearchTypeKeyword(page, keyword, searchType)}`;
 
         await axiosInstance.get(url)
             .then(res => {
                 setData(res.data.content);
-
                 const pagingObject = mainProductPagingObject(page, res.data.totalPages);
 
                 setPagingData({
@@ -77,30 +74,31 @@ function AdminOrder() {
                     endPage: pagingObject.endPage,
                     prev: pagingObject.prev,
                     next: pagingObject.next,
+                    totalElements: res.data.totalElements,
                     activeNo: pagingObject.activeNo,
                 });
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //리스트 Element 클릭 이벤트
+    //주문 정보 modal Open
     const handleOnClick = (idx) => {
         setModalOrderData(data[idx]);
         setModalIsOpen(true);
     }
 
+    //검색 타입 select box 이벤트
     const handleSelectOnChange = (e) => {
         const value = e.target.value;
         setKeywordSelectValue(value);
     }
 
+    //검색 input 입력 이벤트
     const handleKeywordOnChange = (e) => {
         setKeywordInput(e.target.value);
     }
 
+    //주문 정보 modal close
     const closeModal = (e) => {
         if(modalIsOpen && modalRef.current && !modalRef.current.contains(e.target)){
             setModalIsOpen(false);
@@ -109,6 +107,7 @@ function AdminOrder() {
         }
     }
 
+    //주문 정보 내 상품 준비 버튼 이벤트
     const handlePreparation = async (e) => {
         const orderId = e.target.value;
 

@@ -1,16 +1,13 @@
 import React, {useEffect, useState} from "react";
-import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
 
 import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
-import {setMemberObject} from "../../../modules/loginModule";
 
 import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import MemberQnAWriteForm from "../../ui/MemberQnAWriteForm";
 
+// 문의 수정 페이지
 function MemberQnAModify() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
-
     const [inputData, setInputData] = useState({
         title: '',
         content: '',
@@ -19,13 +16,13 @@ function MemberQnAModify() {
     const [classificationId, setClassificationId] = useState('');
     const { qnaId } = useParams();
 
-    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
         getPatchData();
     }, [qnaId]);
 
+    //수정할 문의 데이터 조회
     const getPatchData = async () => {
         await axiosInstance.get(`my-page/qna/member/modify/${qnaId}`)
             .then(res => {
@@ -36,14 +33,10 @@ function MemberQnAModify() {
 
                 setClassificationId(res.data.content.qnaClassificationId);
                 setClassification(res.data.content.classificationList);
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //문의 수정 이벤트
     const handleSubmit = async () => {
 
         await axiosInstance.patch('my-page/qna/member', {
@@ -58,11 +51,13 @@ function MemberQnAModify() {
             })
     }
 
+    //문의 분류 select box 이벤트
     const handleSelectOnChange = (e) => {
         const selectValue = e.target.value;
         setClassificationId(selectValue);
     }
 
+    //제목, textarea 입력 이벤트
     const handleInputOnChange = (e) => {
         setInputData({
             ...inputData,

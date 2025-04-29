@@ -1,15 +1,14 @@
 import React, {useState, useEffect} from 'react';
-import {useDispatch, useSelector} from "react-redux";
 import {useParams} from "react-router-dom";
 
 import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
-import {setMemberObject} from "../../../modules/loginModule";
 
 import AdminSideNav from "../../ui/nav/AdminSideNav";
 import DefaultBtn from "../../ui/DefaultBtn";
 
+
+// 리뷰 상세 페이지
 function AdminReviewDetail() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const { reviewId } = useParams();
 
     const [data, setData] = useState({
@@ -24,16 +23,15 @@ function AdminReviewDetail() {
     });
     const [inputValue, setInputValue] = useState('');
 
-    const dispatch = useDispatch();
-
     useEffect(() => {
         getReviewDetail(reviewId);
     }, [reviewId]);
 
+    //리뷰 상세 정보 조회
     const getReviewDetail = async (reviewId) => {
         await axiosInstance.get(`admin/review/detail/${reviewId}`)
             .then(res => {
-                const responseContent = res.data.content;
+                const responseContent = res.data;
                 const optionSize = `사이즈 : ${responseContent.size}`;
                 const optionColor = `컬러 : ${responseContent.color}`;
                 let option = '';
@@ -57,18 +55,15 @@ function AdminReviewDetail() {
                     replyUpdatedAt: responseContent.replyUpdatedAt,
                     replyContent: responseContent.replyContent
                 });
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //리뷰 답변 textarea 입력 이벤트
     const handleInputOnChange = (e) => {
         setInputValue(e.target.value);
     }
 
+    //리뷰 답변 작성 이벤트
     const handleInputSubmit = async () => {
         if(inputValue === ''){
             alert('답글 내용을 입력해주세요');

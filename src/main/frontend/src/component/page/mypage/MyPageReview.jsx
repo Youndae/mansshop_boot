@@ -1,9 +1,7 @@
 import React, {useEffect, useRef, useState} from "react";
-import {useDispatch, useSelector} from "react-redux";
 import {Link, useNavigate, useSearchParams} from "react-router-dom";
 
 import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
-import {setMemberObject} from "../../../modules/loginModule";
 import {
     getClickNumber,
     getNextNumber,
@@ -15,9 +13,10 @@ import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import Paging from "../../ui/Paging";
 import Image from "../../ui/Image";
 import MyPageModal from "./MyPageModal";
+import {createPageParam} from "../../../modules/requestUrlModule";
 
+//작성한 리뷰 목록
 function MyPageReview() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const [params] = useSearchParams();
     const page = params.get('page') == null ? 1 : params.get('page');
 
@@ -33,16 +32,16 @@ function MyPageReview() {
     const [isOpen, setIsOpen] = useState(false);
     const modalRef = useRef(null);
 
-    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
         getReview();
     }, [page]);
 
+    //리뷰 목록 조회
     const getReview = async () => {
 
-        await axiosInstance.get(`my-page/review/${page}`)
+        await axiosInstance.get(`my-page/review?${createPageParam(page)}`)
             .then(res => {
                 setData(res.data.content);
 
@@ -55,26 +54,25 @@ function MyPageReview() {
                     next: pagingObject.next,
                     activeNo: pagingObject.activeNo,
                 });
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //페이지네이션 버튼 이벤트
     const handlePageBtn = (e) => {
         pageSubmit(getClickNumber(e), navigate);
     }
 
+    //페이지네이션 이전 버튼 이벤트
     const handlePagePrev = () => {
         pageSubmit(getPrevNumber(pagingData), navigate);
     }
 
+    //페이지네이션 다음 버튼 이벤트
     const handlePageNext = () => {
         pageSubmit(getNextNumber(pagingData));
     }
 
+    //리뷰 제거 이벤트
     const handleDeleteReview = async (e) => {
         if(window.confirm('리뷰를 삭제하시겠습니까?\n삭제 이후 재작성은 불가합니다.')){
             const reviewId = e.target.name;
@@ -87,6 +85,7 @@ function MyPageReview() {
         }
     }
 
+    //목록에서 리뷰 클릭 이벤트. Modal Open
     const handleReviewOnClick = (e) => {
         const idx = e.target.id;
         setModalData(data[idx]);
@@ -94,6 +93,7 @@ function MyPageReview() {
 
     }
 
+    //리뷰 상세 Modal close 이벤트
     const closeModal = (e) => {
         if(isOpen && modalRef.current && !modalRef.current.contains(e.target)){
             setIsOpen(false);

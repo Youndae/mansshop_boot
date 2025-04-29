@@ -5,6 +5,9 @@ import {axiosDefault, axiosInstance, checkResponseMessageOk} from "../../../modu
 
 import DefaultBtn from "../../ui/DefaultBtn";
 
+
+
+// 비밀번호 찾기 페이지
 function SearchPw() {
     const [data, setData] = useState({
         userId: '',
@@ -26,6 +29,7 @@ function SearchPw() {
     const emailPattern = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
 
     useEffect(() => {
+        //모두 입력한 뒤 요청 후 인증번호 입력 시간 처리
         let interval;
         if(certificationStatus) {
             let interval = setInterval(() => {
@@ -43,6 +47,7 @@ function SearchPw() {
         return () => clearInterval(interval);
     }, [certificationStatus]);
 
+    //input 입력 이벤트
     const handleOnChange = (e) => {
         setData({
             ...data,
@@ -51,6 +56,7 @@ function SearchPw() {
 
     }
 
+    //사용자 이름 입력 여부 확인. 입력하지 않았다면 focus
     const checkUserName = () => {
         const name = data.username;
 
@@ -62,6 +68,11 @@ function SearchPw() {
         }
     }
 
+    //비밀번호 찾기 요청
+    //아이디, 이름, 이메일을 입력했다면
+    //요청을 전달하고 정상 응답을 받게 되면 인증번호 입력 폼이 출력.
+    //인증번호 입력 폼 상태값을 변경해 출력하도록 처리하게 되고
+    //interval이 동작.
     const handleSubmit = async () => {
         if(checkUserName()) {
             const email = `${data.email}@${data.mailSuffix}`;
@@ -79,7 +90,7 @@ function SearchPw() {
                 await axiosInstance.get(`member/search-pw?id=${data.userId}&name=${data.username}&email=${email}`)
                     .then(res => {
                         if(checkResponseMessageOk(res)){
-                            //인증번호 입력 페이지로 전환
+                            //인증번호 입력 Element 상태 변경
                             setCertificationStatus(true);
                             setOverlapStatus('');
                         }else if(res.data.message === 'not found'){
@@ -90,10 +101,12 @@ function SearchPw() {
         }
     }
 
+    //인증번호 입력 이벤트
     const handleCertification = (e) => {
         setCertification(e.target.value);
     }
 
+    //인증번호 입력 시간
     const certificationTime = () => {
         const minutes = Math.floor(timer / 60);
         const seconds = timer % 60;
@@ -101,8 +114,8 @@ function SearchPw() {
         return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
     }
 
+    //인증번호 submit 이벤트
     const handleCertificationSubmit = async () => {
-        const value = certification;
         if(timer !== 0) {
             await axiosDefault.post(`member/certification`, {
                 userId: data.userId,
@@ -125,10 +138,12 @@ function SearchPw() {
         }
     }
 
+    // 인증번호 시간 초기화 이벤트
     const handleTimerReset = () => {
         setTimer(300);
     }
 
+    //아이디 찾기 페이지 이동
     const handleSearchId = () => {
         navigate('/search-id');
     }

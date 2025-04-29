@@ -3,6 +3,7 @@ import React, {useEffect, useState} from 'react';
 import DefaultBtn from "../../ui/DefaultBtn";
 import Image from "../../ui/Image";
 
+//상품 추가 및 수정 Form Component
 function AddProductForm(props) {
     const { productData
         , optionList
@@ -234,6 +235,7 @@ function AddProductForm(props) {
     )
 }
 
+//상품 분류 select box
 function ProductClassification(props) {
     const { data, value, handleSelectOnChange } = props;
 
@@ -249,6 +251,7 @@ function ProductClassification(props) {
     )
 }
 
+//대표 썸네일 preview
 function FirstThumbnailPreview(props) {
     const { firstThumbnail, newFirstThumbnail, handleRemoveFirstThumbnail, handleRemoveOriginalFirstThumbnail } = props;
 
@@ -277,6 +280,7 @@ function FirstThumbnailPreview(props) {
     }
 }
 
+//상품 썸네일 및 정보 이미지 preview
 function PreviewImage(props) {
     const { file } = props;
 

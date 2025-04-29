@@ -1,9 +1,7 @@
 import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
 import {Link, useNavigate, useSearchParams} from "react-router-dom";
 
 import {axiosInstance} from "../../../modules/customAxios";
-import {setMemberObject} from "../../../modules/loginModule";
 import {createPageAndKeywordUrl} from "../../../modules/requestUrlModule";
 import {
     getClickNumber,
@@ -21,22 +19,12 @@ import DefaultBtn from "../../ui/DefaultBtn";
 import "../../css/admin.css";
 
 /*
-        상품 리스트를 출력하고
-        상품 또는 옵션을 추가하고
-        상품을 검색할 수도 있어야 하고
-        카테고리 별로 상품을 볼 수도 있어야 한다.
+        전체 상품 목록
+        상품 추가 버튼, 상품 클릭 시 상품 정보 페이지로 이동
 
-        출력 정보로는 분류, 상품명, 재고, 옵션 수, 가격
-
-        paging기능이 필요하다.
-
-        디자인으로는
-
-        테이블 상단에 상품 추가, 옵션 추가 버튼, 카테고리 select box를 배치하고
-        테이블 하단에 검색과 페이징을 추가한다.
+        상품명 기반 검색
      */
 function AdminProduct() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const [params] = useSearchParams();
     const page = params.get('page');
     const keyword = params.get('keyword');
@@ -51,7 +39,6 @@ function AdminProduct() {
     });
     const [keywordInput, setKeywordInput] = useState('');
 
-    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -59,9 +46,9 @@ function AdminProduct() {
         getProductList();
     }, [page, keyword]);
 
+    //상품 목록 조회
     const getProductList = async () => {
         let url = `admin/product${createPageAndKeywordUrl(page, keyword)}`;
-        // url += createPageAndKeywordUrl(page, keyword);
 
         await axiosInstance.get(url)
             .then(res => {
@@ -76,26 +63,25 @@ function AdminProduct() {
                     next: pagingObject.next,
                     activeNo: pagingObject.activeNo,
                 });
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //페이지네이션 버튼 이벤트
     const handlePageBtn = (e) => {
         handlePagingSubmit(getClickNumber(e));
     }
 
+    //페이지네이션 이전 버튼 이벤트
     const handlePagePrev = () => {
         handlePagingSubmit(getPrevNumber(pagingData));
     }
 
+    //페이지네이션 다음 버튼 이벤트
     const handlePageNext = () => {
         handlePagingSubmit(getNextNumber(pagingData));
     }
 
+    //페이지네이션 이벤트 제어
     const handlePagingSubmit = (pageNum) => {
         if(keyword == null)
             pageSubmit(pageNum, navigate);
@@ -103,14 +89,17 @@ function AdminProduct() {
             searchPageSubmit(keyword, pageNum, navigate);
     }
 
+    //검색 input 입력 이벤트
     const handleKeywordOnChange = (e) => {
         setKeywordInput(e.target.value);
     }
 
+    //검색 이벤트
     const handleSearchOnClick = async () => {
         searchSubmit(keywordInput, navigate);
     }
 
+    //상품 추가 버튼 이벤트
     const handleAddBtnOnClick = () => {
         navigate(`/admin/product/add`);
     }

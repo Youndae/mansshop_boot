@@ -1,9 +1,7 @@
 import React, {useState, useEffect} from 'react';
-import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useParams, useSearchParams} from "react-router-dom";
 
 import {axiosInstance} from "../../../modules/customAxios";
-import {setMemberObject} from "../../../modules/loginModule";
 import {
     getClickNumber,
     getNextNumber,
@@ -21,7 +19,6 @@ import Paging from "../../ui/Paging";
     당일의 주문내역만을 출력한다.
  */
 function AdminPeriodSalesDailyDetail() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const { selectDate } = useParams();
     const [params] = useSearchParams();
     const page = params.get('page') == null ? 1 : params.get('page');
@@ -37,12 +34,12 @@ function AdminPeriodSalesDailyDetail() {
     const [data, setData] = useState([]);
 
     const navigate = useNavigate();
-    const dispatch = useDispatch();
 
     useEffect(() => {
         getDailyOrderList();
     }, [selectDate]);
 
+    //선택 일자 전체 주문 내역 조회
     const getDailyOrderList = async () => {
 
         await axiosInstance.get(`admin/sales/period/order-list?term=${selectDate}&page=${page}`)
@@ -58,22 +55,20 @@ function AdminPeriodSalesDailyDetail() {
                     next: pagingObject.next,
                     activeNo: pagingObject.activeNo,
                 });
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //페이지네이션 버튼 이벤트
     const handlePageBtn = (e) => {
         pageSubmit(getClickNumber(e), navigate);
     }
 
+    //페이지네이션 이전 버튼 이벤트
     const handlePagePrev = () => {
         pageSubmit(getPrevNumber(pagingData), navigate);
     }
 
+    //페이지네이션 다음 버튼 이벤트
     const handlePageNext = () => {
         pageSubmit(getNextNumber(pagingData));
     }

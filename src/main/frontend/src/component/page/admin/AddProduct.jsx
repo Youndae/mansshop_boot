@@ -1,9 +1,7 @@
 import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
 import {useNavigate} from "react-router-dom";
 
 import {axiosInstance} from "../../../modules/customAxios";
-import {setMemberObject} from "../../../modules/loginModule";
 import {imageInputChange, imageValidation, setProductFormData} from "../../../modules/imageModule";
 
 import AdminSideNav from "../../ui/nav/AdminSideNav";
@@ -24,7 +22,6 @@ import AddProductForm from "./AddProductForm";
         상품 정보 이미지
  */
 function AddProduct() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const [productData, setProductData] = useState({
         classification: 'default',
         productName: '',
@@ -40,24 +37,20 @@ function AddProduct() {
     const [infoImageLength, setInfoImageLength] = useState(0);
 
     const navigate = useNavigate();
-    const dispatch = useDispatch();
 
     useEffect(() => {
         getClassification();
     }, []);
 
+    // 상품 분류 전체 리스트 조회
     const getClassification = async () => {
         await axiosInstance.get(`admin/product/classification`)
             .then(res => {
-                setClassification(res.data.content);
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
+                setClassification(res.data);
             })
     }
 
+    //상품 데이터 input 입력 이벤트
     const handleProductOnChange = (e) => {
         let value = e.target.value;
 
@@ -72,6 +65,7 @@ function AddProduct() {
         });
     }
 
+    //상품 옵션 input 입력 이벤트
     const handleOptionOnChange = (e) => {
         const idx = e.target.parentElement.parentElement.getAttribute('value');
         let value = e.target.value;
@@ -87,6 +81,7 @@ function AddProduct() {
         setOptionList([...optionList]);
     }
 
+    //상품 옵션 공개, 비공개 설정 Radio 이벤트
     const handleOptionRadioOnChange = (e) => {
         const radioName = e.target.name.split('/');
         const name = radioName[0];
@@ -101,6 +96,7 @@ function AddProduct() {
         setOptionList([...optionList]);
     }
 
+    //상품 옵션 추가 버튼 이벤트
     const handleAddOption = () => {
         const optionArr = [...optionList];
 
@@ -115,6 +111,7 @@ function AddProduct() {
         setOptionList(optionArr);
     }
 
+    //상품 옵션 제거 버튼 이벤트
     const handleRemoveOption = (e) => {
         const idx = e.target.value;
 
@@ -125,6 +122,7 @@ function AddProduct() {
         setOptionList(optionArr);
     }
 
+    //submit 이벤트
     const handleSubmitOnClick = async () => {
         const formData = setProductFormData(productData, optionList, newFirstThumbnail, newThumbnail, newInfoImage);
 
@@ -138,6 +136,7 @@ function AddProduct() {
             })
     }
 
+    //상품 분류 select box 선택 이벤트
     const handleSelectOnChange = (e) => {
         setProductData({
             ...productData,
@@ -145,6 +144,7 @@ function AddProduct() {
         });
     }
 
+    //대표 썸네일 input 이벤트
     const handleFirstThumbnailInputChange = (e) => {
         if(imageValidation(e)){
             const file = e.target.files[0];
@@ -152,17 +152,20 @@ function AddProduct() {
         }
     }
 
+    //대표 썸네일 제거 이벤트
     const handleRemoveFirstThumbnail = (e) => {
         window.URL.revokeObjectURL(newFirstThumbnail);
         setNewFirstThumbnail('');
     }
 
+    //상품 썸네일 input 이벤트
     const handleThumbnailInputChange = (e) => {
         const files = imageInputChange(e, newThumbnail);
 
         setNewThumbnail(files);
     }
 
+    //상품 썸네일 제거 이벤트
     const handleRemoveThumbnail = (e) => {
         const deleteIdx = e.target.value;
         const files = [...newThumbnail];
@@ -172,6 +175,7 @@ function AddProduct() {
         setNewThumbnail(files);
     }
 
+    //상품 정보 이미지 input 이벤트
     const handleInfoImageInputChange = (e) => {
         const files = imageInputChange(e, newInfoImage);
 
@@ -179,6 +183,7 @@ function AddProduct() {
         setInfoImageLength(files.length);
     }
 
+    //상품 정보 이미지 제거 이벤트
     const handleRemoveInfoImage = (e) => {
         const deleteIdx = e.target.value;
         const files = [...newInfoImage];

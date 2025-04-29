@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useSearchParams} from "react-router-dom";
 
 import {axiosInstance} from "../../../modules/customAxios";
@@ -10,7 +9,6 @@ import {
     pageSubmit,
     searchPageSubmit, searchSubmit
 } from "../../../modules/pagingModule";
-import {setMemberObject} from "../../../modules/loginModule";
 import {numberComma} from "../../../modules/numberCommaModule";
 import {createPageAndKeywordUrl} from "../../../modules/requestUrlModule";
 
@@ -21,20 +19,9 @@ import Paging from "../../ui/Paging";
 /*
         상품별 매출.
 
-        옵션별이 아닌 상품별로 볼 수 있도록.
-        분류, 상품명, 상품 총 매출, 판매량
-
-        테이블 오른쪽 상단에서 분류 선택할 수 있도록 처리.
-        조회 정렬은 분류 아이디 순서로.
-
-        분류별 매출은 출력할 필요 없을 것 같고
-        옵션에 대한 매출은 상세 페이지에서 확인하도록 처리.
-
-        테이블 하단에는 상품명 검색과 페이징.
-
-     */
+        상품명 기반 검색 가능
+ */
 function AdminProductSales() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const [params] = useSearchParams();
     const page = params.get('page');
     const keyword = params.get('keyword');
@@ -49,7 +36,6 @@ function AdminProductSales() {
     });
     const [keywordInput, setKeywordInput] = useState('');
 
-    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -59,6 +45,7 @@ function AdminProductSales() {
         getProductSales();
     }, [page, keyword]);
 
+    //상품 매출 리스트 조회
     const getProductSales = async () => {
         let url = `admin/sales/product${createPageAndKeywordUrl(page, keyword)}`;
 
@@ -75,26 +62,25 @@ function AdminProductSales() {
                     next: pagingObject.next,
                     activeNo: pagingObject.activeNo,
                 });
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //페이지네이션 버튼 이벤트
     const handlePageBtn = (e) => {
         handlePagingSubmit(getClickNumber(e));
     }
 
+    //페이지네이션 이전 버튼 이벤트
     const handlePagePrev = () => {
         handlePagingSubmit(getPrevNumber(pagingData));
     }
 
+    //페이지네이션 다음 버튼 이벤트
     const handlePageNext = () => {
         handlePagingSubmit(getNextNumber(pagingData));
     }
 
+    //페이지네이션 제어
     const handlePagingSubmit = (pageNum) => {
         if(keyword == null)
             pageSubmit(pageNum, navigate);
@@ -102,14 +88,17 @@ function AdminProductSales() {
             searchPageSubmit(keyword, pageNum, navigate);
     }
 
+    //검색 input 입력 이벤트
     const handleKeywordOnChange = (e) => {
         setKeywordInput(e.target.value);
     }
 
+    //검색 이벤트
     const handleSearchOnClick = async () => {
         searchSubmit(keywordInput, navigate);
     }
 
+    //리스트 상품 Element 클릭 이벤트
     const handleProductOnClick = (productId) => {
         navigate(`/admin/sales/product/${productId}`);
     }

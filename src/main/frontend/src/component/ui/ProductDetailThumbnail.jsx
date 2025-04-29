@@ -2,6 +2,10 @@ import React, {useState, useEffect} from 'react';
 
 import {axiosInstance} from "../../modules/customAxios";
 
+/*
+    상품 상세 페이지에서 썸네일 폼
+    MouseOver 시 상단의 대표 이미지 위치에 해당 이미지를 출력하는 이벤트 발생
+ */
 function ProductDetailThumbnail(props) {
     const { imageName } = props;
     const [firstThumb, setFirstThumb] = useState('');
@@ -37,6 +41,7 @@ function ProductDetailThumbnail(props) {
         setFirstThumb(imageSrcArr[0]);
     }
 
+    //MouseOver 발생 시 대표 썸네일 위치의 이미지를 해당 썸네일로 변경하는 이벤트
     const handleThumbnailOnClick = (e) => {
         const idx = e.target.name;
 

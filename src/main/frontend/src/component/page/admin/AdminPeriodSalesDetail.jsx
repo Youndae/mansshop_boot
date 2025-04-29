@@ -1,9 +1,7 @@
 import React, {useState, useEffect, useRef} from 'react';
-import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
 
 import {axiosInstance} from "../../../modules/customAxios";
-import {setMemberObject} from "../../../modules/loginModule";
 import {numberComma} from "../../../modules/numberCommaModule";
 
 import AdminSideNav from "../../ui/nav/AdminSideNav";
@@ -35,7 +33,6 @@ import AdminOrderModal from "./modal/AdminOrderModal";
         페이징 처리는 x
  */
 function AdminPeriodSalesDetail() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const { date } = useParams();
 
     const [monthSales, setMonthSales] = useState({
@@ -70,18 +67,19 @@ function AdminPeriodSalesDetail() {
     const dailyModalRef = useRef(null);
 
     const navigate = useNavigate();
-    const dispatch = useDispatch();
+    // const dispatch = useDispatch();
 
     useEffect(() => {
         getMonthSalesData();
     }, [date]);
 
+    //월 매출 데이터 조회
     const getMonthSalesData = async () => {
 
         await axiosInstance.get(`admin/sales/period/detail/${date}`)
             .then(res => {
-                console.log('res : ', res);
-                const content = res.data.content;
+                const content = res.data;
+
                 setMonthSales({
                     sales: content.monthSales,
                     salesQuantity: content.monthSalesQuantity,
@@ -94,14 +92,10 @@ function AdminPeriodSalesDetail() {
                 setBestProduct(content.bestProduct);
                 setClassificationSales(content.classificationSales);
                 setDailySales(content.dailySales);
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //일 매출 조회 및 Modal Open
     const handleDailyOnClick = async (day) => {
         const selectDay = `${date}-${day}`;
 
@@ -121,24 +115,29 @@ function AdminPeriodSalesDetail() {
             })
     }
 
+    // 상품 분류 매출 선택 이벤트
+    // 해당 상품 분류의 월 매출 내역 조회 및 Modal Open
     const handleClassificationOnClick = async (e) => {
         const name = e.target.value;
 
         await axiosInstance.get(`admin/sales/period/detail/classification?term=${date}&classification=${name}`)
             .then(res => {
+                console.log('periodDetail classification : ', res.data);
+
                 const content = res.data;
 
                 setClassificationModalData({
                     name: content.classification,
                     sales: content.totalSales,
                     salesQuantity: content.totalSalesQuantity,
-                    productList: content.product,
+                    productList: content.productList,
                 })
 
                 setClassificationModalIsOpen(true);
             })
     }
 
+    //일 매출 Modal close
     const closeDailyModal = (e) => {
         if(dailyModalIsOpen && dailyModalRef.current && !dailyModalRef.current.contains(e.target)){
             setDailyModalIsOpen(false);
@@ -146,6 +145,7 @@ function AdminPeriodSalesDetail() {
         }
     }
 
+    //상품 분류 매출 Modal close
     const closeClassificationModal = (e) => {
         if(classificationModalIsOpen && classificationModalRef.current && !classificationModalRef.current.contains(e.target)){
             setClassificationModalIsOpen(false);
@@ -153,6 +153,7 @@ function AdminPeriodSalesDetail() {
         }
     }
 
+    //일 주문내역 버튼 이벤트
     const handleDailyDetailOnClick = (e) => {
         const selectDate = e.target.value;
 
@@ -307,7 +308,7 @@ function AdminPeriodSalesDetail() {
                                                         <td>{data.productName}</td>
                                                         <td>{optionText}</td>
                                                         <td>{numberComma(data.productSales)}</td>
-                                                        <td>{numberComma(data.productQuantity)}</td>
+                                                        <td>{numberComma(data.productSalesQuantity)}</td>
                                                     </tr>
                                                 )
                                             })}

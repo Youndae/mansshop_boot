@@ -1,11 +1,17 @@
-import React, {useRef, useState} from 'react';
+import React, {useRef, useState, useEffect} from 'react';
+import { useSelector } from "react-redux";
 import {useNavigate} from "react-router-dom";
 
 import {axiosDefault} from "../../../modules/customAxios";
 
 import DefaultBtn from "../../ui/DefaultBtn";
 
+/*
+    아이디 찾기 페이지
+    로그인한 사용자인 경우 메인페이지로 강제 이동
+ */
 function SearchId() {
+    const loginStatus = useSelector((state) => state.member.loginStatus);
     const [data, setData] = useState({
         username: '',
         userPhone: '',
@@ -26,7 +32,13 @@ function SearchId() {
     const emailPattern = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
     const phonePattern = /^01(?:0|1|6|9)([0-9]{3,4})([0-9]{4})$/;
 
+    useEffect(() => {
+        if(loginStatus)
+            navigate('/');
+    }, [loginStatus]);
 
+
+    //input 입력 이벤트
     const handleOnChange = (e) => {
         setData({
             ...data,
@@ -35,6 +47,7 @@ function SearchId() {
 
     }
 
+    //userName 입력 여부 확인. 입력하지 않았다면 focus
     const checkUserName = () => {
         const name = data.username;
 
@@ -46,6 +59,8 @@ function SearchId() {
         }
     }
 
+    //이름과 연락처 기반 검색 submit 이벤트
+    //이름 입력 여부와 연락처 패턴 검증 및 입력 여부 확인 후 Query Parameter 작성해서 요청
     const handleSearchPhoneSubmit = () => {
         if(checkUserName()){
             if(data.userPhone === '' || !phonePattern.test(data.userPhone)){
@@ -58,6 +73,8 @@ function SearchId() {
         }
     }
 
+    //이름과 이메일 기반 검색 submit 이벤트
+    //이름 입력 여부와 이메일 패턴 검증 및 입력 여부 확인 후 Query Parameter 작성해서 요청
     const handleSearchEmailSubmit = () => {
         if(checkUserName){
             const email = `${data.userEmail}@${data.emailSuffix}`;
@@ -71,6 +88,8 @@ function SearchId() {
         }
     }
 
+    //찾기 요청 처리.
+    //존재한다면 사용자 아이디가 반환됨.
     const submitRequest = async (queryParam) => {
         const url = `member/search-id?userName=${data.username}${queryParam}`;
 
@@ -86,6 +105,7 @@ function SearchId() {
             })
     }
 
+    //연락처, 이메일 기반 검색을 위한 Radio 버튼 이벥트
     const handleRadioOnChange = (e) => {
         const elementName = e.target.name;
 
@@ -98,6 +118,7 @@ function SearchId() {
         }
     }
 
+    //비밀번호 찾기 페이지 이동
     const handleSearchPassword = () => {
         navigate('/search-pw');
     }

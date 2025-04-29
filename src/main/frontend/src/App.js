@@ -1,17 +1,26 @@
 import React from 'react';
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { login, logout } from './features/member/memberSlice';
+import { axiosInstance, getToken } from "./modules/customAxios";
 import {
     BrowserRouter,
     Routes,
     Route
 } from "react-router-dom";
 
+// Component
+
+//Navbar
 import Navbar from "./component/ui/nav/Navbar";
+
+// Main
 import Best from "./component/page/main/Best";
 import New from './component/page/main/New';
 import MainClassification from "./component/page/main/MainClassification";
 import SearchProduct from "./component/page/main/SearchProduct";
 
-
+// Login
 import Login from './component/page/member/Login';
 import Join from './component/page/member/Join';
 import Oauth from "./component/page/member/Oauth";
@@ -19,13 +28,14 @@ import SearchId from "./component/page/member/SearchId";
 import SearchPw from "./component/page/member/SearchPw";
 import ResetPassword from "./component/page/member/ResetPassword";
 
-
+// Product & Anonymous Order
 import ProductDetail from "./component/page/product/ProductDetail";
 import Cart from "./component/page/cart/Cart";
 import Order from "./component/page/order/Order";
 import NonMemberOrderInfo from "./component/page/main/NonMemberOrderInfo";
 import NonMemberOrderList from "./component/page/main/NonMemberOrderList";
 
+// MyPage
 import MyPageOrder from "./component/page/mypage/MyPageOrder";
 import LikeProduct from "./component/page/mypage/LikeProduct";
 import MyPageProductQnA from "./component/page/mypage/MyPageProductQnA";
@@ -39,6 +49,7 @@ import MyPageReviewWrite from "./component/page/mypage/MyPageReviewWrite";
 import MyPageReviewModify from "./component/page/mypage/MyPageReviewModify";
 import MyPageUpdateInfo from "./component/page/mypage/MyPageUpdateInfo";
 
+// Admin
 import AdminProduct from "./component/page/admin/AdminProduct";
 import AdminProductDetail from "./component/page/admin/AdminProductDetail";
 import AddProduct from "./component/page/admin/AddProduct";
@@ -63,10 +74,30 @@ import AdminProductSales from "./component/page/admin/AdminProductSales";
 import AdminProductSalesDetail from "./component/page/admin/AdminProductSalesDetail";
 import FailedQueueList from "./component/page/admin/FailedQueueList";
 
+// Error Page
 import Error from "./component/ui/Error";
 
 
 function App() {
+  const dispatch = useDispatch();
+
+  //User status Redux
+  useEffect(() => {
+    const accessToken = getToken();
+
+    if(!accessToken) {
+      dispatch(logout());
+      return;
+    }
+
+    axiosInstance.get('member/status', { withCredentials: true })
+        .then(res => {
+          const { userId, role } = res.data;
+          dispatch(login({ userId, role }));
+        })
+  }, [dispatch]);
+
+
   return (
       <BrowserRouter>
           <div className="container">

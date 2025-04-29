@@ -31,6 +31,7 @@ const ModalBackground = styled.div`
       cursor: auto;
 `
 
+// 마이페이지 리뷰 Modal
 function MyPageModal(props) {
     const { closeModal, data, modalRef } = props;
 

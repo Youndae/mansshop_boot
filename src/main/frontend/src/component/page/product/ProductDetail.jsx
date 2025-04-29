@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {useLocation, useNavigate, useParams} from "react-router-dom";
-import {useDispatch, useSelector} from "react-redux";
+import {useSelector} from "react-redux";
 
 import {axiosDefault, axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {getClickNumber,
@@ -8,7 +8,7 @@ import {getClickNumber,
         getPrevNumber,
         productDetailPagingObject
 } from "../../../modules/pagingModule";
-import {handleLocationPathToLogin, setMemberObject} from "../../../modules/loginModule";
+import {handleLocationPathToLogin} from "../../../modules/loginModule";
 import {numberComma} from "../../../modules/numberCommaModule";
 
 import ProductDetailThumbnail from "../../ui/ProductDetailThumbnail";
@@ -19,13 +19,11 @@ import DefaultBtn from "../../ui/DefaultBtn";
 import '../../css/productDetail.css';
 
 /*
-    바로구매, 장바구니, 관심상품 버튼 handling -> 컴포넌트 작성 이후 테스트
-    로그인 여부에 따른 QnA 작성 버튼 handling
+    상품 상세 페이지
+    현재는 백엔드에서 한번의 요청으로 모든 데이터를 전달해주는 형태.
  */
 function ProductDetail() {
     const loginStatus = useSelector((state) => state.member.loginStatus);
-    const dispatch = useDispatch();
-
     const { productId } = useParams();
     const [productData, setProductData] = useState({
         productId: '',
@@ -73,13 +71,14 @@ function ProductDetail() {
         getDetailData();
     }, [productId]);
 
+    //상품 상세 페이지 데이터 조회
     const getDetailData = async () => {
 
         await axiosInstance.get(`product/${productId}`)
             .then(res => {
-                const productContent = res.data.content;
-                const productReview = res.data.content.productReviewList;
-                const productQnA = res.data.content.productQnAList;
+                const productContent = res.data;
+                const productReview = res.data.productReviewList;
+                const productQnA = res.data.productQnAList;
 
                 setProductData({
                     productId: productContent.productId,
@@ -127,14 +126,10 @@ function ProductDetail() {
                     totalElements: productQnA.totalElements,
                 });
 
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
-
             })
     }
 
+    //옵션 select box 이벤트
     const handleSelectBoxOnChange = (e) => {
         const elementValue = e.target.value;
         const valueArr = elementValue.split('/');
@@ -162,6 +157,7 @@ function ProductDetail() {
         setTotalPrice(totalPrice + productData.discountPrice);
     }
 
+    //옵션 선택 이후 상품 수량 증가 버튼 이벤트
     const handleCountUp = (e) => {
         const idx = e.target.name;
 
@@ -169,6 +165,7 @@ function ProductDetail() {
         setTotalPrice(totalPrice + productData.discountPrice);
     }
 
+    //옵션 선택 이후 상품 수량 감소 버튼 이벤트
     const handleCountDown = (e) => {
         const idx = e.target.name;
         const count = selectOption[idx].count;
@@ -179,6 +176,7 @@ function ProductDetail() {
         }
     }
 
+    //상품 수량 증감 처리
     const countUpDown = (idx, count) => {
 
         selectOption[idx] = {
@@ -192,6 +190,7 @@ function ProductDetail() {
         setSelectOption([...selectOption]);
     }
 
+    //선택 옵션 제거 이벤트
     const handleOptionRemove = (e) => {
         const idx = e.target.name;
 
@@ -203,6 +202,7 @@ function ProductDetail() {
         setTotalPrice(totalPrice - optionPrice);
     }
 
+    //바로 구매 버튼 이벤트
     const handleBuyBtn = () => {
         if(selectOption.length === 0){
             alert('상품 옵션을 선택해주세요');
@@ -217,28 +217,10 @@ function ProductDetail() {
             }
 
             getOrderData(orderProductArr);
-
-            /*for(let i = 0; i < selectOption.length; i++) {
-                orderProductArr.push({
-                    productId: productData.productId,
-                    optionId: selectOption[i].optionId,
-                    productName: productData.productName,
-                    size: selectOption[i].size,
-                    color: selectOption[i].color,
-                    count: selectOption[i].count,
-                    price: selectOption[i].price,
-                })
-            }*/
-
-            /*navigate('/productOrder', {state : {
-                    orderProduct : orderProductArr,
-                    orderType: 'direct',
-                    totalPrice: totalPrice,
-                }}
-            );*/
         }
     }
 
+    //바로 구매 요청 시 상품 데이터 재 확인 후 state에 담아 주문 페이지 호출
     const getOrderData = async (selectData) => {
         await axiosInstance.post(`order/product`, selectData)
             .then(res => {
@@ -253,6 +235,7 @@ function ProductDetail() {
             })
     }
 
+    //장바구니 담기 버튼 이벤트
     const handleCartBtn = async () => {
 
         if(selectOption.length === 0){
@@ -261,8 +244,6 @@ function ProductDetail() {
             let addList = [];
 
             for (let i = 0; i < selectOption.length; i++) {
-                const addPrice = Number(productData.productPrice * selectOption[i].count);
-
                 addList.push({
                     optionId: selectOption[i].optionId,
                     count: selectOption[i].count,
@@ -280,6 +261,7 @@ function ProductDetail() {
         }
     }
 
+    //관심상품 등록 이벤트
     const handleLikeBtn = async () => {
         if(!loginStatus){
             if(window.confirm('로그인 사용자만 관심상품 등록이 가능합니다.\n로그인 하시겠습니까?'))
@@ -303,6 +285,7 @@ function ProductDetail() {
         }
     }
 
+    //관심상품 해제 이벤트
     const handleDeLikeBtn = async () => {
         const pid = productData.productId;
         const likeStatus = productData.productLikeStat;
@@ -321,6 +304,7 @@ function ProductDetail() {
             })
     }
 
+    //UI내 상품 정보, 리뷰, 문의 버튼 클릭 시 스크롤 이동 이벤트
     const handleDetailBtn = (e) => {
         const name = e.target.name;
 
@@ -334,18 +318,22 @@ function ProductDetail() {
             productOrderInfoElem.current.scrollIntoView({ behavior: 'smooth', block: 'center'});
     }
 
+    //리뷰 페이지네이션 버튼 이벤트
     const handleReviewPagingClickNumber = (e) => {
         handleReviewPaging(getClickNumber(e));
     }
 
+    //리뷰 페이지네이션 이전 버튼 이벤트
     const handleReviewPagingPrev = () => {
         handleReviewPaging(getPrevNumber(reviewPagingObject));
     }
 
+    //리뷰 페이지네이션 다음 버튼 이벤트
     const handleReviewPagingNext = () => {
         handleReviewPaging(getNextNumber(reviewPagingObject));
     }
 
+    //리뷰 페이지네이션 처리
     const handleReviewPaging = async (clickNo) => {
 
         await axiosInstance.get(`product/${productId}/review?page=${clickNo}`)
@@ -365,18 +353,22 @@ function ProductDetail() {
             })
     }
 
+    //상품 문의 페이지네이션 버튼 이벤트
     const handleQnAPagingClickNumber = (e) => {
         handleQnAPaging(getClickNumber(e));
     }
 
+    //상품 문의 페이지네이션 이전 버튼 이벤트
     const handleQnAPagingPrev = () => {
         handleQnAPaging(getPrevNumber(productQnAPagingObject));
     }
 
+    //상품 문의 페이지네이션 다음 버튼 이벤트
     const handleQnAPagingNext = () => {
         handleQnAPaging(getNextNumber(productQnAPagingObject));
     }
 
+    //상품 문의 페이지네이션 처리
     const handleQnAPaging = async (clickNo) => {
 
         await axiosInstance.get(`product/${productId}/qna?page=${clickNo}`)
@@ -396,10 +388,12 @@ function ProductDetail() {
             })
     }
 
+    //상품 문의 작성 textarea 입력 이벤트
     const handleQnAOnChange = (e) => {
         setQnAInputValue(e.target.value);
     }
 
+    //상품 문의 작성 버튼 이벤트
     const handleQnASubmit = async () => {
         if(!loginStatus){
             if(window.confirm('상품문의는 로그인시에만 가능합니다.\n로그인하시겠습니까?'))
@@ -644,6 +638,7 @@ function ProductDetail() {
     )
 }
 
+//상품 가격 폼
 function ProductPrice(props) {
     const { productData } = props;
 
@@ -662,6 +657,7 @@ function ProductPrice(props) {
     }
 }
 
+//상품 옵션 select box 폼
 function ProductDetailSelect(props) {
     const { productOption, onChange } = props;
 
@@ -687,6 +683,7 @@ function ProductDetailSelect(props) {
     }
 }
 
+//상품 옵션 select box option 태그 폼
 function ProductDetailSelectOption(props) {
     const { productOption } = props;
     let optionText = '단일 옵션';
@@ -726,6 +723,7 @@ function ProductDetailSelectOption(props) {
     }
 }
 
+//옵션 선택 시 출력 폼
 function TempOrderTableBody(props) {
     const { idx, selectOption, handleCountUp, handleCountDown, handleOptionRemove } = props;
 
@@ -773,6 +771,7 @@ function TempOrderTableBody(props) {
     }
 }
 
+//옵션 선택에 따른 전체 금액 출력 폼
 function TotalPrice(props) {
     const { totalPrice } = props;
 
@@ -789,6 +788,7 @@ function TotalPrice(props) {
     }
 }
 
+//상품 리뷰 폼
 function Review(props) {
     const { data } = props;
 
@@ -825,6 +825,7 @@ function Review(props) {
     )
 }
 
+//상품 문의 폼
 function QnA(props) {
     const { data } = props;
 
@@ -873,6 +874,7 @@ function QnA(props) {
     }
 }
 
+//상품 문의 답변 폼
 function QnAReply(props) {
     const { data } = props;
 
@@ -897,6 +899,7 @@ function QnAReply(props) {
     }
 }
 
+//관심상품 버튼 폼
 function ProductLikeBtn(props) {
     const { likeStatus, handleLikeBtn, handleDeLikeBtn } = props;
 

@@ -1,10 +1,17 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {useLocation, useNavigate} from "react-router-dom";
 
 import {axiosDefault, checkResponseMessageOk} from "../../../modules/customAxios";
 
 import DefaultBtn from "../../ui/DefaultBtn";
 
+/*
+    비밀번호 재설정 페이지
+    인증 과정을 모두 거친 후 재설정할 수 있는 페이지.
+    여기에서는 인증 과정에서 처리된 certification이 있어야만 처리되고
+    수정 요청시에도 certification이 필요하기 때문에
+    useEffect에서 state.certification이 없는 경우 메인페이지로 이동하도록 처리
+ */
 function ResetPassword() {
     const location = useLocation();
     const state = location.state;
@@ -27,6 +34,12 @@ function ResetPassword() {
                         certification: state.certification,
                     };
 
+    useEffect(() => {
+        if(state === undefined || state.certification === undefined)
+            navigate('/');
+    }, [state]);
+
+    // 비밀번호와 재입력 input 입력 이벤트
     const handleOnChange = (e) => {
         const name = e.target.name;
         const value = e.target.value;
@@ -60,6 +73,7 @@ function ResetPassword() {
 
     }
 
+    //비밀번호 수정 요청. 완료되면 로그인 페이지로 이동
     const handleSubmit = async () => {
 
         if(pwCheck === 'valid' && password.checkPassword !== '' && verifyPw){

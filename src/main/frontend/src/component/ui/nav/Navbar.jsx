@@ -1,16 +1,20 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {Link, useLocation, useNavigate} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
+import { logout } from '../../../features/member/memberSlice';
 
-import {axiosDefault, axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
+import {axiosDefault, checkResponseMessageOk} from "../../../modules/customAxios";
 import {handleLocationPathToLogin} from "../../../modules/loginModule";
 
 import "../../css/header.css";
 
+/*
+    페이지 상단 Navbar
+ */
 function Navbar() {
     const status = useSelector((state) => state.member);
     const loginStatus = status.loginStatus;
-    const adminStatus = status.id === '관리자';
+    const adminStatus = status.role === 'admin';
     const { pathname } = useLocation();
 
     const [keyword, setKeyword] = useState('');
@@ -18,27 +22,25 @@ function Navbar() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
+    //검색 input 입력 이벤트
     const handleKeywordOnchange = (e) => {
         setKeyword(e.target.value);
     }
 
+    //로그인 버튼 이벤트
     const handleLoginBtn = () => {
         handleLocationPathToLogin(pathname, navigate);
     }
 
+    //로그아웃 버튼 이벤트
     const handleLogoutBtn = async () => {
 
         await axiosDefault.post(`member/logout`)
             .then(res => {
                 if(checkResponseMessageOk(res)) {
                     window.localStorage.removeItem('Authorization');
-                    const body = {
-                        type: 'isLoggedOut',
-                        loginStatus: false,
-                        id: null,
-                    }
 
-                    dispatch(body);
+                    dispatch(logout());
                     navigate('/');
                 }else {
                     alert('오류가 발생했습니다.\n문제가 계속되면 관리자에게 문의해주세요');
@@ -49,22 +51,27 @@ function Navbar() {
             })
     }
 
+    //장바구니 버튼 이벤트
     const handleCartBtn = () => {
         navigate('/cart');
     }
 
+    //주문 조회 버튼 이벤트
     const handleOrderBtn = () => {
         navigate('/order/info');
     }
 
+    //마이페이지 버튼 이벤트
     const handleMyPageBtn = () => {
         navigate('/my-page/order');
     }
 
+    //검색 버튼 이벤트
     const handleSearchBtn = () => {
         navigate(`/search?keyword=${keyword}`);
     }
 
+    //상품 분류 버튼 이벤트
     const handleClassificationBtn = (e) => {
         const btnName = e.target.textContent;
 
@@ -76,6 +83,7 @@ function Navbar() {
             navigate(`/category/${btnName}`);
     }
 
+    //관리자 페이지 버튼 이벤트
     const handleAdminPageBtn = () => {
         navigate('/admin/product');
     }

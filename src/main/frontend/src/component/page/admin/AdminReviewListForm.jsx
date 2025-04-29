@@ -12,13 +12,7 @@ import {
 import Paging from "../../ui/Paging";
 
 /*
-    reviewId
-    productName
-    writer
-    updatedAt
-
-    table
-        productName | writer | updatedAt
+    관리자 리뷰 목록 List Component
  */
 function AdminReviewListForm(props) {
     const { header
@@ -35,18 +29,22 @@ function AdminReviewListForm(props) {
 
     const navigate = useNavigate();
 
+    //페이지네이션 버튼 이벤트
     const handlePageBtn = (e) => {
         handlePagingSubmit(getClickNumber(e));
     }
 
+    //페이지네이션 이전 버튼 이벤트
     const handlePagePrev = () => {
         handlePagingSubmit(getPrevNumber(pagingData));
     }
 
+    //페이지네이션 다음 버튼 이벤트
     const handlePageNext = () => {
         handlePagingSubmit(getNextNumber(pagingData));
     }
 
+    //페이지네이션 제어
     const handlePagingSubmit = (pageNum) => {
         if(keyword == null)
             pageSubmit(pageNum, navigate);
@@ -54,6 +52,7 @@ function AdminReviewListForm(props) {
             searchTypePageSubmit(searchType, keyword, pageNum, navigate);
     }
 
+    //검색 이벤트
     const handleSearchOnClick = () => {
         searchTypeSubmit(keywordSelectValue, keywordInput, navigate);
     }

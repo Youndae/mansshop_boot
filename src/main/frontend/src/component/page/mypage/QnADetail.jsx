@@ -4,6 +4,10 @@ import {useSelector} from "react-redux";
 
 import DefaultBtn from "../../ui/DefaultBtn";
 
+/*
+    문의 상세 페이지 component
+    마이페이지와 관리자의 회원 문의, 상품 문의 상세 페이지에 사용되는 Component
+ */
 function QnADetail(props) {
     const { data
         , replyData
@@ -23,7 +27,7 @@ function QnADetail(props) {
     } = props;
 
     const replyInputStatus = replyStatus === undefined;
-    const nickname = useSelector((state) => state.member.id);
+    const userId = useSelector((state) => state.member.id);
 
     const navigate = useNavigate();
 
@@ -40,7 +44,7 @@ function QnADetail(props) {
             <div className="mypage-qna-content">
                 <div className="mypage-qna-content-header-btn">
                     <HeaderBtn
-                        nickname={nickname}
+                        userId={userId}
                         status={data.qnaStatus}
                         type={type}
                         handleModifyBtn={handleModifyBtn}
@@ -68,7 +72,7 @@ function QnADetail(props) {
                             <MyPageQnADetailReply
                                 key={index}
                                 data={reply}
-                                username={nickname}
+                                username={userId}
                                 index={index}
                                 handleReplyModifyOpen={handleReplyModifyOpen}
                                 handleReplyModifyClose={handleReplyModifyClose}
@@ -100,9 +104,9 @@ function ReplyInput(props) {
 }
 
 function HeaderBtn(props) {
-    const { nickname, status, type, handleModifyBtn, handleDeleteBtn, handleCompleteBtn } = props;
+    const { userId, status, type, handleModifyBtn, handleDeleteBtn, handleCompleteBtn } = props;
 
-    if(nickname === '관리자') {
+    if(userId === '관리자') {
         if(status) {
             return null;
         }else {
@@ -139,9 +143,9 @@ function QnATitle(props) {
 }
 
 function MyPageQnADetailReply(props) {
-    const { data, username, index, handleReplyModifyOpen, handleReplyModifyClose, handleModifyOnChange, modifyTextValue, handleModifySubmit } = props;
+    const { data, userId, index, handleReplyModifyOpen, handleReplyModifyClose, handleModifyOnChange, modifyTextValue, handleModifySubmit } = props;
 
-    if(username === data.writer){
+    if(userId === data.writer){
         return (
             <div className="qna-detail-reply">
                 <div className="qna-reply-writer">

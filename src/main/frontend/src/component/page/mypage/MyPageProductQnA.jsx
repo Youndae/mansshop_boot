@@ -1,9 +1,7 @@
 import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
 import {Link, useNavigate, useSearchParams} from "react-router-dom";
 
 import {axiosInstance} from "../../../modules/customAxios";
-import {setMemberObject} from "../../../modules/loginModule";
 import {
     getClickNumber,
     getNextNumber,
@@ -16,8 +14,8 @@ import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import Paging from "../../ui/Paging";
 
 
+// 상품 문의 목록
 function MyPageProductQnA() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const [params] = useSearchParams();
     const page = params.get('page') == null ? 1 : params.get('page');
 
@@ -30,13 +28,13 @@ function MyPageProductQnA() {
     });
     const [qnaData, setQnAData] = useState([]);
 
-    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
         getProductQnA();
     }, [page]);
 
+    //상품 문의 목록 조회
     const getProductQnA = async () => {
         await axiosInstance.get(`my-page/qna/product${createPageParam(page)}`)
             .then(res => {
@@ -51,22 +49,20 @@ function MyPageProductQnA() {
                     next: pagingObject.next,
                     activeNo: pagingObject.activeNo,
                 });
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //페이지네이션 버튼 이벤트
     const handlePageBtn = (e) => {
         pageSubmit(getClickNumber(e), navigate);
     }
 
+    //페이지네이션 이전 버튼 이벤트
     const handlePagePrev = () => {
         pageSubmit(getPrevNumber(pagingData), navigate);
     }
 
+    //페이지네이션 다음 버튼 이벤트
     const handlePageNext = () => {
         pageSubmit(getNextNumber(pagingData));
     }

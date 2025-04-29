@@ -1,24 +1,19 @@
 import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
 
 import {axiosInstance} from "../../../modules/customAxios";
-import {setMemberObject} from "../../../modules/loginModule";
 import {imageInputChange, imageValidation, setProductFormData} from "../../../modules/imageModule";
 
 import AdminSideNav from "../../ui/nav/AdminSideNav";
 import AddProductForm from "./AddProductForm";
 
 /*
-        상품 수정 컴포넌트.
+        상품 수정 페이지
+        상품 추가와 마찬가지로 AddProductForm Component 사용.
 
-        AddProduct와 같은 구조로 처리될 것이며
-        상품 조회로 값을 하위 컴포넌트에 전달해 처리힌다.
-
-        헤더에는 상품 수정이라는 타이틀과 수정 버튼만 배치한다.
+        헤더에는 상품 수정이라는 타이틀과 수정 버튼만 배치.
      */
 function UpdateProduct() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const { productId } = useParams();
 
     const [productData, setProductData] = useState({
@@ -43,12 +38,12 @@ function UpdateProduct() {
     const [infoImageLength, setInfoImageLength] = useState(0);
 
     const navigate = useNavigate();
-    const dispatch = useDispatch();
 
     useEffect(() => {
         getPatchData(productId);
     }, [productId]);
 
+    //수정할 상품 데이터 조회
     const getPatchData = async (productId) => {
         await axiosInstance.get(`admin/product/patch/${productId}`)
             .then(res => {
@@ -68,14 +63,10 @@ function UpdateProduct() {
                 setClassification(content.classificationList);
                 setOptionList(content.optionList);
                 setInfoImageLength(content.infoImageList.length);
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    // 상품 정보 데이터 input 입력 이벤트
     const handleProductOnChange = (e) => {
         let value = e.target.value;
 
@@ -90,6 +81,7 @@ function UpdateProduct() {
         });
     }
 
+    //상품 옵션 데이터 input 이벤트
     const handleOptionOnChange = (e) => {
         const idx = e.target.parentElement.parentElement.getAttribute('value');
         let value = e.target.value;
@@ -105,6 +97,7 @@ function UpdateProduct() {
         setOptionList([...optionList]);
     }
 
+    //상품 옵션 공개, 비공개 여부 radio 버튼 이벤트
     const handleOptionRadioOnChange = (e) => {
         const radioName = e.target.name.split('/');
         const name = radioName[0];
@@ -119,6 +112,8 @@ function UpdateProduct() {
         setOptionList([...optionList]);
     }
 
+    //옵션 추가 이벤트
+    //동적으로 옵션 탭 Element 추가
     const handleAddOption = () => {
         const optionArr = [...optionList];
 
@@ -133,6 +128,8 @@ function UpdateProduct() {
         setOptionList(optionArr);
     }
 
+    //옵션 제거 이벤트
+    //동적으로 해당 옵션 Element 제거
     const handleRemoveOption = (e) => {
         const idx = e.target.value;
         const optionId = e.target.name;
@@ -148,14 +145,18 @@ function UpdateProduct() {
         setOptionList(optionArr);
     }
 
+    //수정 이벤트
     const handleSubmitOnClick = async (e) => {
         e.preventDefault();
 
+        //상품 정보, 옵션 정보, 새로 업로드 될 이미지를 포함한 formData 생성
         let formData = setProductFormData(productData, optionList, newFirstThumbnail, newThumbnail, newInfoImage);
 
+        //삭제되어야 할 대표 썸네일이 존재하는 경우 formData에 추가
         if(deleteFirstThumbnail !== '')
             formData.append('deleteFirstThumbnail', deleteFirstThumbnail);
 
+        //삭제될 옵션, 썸네일, 정보 이미지 리스트를 formData에 추가
         deleteOption.forEach(deleteOptionId => formData.append('deleteOptionList', deleteOptionId));
         deleteThumbnail.forEach(file => formData.append('deleteThumbnail', file));
         deleteInfoImage.forEach(file => formData.append('deleteInfoImage', file));
@@ -171,6 +172,7 @@ function UpdateProduct() {
             })
     }
 
+    //상품 분류 select box 이벤트
     const handleSelectOnChange = (e) => {
         const value = e.target.value;
 
@@ -180,6 +182,7 @@ function UpdateProduct() {
         })
     }
 
+    //대표 썸네일 input 이벤트
     const handleFirstThumbnailInputChange = (e) => {
         if(imageValidation(e)){
             const file = e.target.files[0];
@@ -187,22 +190,26 @@ function UpdateProduct() {
         }
     }
 
+    //새로 등록한 대표 썸네일 삭제 이벤트
     const handleRemoveFirstThumbnail = (e) => {
         window.URL.revokeObjectURL(newFirstThumbnail);
         setNewFirstThumbnail('');
     }
 
+    //기존 대표 썸네일 삭제 이벤트
     const handleRemoveOriginalFirstThumbnail = (e) => {
         setDeleteFirstThumbnail(firstThumbnail);
         setFirstThumbnail('');
     }
 
+    //썸네일 input 이벤트 ( multiple )
     const handleThumbnailInputChange = (e) => {
         const files = imageInputChange(e, newThumbnail);
 
         setNewThumbnail(files);
     }
 
+    //새로 추가했던 상품 썸네일 제거 이벤트
     const handleRemoveThumbnail = (e) => {
         const deleteIdx = e.target.value;
         const files = [...newThumbnail];
@@ -210,6 +217,7 @@ function UpdateProduct() {
         setNewThumbnail(files);
     }
 
+    //기존 상품 썸네일 제거 이벤트
     const handleRemoveOriginalThumbnail = (e) => {
         const deleteIdx = e.target.value;
         const files = [...thumbnail];
@@ -221,6 +229,7 @@ function UpdateProduct() {
         setThumbnail(files);
     }
 
+    //상품 정보 이미지 input 이벤트 ( multiple )
     const handleInfoImageInputChange = (e) => {
         const files = imageInputChange(e, newInfoImage);
 
@@ -228,6 +237,7 @@ function UpdateProduct() {
         setInfoImageLength(infoImageLength + 1);
     }
 
+    //새로 추가했던 상품 정보 이미지 제거 이벤트
     const handleRemoveInfoImage = (e) => {
         const deleteIdx = e.target.value;
         const files = [...newInfoImage];
@@ -236,6 +246,7 @@ function UpdateProduct() {
         setInfoImageLength(infoImageLength - 1);
     }
 
+    //기존 정보 이미지 제거 이벤트
     const handleRemoveOriginalInfoImage = (e) => {
         const deleteIdx = e.target.value;
         const files = [...infoImage];

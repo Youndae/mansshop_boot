@@ -1,4 +1,5 @@
-import React, {useRef, useState} from 'react';
+import React, {useRef, useState, useEffect} from 'react';
+import { useSelector } from "react-redux";
 import {useNavigate} from "react-router-dom";
 
 import {axiosDefault, axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
@@ -6,7 +7,11 @@ import {axiosDefault, axiosInstance, checkResponseMessageOk} from "../../../modu
 import Overlap from "../../ui/Overlap";
 import DefaultBtn from "../../ui/DefaultBtn";
 
+/*
+    로컬 회원가입 페이지
+ */
 function Join() {
+    const loginStatus = useSelector((state) => state.member.loginStatus);
     const [userData, setUserData] = useState({
         userId: '',
         userPw: '',
@@ -55,6 +60,12 @@ function Join() {
     const responseDuplicatedMessage = 'duplicated';
     const responseNoDuplicatesMessage = 'No duplicates';
 
+    useEffect(() => {
+        if(loginStatus)
+            navigate('/');
+    }, [loginStatus]);
+
+    // input 입력 이벤트
     const handleOnChange = (e) => {
         setUserData({
             ...userData,
@@ -71,6 +82,8 @@ function Join() {
             });
         }else if(targetName === 'userPw'){
             const pwValue = e.target.value;
+
+            //비밀번호 길이 및 패턴 검증
             if(pwValue.length < 8)
                 setPwCheck('short');
             else if(pwPattern.test(pwValue) === false)
@@ -79,13 +92,14 @@ function Join() {
                 setPwCheck('valid');
             }
 
+            //검증에 통과했다면 사용할 수 있는 상태로 checkInfo 수정
             if(pwValue === userData.checkPassword){
                 setCheckInfo({
                     ...checkInfo,
                     'pwCheckInfo': true,
                 });
                 setVerifyPw('valid');
-            }else{
+            }else{ // 검증에 실패했다면 사용할 수 없는 상태로 checkInfo 수정
                 setCheckInfo({
                     ...checkInfo,
                     'pwCheckInfo': false,
@@ -94,6 +108,8 @@ function Join() {
             }
         }else if(targetName === 'checkPassword'){
             const pwValue = e.target.value;
+            //비밀번호 재입력 검증.
+            //비밀번호 input과 일치 여부를 검증
             if(userData.userPw === pwValue) {
                 setVerifyPw('valid');
                 setCheckInfo({
@@ -108,16 +124,19 @@ function Join() {
                 });
             }
         }else if(targetName === 'userName'){
+            //사용자 이름 검증 및 처리
             const nameValue = e.target.value;
             if(nameValue !== '')
                 setNameCheck('');
         }else if(targetName === 'nickname') {
-
+            //닉네임 입력값 처리
+            //닉네임 중복 여부 확인 이후 다시 수정되는 경우를 감안해 상태값 수정
             setCheckInfo({
                 ...checkInfo,
                 nicknameCheckInfo: false,
             })
         }else if(targetName === 'phone') {
+            //연락처 입력값 처리 및 검증
             const phoneValue = e.target.value;
             if(!phonePattern.test(phoneValue))
                 setPhoneCheck('invalid');
@@ -126,6 +145,7 @@ function Join() {
         }
     }
 
+    //submit 이벤트
     const handleJoinSubmit = async () => {
         const userEmail = userData.email + '@' + emailSuffix;
 
@@ -141,12 +161,15 @@ function Join() {
             setNameCheck('empty');
             nameElem.current.focus();
         }else if(userData.nickname !== '' && !checkInfo.nicknameCheckInfo) {
+            //닉네임 중복 여부 확인이 안된 상태라면 overlap 출력 및 focus
             setNicknameCheck('notDuplicateCheck');
             nicknameElem.current.focus();
         }else if(!emailPattern.test(userEmail)) {
+            //이메일 값이 정상이 아니라면 overlap 출력 및 focus
             setEmailCheck('invalid');
             mailElem.current.focus();
         }else if(!phonePattern.test(userData.phone)){
+            //연락처 값이 정상이 아니라면 Overlap 출력 및 focus
             setPhoneCheck('invalid');
             phoneElem.current.focus();
         }else {
@@ -173,23 +196,26 @@ function Join() {
         }
     }
 
+    //아이디 중복 체크 버튼 이벤트
     const handleIdCheck = async () => {
+        //입력값이 없다면
         if(userData.userId === '')
             setIdCheck('empty');
-        else if(!idPattern.test(userData.userId))
+        else if(!idPattern.test(userData.userId)) //패턴 검증이 실패했다면
             setIdCheck('invalid');
         else {
+            //패턴이 정상이라면 중복 체크 요청
             await axiosInstance.get(`member/check-id?userId=${userData.userId}`)
                 .then(res => {
                     const responseMessage = res.data.message;
 
-                    if(responseMessage === responseDuplicatedMessage){
+                    if(responseMessage === responseDuplicatedMessage){ // 결과가 중복이라면
                         setCheckInfo({
                             ...checkInfo,
                             'idCheckInfo': false,
                         });
                         setIdCheck('duplication');
-                    }else if(responseMessage === responseNoDuplicatesMessage){
+                    }else if(responseMessage === responseNoDuplicatesMessage){ // 결과가 중복이 아니라면
                         setCheckInfo({
                             ...checkInfo,
                             'idCheckInfo': true,
@@ -203,21 +229,24 @@ function Join() {
         }
     }
 
+    //닉네임 중복 체크 버튼 이벤트
     const handleNicknameCheck = async () => {
+        //닉네임 값이 입력되지 않았다면
         if(userData.nickname === '')
             setNicknameCheck('empty');
         else{
+            //입력된 상태라면 중복 체크 요청
             await axiosInstance.get(`member/check-nickname?nickname=${userData.nickname}`)
                 .then(res => {
                     const responseMessage = res.data.message;
 
-                    if(responseMessage === responseDuplicatedMessage){
+                    if(responseMessage === responseDuplicatedMessage){ // 결과가 중복이라면
                         setCheckInfo({
                             ...checkInfo,
                             'nicknameCheckInfo': false,
                         });
                         setNicknameCheck('duplication');
-                    }else if(responseMessage === responseNoDuplicatesMessage){
+                    }else if(responseMessage === responseNoDuplicatesMessage){ // 결과가 중복이 아니라면
                         setCheckInfo({
                             ...checkInfo,
                             'nicknameCheckInfo': true,
@@ -232,6 +261,7 @@ function Join() {
         }
     }
 
+    //이메일 Suffix select box 이벤트
     const handleEmailSelectOnChange = (e) => {
         const val = e.target.value;
         setEmailProvider(val);
@@ -247,6 +277,7 @@ function Join() {
         setEmailSuffix(suffix);
     }
 
+    // 이메일 직접 입력 선택 시 input 입력 이벤트
     const handleEmailSuffixChange = (e) => {
         const val = e.target.value;
 
@@ -255,6 +286,7 @@ function Join() {
         setEmailSuffix(val);
     }
 
+    //생년월일 select box 이벤트
     const handleBirthOnChange = (e) => {
         const changeType = e.target.name;
 

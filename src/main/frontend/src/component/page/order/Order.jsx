@@ -9,6 +9,14 @@ import DefaultBtn from "../../ui/DefaultBtn";
 
 import '../../css/order.css';
 
+/*
+    주문 페이지
+    장바구니 및 상품 페이지에서 주문 버튼 클릭 시 상품 정보를 먼저 조회한 뒤 state에 담아 주문 페이지를 호출하는 형태.
+    그래서 주문 페이지에서는 별도의 상품 데이터 요청을 처리하지 않음.
+
+    주소 입력에는 kakao 우편번호 서비스 API를 사용,
+    카드 결제는 I'mport 결제 API를 사용.
+ */
 function Order() {
     const location = useLocation();
     const state = location.state;
@@ -70,6 +78,7 @@ function Order() {
         }
     }, [state]);
 
+    //결제 처리
     const requestPay = () => {
         const { IMP } = window;
         IMP.init('');
@@ -111,10 +120,14 @@ function Order() {
 
     }
 
+    //주소 검색 창 오픈
     const handlePostCodeBtn = (e) => {
         setIsOpen(true);
     }
 
+    //결제 버튼 이벤트.
+    //입력값 검증 이후 카드 결제인 경우 API 호출
+    //무통장 입금의 경우 바로 주문 데이터 처리 요청.
     const handleOrderSubmit = async () => {
 
         if(userAddress.postCode === '') {
@@ -135,10 +148,9 @@ function Order() {
                 await requestOrder();
 
         }
-
-
     }
 
+    //주문 데이터 처리 요청
     const requestOrder = async () => {
         const addr = `${userAddress.postCode} ${userAddress.address} ${userAddress.detail}`;
         let productArr = [];
@@ -174,6 +186,7 @@ function Order() {
             })
     }
 
+    //결제 타입 Radio 이벤트
     const handleRadioSelect = (e) => {
         const name = e.target.value;
 
@@ -199,6 +212,7 @@ function Order() {
         padding: '15% 45%',
     }
 
+    //주소 검색 이후 확인 버튼 이벤트
     const handlePostCodeComplete = (data) => {
         const { address, zonecode } = data;
         setUserAddress({
@@ -211,6 +225,7 @@ function Order() {
         setAddressOverlap(true);
     }
 
+    //주소 검색 창 닫기 이벤트
     const handleClosed = (state) => {
         if (state === 'FORCE_CLOSE') {
             setIsOpen(false);
@@ -219,6 +234,7 @@ function Order() {
         }
     }
 
+    //상세 주소 input 입력 이벤트
     const handleAddressDetail = (e) => {
         setUserAddress({
             ...userAddress,
@@ -226,6 +242,7 @@ function Order() {
         })
     }
 
+    //주문 정보 input 입력 이벤트
     const handleOrderData = (e) => {
         setOrderData({
             ...orderData,

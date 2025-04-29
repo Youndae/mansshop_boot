@@ -1,4 +1,4 @@
-
+//이미지 input시 파일 타입 검증 및 대기중인 파일 배열에 추가 후 배열 반환
 export const imageInputChange = (e, files) => {
     const validationResult = imageValidation(e);
 
@@ -15,6 +15,7 @@ export const imageInputChange = (e, files) => {
     }
 }
 
+//이미지 타입 검증
 export const imageValidation = (e) => {
     const files = e.target.files;
 
@@ -31,6 +32,7 @@ export const imageValidation = (e) => {
     return true;
 }
 
+//formData 생성
 export const setProductFormData = (productData, optionList, firstThumbnail, thumbnail, infoImage) => {
     let formData = new FormData();
 

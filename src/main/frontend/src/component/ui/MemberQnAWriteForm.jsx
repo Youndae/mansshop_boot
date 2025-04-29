@@ -1,5 +1,6 @@
 import React from "react";
 
+// 회원 문의 작성 폼
 function MemberQnAWriteForm(props) {
     const { inputData, classificationId, classification, handleInputOnChange, handleSelectOnChange, handleSubmit, btnText } = props;
 

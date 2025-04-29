@@ -1,9 +1,7 @@
 import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
 
 import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
-import {setMemberObject} from "../../../modules/loginModule";
 
 import AdminSideNav from "../../ui/nav/AdminSideNav";
 import QnADetail from "../mypage/QnADetail";
@@ -21,7 +19,6 @@ import QnADetail from "../mypage/QnADetail";
         관리자가 답변을 달기 애매한 마무리의 경우(감사 인사 등)의 처리를 위해 답변 완료 버튼을 추가한다.
      */
 function AdminMemberQnADetail() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const { qnaId } = useParams();
 
     const [data, setData] = useState({
@@ -36,13 +33,11 @@ function AdminMemberQnADetail() {
     const [modifyTextValue, setModifyTextValue] = useState('');
     const [inputValue, setInputValue] = useState('');
 
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-
     useEffect(() => {
         getMemberQnADetail();
-    }, []);
+    }, [qnaId]);
 
+    //회원 문의 상세 데이터 조회
     const getMemberQnADetail = async () => {
         await axiosInstance.get(`admin/qna/member/${qnaId}`)
             .then(res => {
@@ -69,22 +64,21 @@ function AdminMemberQnADetail() {
                 }
 
                 setReplyData(replyArr);
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //답변 수정 버튼 이벤트
+    //답변을 수정할 수 있는 Element가 추가
     const handleReplyModifyOpen = (e) => {
         setReplyModifyStatus(e, true);
     }
 
+    //답변 수정 Element close 이벤트
     const handleReplyModifyClose = (e) => {
         setReplyModifyStatus(e, false);
     }
 
+    //답변 수정 이벤트 제어
     const setReplyModifyStatus = (e, status) => {
         const idx = e.target.value;
 
@@ -102,10 +96,12 @@ function AdminMemberQnADetail() {
             setModifyTextValue(replyData[idx].replyContent);
     }
 
+    //답변 수정 Element textarea 입력 이벤트
     const handleModifyOnChange = (e) => {
         setModifyTextValue(e.target.value);
     }
 
+    //답변 수정 이벤트
     const handleModifySubmit = async (e) => {
         const idx = e.target.value;
         const replyId = replyData[idx].replyId;
@@ -122,10 +118,12 @@ function AdminMemberQnADetail() {
             })
     }
 
+    //답변 textarea 입력 이벤트
     const handleInputOnChange = (e) => {
         setInputValue(e.target.value);
     }
 
+    //답변 작성 처리 이벤트
     const handleInputSubmit = async () => {
         await axiosInstance.post(`admin/qna/member/reply`, {
             qnaId: data.memberQnAId,
@@ -137,6 +135,7 @@ function AdminMemberQnADetail() {
             })
     }
 
+    //답변 완료 처리 버튼 이벤트
     const handleCompleteBtn = async () => {
 
         await axiosInstance.patch(`admin/qna/member/${data.memberQnAId}`)

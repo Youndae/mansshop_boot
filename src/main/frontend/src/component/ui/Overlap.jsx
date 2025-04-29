@@ -6,6 +6,7 @@ const OverlapDiv = styled.div`
     color: red;
 `
 
+//회원가입, 로그인, 정보 수정 등에서 사용될 overlap 폼
 function Overlap(props) {
     const { overlapText } = props;
 

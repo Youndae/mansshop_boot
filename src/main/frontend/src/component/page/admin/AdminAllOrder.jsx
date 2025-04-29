@@ -1,9 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useSearchParams} from "react-router-dom";
 import {axiosInstance} from "../../../modules/customAxios";
 import { mainProductPagingObject } from "../../../modules/pagingModule";
-import {setMemberObject} from "../../../modules/loginModule";
 import {createPageAndSearchTypeKeyword} from "../../../modules/requestUrlModule";
 
 import dayjs from "dayjs";
@@ -19,13 +17,8 @@ import AdminOrderModalDetail from "./modal/AdminOrderModalDetail";
         recipient, userId, phone, createdAt 구조.
 
         하단에는 주문자, 아이디를 통한 검색과 페이징이 존재.
-
-        클릭시 OrderModal을 통해 주문 정보를 확인할 수 있지만 버튼은 활성화 시키지 않는다.
-
-        추후 매니저 권한으로 접근할 수 있는 컴포넌트로 처리하기 위함.
  */
 function AdminAllOrder() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const [params] = useSearchParams();
     const page = params.get('page');
     const keyword = params.get('keyword');
@@ -55,12 +48,11 @@ function AdminAllOrder() {
 
     const modalRef = useRef(null);
 
-    const dispatch = useDispatch();
-
     useEffect(() => {
         getOrderList();
     }, [page, keyword, searchType]);
 
+    //전체 주문 목록 조회.
     const getOrderList = async () => {
         let url = `admin/order/all${createPageAndSearchTypeKeyword(page, keyword, searchType)}`;
 
@@ -77,29 +69,28 @@ function AdminAllOrder() {
                     next: pagingObject.next,
                     activeNo: pagingObject.activeNo,
                 });
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //주문 상세 modal창 오픈 이벤트
     const handleOnClick = (idx) => {
         setModalOrderData(data[idx]);
         setModalIsOpen(true);
     }
 
+    //검색 타입 select box 이벤트
     const handleSelectOnChange = (e) => {
         const value = e.target.value;
 
         setKeywordSelectValue(value);
     }
 
+    //검색 input 입력 이벤트
     const handleKeywordOnChange = (e) => {
         setKeywordInput(e.target.value);
     }
 
+    //주문 상세 modal창 close 이벤트
     const closeModal = (e) => {
 
         if(modalIsOpen && modalRef.current && !modalRef.current.contains(e.target)){

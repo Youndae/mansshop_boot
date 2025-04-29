@@ -1,9 +1,7 @@
 import React, {useState, useEffect} from 'react';
-import {useDispatch, useSelector} from "react-redux";
 import {useNavigate} from "react-router-dom";
 
 import {axiosInstance} from "../../../modules/customAxios";
-import {setMemberObject} from "../../../modules/loginModule";
 import {numberComma} from "../../../modules/numberCommaModule";
 
 import AdminSideNav from "../../ui/nav/AdminSideNav";
@@ -21,8 +19,6 @@ import AdminSideNav from "../../ui/nav/AdminSideNav";
     테이블에서 월 데이터를 클릭하면 상세 페이지로 이동해 해당 월 매출을 좀 더 상세하게 확인할 수 있도록 한다.
  */
 function AdminPeriodSales() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
-
     const [yearSalesData, setYearSalesData] = useState({
         sales: 0,
         salesQuantity: 0,
@@ -33,7 +29,6 @@ function AdminPeriodSales() {
     const [selectBoxData, setSelectBoxData] = useState([]);
 
     const navigate = useNavigate();
-    const dispatch = useDispatch();
 
     useEffect(() => {
         const currentDate = new Date();
@@ -41,6 +36,7 @@ function AdminPeriodSales() {
         setSelectYear(year);
         getSalesData(year);
 
+        //현재 년도 기준으로 select box에 들어갈 연도 처리
         const yearArr = [];
         for(let i = 0; i < 3; i++)
             yearArr.push(year--);
@@ -48,11 +44,12 @@ function AdminPeriodSales() {
         setSelectBoxData(yearArr);
     }, []);
 
+    //해당 연도의 월별 매출 리스트 조회
     const getSalesData = async (year) => {
 
         await axiosInstance.get(`admin/sales/period/${year}`)
             .then(res => {
-                const content = res.data.content;
+                const content = res.data;
                 setYearSalesData({
                     sales: content.sales,
                     salesQuantity: content.salesQuantity,
@@ -60,14 +57,10 @@ function AdminPeriodSales() {
                 });
 
                 setData(content.content);
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //연도 select box 이벤트
     const handleSelectOnChange = (e) => {
         const year = e.target.value;
 
@@ -75,6 +68,7 @@ function AdminPeriodSales() {
         getSalesData(year);
     }
 
+    //리스트에서 월 매출 클릭 이벤트
     const handleMonthOnClick = (month) => {
         const yearMonth = `${selectYear}-${month}`;
 

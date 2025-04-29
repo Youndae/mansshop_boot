@@ -2,6 +2,10 @@ import React from 'react';
 
 import DefaultBtn from "../../ui/DefaultBtn";
 
+/*
+    리뷰 작성 폼
+    리뷰 작성과 수정 페이지에서 사용
+ */
 function MyPageReviewWriteForm(props) {
     const { productName, inputData, handleInputOnChange, handleSubmit } = props;
 

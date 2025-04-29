@@ -1,18 +1,20 @@
 import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
 import {useNavigate} from "react-router-dom";
 
 import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {numberComma} from "../../../modules/numberCommaModule";
-import {setMemberObject} from "../../../modules/loginModule";
 
 import AdminSideNav from "../../ui/nav/AdminSideNav";
 import DefaultBtn from "../../ui/DefaultBtn";
 
-
+/*
+    상품 할인 설정 페이지
+    상품 정보 수정에서 개별적인 설정이 아닌
+    한번에 여러개의 상품 할인율을 수정하기 위함.
+    상품 분류를 선택하면 그걸 기반으로 상품명 select box가 갱신.
+    상품명 select box를 선택하면 해당 상품 Element가 동적으로 생성
+*/
 function ProductDiscount() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
-
     const [classification, setClassification] = useState([]);
     const [product, setProduct] = useState([]);
     const [selectProductData, setSelectProductData] = useState([]);
@@ -20,26 +22,22 @@ function ProductDiscount() {
     const [selectProductValue, setSelectProductValue] = useState('default');
     const [discount, setDiscount] = useState(0);
 
-    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
         getClassification();
     }, []);
 
+    //상품 분류 조회
     const getClassification = async () => {
 
         await axiosInstance.get(`admin/product/classification`)
             .then(res => {
                 setClassification(res.data.content);
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //선택된 상품 분류에 해당하는 상품 조회
     const getSelectProduct = async (classificationName) => {
 
         await axiosInstance.get(`admin/product/discount/select/${classificationName}`)
@@ -48,6 +46,7 @@ function ProductDiscount() {
             })
     }
 
+    //상품 분류 select box 이벤트
     const handleClassificationOnChange = (e) => {
         const value = e.target.value;
 
@@ -57,8 +56,7 @@ function ProductDiscount() {
         getSelectProduct(value);
     }
 
-    // value = index
-    // product[index] 활용
+    //상품 select box 이벤트
     const handleProductOnChange = (e) => {
         const idx = e.target.value;
         const productData = product[idx];
@@ -69,10 +67,12 @@ function ProductDiscount() {
         setSelectProductData(productArr);
     }
 
+    //할인율 input 입력 이벤트
     const handleDiscountOnChange = (e) => {
         setDiscount(Number(e.target.value));
     }
 
+    //할인 적용 이벤트
     const handleDiscountSubmit = async () => {
         if(selectProductData.length === 0){
             alert('상품을 선택해주세요');
@@ -95,6 +95,7 @@ function ProductDiscount() {
         }
     }
 
+    //상품 제거 이벤트
     const handleDeleteDiscountProduct = (e) => {
         const idx = e.target.value;
         const selectProductArr = [...selectProductData];

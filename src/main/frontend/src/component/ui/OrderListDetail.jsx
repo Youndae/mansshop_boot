@@ -6,6 +6,7 @@ import {numberComma} from "../../modules/numberCommaModule";
 import Paging from "./Paging";
 import Image from "./Image";
 
+//주문 내역 폼
 function OrderListDetail(props) {
     const {
         className

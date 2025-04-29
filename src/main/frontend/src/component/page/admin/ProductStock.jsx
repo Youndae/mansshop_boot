@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
 import {Link, useNavigate, useSearchParams} from "react-router-dom";
 
 import {axiosInstance} from "../../../modules/customAxios";
@@ -11,26 +10,20 @@ import {
     pageSubmit,
     searchPageSubmit, searchSubmit
 } from "../../../modules/pagingModule";
-import {setMemberObject} from "../../../modules/loginModule";
 
 import AdminSideNav from "../../ui/nav/AdminSideNav";
 import Paging from "../../ui/Paging";
 
 /*
-        상품 재고 관리 탭 컴포넌트
+        상품 재고 관리 페이지
+        테이블 구조.
+        상품 elements 클릭 시 상품 정보로 이동
+        상품 elements 하위에
+        상품 옵션별 elements를 통해 옵션별 재고 현황 확인 가능.
 
-        테이블 구조로 처리하는데
-        분류, 상품명, 공개여부가 상단
-        하단에는 사이즈, 컬러, 재고, 공개여부로 처리한다.
-        td 처리 함수 새로 생성하고 그 안에서 옵션 처리 function을 또 호출하도록 하면 되지 않을까?
-
-        상품명 클릭 시 AdminProductDetail로 연결될 수 있도록 해 바로 수정이 가능하도록 처리한다.
-
-        검색, 페이징
-
+        검색은 상품명 기반.
      */
 function ProductStock() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const [params] = useSearchParams();
     const page = params.get('page');
     const keyword = params.get('keyword');
@@ -45,7 +38,6 @@ function ProductStock() {
     });
     const [keywordInput, setKeywordInput] = useState('');
 
-    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -53,9 +45,9 @@ function ProductStock() {
         getProductStock();
     }, [page, keyword]);
 
+    //상품 조회
     const getProductStock = async() => {
         let url = `admin/product/stock${createPageAndKeywordUrl(page, keyword)}`;
-        // url += createPageAndKeywordUrl(page, keyword);
 
         await axiosInstance.get(url)
             .then(res => {
@@ -72,26 +64,25 @@ function ProductStock() {
                     next: pagingObject.next,
                     activeNo: pagingObject.activeNo,
                 });
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //페이지네이션 버튼 이벤트
     const handlePageBtn = (e) => {
         handlePagingSubmit(getClickNumber(e));
     }
 
+    //페이지네이션 이전 버튼 이벤트
     const handlePagePrev = () => {
         handlePagingSubmit(getPrevNumber(pagingData));
     }
 
+    //페이지네이션 다음 버튼 이벤트
     const handlePageNext = () => {
         handlePagingSubmit(getNextNumber(pagingData));
     }
 
+    //페이지네이션 제어
     const handlePagingSubmit = (pageNum) => {
         if(keyword == null)
             pageSubmit(pageNum, navigate);
@@ -99,10 +90,12 @@ function ProductStock() {
             searchPageSubmit(keyword, pageNum, navigate);
     }
 
+    //검색 input 입력 이벤트
     const handleKeywordOnChange = (e) => {
         setKeywordInput(e.target.value);
     }
 
+    //검색 이벤트
     const handleSearchOnClick = async () => {
         searchSubmit(keywordInput, navigate);
     }

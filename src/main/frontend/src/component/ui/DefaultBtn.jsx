@@ -7,8 +7,11 @@ const Button = styled.button`
     cursor: pointer;
 `;
 
+/*
+    기본 Button UI
+ */
 function DefaultBtn(props) {
-    const { btnText, className, onClick, id, name, value, disable} = props;
+    const { btnText, className, onClick, id, name, value} = props;
 
     return (
         <Button

@@ -1,5 +1,9 @@
 import React from 'react';
 
+/*
+    오류 페이지
+    403, 404 등 오류가 발생하는 경우 이 컴포넌트가 호출
+ */
 function Error() {
 
     return (

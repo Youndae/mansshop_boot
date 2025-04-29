@@ -1,19 +1,19 @@
 import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
 import {useNavigate} from "react-router-dom";
 
 import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {numberComma} from "../../../modules/numberCommaModule";
-import {setMemberObject} from "../../../modules/loginModule";
 
 import Image from "../../ui/Image";
 import DefaultBtn from "../../ui/DefaultBtn";
 
 import '../../css/cart.css';
 
+/*
+    장바구니 페이지
+    선택 상품 주문, 전체 상품 주문, 선택 상품 삭제, 전체 상품 삭제, 상품별 수량 제어 기능
+ */
 function Cart() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
-
     const [cartData, setCartData] = useState([]);
     const [selectValue, setSelectValue] = useState([{
         productId: '',
@@ -28,20 +28,20 @@ function Cart() {
     }]);
     const [totalPrice, setTotalPrice] = useState(0);
 
-    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
         getCartData();
     }, []);
 
+    //장바구니 데이터 조회
     const getCartData = async () => {
         await axiosInstance.get(`cart/`)
             .then(res => {
-                setCartData(res.data.content);
+                const data = res.data;
+                setCartData(data);
 
-                const data = res.data.content;
-                if(data !== null){
+                if(data.length !== 0){
                     if(selectValue[0].cartDetailId === '') {
                         let selectArr = [];
                         for (let i = 0; i < data.length; i++) {
@@ -67,18 +67,15 @@ function Cart() {
 
                     setTotalPrice(totalPrice);
                 }
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //상품 수량 증가 이벤트
     const handleCountUp = async (e) => {
         countRequest('cart/count-up', e.target.name);
     }
 
+    //상품 수량 감소 이벤트
     const handleCountDown = async (e) => {
         const cartInput = e.target.parentElement.previousSibling.value;
 
@@ -86,21 +83,25 @@ function Cart() {
             countRequest('cart/count-down', e.target.name);
     }
 
+    //상품 제거 이벤트 ( 상품 Element 중 x 버튼을 통한 제거 )
     const handleRemoveProduct = (e) => {
         const arr = [];
         arr.push(Number(e.target.name));
         removeRequest(`cart/select`, arr);
     }
 
+    //선택 상품 제거 버튼 이벤트
     const handleSelectRemove = () => {
         const selectProduct = setSelectCartDetail();
         removeRequest(`cart/select`, selectProduct);
     }
 
+    //전체 상품 제거 버튼 이벤트
     const handleAllRemove = () => {
         removeRequest(`cart/all`, null);
     }
 
+    //선택 상품 주문 버튼 이벤트
     const handleSelectOrder = () => {
         let detailIds = [];
         for(let i = 0; i < selectValue.length; i++)
@@ -108,19 +109,19 @@ function Cart() {
                 detailIds.push(selectValue[i].cartDetailId)
 
         getOrderData(detailIds);
-
-        // navigateOrder(resultArr);
     }
 
+    //전체 상품 주문 버튼 이벤트
     const handleAllOrder = () => {
         let detailIds = [];
         for(let i = 0; i < cartData.length; i++)
             detailIds.push(selectValue[i].cartDetailId)
 
         getOrderData(detailIds);
-        // navigateOrder(resultArr);
     }
 
+    //주문 데이터 조회
+    //요청 시점에 따라 할인율 등 변경 사항을 제대로 반영하기 위해 주문 페이지로 넘길 데이터 사전 조회
     const getOrderData = async (detailIds) => {
         await axiosInstance.post(`order/cart`, detailIds)
             .then(res => {
@@ -133,6 +134,7 @@ function Cart() {
             })
     }
 
+    //주문 페이지에 넘길 객체 생성
     const getOrderObject = (data) => {
         return {
             productId: data.productId,
@@ -145,10 +147,7 @@ function Cart() {
         }
     }
 
-    const navigateOrder = (data) => {
-        navigate('/productOrder', {state : {orderProduct: data, orderType: 'cart', totalPrice: totalPrice}});
-    }
-
+    //상품 수량 증감 요청
     const countRequest = async (reqUrl, data) => {
         await axiosInstance.patch(`${reqUrl}/${data}`, {})
             .then(res => {
@@ -157,6 +156,7 @@ function Cart() {
             })
     }
 
+    //상품 제거 요청
     const removeRequest = async (reqUrl, reqData) => {
         if(reqData === null){
             await axiosInstance.delete(`${reqUrl}`)
@@ -180,6 +180,7 @@ function Cart() {
         }
     }
 
+    //선택된 상품 데이터 배열 반환
     const setSelectCartDetail = () => {
         let arr = [...selectValue];
         let resultArr = [];
@@ -191,6 +192,7 @@ function Cart() {
         return resultArr;
     }
 
+    //상품 checkbox 체크 해제 이벤트
     const handleDisableCheckBox = (e) => {
         const idx = e.target.value;
         const arr = [...selectValue];
@@ -203,6 +205,7 @@ function Cart() {
         setTotalPrice(totalPrice - Number(arr[idx].price));
     }
 
+    //상품 checkbox 체크 이벤트
     const handleSelectCheckBox = (e) => {
         const idx = e.target.value;
         const arr = [...selectValue];
@@ -262,7 +265,7 @@ function TotalPrice(props) {
 function CartDetail(props) {
     const { data, handleCountUp, handleCountDown, handleRemoveProduct, handleDisableCheckBox, handleSelectCheckBox, selectStatus } = props;
 
-    if(data === null){
+    if(data.length === 0){
         return (
             <div className="content-data">
                 <h3>장바구니에 담긴 상품이 없습니다.</h3>

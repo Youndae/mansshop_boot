@@ -6,6 +6,9 @@ import {numberComma} from "../../modules/numberCommaModule";
 
 import '../css/main.css';
 
+/*
+    메인페이지 출력 폼
+ */
 function MainContent(props) {
     const { data, classification } = props;
     const [imageList, setImageList] = useState([]);

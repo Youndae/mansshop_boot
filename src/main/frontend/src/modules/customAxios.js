@@ -1,5 +1,7 @@
 import axios from "axios";
 
+// 401에 대한 처리만 하는 기본 Axios
+// 403, 800 미발생이 보장되거나, 따로 관리해야 하는 요청에서만 사용
 export const axiosDefault = axios.create({
     baseURL: '/api',
     withCredentials: true,
@@ -39,6 +41,7 @@ axiosDefault.interceptors.response.use(
     }
 )
 
+// 401, 800, 403에 대응하는 Axios
 export const axiosInstance = axios.create({
     baseURL: '/api',
     withCredentials: true,
@@ -66,7 +69,7 @@ axiosInstance.interceptors.response.use(
     }
 )
 
-const getToken = () => window.localStorage.getItem('Authorization');
+export const getToken = () => window.localStorage.getItem('Authorization');
 
 
 export const checkResponseMessageOk = (res) => {
@@ -104,7 +107,7 @@ export const errorHandling = (err) => {
         window.localStorage.removeItem('Authorization');
         alert('로그인 정보에 문제가 발생해 로그아웃됩니다.\n문제가 계속된다면 관리자에게 문의해주세요.');
         window.location.href='/';
-    }else if(errorStatus === 403 && errorMessage === 'AccessDeniedException') {
+    }else if(errorStatus === 403 || errorMessage === 'AccessDeniedException') {
         window.location.href='/error';
     }
 }

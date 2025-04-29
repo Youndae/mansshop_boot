@@ -1,9 +1,7 @@
 import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
 import {Link, useNavigate, useSearchParams} from "react-router-dom";
 
 import {axiosInstance} from "../../../modules/customAxios";
-import {setMemberObject} from "../../../modules/loginModule";
 import {
     getClickNumber,
     getNextNumber,
@@ -16,8 +14,11 @@ import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import Paging from "../../ui/Paging";
 import DefaultBtn from "../../ui/DefaultBtn";
 
+/*
+    회원 문의 목록
+    회원 문의 작성은 여기에서 가능
+ */
 function MemberQnA() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const [params] = useSearchParams();
     const page = params.get('page');
 
@@ -30,13 +31,13 @@ function MemberQnA() {
     });
     const [qnaData, setQnAData] = useState([]);
 
-    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
         getMemberQnA();
     }, [page]);
 
+    //회원 문의 목록 조회
     const getMemberQnA = async () => {
 
         await axiosInstance.get(`my-page/qna/member${createPageParam(page)}`)
@@ -52,26 +53,25 @@ function MemberQnA() {
                     next: pagingObject.next,
                     activeNo: pagingObject.activeNo,
                 });
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //페이지네이션 버튼 이벤트
     const handlePageBtn = (e) => {
         pageSubmit(getClickNumber(e), navigate);
     }
 
+    //페이지네이션 이전 버튼 이벤트
     const handlePagePrev = () => {
         pageSubmit(getPrevNumber(pagingData), navigate);
     }
 
+    //페이지네이션 다음 버튼 이벤트
     const handlePageNext = () => {
         pageSubmit(getNextNumber(pagingData));
     }
 
+    //문의 작성 페이지 이동 버튼 이벤트
     const handleInsertBtn = () => {
         navigate('/my-page/qna/member/write');
     }

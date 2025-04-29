@@ -5,6 +5,14 @@ import {axiosInstance} from "../../../modules/customAxios";
 import AdminSideNav from "../../ui/nav/AdminSideNav";
 import DefaultBtn from "../../ui/DefaultBtn";
 
+/*
+    RabbitMQ DLQ 메시지 조회
+
+    메시지 자체 조회가 아닌 DLQ에 있는 메시지 개수를 조회.
+    모든 DLQ에 메시지가 존재하지 않는다면 empty List가 오게 됨.
+
+    버튼을 통해 메시지가 존재하는 모든 DLQ 재시도 처리.
+ */
 function FailedQueueList() {
     const [data, setData] = useState([]);
 
@@ -12,17 +20,22 @@ function FailedQueueList() {
         getFailedListCount();
     }, []);
 
+    //DLQ 조회
+    //메시지가 존재하는 DLQ만 응답값으로 오게 됨.
+    //구조는 DLQ명과 개수 구조의 리스트 구조.
     const getFailedListCount = async () => {
         await axiosInstance.get('admin/message')
             .then(res => {
-                setData(res.data.content);
+                setData(res.data);
             })
     }
 
+    //재시도 버튼 이벤트
     const handleRetryBtn = () => {
         retryFailedQueue();
     }
 
+    //재시도 요청
     const retryFailedQueue = async () => {
         await axiosInstance.post('admin/message', data)
             .then(res => {

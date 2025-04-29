@@ -2,7 +2,7 @@ import React from 'react';
 import {Link} from "react-router-dom";
 
 /*
-    * 관리자 side
+    * 관리자 side Nav
     * 상품 관리
     *   상품 목록(메인)
     *   상품 재고
@@ -19,7 +19,8 @@ import {Link} from "react-router-dom";
     * 매출 관리
     *   기간별
     *   상품별
-    * */
+    *
+*/
 function AdminSideNav(props) {
     const { categoryStatus } = props;
 

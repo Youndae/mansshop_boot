@@ -1,18 +1,19 @@
 import React, {useEffect} from 'react';
-import {useNavigate, useSearchParams} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 
 import {axiosInstance} from "../../../modules/customAxios";
 
 /*
-    OAuth2 로그인의 경우 href 요청으로 인해 응답 body를 받을 수 없어서
-    해당 컴포넌트를 거쳐 쿠키로 임시 토큰을 받은 뒤 이 임시 토큰으로 정식 토큰 발급 요청을 보낸다.
+    OAuth2 로그인의 경우 href 요청으로 처리되므로 응답을 받을 수 없음.
+    href 요청이 전달되고 정상 처리되고 나면 백엔드에서 이 컴포넌트 라우팅 경로로 redirect 요청을 보냄.
+    이때 임시 토큰이 응답 쿠키에 담겨 전달되고 해당 임시 토큰을 통해 정식 토큰 발급 요청을 보냄.
+    토큰이 정상적으로 발급되면 AccessToken을 localStorage에 저장.
+    이전 페이지 이동을 위해 sessionStorage에 저장된 prev를 꺼내 페이지 이동.
+
+    이 페이지에서는 따로 UI를 보여주거나 할 것 없이 OAuth2 로그인의 마무리가 목적.
  */
 function Oauth() {
-    const [params] = useSearchParams();
     const navigate = useNavigate();
-    // 추가적인 정보를 받기 위해 userType을 new, old 로 받아 조건에 따라 처리하도록 했었으나
-    // 실제 운영하는 서비스의 경우 해당 Authorization 서버에서 정보를 받을 수 있으므로 생략.
-    // const userType = params.get('type');
 
     useEffect(() => {
         tokenRequest();

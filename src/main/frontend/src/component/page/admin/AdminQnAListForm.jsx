@@ -12,23 +12,33 @@ import {
 
 import Paging from "../../ui/Paging";
 
+/*
+    상품 및 회원 문의 List Component
+
+    th 구조가 다르기 떄문에 각 Component에서 정의한 th 배열 데이터 필요.
+
+ */
 function AdminQnAListForm(props) {
     const { headerText, data, typeSelectData, thText, handleSelectOnChange, handleOnClick, handleKeywordOnChange, keyword, keywordInput, pagingData } = props;
 
     const navigate = useNavigate();
 
+    //페이지네이션 버튼 이벤트
     const handlePageBtn = (e) => {
         handlePagingSubmit(getClickNumber(e));
     }
 
+    //페이지네이션 이전 버튼 이벤트
     const handlePagePrev = () => {
         handlePagingSubmit(getPrevNumber(pagingData));
     }
 
+    //페이지네이션 다음 버튼 이벤트
     const handlePageNext = () => {
         handlePagingSubmit(getNextNumber(pagingData));
     }
 
+    //페이지네이션 이벤트 제어
     const handlePagingSubmit = (pageNum) => {
         if(keyword === null)
             typePageSubmit(typeSelectData, pageNum, navigate);
@@ -36,6 +46,7 @@ function AdminQnAListForm(props) {
             searchTypePageSubmit(typeSelectData, keyword, pageNum, navigate);
     }
 
+    //검색 이벤트
     const handleSearchOnClick = async () => {
         searchTypeSubmit('all', keywordInput, navigate);
     }

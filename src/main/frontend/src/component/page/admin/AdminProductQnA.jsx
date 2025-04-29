@@ -1,9 +1,7 @@
 import React, {useState, useEffect} from 'react';
-import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useSearchParams} from "react-router-dom";
 
 import {axiosInstance} from "../../../modules/customAxios";
-import {setMemberObject} from "../../../modules/loginModule";
 import {mainProductPagingObject} from "../../../modules/pagingModule";
 import {createListTypePageAndKeyword} from "../../../modules/requestUrlModule";
 
@@ -11,9 +9,12 @@ import AdminSideNav from "../../ui/nav/AdminSideNav";
 import AdminQnAListForm from "./AdminQnAListForm";
 
 /*
-        상품 문의 목록 컴포넌트.
+        상품 문의 목록.
 
         테이블 구조로 출력.
+        테이블 오른쪽 상단의 select box로 미답변, 전체 선택을 통해 목록 제어.
+        클릭 시 상세 페이지 이동
+        검색은
 
         상품 분류, 상품명, 작성자, 작성일, 답변 상태 구조로 출력.
 
@@ -21,11 +22,11 @@ import AdminQnAListForm from "./AdminQnAListForm";
 
         클릭 시 상세 페이지로 이동하도록 처리한다.
 
-        검색은 사용자 아이디를 키워드로 검색.
+        검색은 사용자 아이디 또는 닉네임 기반 검색.
+        검색 타입은 따로 없고 입력값을 그대로 닉네임과 아이디에서 검색
 
      */
 function AdminProductQnA() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const [params] = useSearchParams();
     const page = params.get('page');
     const keyword = params.get('keyword');
@@ -44,13 +45,14 @@ function AdminProductQnA() {
     const [thText, setThText] = useState([]);
 
     const navigate = useNavigate();
-    const dispatch = useDispatch();
 
     useEffect(() => {
         getProductQnA(page, keyword, typeSelectData);
         thTextSet();
     }, [page, keyword]);
 
+    //리스트 th 정의
+    //List Component를 MemberQnA와 같이 사용하므로 정의 필요.
     const thTextSet = () => {
         const textArr = [];
 
@@ -63,6 +65,7 @@ function AdminProductQnA() {
         setThText(textArr);
     }
 
+    //목록 조회
     const getProductQnA = async (page, keyword, typeSelectData) => {
         let url = `admin/qna/product${createListTypePageAndKeyword(page, keyword, typeSelectData)}`;
 
@@ -79,18 +82,15 @@ function AdminProductQnA() {
                     next: pagingObject.next,
                     activeNo: pagingObject.activeNo,
                 });
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //검색 input 입력 이벤트
     const handleKeywordOnChange = (e) => {
         setKeywordInput(e.target.value);
     }
 
+    //리스트 타입 ( 미처리, 전체 ) select box 이벤트
     const handleSelectOnChange = (e) => {
         const value = e.target.value;
 
@@ -98,6 +98,7 @@ function AdminProductQnA() {
         getProductQnA(1, keyword, value);
     }
 
+    //리스트 Element 클릭 이벤트
     const handleOnClick = (qnaId) => {
         navigate(`/admin/qna/product/${qnaId}`);
     }

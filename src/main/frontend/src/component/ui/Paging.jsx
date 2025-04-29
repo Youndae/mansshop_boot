@@ -9,6 +9,9 @@ const PagingLiWrapper = styled.li`
     padding: 10px;
 `
 
+/*
+    애플리케이션에서 사용되는 대부분의 페이지네이션 폼
+ */
 function Paging(props) {
     const { pagingData, onClickNumber, onClickPrev, onClickNext, className } = props;
     let prevElem = null;

@@ -6,6 +6,11 @@ import DefaultBtn from "../../ui/DefaultBtn";
 
 import '../../css/mypage.css';
 
+/*
+    비회원의 주문 목록 조회 접근 이전
+    받는사람과 연락처를 받는 페이지
+    회원이 접근하는 경우 mypage의 주문 조회로 강제 이동
+ */
 function NonMemberOrderInfo() {
     const [params] = useSearchParams();
     const loginStatus = useSelector((state) => state.member.loginStatus);
@@ -24,7 +29,7 @@ function NonMemberOrderInfo() {
             navigate('/my-page/order');
     }, [term, page]);
 
-
+    //input 입력 이벤트
     const handleInputOnChange = (e) => {
         setInputData({
             ...inputData,
@@ -32,6 +37,7 @@ function NonMemberOrderInfo() {
         })
     }
 
+    //submit 이벤트
     const handleSubmit = () => {
         navigate('/order/detail', {state: { recipient : inputData.recipient, phone: inputData.phone}});
     }

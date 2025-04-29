@@ -1,16 +1,19 @@
 import React, {useEffect, useRef, useState} from "react";
-import {useDispatch, useSelector} from "react-redux";
 
 import {axiosDefault, axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
-import {setMemberObject} from "../../../modules/loginModule";
 
 import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import DefaultBtn from "../../ui/DefaultBtn";
 import Overlap from "../../ui/Overlap";
 
+/*
+    정보 수정 페이지
+    현재는 토큰 기반으로 그냥 접근이 가능한데
+    이걸 어떻게 개선할지 고민중.
+    로컬 사용자의 경우 추가적인 비밀번호 입력으로 인증을 받을 수 있지만,
+    oAuth 사용자의 경우 비밀번호가 존재하지 않아서 고민 중.
+ */
 function MyPageUpdateInfo() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
-
     const [userData, setUserData] = useState({
         nickname: '',
         phone: '',
@@ -27,8 +30,6 @@ function MyPageUpdateInfo() {
     const phoneElem = useRef(null);
     const mailElem = useRef(null);
 
-    const dispatch = useDispatch();
-
     const emailPattern = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
     const phonePattern = /^01(?:0|1|6|9)([0-9]{3,4})([0-9]{4})$/;
 
@@ -39,11 +40,12 @@ function MyPageUpdateInfo() {
         getUserInfo();
     }, []);
 
+    //사용자 정보 조회
     const getUserInfo = async () => {
 
         await axiosInstance.get(`my-page/info`)
             .then(res => {
-                const contentData = res.data.content;
+                const contentData = res.data;
 
                 setUserData({
                     nickname: contentData.nickname,
@@ -53,15 +55,10 @@ function MyPageUpdateInfo() {
 
                 setEmailProvider(contentData.mailType);
                 setEmailSuffix(contentData.mailSuffix);
-
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //input 입력 이벤트
     const handleOnChange = (e) => {
         setUserData({
             ...userData,
@@ -81,6 +78,7 @@ function MyPageUpdateInfo() {
         }
     }
 
+    //닉네임 중복 체크 요청 이벤트
     const handleNicknameCheck = async () => {
         if(userData.nickname === '')
             setNicknameCheck('empty');
@@ -101,6 +99,7 @@ function MyPageUpdateInfo() {
         }
     }
 
+    //이메일 suffix Select box 이벤트
     const handleEmailSelectOnChange = (e) => {
         const val = e.target.value;
         setEmailProvider(val);
@@ -116,6 +115,7 @@ function MyPageUpdateInfo() {
         setEmailSuffix(suffix);
     }
 
+    //이메일 직접 입력 선택 시 input 입력 이벤트
     const handleEmailSuffixChange = (e) => {
         const val = e.target.value;
 
@@ -124,6 +124,8 @@ function MyPageUpdateInfo() {
         setEmailSuffix(val);
     }
 
+    //수정 요청 이벤트
+    //전체적으로 패턴 검증 및 정상 처리가 확인되면 요청
     const handleSubmit = async () => {
         const userEmail = userData.email + '@' + emailSuffix;
 

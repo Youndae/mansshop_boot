@@ -1,24 +1,14 @@
 import React, {useState, useEffect} from 'react';
-import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
 
 import {axiosInstance} from "../../../modules/customAxios";
-import {setMemberObject} from "../../../modules/loginModule";
 import {numberComma} from "../../../modules/numberCommaModule";
 
 import AdminSideNav from "../../ui/nav/AdminSideNav";
 
-/*
-        params로 productId를 받는다.
 
-        해당 상품의 총 매출
-        총 판매량
-        옵션별 판매량과 매출을 출력.
-
-        당해, 전년 월별 판매량과 매출을 출력.
-     */
+// 상품 매출 상세 페이지
 function AdminProductSalesDetail() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const { productId } = useParams();
 
     const [detailData, setDetailData] = useState({
@@ -37,16 +27,15 @@ function AdminProductSalesDetail() {
     const [optionYearSales, setOptionYearSales] = useState([]);
     const [optionLastYearSales, setOptionLastYearSales] = useState([]);
 
-    const dispatch = useDispatch();
-
     useEffect(() => {
         getProductSalesDetail();
     }, [productId]);
 
+    //상품 매출 상세 데이터 조회
     const getProductSalesDetail = async () => {
         await axiosInstance.get(`admin/sales/product/${productId}`)
             .then(res => {
-                const content = res.data.content;
+                const content = res.data;
                 const date = new Date();
 
                 setDetailData({
@@ -65,12 +54,6 @@ function AdminProductSalesDetail() {
                 setOptionTotalSales(content.optionTotalSales);
                 setOptionYearSales(content.optionYearSales);
                 setOptionLastYearSales(content.optionLastYearSales);
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
-
             })
     }
 

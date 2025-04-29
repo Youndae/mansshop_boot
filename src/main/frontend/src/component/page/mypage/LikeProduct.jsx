@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import {Link, useNavigate, useSearchParams} from "react-router-dom";
-import {useDispatch, useSelector} from "react-redux";
 
 import {axiosDefault, axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
 import {
@@ -9,7 +8,6 @@ import {
     getPrevNumber, mainProductPagingObject,
     pageSubmit
 } from "../../../modules/pagingModule";
-import {setMemberObject} from "../../../modules/loginModule";
 import {numberComma} from "../../../modules/numberCommaModule";
 import {createPageParam} from "../../../modules/requestUrlModule";
 
@@ -17,8 +15,9 @@ import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import Paging from "../../ui/Paging";
 import Image from "../../ui/Image";
 
+
+// 관심상품 목록 페이지
 function LikeProduct() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const [params] = useSearchParams();
     const page = params.get('page');
 
@@ -31,13 +30,13 @@ function LikeProduct() {
         activeNo: page,
     });
 
-    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
         getLikeProduct();
     }, [page]);
 
+    //관심상품 목록 조회
     const getLikeProduct = async() => {
 
         await axiosInstance.get(`my-page/like${createPageParam(page)}`)
@@ -53,26 +52,25 @@ function LikeProduct() {
                 });
 
                 setLikeData(res.data.content);
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //페이지네이션 버튼 이벤트
     const handlePageBtn = (e) => {
         pageSubmit(getClickNumber(e), navigate);
     }
 
+    //페이지네이션 이전 버튼 이벤트
     const handlePagePrev = () => {
         pageSubmit(getPrevNumber(pagingData), navigate);
     }
 
+    //페이지네이션 다음 버튼 이벤트
     const handlePageNext = () => {
         pageSubmit(getNextNumber(pagingData));
     }
 
+    //관심상품 제거 요청
     const handleRemoveProductLike = async (e) => {
         const productId = e.target.name;
 

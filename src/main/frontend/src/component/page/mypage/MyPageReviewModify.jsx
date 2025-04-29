@@ -1,44 +1,39 @@
 import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useParams} from "react-router-dom";
 
 import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
-import {setMemberObject} from "../../../modules/loginModule";
 
 import MyPageSideNav from "../../ui/nav/MyPageSideNav";
 import MyPageReviewWriteForm from "./MyPageReviewWriteForm";
 
+//리뷰 수정
 function MyPageReviewModify() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const { reviewId } = useParams();
 
     const [inputData, setInputData] = useState('');
     const [productName, setProductName] = useState('');
 
-    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
         getPatchReview();
     }, [reviewId])
 
+    //수정할 리뷰 데이터 조회
     const getPatchReview = async () => {
         await axiosInstance.get(`my-page/review/modify/${reviewId}`)
             .then(res => {
                 setInputData(res.data.content.content);
                 setProductName(res.data.content.productName);
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //input 입력 이벤트
     const handleInputOnChange = (e) => {
         setInputData(e.target.value);
     }
 
+    //리뷰 수정 요청 이벤트
     const handleSubmit = async () => {
         await axiosInstance.patch(`my-page/review`, {
             reviewId: reviewId

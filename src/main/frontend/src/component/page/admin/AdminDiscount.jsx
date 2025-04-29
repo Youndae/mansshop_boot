@@ -1,9 +1,7 @@
 import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
 import {Link, useNavigate, useSearchParams} from "react-router-dom";
 
 import {axiosInstance} from "../../../modules/customAxios";
-import {setMemberObject} from "../../../modules/loginModule";
 import {createPageAndKeywordUrl} from "../../../modules/requestUrlModule";
 import {
     getClickNumber,
@@ -28,7 +26,6 @@ import DefaultBtn from "../../ui/DefaultBtn";
         할인을 하지 않고 있는 상품은 테이블에 출력하지 않는다.
  */
 function AdminDiscount() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const [params] = useSearchParams();
     const page = params.get('page');
     const keyword = params.get('keyword');
@@ -43,7 +40,6 @@ function AdminDiscount() {
     });
     const [keywordInput, setKeywordInput] = useState('');
 
-    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -51,6 +47,7 @@ function AdminDiscount() {
         getDiscountProduct();
     }, [page, keyword]);
 
+    //할인중인 상품 목록 조회
     const getDiscountProduct = async () => {
         let url = `admin/product/discount${createPageAndKeywordUrl(page, keyword)}`;
 
@@ -66,26 +63,25 @@ function AdminDiscount() {
                     next: pagingObject.next,
                     activeNo: pagingObject.activeNo,
                 });
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //페이지네이션 버튼 이벤트
     const handlePageBtn = (e) => {
         handlePagingSubmit(getClickNumber(e));
     }
 
+    //페이지네이션 이전 버튼 이벤트
     const handlePagePrev = () => {
         handlePagingSubmit(getPrevNumber(pagingData));
     }
 
+    //페이지네이션 다음 버튼 이벤트
     const handlePageNext = () => {
         handlePagingSubmit(getNextNumber(pagingData));
     }
 
+    //페이지네이션 이벤트
     const handlePagingSubmit = (pageNum) => {
         if(keyword == null)
             pageSubmit(pageNum, navigate);
@@ -93,10 +89,12 @@ function AdminDiscount() {
             searchPageSubmit(keyword, pageNum, navigate);
     }
 
+    //검색어 input 입력 이벤트
     const handleKeywordOnChange = (e) => {
         setKeywordInput(e.target.value);
     }
 
+    //검색 버튼 이벤트
     const handleSearchOnClick = async () => {
         searchSubmit(keywordInput, navigate);
     }

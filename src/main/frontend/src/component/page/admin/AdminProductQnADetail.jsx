@@ -1,28 +1,19 @@
 import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
 import {useParams} from "react-router-dom";
 
 import {axiosInstance, checkResponseMessageOk} from "../../../modules/customAxios";
-import {setMemberObject} from "../../../modules/loginModule";
 
 import AdminSideNav from "../../ui/nav/AdminSideNav";
 import QnADetail from "../mypage/QnADetail";
 
 
 /*
-        params로 ProductQnAId를 받는다.
+        상품 문의 상세 페이지.
 
-        title로 상품명.
-        content로 문의 내용이 출력된다.
-
-        하단에는 textarea로 답변을 작성할 수 있으며
-        관리자가 답변을 작성하게 되면 답변 상태를 변경시킨다.
-        오타나 잘못 작성하는 경우를 대비해 이미 작성된 답변에 대해 수정 처리를 할 수 있도록 처리힌다.
-
-        관리자가 답변을 달기 애매한 마무리의 경우(감사 인사 등)의 처리를 위해 답변 완료 버튼을 추가한다.
-     */
+        내용 하단에서 답변 작성 가능.
+        오른쪽 상단의 답변 완료 버튼을 통해 답변을 작성하지 않고 완료 처리 가능.
+ */
 function AdminProductQnADetail() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const { qnaId } = useParams();
 
     const [data, setData] = useState({
@@ -37,12 +28,11 @@ function AdminProductQnADetail() {
     const [modifyTextValue, setModifyTextValue] = useState('');
     const [inputValue, setInputValue] = useState('');
 
-    const dispatch = useDispatch();
-
     useEffect(() => {
         getProductQnADetail();
     }, [qnaId]);
 
+    //상품 문의 상세 데이터 조회
     const getProductQnADetail = async () => {
         await axiosInstance.get(`admin/qna/product/${qnaId}`)
             .then(res => {
@@ -69,22 +59,21 @@ function AdminProductQnADetail() {
                 }
 
                 setReplyData(replyArr);
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //답변 수정 버튼 이벤트
+    //답변 수정 Element가 출력
     const handleReplyModifyOpen = (e) => {
         setReplyModifyStatus(e, true);
     }
 
+    //답변 수정 Element 닫기 버튼 이벤트
     const handleReplyModifyClose = (e) => {
         setReplyModifyStatus(e, false);
     }
 
+    //답변 수정 Element 제어
     const setReplyModifyStatus = (e, status) => {
         const idx = e.target.value;
 
@@ -102,10 +91,12 @@ function AdminProductQnADetail() {
             setModifyTextValue(replyData[idx].replyContent);
     }
 
+    //답변 수정 textarea 입력 이벤트
     const handleModifyOnChange = (e) => {
         setModifyTextValue(e.target.value);
     }
 
+    //답변 수정 이벤트
     const handleModifySubmit = async (e) => {
         const idx = e.target.value;
         const replyId = replyData[idx].replyId;
@@ -122,10 +113,12 @@ function AdminProductQnADetail() {
             })
     }
 
+    //답변 작성 textarea 입력 이벤트
     const handleInputOnChange = (e) => {
         setInputValue(e.target.value);
     }
 
+    //답변 작성 이벤트
     const handleInputSubmit = async () => {
         await axiosInstance.post(`admin/qna/product/reply`, {
             qnaId: data.productQnAId,
@@ -137,6 +130,7 @@ function AdminProductQnADetail() {
             })
     }
 
+    //답변 완료 버튼 이벤트
     const handleCompleteBtn = async () => {
 
         await axiosInstance.patch(`admin/qna/product/${data.productQnAId}`)

@@ -1,8 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
 import {useNavigate, useSearchParams} from "react-router-dom";
 
-import {setMemberObject} from "../../../modules/loginModule";
 import {axiosInstance} from "../../../modules/customAxios";
 import {
     getClickNumber,
@@ -16,8 +14,12 @@ import OrderListDetail from "../../ui/OrderListDetail";
 
 import '../../css/mypage.css';
 
+/*
+    주문 목록 조회
+    select box를 통한 기간별 조회 가능.
+    3, 6, 12 개월, 전체 조회 가능.
+ */
 function MyPageOrder() {
-    const loginStatus = useSelector((state) => state.member.loginStatus);
     const [params] = useSearchParams();
     const page = params.get('page');
     const term = params.get('term') === null ? 3 : params.get('term');
@@ -32,13 +34,14 @@ function MyPageOrder() {
     });
 
     const userType = 'user';
-    const dispatch = useDispatch();
+
     const navigate = useNavigate();
 
     useEffect(() => {
         getOrderData(term);
     }, [term, page]);
 
+    //주문 목록 조회. select box의 기간을 기준으로 조회
     const getOrderData = async (term) => {
 
         await axiosInstance.get(`my-page/order/${term}${createPageParam(page)}`)
@@ -54,32 +57,32 @@ function MyPageOrder() {
                 });
 
                 setOrderData(res.data.content);
-
-                const member = setMemberObject(res, loginStatus);
-
-                if(member !== undefined)
-                    dispatch(member);
             })
     }
 
+    //기간 select box 이벤트
     const handleSelectOnChange = (e) => {
         const selectTerm = e.target.value;
 
         navigate(`?term=${selectTerm}`)
     }
 
+    //페이지네이션 버튼 이벤트
     const handlePageBtn = (e) => {
         handlePagingSubmit(getClickNumber(e));
     }
 
+    //페이지네이션 이전 버튼 이벤트
     const handlePagePrev = () => {
         handlePagingSubmit(getPrevNumber(pagingData));
     }
 
+    //페이지네이션 다음 버튼 이벤트
     const handlePageNext = () => {
         handlePagingSubmit(getNextNumber(pagingData));
     }
 
+    //페이지네이션 이벤트
     const handlePagingSubmit = (pageNum) => {
         navigate(`?term=${term}&page=${pageNum}`);
     }
