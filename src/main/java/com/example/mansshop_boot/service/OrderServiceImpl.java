@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -148,6 +149,9 @@ public class OrderServiceImpl implements OrderService{
 
         List<OrderProductInfoDTO> orderProductInfoDTO = getOrderDataDTOList(optionIdAndCountDTO);
 
+        if(orderProductInfoDTO.isEmpty())
+            throw new IllegalArgumentException("product Order Data is empty");
+
         return mappingOrderResponseDTO(optionIdAndCountDTO, orderProductInfoDTO);
     }
 
@@ -162,7 +166,7 @@ public class OrderServiceImpl implements OrderService{
         Cart cart = cartRepository.findById(cartId).orElseThrow(IllegalArgumentException::new);
 
         if(!cart.getMember().getUserId().equals(cartMemberDTO.uid())
-                && !cart.getCookieId().equals(cartMemberDTO.cartCookieValue()))
+                || !Objects.equals(cart.getCookieId(), cartMemberDTO.cartCookieValue()))
             throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
 
         List<OrderProductRequestDTO> optionIdAndCountDTO = cartDetails.stream()
