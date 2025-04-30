@@ -2,113 +2,85 @@
 
 ---
 
-# 목적
-* 기존 Man's Shop 프로젝트를 Spring Boot 3 이상 버전으로 구현.
-* 자바 버전을 17로 올리고 record를 활용해 프로젝트 진행.
-* Java Stream을 최대한 활용
-* react와 Spring이 분리된 환경이 아닌 하나의 프로젝트에 합쳐서 처리하는 경험.
-* 게시판 같은 간단한 CRUD에서 벗어나 좀 더 다양하게 연결되어있는 데이터베이스 구조에서 JPA 사용 및 QueryDSL 사용의 경험.
+# 프로젝트 요약
 
-## JSP 버전 github
+> 소규모 개인 의류 쇼핑몰이라는 기획으로 진행한 개인 프로젝트입니다.   
+> 초기 버전인 JDK 8, Spring MVC, MyBatis, Oracle, JSP 기반의 프로젝트를 JDK 17, Spring Boot 3, MySQL, React( jsx ) 환경에서 재구현했습니다.   
+> JSP 버전은 마무리 이후 유지하고 있는 상태지만, 해당 버전은 지속적인 리팩토링과 기능 추가를 수행하고 있습니다.   
+> 쇼핑몰에서 볼 수 있는 기본적인 상품 정보, 장바구니, 결제, 마이페이지, 로그인 ( 로컬 및 OAuth2 ) 기능들을 구현했으며, 관리자의 기능들은 예상되는 기능들을 설계해 구현했습니다.
+
+### JSP 버전 github
 * https://github.com/Youndae/mansShop
 
 <br />
 
-# 프로젝트 정보
-
-<br />
-
-## 구조
-* 통합빌드로 처리 된 하나의 서버
-* FrontEnd 위치
-  * src/main/frontend
-
-<br />
-
-## 프로젝트 및 개발 환경
-<details>
-  <summary>Backend Server</summary>
-
-  - Spring Boot 3.2.5
-  - JDK 17
-  - Gradle
-  - Spring Security
-  - JWT
-  - Sprint Data JPA
-  - QueryDSL
-  - OAuth2 ( Google, Kakao, Naver )
-  - Lombok
-  - iamport-rest-client ( I'mport 결제 API )
-  - Java Mail
-  - commons-io
-  - RabbitMQ 3.12 Management
-  - Swagger ( springdoc-openapi 2.6.0 )
-</details>
-<br/>
-<details>
-  <summary>Frontend</summary>
-  
-  - React 18.3.1
-  - react-cookie
-  - react-dom
-  - react-router-dom
-  - react-redux
-  - redux-persist
-  - @reduxjs-???
-  - styled-components
-  - http-proxy-middleware
-  - dayjs
-  - Axios
-  - react-duam-postcode ( Kakao 우편번호 서비스 API )
-</details>
-<br/>
-<details>
-  <summary>Database</summary>
-
-  - MySQL
-  - Redis
-</details>
-<br/>
-<details>
-  <summary>Environment</summary>
-  
-  - IntelliJ IDEA
-  - GitHub
-  - Docker ( MySQL, Redis, RabbitMQ Container )
-</details>
-
-<br />
-
-## 배포 환경
-* AWS
-  * EC2
-  * ALB
-  * RDS(MySQL)
-  * S3
-  * IAM
-  * ElastiCache
-  * ACM
-  * Route53
-* Nginx
-* Jenkins
-* GitHub webhook
-
-<br />
-
-## ERD
-<img src="src/main/resources/README_image/new_ERD.jpg">
+# 목차
+<strong>1. [프로젝트 구조](#프로젝트-구조)</strong>   
+<strong>2. [개발 환경](#개발-환경)</strong>   
+<strong>3. [Architecture Diagram](#Architecture-Diagram)</strong>   
+<strong>4. [ERD](#ERD)</strong>   
+<strong>5. [페이지별 기능 상세](#페이지별-기능-상세)</strong>   
+<strong>6. [기능 및 개선 내역](#기능-및-개선-내역)</strong>
 
 <br/>
 
-## workflow
-<img src="src/main/resources/README_image/architecture_flow.jpg">
+# 프로젝트 구조
+
+<img src="src/main/resources/README_image/project_structure.jpg">
+
+* React 기반 Frontend와 Java, Spring Boot 기반 Backend의 통합 빌드
+  * Gradle build를 통해 frontend가 같이 빌드
+  * 백엔드에서 WebController라는 이름의 컨트롤러를 통해 forward:index.html을 반환
+  * Frontend에서는 Axios를 통한 통신
+* Frontend 구조 설계
+  * src/main/frontend에 위치
+  * public/image에 버튼 등의 정적 이미지 파일을 배치
+  * src/app과 src/features에 Redux 관련 store 및 설정, 상태 관리 모듈을 배치
+  * src/component 하위에 css, page, ui로 나눠주고 page는 각 페이지 Component들을 배치. UI에서는 기본 버튼, 페이지네이션 버튼 등의 UI 관련 Component를 배치함으로써 재사용성 증대
+  * src/modules에 공통 처리 로직들을 분리해 모듈화 함으로써 코드 중복 최소화
+* Backend 구조 설계
+  * annotation, auth, config, controller, domain, repository, service 구조로 설계
+  * 각 Layer 별 분리를 기반으로 패키지 구조 설계
+  * domain의 경우 dto 패키지내부에서 기능별로 패키지를 나누고 그 안에서 다시 요청, 응답, 비즈니스로직 별로 패키지를 분리해 책임을 명확히 할 수 있도록 설계
+* Project Architecture
+  * Spring의 기본적인 Layerd Architecture 구조.
+  * Controller - Service ( Interface와 구현체 ) - Repository
 
 <br />
+
+# 개발 환경
+|Category|Tech Stack|
+|---|---|
+|Backend| - Spring Boot 3.2.5 <br/> - JDK 17 <br/> - Gradle <br/> - Spring Data JPA <br/> - QueryDSL <br/> - RabbitMQ 3.12 Management <br/> - SpringSecurity <br/> - JWT <br/> - OAuth2(Google, Kakao, Naver) <br/> - Swagger( springdoc-openapi 2.6.0 ) <br/> - Java Mail <br/> - I'mport 결제 API ( iamport-rest-client ) |
+|Frontend| - React 18.3.1 <br/> - Axios <br/> - reduxjs/toolkit <br/> - react-redus <br/> - redux-persist <br/> - react-dom <br/> - http-proxy-middleware <br/> - styled-components <br/> - dayjs <br/> - Kakao 우편번호 서비스 API ( react-daum-postcode ) |
+|Database| - MySQL <br/> - Redis|
+|Environment| - IntelliJ <br/> - GitHub <br/> - Docker ( MySQL, Redis, RabbitMQ )|
+
+<br />
+
+# Architecture Diagram
+<img src="src/main/resources/README_image/architecture_Diagram.jpg">
+
+<br/>
+<br/>
+
+<strong>
+이 프로젝트는 배포 테스트를 수행했습니다. AWS 환경에서 수행했으며 GitHub Webhook과 Jenkins를 통해 push 이벤트 감지를 통한 자동 배포 및 빌드까지 구축했습니다.<br/>
+RabbitMQ의 경우 도입 이전 배포 테스트 수행으로 인해 RabbitMQ에 대한 처리는 workflow에 빠져있는 상태입니다.
+</strong>
+
+<br/>
+
+# ERD
+<img src="src/main/resources/README_image/erd.jpg">
+
+<br/>
+
 
 ## 페이지별 기능 상세
 
 <details>
-  <summary>메인</summary>
+  <summary><strong>메인 화면</strong></summary>
 
   * BEST, NEW, 상품 분류별 목록 출력
   * 상품 리스트 페이징
@@ -118,10 +90,21 @@
     * 장바구니 상품 선택 또는 전체 삭제
     * 장바구니 상품 선택 또는 전체 구매
   * 주문 조회(비 로그인시에만 출력. 로그인 시 마이페이지에서 조회 가능)
+  * 로그인
+    * 회원가입
+    * 로컬 로그인 및 OAuth2 로그인 ( Google, Kakao, Naver )
+    * 아이디 및 비밀번호 찾기 ( 비밀번호 찾기 기능은 Mail로 인증번호 전송을 통한 인증 이후 처리 )
+    * 로그아웃
+  * 비회원
+    * 장바구니( Cookie 기반 )
+    * 주문 및 결제
+    * 주문 내역 조회 ( 받는사람, 연락처 기반 )
 </details>
 
+<br/>
+
 <details>
-  <summary>상품 상세</summary>
+  <summary><strong>상품 상세</strong></summary>
 
 * 상품 정보 출력
 * 상품 옵션 선택
@@ -133,8 +116,10 @@
 * 상품 문의 목록 출력 및 작성
 </details>
 
+<br/>
+
 <details>
-  <summary>마이페이지</summary>
+  <summary><strong>마이페이지</strong></summary>
 
 * 주문 목록
   * 배송완료 상품 리뷰 작성
@@ -154,168 +139,126 @@
 * 정보 수정
 </details>
 
+<br/>
+
 <details>
-  <summary>로그인</summary>
+  <summary><strong>관리자 페이지</strong></summary>
+
+* 상품 관리
+  * 상품 목록
+  * 상품 검색
+  * 상품 추가 및 수정
+  * 상품 상세 정보
+  * 재고 관리
+  * 할인 설정
+* 주문 관리
+  * 미처리 주문 목록
+    * 주문 정보
+    * 주문 확인 처리
+    * 미처리 주문 검색 ( 받는사람 or 사용자 아이디 )
+  * 전체 주문 목록
+    * 주문 정보
+    * 전체 주문 검색 ( 받는사람 or 사용자 아이디 )
+* 문의 관리
+  * 상품 문의 관리
+    * 미답변 상품 문의 목록
+    * 전체 상품 문의 목록
+    * 상품 문의 상세 정보
+    * 상품 문의 답변 작성
+    * 상품 문의 완료 처리
+    * 상품 문의 검색 ( 닉네임 and 아이디 )
+  * 회원 문의 관리
+    * 미답변 회원 문의 목록
+    * 전체 회원 문의 목록
+    * 회원 문의 상세 정보
+    * 회원 문의 답변 작성
+    * 회원 문의 완료 처리
+    * 회원 문의 검색 ( 닉네임 and 아이디 )
+  * 회원 문의 카테고리 설정
+    * 카테고리 추가, 삭제
+* 회원 관리
+  * 회원 목록
+  * 회원 상세 정보
+    * 회원 주문 목록 조회
+    * 회원 상품 문의 내역 조회
+    * 회원 문의 내역 조회
+* 매출 관리
+  * 기간별 매출
+    * 선택 연도 월별 매출 목록 및 연매출, 판매량, 주문량
+    * 월 매출 상세 정보
+      * 베스트 5 상품, 분류별 매출, 일별 매출
+      * 분류별 상세 매출
+      * 선택 날짜의 전체 주문 내역 조회
+  * 상품별 매출
+    * 상품별 매출 목록
+    * 검색 ( 상품명 )
+    * 상품별 매출 상세 정보
+      * 옵션별 매출 내역
 </details>
 
+<br/>
 
-* 메인화면
-  * BEST, NEW, 상품 분류별 목록 출력
-  * 상품 리스트 페이징
-  * 상품명 검색
-  * 장바구니
-    * 장바구니 상품 수량 증감
-    * 장바구니 상품 선택 또는 전체 삭제
-    * 장바구니 상품 선택 또는 전체 구매
-  * 주문 조회(비 로그인시에만 출력. 로그인 시 마이페이지에서 조회 가능)
-* 상품 상세
-  * 상품 정보 출력
-  * 상품 옵션 선택
-  * 장바구니 담기
-  * 관심상품 등록
-  * 선택 상품 수량 증감
-  * 선택 상품 결제
-  * 상품 리뷰 리스트
-  * 상품 문의 목록 출력 및 작성
-* 마이페이지
-  * 주문 목록
-    * 배송완료 상품 리뷰 작성
-  * 관심 상품 목록
-  * 문의 내역
-    * 상품 문의 내역
-      * 문의 상세 정보
-      * 문의 삭제
-    * 회원 문의 내역
-      * 문의 작성
-      * 문의 상세 정보
-        * 답변 작성
-        * 문의 삭제
-  * 작성한 리뷰 목록
-    * 작성한 리뷰 상세 및 삭제
-    * 리뷰 수정
-  * 정보 수정
-* 로그인
-  * 회원가입
-  * 로컬 로그인 및 OAuth2 로그인(google, kakao, naver)
-  * 아이디 및 비밀번호 찾기
-  * 로그아웃
-* 관리자
-  * 상품관리
-    * 상품 목록
-    * 상품 추가
-    * 상품 상세 정보
-    * 상품 수정
-    * 재고 관리
-    * 할인 설정
-  * 주문 관리
-    * 미처리 주문 목록
-      * 주문 상세 정보
-      * 미처리 주문 확인 처리
-      * 미처리 주문 검색(받는사람, 아이디)
-    * 전체 주문 목록
-      * 주문 상세 정보
-      * 전체 주문 검색(받는사람, 아이디)
-  * 문의 관리
-    * 상품 문의
-      * 미답변 문의 목록
-      * 전체 문의 목록
-      * 문의 상세 정보
-      * 문의 답변 작성
-      * 문의 답변 처리
-      * 문의 검색(닉네임)
-    * 회원 문의
-      * 미답변 문의 목록
-      * 전체 문의 목록
-      * 문의 상세 정보
-      * 문의 답변 작성
-      * 문의 답변 처리
-      * 문의 검색(닉네임)
-    * 문의 카테고리 설정
-      * 카테고리 추가
-      * 카테고리 삭제
-    * 회원 관리
-      * 회원 목록
-      * 회원 상세 정보
-      * 회원 주문 목록 조회
-      * 회원 상품 문의 내역 조회
-      * 회원 문의 내역 조회
-      * 포인트 지급
-    * 매출 관리
-      * 기간별 매출
-        * 당해 월별 매출 목록
-        * 당해 매출, 판매량, 주문량 출력
-        * 월 매출 상세 정보
-        * 상품 분류별 월 매출 내역
-        * 일별 매출 내역
-        * 일별 주문 목록
-      * 상품별 매출
-        * 상품별 매출 정보 리스트
-        * 상품 매출 상세 정보
-        * 옵션별 매출 내역
-        * 검색(상품명)
-* 비회원
-  * 메인 화면 모든 기능
-  * 장바구니 사용(쿠키 활용)
-  * 상품 주문
-  * 주문 내역 조회(받는사람, 연락처)
+# 기능 및 개선 내역
+
+## 목차
+* <strong>백엔드</strong>
+  1. [JMeter 테스트 수행 및 결과](#JMeter-테스트-수행-및-결과)
+  2. [OAuth2 요청 및 토큰 발급 처리](#OAuth2-요청-처리)
+  3. [인증 인가 처리](#인증-인가-처리)
+  4. [주문 및 매출 집계 처리 개선 RabbitMQ 적용](#주문-및-매출-집계-처리-개선-RabbitMQ-적용)
+  5. [RabbitMQ 실패 메시지 재처리](#RabbitMQ-실패-메시지-재처리)
+  6. [쿼리 튜닝](#쿼리-튜닝)
+  7. [count 쿼리 캐싱](#count-쿼리-캐싱)
+  8. [상품 추가 및 수정에서 JPA 이슈와 파일관리](#상품-추가-및-수정에서-JPA-이슈와-파일관리)
+  9. [S3 연결을 통한 이미지 출력 처리](#S3-연결을-통한-이미지-출력-처리)
+  
+<br/>
+
+* <strong>프론트 엔드</strong>
+  1. [Redux를 통한 로그인 상태 관리](#Redux를-통한-로그인-상태-관리)
+  2. [Axios Interceptor](#Axios-Interceptor)
+  3. [상품 옵션 입력 폼 동적 생성 및 삭제](#상품-옵션-입력-폼-동적-생성-및-삭제)
+
 
 <br/>
 
-## 기능 및 개선 내역
+## 백엔드
 
-### 목차
-* 백엔드
-  * JMeter 테스트 수행 및 결과
-  * OAuth2 처리
-  * 인증 / 인가
-  * 주문 데이터 처리 개선 ( RabbitMQ )
-  * 쿼리 튜닝
-  * count 쿼리 캐싱
-  * 관리자의 상품 추가 및 수정, 파일관리
-  * S3 연결로 인한 이미지 출력 처리
-  * 비밀번호 찾기
-* 프론트 엔드
-  * 상품 구매 요청 시 데이터 처리
-  * Axios Interceptor
-  * 상품 옵션 추가 폼 처리
+---
 
-<br/>
-
-## 백엔드 기능
-
-<br/>
-
-### JMeter 테스트 수행 및 결과
+## JMeter 테스트 수행 및 결과
 <br />
 
 리팩토링 이후 JMeter를 통한 테스트를 진행했습니다.   
 테스트 목적은 기능에 대한 성능 최적화입니다.   
-사용하지 않는 구형 노트북에 Ubuntu 24.04.01을 설치하고 Docker를 통한 MySQL, Redis, RabbitMQ를 사용하는 환경에서 서버를 실행했습니다.   
-JMeter는 데스크탑 환경에서 실행해 테스트를 진행했습니다.   
-테스트 데이터로는 사용자 및 상품 데이터 2000개 가량, 그 외 테이블은 250만개 이상의 더미데이터를 담아두고 테스트했습니다.   
+사용하지 않는 구형 노트북에 Ubuntu 24.04.01을 설치한 뒤 Docker로 MySQL, Redis, RabbitMQ를 사용해 배포했습니다.   
+JMeter는 데스크탑에서 실행했고 공유기로 인한 같은 로컬 환경에서의 테스트로 진행했습니다.   
 
-애플리케이션 기획에 맞게 관리자를 제외한 기능은 Thread 500, Ramp-up 5, Loop count 1 환경에서 테스트를 진행했으며, 관리자는 사용자 기능에 비해 요청이 적다는 점을 감안해 Thread 20, Ramp-up 1 환경에서 테스트했습니다.   
-500 Thread로 설정한 이유는 테스트 이전 수치를 계속 바꿔가며 테스트해본 결과 500 Thread를 넘어가는 경우 비정상적으로 테스트 시간이 증가되는 것을 확인했기에 가장 적합한 최대치라고 생각했기 때문입니다.   
+테스트 데이터로는 사용자 및 상품 데이터 2000개 가량, 그 외 테이블들은 250만개 이상의 더미데이터를 담아두고 테스트했습니다.   
+테스트 설정은 500 Thread, 5 Ramp-up, Loop count 1 환경에서 수행했으며, 관리자의 경우 상대적으로 요청이 적게 발생하는 만큼 20 Thread, 1 Ramp-up 환경으로 수행했습니다.   
+이 설정은 가장 원활하게 처리되던 메인 페이지 조회 기능 기준으로 여러 수치에 대한 테스트를 진행하며 결정하게 되었습니다.   
+평균적으로 200ms를 넘어가지 않는 기능이었지만, 500 Thread가 넘는 수치에서는 1500ms 이상의 비정상적으로 치솟는 결과를 볼 수 있었기에 최적화에 가장 적합한 최대치라고 생각했습니다.   
 
-하단의 이미지는 테스트에서 사용한 테스트 목록과 결과를 정리한 엑셀 파일 중 일부입니다.   
-대부분 관리자 기능에서 큰 지연시간이 많이 발생했기 때문에 관리자 기능 위주로 자료를 준비했습니다.   
+하단의 이미지는 테스트 결과를 정리한 엑셀 파일의 일부입니다.   
+가장 문제가 많아 최적화를 많이 수행한 부분이 관리자 파트였기 때문에 관리자 기능 위주로 자료를 준비했습니다.   
 
-테스트 통과 기준은 평균 500ms대 까지로 잡았고, 그에 따른 최적화를 수행했습니다.   
-최적화는 데이터베이스 인덱스 설정, 쿼리 튜닝, 코드 레벨에서의 데이터 파싱 개선을 중점적으로 수행했고, 모든 요청에 대해 목표를 달성할 수 있었습니다.   
+테스트의 통과 기준은 평균 500ms대 까지로 잡았고, 목표에 맞춰 최적화를 수행했습니다.   
+최적화는 데이터베이스 인덱싱, 쿼리 튜닝, 코드 레벨에서의 데이터 파싱 및 JPA 최적화를 수행했으며, 모든 요청에 대해 목표를 달성할 수 있었습니다.   
 
-이번 JMeter 테스트를 통해 브라우저 및 테스트 코드를 통한 단일 테스트에서 정상적이더라도 운영 서버에서는 그렇지 않을 수 있따는 점을 알 수 있었고, 쿼리 튜닝과 쿼리 작성에 대해 더 깊게 고민할 수 있는 좋은 기회가 되었습니다.
+이 테스트를 수행하기 이전 브라우저나 Postman을 통한 단일 요청 테스트에서는 모두 정상적인 수치를 보여주던 기능들이었지만, 운영 환경과 같은 다중 요청이 발생하는 경우 또 다른 결과를 볼 수 있다는 점을 알 수 있게 된 좋은 기회였습니다.
+또한, 쿼리 튜닝과 인덱싱, JPA에 대해 좀 더 깊게 고민할 수 있었습니다.
 
 <img src="src/main/resources/README_image/jmeter_2.jpg">
 
 <br />
 
-### OAuth2 처리
+## OAuth2 요청 및 토큰 발급 처리
 <br />
 
 <img src="src/main/resources/README_image/login_view.jpg">
 
-로그인 처리로는 페이지에서 회원 가입후 로그인하는 로컬 로그인과 OAuth2 로그인으로 처리했습니다.   
-Google, Naver, Kakao 세가지로 처리했으며 요청은 window.location.href를 통해 프론트에서 요청하도록 했습니다.
+로그인 처리로는 페이지에서 회원 가입후 로그인하는 로컬 로그인과 OAuth2 로그인이 있습니다.   
+OAuth2 로그인은 Google, Naver, Kakao 세가지로 처리했으며 요청은 Frontend에서 window.location.href를 통해 요청하도록 했습니다.
 
 ```javascript
 const handleOAuth = (e) => {
@@ -332,12 +275,13 @@ const handleOAuth = (e) => {
 }
 ```
 
-클라이언트에서는 로그인 페이지 접근 시 처리 후 이동할 페이지의 정보를 state에 담아 전달합니다.   
-로컬로그인이라면 요청 응답을 받은 뒤 해당 state의 값으로 바로 이동하도록 처리할 수 있지만 OAuth2 로그인의 경우 href로 요청하기 때문에 응답을 받을 수 없어 sessionStorage에 담아두었다가 추후 처리하게 됩니다.
+href 요청 이전 state에 이전 페이지 데이터를 담도록 처리했습니다.   
+일반적인 로그인 요청에서는 200 응답을 받아 바로 이동하는 것이 가능하지만 href 요청의 경우 어렵기 때문입니다.   
+그래서 SessionStorage에 담아두었다가 처리 완료 후 꺼내 처리할 수 있도록 설계했습니다.
 
-서버에서는 OAuth2 인증 정보들을 application-oauth.yml에 저장해두었고 SimpleUrlAuthenticationSuccessHandler, OAuth2User, DefaultOAuth2UserService를 Custom해 처리할 수 있도록 했습니다.   
-SecurityFilterChain Bean에서는 oauth2Login 설정을 통해 OAuth2UserService와 SuccessHandler를 처리할 수 있도록 했습니다.   
-CustomOAuth2User의 경우 현재 받을 수 있는 사용자 이메일, 이름(카카오의 경우 닉네임)을 받아 처리합니다.
+서버에서는 OAuth2 인증 정보들을 application-oauth.yml에 저장해두었습니다.   
+처리 과정중에 사용될 SimpleUrlAuthenticationSuccessHandler와 OAuth2User, DefaultOAuth2UserService는 customizing 처리해서 사용했습니다.   
+SpringFilterChain Bean에서 oauth2Login 설정을 통해 OAuth2UserService와 SuccessHandler를 처리할 수 있도록 설정해두었습니다.
 
 ```java
 //CustomOAuth2UserService
@@ -387,9 +331,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 }
 ```
 
-Authorization Server 요청과 응답은 SpringSecurity를 통해 요청을 보내고 응답을 받아 OAuth2UserRequest로 Service에서 사용하는 방법을 택했습니다.   
-응답받은 데이터는 각 Provider에 맞는 OAuth2Response record 인스턴스를 생성하게 되고 해당 데이터를 통해 데이터베이스에 사용자 정보를 저장합니다.   
-이후 OAuth2DTO에 데이터를 담아 CustomOAuth2User를 생성하며 처리가 완료된다면 CustomOAuth2SuccessHandler에 접근합니다.
+각 Authorization Server 대한 처리를 공통적으로 처리할 수 있도록 OAuth2Response라는 인터페이스를 통해 처리하도록 설계했습니다.   
+이 설계를 통해 추후 새로운 Authorization Server가 추가되더라도 유연하게 대응할 수 있습니다.   
+응답 데이터를 처리한 뒤 provider 컬럼에 각 Authorization Server provider를 담게 되며 새로운 사용자인 경우 데이터를 새로 저장, 기존 사용자인 경우 Authorization Server로 부터 받은 데이터 기반으로 갱신을 처리하게 됩니다.   
+이후 OAuth2DTO에 담아 CustomOAuth2User를 생성하고 반환해 처리가 완료된 이후 SuccessHandler에 접근합니다.
 
 ```java
 // CustomOAuth2SuccessHandler
@@ -414,262 +359,357 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
   }
 }
 ```
+```javascript
+//Oauth.jsx
 
-SuccessHandler에서는 전달받은 OAuth2User를 통해 사용자 아이디를 알아내고 임시 토큰을 생성한 뒤 응답 쿠키에 담아 /oAuth로 Redirect 하게 됩니다.   
-/oAuth에 해당하는 컴포넌트 내부에서는 임시 토큰을 보내 토큰 발급을 요청하게 되고 서버에서는 임시 토큰 검증과 토큰 발급 처리 후 응답합니다.   
-정상적인 응답이 도달한다면 AccessToken은 LocalStorage에 저장되고 OAuth2 로그인 요청 시 SessionStorage에 저장해두었던 이전 페이지 정보를 가져와 해당 경로로 이동할 수 있도록 처리했습니다.   
-SessionStorage에 저장해두었던 이전 페이지 정보는 페이지 이동 전 삭제하도록 처리했습니다.
+useEffect(() => {
+  tokenRequest();
+}, []);
 
-OAuth2를 적용하면서 아쉬웠던 점은 href를 통한 요청이기 때문에 응답을 받을 수 없다는 점이었습니다.   
-서버의 특정 주소로 요청을 보내도록 해 처리하는 방법으로도 테스트를 해봤지만 원하는 방향으로 해결할 수 없어 비어있는 컴포넌트를 하나 생성해 그 안에서 처리하게 된 점이 아쉽습니다.
+const tokenRequest = async () => {
+
+  await axiosInstance.get('member/oAuth/token')
+          .then(res => {
+            const authorization = res.headers.get('authorization');
+            window.localStorage.setItem('Authorization', authorization);
+
+            const prevUrl = window.sessionStorage.getItem('prev');
+            navigate(prevUrl);
+          })
+}
+```
+
+SuccessHandler에서는 사용자 아이디를 기반으로 임시 토큰을 생성한 뒤 응답 쿠키에 토큰을 담아 /oAuth 경로로 Redirect 합니다.      
+그럼 Oauth 컴포넌트로 접근하게 되는데 이 컴포넌트는 아무런 UI를 처리하지 않는 컴포넌트입니다.   
+단지 랜더링 시점에 useEffect를 통해 임시 토큰을 담아 정식 토큰 발급 요청을 보내게 되고, 정상적으로 토큰이 발급 되었다면 SessionStorage에 담아두었던 prev를 꺼내 로그인 이전 페이지로 이동하게 됩니다.   
+이때, 발급 받은 토큰의 처리는 Axios Interceptor에 의해 처리되는데, Frontend 기능 내역에 따로 정리해두었습니다.   
+
+Redirect를 처리할 때 Authorization 헤더에 토큰을 담는 것은 보안상 적절하지 않다고 생각해 이렇게 처리했습니다.   
+서버의 특정 요청 경로를 만들고 처리하는 방법도 테스트해봤지만 원하는 방법으로 해결할 수 없어 UI가 없는 컴포넌트를 통해 처리하게 되어 아쉬움이 남는 기능입니다.
 
 <br />
 
-### 인증 / 인가
+## 인증 인가 처리
 <br />
 
-인증 / 인가에 대한 처리는 JWT와 SpringSecurity를 같이 사용했습니다.   
-Spring Security는 SecurityContextHolder를 통해 인증 객체를 담아주고 컨트롤러 혹은 메소드 단위로 @PreAuthorize Annotation을 사용해 처리했습니다.   
-JWT의 경우 AccessToken과 RefreshToken을 사용했으며 Refresh Token Rotation 방식으로 재발급시마다 두 토큰을 모두 재발급하도록 설계했습니다.   
-추가적으로 ino라는 쿠키를 하나 같이 생성해서 클라이언트에게 전달하는데 다중 디바이스 로그인을 처리하기 위해 만들게 되었습니다.
-Identifier Number라는 의미로 식별자로서의 역할을 하며 토큰 탈취를 감별하는데도 사용합니다.   
-ino를 통해 탈취에 대응하는 방법으로는 9999일이라는 아주 긴 만료시간을 갖는 쿠키로 전달되기 때문에 사용자가 로그아웃을 하지 않는 이상 삭제되지 않습니다.   
-만약 탈취된 토큰이 재발급이 수행되었다고 하더라도 사용자가 재 접근 했을 때 ino가 동일한 다른 데이터가 존재하는 것을 체크하기 때문에 일치하지 않는 데이터라면 탈취로 판단할 수 있어 대응할 수 있다고 생각해 설계했습니다.   
-토큰 관리는 클라이언트의 경우 AccessToken은 Local Storage에 저장하며, RefreshToken과 ino는 Cookie에 저장하게 되며, 서버에서는 Redis에 AccessToken과 RefreshToken을 저장해 관리하게 됩니다.
+인증 인가 처리는 JWT와 Spring Security를 같이 사용했습니다.   
+SpringSecurity는 검증된 토큰을 기반으로 Authentication 객체를 SecurityContextHolder.setAuthentication()을 통해 담아 관리하게 됩니다.   
+권한 관리는 컨트롤러 혹은 메소드 단위로 @PreAuthorize Annotation을 통해 관리합니다.   
+
+JWT는 AccessToken과 RefreshToken 구조로 설계했습니다.   
+또한, 다중 디바이스 로그인을 허용하기 위해 ino라는 디바이스 식별 목적의 값이 같이 처리되는 구조입니다.   
+AccessToken은 1시간, RefreshToken은 2주의 만료기간을 갖도록 처리했으며, ino는 JWT로 생성하는 것이 아니기 때문에 자체적인 만료 기간은 없습니다.   
+
+서버에서의 토큰 관리는 Redis로 관리하게 됩니다.   
+이때 key 구조는 at 또는 rt 라는 각 토큰의 약어로 시작합니다. 토큰 약어 + ino + 사용자 아이디 구조로 키값을 생성하게 됩니다.   
+클라이언트에서는 AccessToken을 LocalStorage에 보관하며 RefreshToken과 ino는 쿠키로 관리합니다.   
+쿠키 만료시점은 토큰 만료 시간과 다르게 30일을 갖게 되며, ino는 9999일의 긴 기간을 주어 사실상 만료되지 않도록 설계했습니다.   
+클라이언트의 만료 시간을 길게 설계한데는 탈취 대응에 대한 이유가 있습니다.   
+만약 사용자의 미접속 기간이 토큰 만료시간보다 길어졌을 때, 탈취를 당했다면 Redis 데이터와 비교를 통해 판단할 수 있기 때문입니다.   
+ino가 제거되지 않는 한 해당 디바이스의 Redis Key 구조는 동일할 것이기 때문에 이 과정에서 비교를 통해 탈취 여부를 판단할 수 있게 됩니다.   
+ino의 경우 절대 사라지지 않는 값은 아니며, 로그아웃이나 탈취로 판단되는 경우 서버에서 만료 쿠키를 응답에 담아 반환함으로써 제거하게 됩니다.   
+
+서버에서 응답할 때 AccessToken은 Authorization Header에 담아 반환하게 되며, RefreshToken과 ino는 응답 쿠키에 담아 반환합니다.   
+이때, 쿠키 설정으로는 SameSite Strict, HttpOnly, Secure 설정을 하도록 설계했습니다.   
+
+재발급 방식은 Refresh Token Rotation 방식으로 처리해 긴 만료시간을 갖는 Refresh Token의 단점을 상쇄할 수 있도록 했습니다.
+
 
 ```java
 @Override
-protected void doFilterInternal(HttpServletRequest request
-                                , HttpServletResponse response
-                                , FilterChain chain) throws ServletException, IOException {
-
+protected void doFilterInternal(HttpServletRequest request,
+                                HttpServletResponse response,
+                                FilterChain chain) throws ServletException, IOException {
+  
     String accessToken = request.getHeader(accessHeader);
     Cookie refreshToken = WebUtils.getCookie(request, refreshHeader);
     Cookie inoToken = WebUtils.getCookie(request, inoHeader);
     String username = null; // Authentication 객체 생성 시 필요한 사용자 아이디
-
+  
     if(inoToken != null){
-        String inoValue = inoToken.getValue();
-        if(accessToken != null && refreshToken != null) {
-            String refreshTokenValue = refreshToken.getValue();
-            String accessTokenValue = accessToken.replace(tokenPrefix, "");
-
-            if(!jwtTokenProvider.checkTokenPrefix(accessToken)
-                    || !jwtTokenProvider.checkTokenPrefix(refreshTokenValue)){
-                chain.doFilter(request, response);
-                return;
-            }else {
-                String claimByAccessToken = jwtTokenProvider.verifyAccessToken(accessTokenValue, inoValue);
-
-                if(claimByAccessToken.equals(Result.WRONG_TOKEN.getResultKey())
-                    || claimByAccessToken.equals(Result.TOKEN_STEALING.getResultKey())){
-                    jwtTokenService.deleteCookieAndThrowException(response);
-                    return;
-                }else if(claimByAccessToken.equals(Result.TOKEN_EXPIRATION.getResultKey())){
-                    if(request.getRequestURI().equals("/api/reissue")) {
-                        chain.doFilter(request, response);
-                    }else
-                        jwtTokenService.tokenExpirationResponse(response);
-
-                    return;
-                }else {
-                    username = claimByAccessToken;
-                }
-            }
-        }else if(accessToken != null && refreshToken == null){
-            String decodeTokenClaim = jwtTokenProvider.decodeToken(accessToken.replace(tokenPrefix, ""));
-
-            jwtTokenService.deleteTokenAndCookieAndThrowException(decodeTokenClaim, inoValue, response);
-            return;
+      String inoValue = inoToken.getValue();
+      if(accessToken != null && refreshToken != null) {
+        String refreshTokenValue = refreshToken.getValue();
+        String accessTokenValue = accessToken.replace(tokenPrefix, "");
+  
+        if(!jwtTokenProvider.checkTokenPrefix(accessToken)
+                || !jwtTokenProvider.checkTokenPrefix(refreshTokenValue)){
+          chain.doFilter(request, response);
+          return;
         }else {
-            chain.doFilter(request, response);
+          String claimByAccessToken = jwtTokenProvider.verifyAccessToken(accessTokenValue, inoValue);
+  
+          if(claimByAccessToken.equals(Result.WRONG_TOKEN.getResultKey())
+                  || claimByAccessToken.equals(Result.TOKEN_STEALING.getResultKey())){
+            jwtTokenService.deleteCookieAndThrowException(response);
             return;
+          }else if(claimByAccessToken.equals(Result.TOKEN_EXPIRATION.getResultKey())){
+            if(request.getRequestURI().equals("/api/reissue")) {
+              chain.doFilter(request, response);
+            }else
+              jwtTokenService.tokenExpirationResponse(response);
+  
+            return;
+          }else {
+            username = claimByAccessToken;
+          }
         }
+      }else if(accessToken != null && refreshToken == null){
+        String decodeTokenClaim = jwtTokenProvider.decodeToken(accessToken.replace(tokenPrefix, ""));
+  
+        jwtTokenService.deleteTokenAndCookieAndThrowException(decodeTokenClaim, inoValue, response);
+        return;
+      }else {
+        chain.doFilter(request, response);
+        return;
+      }
     }
-
+  
     if(username != null){
-        Member memberEntity = memberRepository.findById(username).get();
-        String userId;
-        Collection<? extends GrantedAuthority> authorities;
-        CustomUserDetails userDetails;
-
-        if(memberEntity.getProvider().equals("local"))
-            userDetails = new CustomUser(memberEntity);
-        else
-            userDetails = new CustomOAuth2User(
-                                memberEntity.toOAuth2DTOUseFilter()
-                            );
-
-        userId = userDetails.getUserId();
-        authorities = userDetails.getAuthorities();
-
-        Authentication authentication =
-        new UsernamePasswordAuthenticationToken(userId, null, authorities);
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+      Member memberEntity = memberRepository.findByUserId(username);
+      String userId;
+      Collection<? extends GrantedAuthority> authorities;
+      CustomUserDetails userDetails;
+  
+      if(memberEntity.getProvider().equals("local"))
+        userDetails = new CustomUser(memberEntity);
+      else
+        userDetails = new CustomOAuth2User(
+                memberEntity.toOAuth2DTOUseFilter()
+        );
+  
+      userId = userDetails.getUserId();
+      authorities = userDetails.getAuthorities();
+  
+      Authentication authentication =
+              new UsernamePasswordAuthenticationToken(userId, null, authorities);
+  
+      SecurityContextHolder.getContext().setAuthentication(authentication);
     }
-
+  
     chain.doFilter(request, response);
 }
 ```
 
-SecurityFilterChain 설정을 통해 JWTAuthorizationFilter를 먼저 거치게 되는데 가장 먼저 ino의 존재 여부를 체크합니다.   
-Token 데이터는 Redis에 저장하고 있는데 Redis 데이터의 키값 구조는 각 토큰의 약자인 'at 또는 rt' + ino + userId 구조로 저장합니다.   
-그래서 ino가 존재하지 않는다면 Redis 데이터를 조회할 수 없고 토큰이 유효한지만 체크할 수 있기 때문에 검증을 수행하지 않습니다.
+SecurityFilterChain 설정에서 beforeFilter에 JWTAuthorizationFilter를 설정해 두었기 떄문에 모든 요청은 위 필터를 거치게 됩니다.   
+처리 과정에서 가장 먼저 ino 존재 여부를 확인하게 되는데 ino가 없는 경우 토큰 검증은 가능하지만 Redis 데이터와 비교가 불가능하기 때문에 검증을 수행하지 않고 인증 처리를 하지 않도록 설계했습니다.   
 
-ino가 존재한다면 그 다음 체크하는 것은 토큰이 모두 존재하는지, RefreshToken만 존재하는지, 아니면 전부 다 없거나 AccessToken만 존재하는지를 체크합니다.   
-모두 존재한다면 모든 토큰의 prefix 체크 후 AccessToken만을 검증하게 되고 Claim에 담겨있는 사용자 아이디와 메소드 호출시 같이 전달된 ino의 값을 통해 Redis 데이터와 비교합니다.   
-이때 검증 시 TokenDecodeException이 발생한다면 이후 처리를 진행하지 않고 잘못된 토큰이라는 응답을 클라이언트에게 보내며 모든 응답 쿠키에 대해 만료기간을 0으로 처리해 삭제되도록 합니다.   
-토큰 검증은 정상적으로 처리되었으나 Redis 데이터와 일치하지 않거나 데이터가 존재하지 않는 경우에는 탈취로 판단해 해당 ino의 Redis 데이터와 응답 쿠키를 모두 삭제하도록 처리하고 탈취 응답을 클라이언트에게 반환합니다.
+ino가 존재한다면 토큰 검증 및 Redis 데이터와 비교를 처리하게 됩니다.   
+조건에 따라 검증이 안되는 잘못된 토큰 혹은 Redis 데이터와 불일치 하는 탈취라고 판단되는 토큰, 정상 토큰으로 나눠집니다.   
+잘못된 토큰이라는 응답의 경우 토큰은 있으나 Redis 데이터가 없거나, 토큰 검증이 실패한 토큰입니다.   
+이 경우 Redis 데이터 처리가 불가능하기 때문에 응답 쿠키로 만료된 쿠키들을 담아준 뒤 800이라는 상태값과 함께 바로 응답을 반환하게 됩니다.   
+탈취로 판단된 토큰의 경우 동일하게 응답 쿠키에 만료된 쿠키들을 담아주고 Redis 데이터까지 삭제한 뒤 800이라는 상태값과 함께 바로 응답을 반환하게 됩니다.   
+800 응답을 받은 클라이언트에서는 LocalStorage에 저장된 AccessToken을 제거하고 인증 과정에서 문제가 있었음을 사용자에게 알려 재로그인을 유도합니다.   
+쿠키의 경우 응답 쿠키가 바로 적용되기도 하고 HttpOnly 설정으로 인해 제어할 수 없으므로 따로 처리하지 않습니다.   
 
-AccessToken은 존재하지 않지만 RefreshToken만 존재하는 경우는 수정된 코드입니다.   
-프로젝트 기능이 마무리되고 통합빌드 이후 테스트 과정에서 새로고침이나 url 입력을 통한 페이지 이동에서 탈취 응답이 계속 반환되는 문제가 있었습니다.   
-통합빌드 이전에는 프론트 엔드 서버의 포트로 접근해 요청을 보내다보니 컴포넌트에 먼저 접근해 문제가 없었지만 빌드 이후에는 백엔드 서버 포트로 접근하다보니 최초 접근 위치가 백엔드 서버가 되어 쿠키에 있는 RefreshToken과 ino는 알아서 넘어왔지만 LocalStorage에 저장된 AccessToken이 전달되지 않아 발생한 문제였습니다.   
-이 문제를 어떻게 해결할지 여러 방향으로 생각해보며 고민을 해봤는데 이미 설계된 상태에서 토큰 여부 체크만 바꿔주면 간단하게 해결할 수 있었습니다.   
-현재 코드처럼 AccessToken만 존재하지 않는 경우이더라도 오류를 반환하는 것이 아니라 검증을 하지 않고 이후 처리를 진행하도록 하는 것이었습니다.
-
-탈취에 대응하기 위해 JWT 설계는 다음과 같이 진행했습니다.
-1. Redis에 저장되는 AccessToken 데이터는 RefreshToken의 만료기간과 같은 기간을 갖고 보관한다.
-2. 클라이언트에서는 재발급을 요청할 때 RefreshToken과 ino만 전달하는 것이 아닌 AccessToken도 같이 전달한다.
-3. 이때, AccessToken의 만료로 인해 잘못된 토큰이라는 응답이 올 것을 고려해 요청 url이 재발급인 경우 이후 처리를 수행할 수 있도록 한다.
-4. 모든 요청에 대한 검증은 AccessToken만 검증하며 다른 토큰은 존재 여부와 prefix만 체크한다.
-
-이러한 설계 구조에서 RefreshToken과 ino만 전달되었다고 하더라도 권한이 필요한 페이지에 접근이 불가능하고 재발급 역시도 처리될 수 없기 때문에 문제될 점이 없었습니다.   
-이 문제가 발생한 이유는 처음 설계하고 검증 코드를 계획할 때 여러 상황에 대한 고려를 제대로 하지 못했기 때문이라고 생각합니다.   
-JWT를 사용하게 되면서 탈취에 충분하게 대응할 수 있는 방법을 계속 고려하며 설계했는데 충분한 대응을 할 수 있는 것만을 바라보고 다양한 상황에 대한 변수는 체크하지 못해 발생한 문제라고 생각이 들었습니다.
-
+토큰이 정상으로 판단되는 경우 RDB 데이터를 조회한 뒤 Authentication 객체 생성 및 SecurityContextHolder에 담아 관리하도록 처리합니다.   
 
 <br />
 
-### 주문 데이터 처리 개선 ( RabbitMQ )
+## 주문 및 매출 집계 처리 개선 RabbitMQ 적용
 <br />
 
-상품의 결제 API로 I'mport 결제 API를 사용했으며, 주소지 API는 Kakao 우편번호 서비스 API를 사용했습니다.
-주문 데이터 처리 과정은 주문 및 상세 데이터 저장, 장바구니를 통한 결제인 경우 장바구니에서 해당 상품 데이터 삭제, 상품 판매량 수정, 구매 상품 옵션의 재고 수정, 집계 테이블 수정으로 이루어져 있습니다.   
-기존 JSP 버전에서는 매출 집계 테이블이 1개였고, 비교적 간결한 구조로 되어있었는데 Spring Boot 버전으로 재구현하면서 다양한 매출 데이터를 보여주도록 수정하며 필요성이 사라졌습니다.   
-그래서 주문 및 상세 테이블에서의 집계만으로 충분할 것이라고 생각해 집계 테이블이 없는 구조로 개선했는데 단일 요청에서는 정상적인 성능을 보였으나, JMeter를 통한 다중 요청 테스트에서는 큰 지연시간이 발생되는 것을 볼 수 있었습니다.   
-심한 경우 몇십분 간의 락이 걸리는 큰 문제였기 때문에 다시 집계 테이블을 만들게 되었고 이번에는 일별, 상품 옵션별 집계 테이블로 나눠 추가했습니다.   
+Spring Boot 버전으로 새로 진행하면서 기존에 있던 집계 테이블은 제거했습니다.   
+매출 기능에 대해 다양한 데이터를 보여주도록 개선하게 되면서 집계 테이블의 효율성이 떨어졌기 때문에 주문 및 상세 테이블에서의 집계 쿼리로 처리했습니다.   
+단일 요청에서 준수한 성능을 보여줬기에 이 설계를 유지하고 있었는데 JMeter로 다중 요청 테스트를 진행해보니 측정 불가 수준의 성능 문제가 발생했습니다.
+이 문제를 해결하기 위해 인덱싱과 쿼리 튜닝을 진행해봤지만 해결할 수 없었기에 집계 테이블을 다시 설계하게 되었고, 일별 집계 테이블과 상품 옵션별 월 매출 집계 테이블로 나눠 추가했습니다.   
 
-이렇게 처리하는 것으로 1차적인 문제는 해결했으나 주문 데이터 처리 과정이 너무 많아진다는 단점이 있었습니다.   
-또한, 사용자에게 필요하지 않은 판매량, 재고, 집계 처리가 같이 처리되어야 한다는 점에서 비효율적이라고 생각했고 분리할 방법에 대해 고민하게 되었습니다.   
-해결 방안으로 배치 처리와 비동기 처리가 있다고 생각하게 되었고, 배치 처리는 매출을 실시간으로 확인할 수 있어야 한다는 기능 설계에 맞지 않다고 생각해 제외했습니다.   
-비동기 처리로 전환하는 방법으로는 @Async Annotation을 사용하는 방법과 Meesage Queue를 사용하는 방법으로 나눌 수 있다고 생각했기에 Message Queue에 대해 알아보게 되었습니다.   
-알아보고 테스트 해본 결과 @Async를 사용하게 되면 의존성 추가나 설정등이 비교적 간단하기 때문에 손쉽게 사용할 수 있있다는 점이 장점이었으나, 비동기 처리 과정 중 발생하는 오류에 대해 대응하는 것이 Message Queue 방식에 비해 복잡하다고 생각했습니다.   
-처리가 실패한 경우 재시도를 수행하도록 할 수 있으나, 일정 시간 이상의 오류 상태가 지속된 경우 결국 로그를 확인해서 처리해야 한다는 점이 아쉬웠습니다.   
-Message Queue 중에서 RabbitMQ를 중점적으로 알아보고 결정하게 되었는데 RabbitMQ의 경우 의존성 추가 및 큐 관리가 필요하다는 단점이 존재하지만, 실패 메시지를 따로 보관해 장기적인 오류에도 재시도를 수행할 수 있다는 점이 장점이었습니다.   
-특히, 실패 메시지를 개발자가 직접 로그 확인 후 실행하지 않아도 애플리케이션 UI를 통해 현재 실패 메시지 상태와 재시도 요청을 처리할 수 있도록 할 수 있다는 것이 선택에 큰 이유가 되었습니다.   
+매출 기능은 이 개선을 통해 해결할 수 있었지만, 이 처리로 인해 주문 처리의 복잡도가 증가했습니다.   
+주문 데이터 처리, 장바구니 데이터 처리, 상품 총 판매량 수정 처리, 옵션별 재고 수정, 2개의 집계 테이블에 대한 처리까지 모두 포함되어야 했습니다.   
+하지만 사용자 입장에서 보면 주문 데이터 처리와 장바구니 데이터 처리만 관심사일 뿐, 다른 처리들은 사용자의 관심밖의 일이라고 생각해 이걸 기다리도록 처리하는건 비효율적이라고 생각했습니다.   
 
-이러한 이유로 아래 코드처럼 RabbitMQ를 도입해 주문 처리에 적용했고, 주문 및 상세 데이터만 처리한 뒤 나머지 처리 과정은 RabbitMQ에게 맡겨 사용자는 더욱 빠른 응답을 받을 수 있도록 개선할 수 있었습니다.
+이 문제를 해결하기 위한 방법으로 Batch 처리와 비동기 처리 방식를 생각할 수 있었습니다.   
+하지만, 매출과 재고, 판매량의 실시간성이 보장되어야 한다는 점에서 Batch 처리는 적합하지 않았고, 비동기 처리 중 방법을 찾게 되었습니다.   
+비동기 처리 방식으로는 @Async Annotation을 통한 처리와 MessageBroker를 사용하는 방법으로 나눌 수 있었습니다.   
+@Async의 경우 비교적 간결한 설정으로 사용할 수 있다는 장점이 있었으나, 처리 과정 중 발생한 오류에 대응하기 어렵다는 단점이 있었습니다.   
+반면, MessageBroker는 설정은 조금 복잡하더라도 실패 메시지 관리와 재시도 처리가 용이하다는 이점이 있어 MessageBroker를 선택했습니다.   
+MessageBroker 중 RabbitMQ를 선택하게 되었는데 다른 선택지였던 Kafka는 목적에 비해 복잡하기도 하고 오버 스펙에 즉시처리가 RabbitMQ에 비해 떨어진다고 생각했습니다.   
+그래서 즉시 처리가 더 수월하며 Dead Letter Queue 기능을 통한 실패 메시지 관리의 편의성을 갖고 있는 RabbitMQ를 적용해 문제를 해결했습니다.
+
+RabbitMQ의 Exchange, Queue, DLQ의 name 또는 Routing Key는 모두 rabbitMQ.yml에서 관리하도록 처리했으며, RabbitMQProperties 클래스를 통해 사용할 수 있도록 처리했습니다.   
+또한, 필요한 값의 유연한 조회를 처리하기 위해 RabbitMQPrefix라는 Enum을 생성해 같이 관리합니다.
 
 ```java
-// 주문 처리
-@Service
+//RabbitMQPrefix
+@Getter
 @RequiredArgsConstructor
-public class OrderServiceImpl implements OrderService {
+public enum RabbitMQPrefix {
+    EXCHANGE_ORDER("order"),
+    QUEUE_ORDER_PRODUCT("orderProduct"),
+    QUEUE_ORDER_PRODUCT_OPTION("orderProductOption"),
+    QUEUE_PERIOD_SUMMARY("periodSalesSummary"),
+    QUEUE_PRODUCT_SUMMARY("productSalesSummary"),
+    QUEUE_ORDER_CART("orderCart");
+  
+    private final String key;
+}
+
+//RabbitMQProperties
+@Component
+@ConfigurationProperties(prefix = "rabbitmq")
+public class RabbitMQProperties {
+    private Map<String, Exchange> exchange;
     
-  private final ProductOrderRepository productOrderRepository;
-
-  private final RabbitTemplate rabbitTemplate;
-
-  private final RabbitMQProperties rabbitMQProperties;
+    private Map<String, Queue> queue;
     
-  @Override
-  @Transactional(rollbackFor = RuntimeException.class)
-  public String payment(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO) {
-      ProductOrderDataDTO productOrderDataDTO = createOrderDataDTO(paymentDTO, cartMemberDTO);
-      ProductOrder order = productOrderDataDTO.productOrder();
-      productOrderRepository.save(order);
-      
-      String orderExchange = rabbitMQProperties.getExchange()
-                                              .get(RabbitMQPrefix.EXCHANGE_ORDER.getKey())
-                                              .getName();
-
-      //주문 타입이 cart인 경우 장바구니에서 선택한 상품 또는 전체 상품 주문이므로 해당 상품을 장바구니에서 삭제.
-      if(paymentDTO.orderType().equals("cart"))
-          rabbitTemplate.convertAndSend(
-                  orderExchange,
-                  getQueueRoutingKey(RabbitMQPrefix.QUEUE_ORDER_CART),
-                  new OrderCartDTO(cartMemberDTO, productOrderDataDTO.orderOptionIds())
-          );
-
-      // ProductOption의 재고 수정
-      rabbitTemplate.convertAndSend(
-              orderExchange,
-              getQueueRoutingKey(RabbitMQPrefix.QUEUE_ORDER_PRODUCT_OPTION),
-              productOrderDataDTO.orderProductList()
-      );
+    //getter, setter
+    //...
   
-      // Product의 salesQuantity 수정
-      rabbitTemplate.convertAndSend(
-              orderExchange,
-              getQueueRoutingKey(RabbitMQPrefix.QUEUE_ORDER_PRODUCT),
-              productOrderDataDTO.orderProductList()
-      );
-  
-      // Period Summary 처리
-      rabbitTemplate.convertAndSend(
-              orderExchange,
-              getQueueRoutingKey(RabbitMQPrefix.QUEUE_PERIOD_SUMMARY),
-              new PeriodSummaryQueueDTO(order)
-      );
-  
-      // Product Summary 처리
-      rabbitTemplate.convertAndSend(
-              orderExchange,
-              getQueueRoutingKey(RabbitMQPrefix.QUEUE_PRODUCT_SUMMARY),
-              new OrderProductSummaryDTO(productOrderDataDTO)
-      );
-  }
-
-  private String getQueueRoutingKey(RabbitMQPrefix rabbitMQPrefix) {
-    return rabbitMQProperties.getQueue()
-            .get(rabbitMQPrefix.getKey())
-            .getRouting();
-  }
-
-  public ProductOrderDataDTO createOrderDataDTO(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO) {
-    ProductOrder productOrder = paymentDTO.toOrderEntity(cartMemberDTO.uid());
-    List<OrderProductDTO> orderProductList = paymentDTO.orderProduct();
-    List<String> orderProductIds = new ArrayList<>();// 주문한 상품 옵션 아이디를 담아줄 리스트
-    List<Long> orderOptionIds = new ArrayList<>();
-    int totalProductCount = 0;// 총 판매량
-    //옵션 정보 리스트에서 각 객체를 OrderDetail Entity로 Entity화 해서 ProductOrder Entity에 담아준다.
-    //주문한 옵션 번호는 추후 더 사용하기 때문에 리스트화 한다.
-    //총 판매량은 기간별 매출에 필요하기 때문에 이때 같이 총 판매량을 계산한다.
-    for(OrderProductDTO data : paymentDTO.orderProduct()) {
-      productOrder.addDetail(data.toOrderDetailEntity());
-      if(!orderProductIds.contains(data.productId()))
-        orderProductIds.add(data.productId());
-      orderOptionIds.add(data.optionId());
-      totalProductCount += data.detailCount();
+    
+    private static class Exchange {
+        private String name;
+        private String dlq;
+        //getter, setter
+        //...
     }
-    productOrder.setProductCount(totalProductCount);
-
-    return new ProductOrderDataDTO(productOrder, orderProductList, orderProductIds, orderOptionIds);
-  }
+    
+    public static class Queue {
+        private String name;
+        private String routing;
+        private string dlq;
+        private String dlqRouting;
+        //getter, setter
+        //...
+    }
 }
 ```
 
-RabbitMQ를 사용하면서 필요한 exchange와 Queue, DLQ 의 이름과 Routing Key는 모두 rabbitMQ.yml에 작성해두고 RabbitMQProperties 객체에 담아 사용하며, RabbitMQPrefix라는 Enum 클래스를 같이 활용해 직접 작성하는 경우를 최소화했습니다.   
-yml은 git Ignore에 등록했지만, RabbitMQProperties와 config, consumer는 아래 각 링크들을 통해 확인하실 수 있습니다.
+이 처리를 통해 rabbitMQProperties.getQueue().get(rabbitMQPrefix.getKey()).getRouting(); 과 같은 코드를 통해 바로 Routing Key를 사용할 수 있습니다.   
 
-<a href="https://github.com/Youndae/mansshop_boot/blob/master/src/main/java/com/example/mansshop_boot/domain/dto/rabbitMQ/RabbitMQProperties.java">RabbitMQProperties</a>   
-<a href="https://github.com/Youndae/mansshop_boot/blob/master/src/main/java/com/example/mansshop_boot/config/rabbitMQ/config/RabbitMQConfig.java#L18">RabbitMQConfig</a>   
-<a href="https://github.com/Youndae/mansshop_boot/blob/master/src/main/java/com/example/mansshop_boot/config/rabbitMQ/consumer/OrderConsumer.java">OrderConsumer</a>
+현재 RabbitMQ가 적용되어 있는 기능은 주문 처리 기능밖에 없기 때문에 별도의 Producer를 두지 않고 메소드에서 바로 convertAndSend()를 통해 호출하게 됩니다.   
+RabbitMQ의 기본적인 설정들과 Queue 정의는 RabbitMQConfig 클래스에 정의해두었으며, 아래 링크를 통해 전체 코드를 확인하실 수 있습니다.
+
+<a href="https://github.com/Youndae/mansshop_boot/blob/master/src/main/java/com/example/mansshop_boot/config/rabbitMQ/config/RabbitMQConfig.java">RabbitMQConfig 전체 코드</a>
 
 <br />
+
+## RabbitMQ 실패 메시지 재처리
+
+RabbitMQ를 사용한 이유중 하나는 실패 메시지 관리 및 재시도 용이성입니다.   
+그래서 이 실패 메시지 관리를 어떻게 할지 고민을 해봤습니다.   
+
+실패 메시지 처리는 Management를 사용하는 만큼 관리자의 수동 처리를 하는 방법이 있고, 로그를 확인 후 재처리를 하는 방법도 있습니다.   
+여러 방법 중 저는 UI를 통해 재처리 요청으로 수행하는 방법을 택했습니다.   
+운영을 담당하는 개발자가 있는 경우에는 처리 방안이 다양하지만, 개발 후 제공만 하는 경우에는 제한적이라고 생각했기 때문입니다.   
+
+기본적인 기능 설계로는 메시지 개수 조회, 재처리 요청 순으로 처리할 수 있도록 가닥을 잡았습니다.   
+여러 조회 테스트와 재처리 테스트를 수행해보고 방법을 택하게 되었는데 그 중 HTTP 요청을 통한 조회, receive()를 통한 재처리로 결정하게 되었습니다.   
+
+HTTP 요청을 통한 조회의 경우 두가지 경로가 존재했습니다.   
+'/api/queues/{vhost}/{queueName}/get' 요청과 '/api/queues/{vhost}/{queueName}' 요청으로 두가지 방법이 있는데 차이점으로는 /get의 경우 메시지내용까지 가져온다는 차이점이 있습니다.   
+만약 조회 즉시 재처리 요청을 수행해야 한다면 /get으로 처리하는 방법이 더 유효할 것이라고 생각합니다.   
+receive()나 HTTP 요청을 통한 추가 조회 및 재처리 요청이 발생하지 않아도 되고 메시지 데이터를 파싱해 바로 브로커에게 메시지를 넘겨줄 수 있기 때문입니다.   
+하지만 제가 원하는 기능은 관리자가 재처리 버튼을 눌렀을 때 재처리를 시도하는 것이 목적이었기 때문에 적합하지 않다고 생각했고, 메시지 내용 없이 단순히 개수만 반환하는 요청을 사용했습니다.   
+
+```java
+@Service
+@RequiredArgsConstructor
+public class AdminServiceImpl implements AdminService {
+    
+    private final RabbitMQProperties rabbitMQProperties;
+
+    @Value("${spring.rabbitmq.username}")
+    private String rabbitMQUser;
+  
+    @Value("${spring.rabbitmq.password}")
+    private String rabbitMQPw;
+    
+    //...
+  
+    @Override
+    public List<FailedQueueDTO> getFailedMessageList() {
+        List<String> dlqNames = rabbitMQProperties.getQueue().values()
+                                          .stream()
+                                          .map(RabbitMQProperties.Queue::getDlq)
+                                          .toList();
+        List<FailedQueueDTO> result = new ArrayList<>();
+        
+        for(String name : dlqNames) {
+            int messageCount = getFailedMessageCount(name);
+            
+            if(messageCount > 0)
+                result.add(new FailedQueueDTO(name, messageCount));
+        }
+      
+        return result;
+    }
+  
+    private int getFailedMessageCount(String queueName) {
+        WebClient webClient = WebClient.builder()
+                .baseUrl("http://localhost:15672")
+                .defaultHeaders(headers -> headers.setBasicAuth(rabbitMQUser, rabbitMQPw))
+                .build();
+
+      return (int) webClient.get()
+                            .uri(builder ->
+                                    builder.path("/api/queues/{vhost}/{queueNames}")
+                                            .build("/", queueName)
+                            )
+                            .retrieve()
+                            .bodyToMono(Map.class)
+                            .block()
+                            .get("messages");
+    }
+}
+```
+
+모든 Queue에 대한 정보를 담고 있는 RabbitMQProperties를 사용해 모든 DLQ 명을 리스트화 한 뒤 요청을 반복적으로 보내 메시지 개수를 조회했습니다.   
+이후 메시지가 존재하는 DLQ명과 개수만 담아 클라이언트에게 반환하게 됩니다.
+
+그럼 클라이언트에서는 실패 메시지가 존재하는 것을 확인 후 재처리 버튼을 통해 요청을 보내게 되면 Request Body에 조회 요청 시 반환된 데이터를 그대로 담아서 보내게 됩니다.   
+
+```java
+@Override
+public String retryFailedMessages(List<FailedQueueDTO> queueDTOList) {
+    //TODO: 추후 알림 기능 추가할 때 모든 메시지 처리에 대한 알림 발송하도록 개선.
+    queueDTOList.forEach(this::retryMessages);
+
+    return Result.OK.getResultKey();
+}
+
+private void retryMessages(FailedQueueDTO dto) {
+    for(int i = 0; i < dto.messageCount(); i++) {
+        Message message = rabbitTemplate.receive(dto.queueName());
+        if(message != null) {
+            Object data = converter.fromMessage(message);
+            Map<String, Object> headers = message.getMessageProperties().getHeaders();
+            List<Map<String, Object>> xDeathList = (List<Map<String, Object>>) headers.get("x-death");
+
+            if(xDeathList != null && !xDeathList.isEmpty()) {
+                Map<String, Object> xDeath = xDeathList.get(0);
+                String exchange = (String) xDeath.get("exchange");
+                List<String> routingKeyList = (List<String>) xDeath.get("routing-keys");
+                String routingKey = routingKeyList.get(0);
+                rabbitTemplate.convertAndSend(exchange, routingKey, data);
+            }
+        }
+    }
+}
+```
+
+서버는 클라이언트로부터 전달받은 리스트를 기반으로 재처리 요청을 시도하게 되는데 이때 메시지의 개수만큼만 반복하게 됩니다.   
+개수만큼 반복하도록 제어하지 않는다면 메시지의 재 실패로 인해 다시 DLQ에 적재되는 경우 무한루프가 발생할 수 있기 때문입니다.   
+
+재처리 요청은 HTTP 요청으로 처리하는 방법도 있었지만, 그렇게 처리하는 경우 너무 많은 횟수의 TCP 연결 및 요청이 반복적으로 발생해야 해서 큰 오버헤드가 발생할 수 있다는 단점이 있습니다.   
+반면, receive()를 통한 처리는 RabbitMQ AMQP에 의해 TCP 연결을 유지한채 지속적인 처리가 가능하기 떄문에 더 효율적으로 실패 메시지 처리가 가능하기 때문에 receive()로 처리했습니다.
+
+<br/>
 
 ### 쿼리 튜닝
 <br />
 
 다중 요청 테스트 이후 쿼리 최적화를 수행하다보니 인덱스로는 한계가 있는 쿼리들이 존재했습니다.   
-이 쿼리들의 공통점은 Pagination을 위한 LIMIT이 붙거나, 여러 테이블과 JOIN이 발생한다는 점이었습니다.   
-대부분 이 쿼리들은 관리자 기능에 존재했는데 사용자는 자신과 관련된 데이터만 조회하는 것 처럼 조건이 붙어있지만, 관리자는 전체를 조회하는 경우가 많기 때문이었습니다.   
+이 쿼리들은 공통적으로 Pagination을 위한 LIMIT 처리와 여러 테이블간의 JOIN이 포함되어 있었습니다.    
+특히 관리자 기능에서 많이 발생했는데, 사용자는 자신의 데이터만 조회한다는 조건이 붙는 반면, 관리자는 테이블의 전체 데이터를 기반으로 조회하기 때문에 성능에 큰 영향을 미쳤습니다.   
 
-문제점 파악을 위해 EXPLAIN ANALYZE를 통해 확인했을 때 기준이 되는 테이블의 모든 데이터에 대해 JOIN이 처리된다는 점이 가장 큰 문제점이라는 것을 알 수 있었습니다.   
-이 문제를 해결하기 위해 몇가지 테스트를 해봤는데 그 중 FROM 절에서 Sub Query를 사용해 JOIN되는 양을 줄이는 것이 가장 효과적인 방법이라는 것을 알 수 있었습니다.   
-모든 데이터베이스 요청에 대해 QueryDSL을 사용하고 있었는데 QueryDSL에서는 FROM 절의 Sub Query를 사용하는 것이 어렵다는 것을 알게 되었습니다.   
-그래서 이 쿼리들에 대해서만 Native Query를 사용해 문제를 해결했습니다.   
+문제 해결을 위해 EXPLAIN ANALYZE를 통해 실행 계획을 분석한 결과, 기준이 되는 테이블의 모든 데이터를 먼저 조회한 후 JOIN을 수행하고 나서야 LIMIT이 적용되는 것을 확인할 수 있었습니다.   
+
+성능 최적화를 위한 첫번째 방법으로는 JOIN 되는 기준 테이블 데이터를 줄이는 것이었습니다.   
+이를 해결하기 위해 FROM 절의 SubQuery를 사용하여 기준 테이블을 별도로 조회해 데이터 양을 줄일 수 있었고, 쿼리 성능을 크게 향상 시킬 수 있었습니다.   
+하지만, QueryDSL 환경에서는 FROM 절의 SubQuery 사용이 어렵다는 문제가 있었습니다.   
+JPQL 기반인 QueryDSL은 객체 중심으로만 처리할 수 있으며, 임시 테이블처럼 FROM 절에서의 SubQuery를 사용하는 경우 타입 안정성 보장이 어렵다는 것이 원인이었습니다.   
+
+이 문제는 Native Query로 처리해 해결했습니다.
 
 ```java
 @Repository
@@ -789,13 +829,10 @@ public class ProductReviewDSLRepositoryImpl implements ProductReviewDSLRepositor
 }
 ```
 
-Native Query를 사용하면서 가장 크게 신경쓰였던 부분은 가독성 부분이었습니다.   
-이 문제를 개선하기 위해 StringBuilder를 사용해 최대한 가독성을 높일 수 있도록 노력했습니다.   
-조건에 따른 동적 처리를 위해서는 메소드를 분리해 중복되는 코드를 최소화하고 추후 수정시에도 편하도록 유연성을 확보하고자 노력했습니다.
+Native Query를 사용하며 가장 신경이 쓰였던 부분은 가독성과 코드 중복이었습니다.   
+이 고민을 해결하기 위해 StringBuilder로 쿼리를 작성했고, 동적 처리 부분은 메소드로 분리해 가독성을 높이고 코드의 중복을 최소화 할 수 있었습니다.
 
-다중 요청 시 리뷰, 문의 등 기본 리스트 조회 성능이 20 ~ 40초 가량 걸렸었는데 이렇게 Sub Query로 쿼리 튜닝을 수행 한 이후 최대 평균 20ms 까지 줄어드는 결과를 확인할 수 있었습니다.   
-특히, 관리자 매출 기능에서는 최악의 경우 수십분의 락이 걸리는 경우도 있었는데 평균 500ms 정도로 줄어드는 효율성을 볼 수 있었습니다.
-
+이 쿼리 튜닝을 수행하게 되면서 20 ~ 40초 가량 걸리던 다중 요청 테스트에서 Count 캐싱을 포함해 20ms까지 줄이는 결과를 냈습니다.
 
 <br />
 
@@ -888,26 +925,28 @@ public class AdminServiceImpl implements AdminService {
 
 <br />
 
-### 관리자의 상품 추가 및 수정, 파일관리
+### 상품 추가 및 수정에서 JPA 이슈와 파일관리
 <br />
 
-관리자의 상품 및 수정 과정에서는 파일을 저장 및 삭제하는 처리가 포함되어 있습니다.   
-데이터베이스 요청은 @Transactional Annotation을 통해 오류 발생 시 롤백이 될 수 있지만, 파일 저장 및 삭제 처리는 그렇지 않다는 점에서 이 처리를 해결해야 한다고 생각했습니다.   
-이 문제를 해결하기 위해 대부분의 처리를 try-catch로 감싸주고 저장되는 파일명들은 saveImages 라는 리스트에 담아 따로 관리하도록 했습니다.   
-이후 내부에서 예외가 발생하는 경우 saveImages 리스트에 저장된 모든 파일명들을 통해 저장된 파일들을 삭제할 수 있도록 처리했습니다.   
+관리자의 상품 추가 및 수정에서는 여러 엔티티에 대한 저장 및 수정 처리가 수행됩니다.   
+Product, ProductOption, ProductThumbnail, ProductInfoImage 이렇게 총 4개의 엔티티에 대한 처리가 이루어져야 합니다.   
+초기에는 이 4개 엔티티들을 동시 저장하도록 하기 위해 양방향 매핑과 CascadeType.ALL 옵션을 통해 최상위 엔티티 Repositroy인 ProductRepository.save()를 통해 동시저장을 처리했습니다.
 
-임시 디렉토리를 사용하는 방안도 있었지만, 그런 경우 추가적인 파일 이동 처리가 필요하고 즉시 반영되어야 한다는 기능 특성 상 시간대 별로 파일 이동을 하는 방법을 사용하기에도 적합하지 않다고 생각했습니다.   
-즉시 처리되어야 하는 만큼 여러번의 I/O가 발생하는 것 보다는 문제가 발생했을 때 삭제할 수 있도록 처리하는게 더 효율적이라고 생각해 이 방법을 택하게 되었습니다.   
+하지만, CascadeType 설정 중 REMOVE 옵션이 Database의 cascade 제약조건을 무시할 수 있는 DELETE 쿼리를 날리게 된다는 점을 알게 되어 PERSIST, MERGE 옵션만 사용하는 방법을 고려하게 되었습니다.   
+그러나, 이 방법 역시 ProductQnA와 같이 Product 엔티티를 참조하고 있는 단방향 매핑 연관관계가 있다면 save()가 발생했을 때 MERGE 옵션이 활성화 되어있는 모든 엔티티들을 한번에 JOIN해서 조회한다는 점이 문제가 되었습니다.   
+이러한 문제 때문에 하나의 Entity에 대한 save() 요청임에도 큰 지연시간이 발생하는 것을 확인할 수 있게 되었고, 원인을 파악할 수 있었습니다.   
+MERGE 옵션이 활성화 되어 있다면 상위 엔티티의 갱신이 이루어질 것이라 판단한 JPA 영속성 컨텍스트가 MERGE 옵션을 통해 하위 엔티티에까지 영향을 끼치도록 처리한다는 점이었습니다.   
+이 문제를 해결하기 위해 동시저장을 처리해보려고 여러 방면으로 테스트를 해봤지만, 해결 방안을 찾을 수가 없었기에 동시저장을 포기하고 CascadeType 옵션을 아예 사용하지 않도록 개선했습니다.
+이번 문제 해결을 통해 JPA의 사용에 대해 많은 고민을 할 수 있었습니다.
 
-이 상품 관리 기능에서는 또 하나의 개선 사항이 있었습니다.   
-JPA를 사용하는 환경이었기에 Product를 참조하는 ProductOption, ProductThumbnail, ProductInfoImage 엔티티들에 대해 양방향 매핑으로 연관관계를 설정하고 CascadeType.ALL을 통한 동시저장을 처리했었습니다.   
-테스트 결과 나눠서 저장하는 것 보다 동시저장이 더 빠르게 처리되기도 하고 단순하게 바라보더라도 데이터베이스 연결 횟수도 1번으로 마무리 할 수 있었기 때문에 더 효율적이라는 생각 때문이었습니다.   
-하지만 이 설정으로 인해 Product를 단방향으로 참조하는 다른 엔티티에서 save() 요청 시 위 엔티티들을 모두 JOIN해서 조회한다는 것이 문제가 되었습니다.   
-간단한 insert 처리임에도 이 JOIN 과정 때문에 큰 지연시간이 발생하는 것을 확인했고, 이 문제를 회피하기 위해 각 엔티티들을 따로 저장하는 방법으로 개선했습니다.   
+이 문제에 대해서는 아래 링크의 제 블로그에 더 상세히 정리해두었습니다.   
+<a href="https://myyoun.tistory.com/242">JPA CascadeType 문제 블로그 정리 </a>
 
-그리고 양방향 매핑에 있는 엔티티들을 제외한 다른 곳에서 전혀 참조가 발생하지 않는 엔티티에 대해서는 CascadeType.PERSIST, CascadeType.MERGE를 정의해 동시 저장을 처리할 수 있도록 개선했습니다.   
-이 문제에 대해서는 블로그에 상세하게 정리해두었고, 아래 링크를 통해 확인하실 수 있습니다.   
-<a href="https://myyoun.tistory.com/242">JPA CascadeType 문제 및 해결</a>
+
+이 처리 과정에서는 파일의 저장 및 삭제 처리도 포함되어 있습니다.   
+고민했던 점은 롤백에 대한 점이었습니다. 데이터베이스 롤백의 경우 @Transactional을 통해 처리할 수 있지만, 파일은 그렇지 않다는 점이 문제였습니다.   
+
+이 문제를 해결하기 위해서는 예외가 발생했을 때 저장된 파일이 어떤게 있는지 알 수 있어야 한다고 생각했습니다.
 
 ```java
 @Service
@@ -935,8 +974,7 @@ public class AdminServiceImpl implements AdminService {
 
       if(deleteOptionList != null)
         productOptionRepository.deleteAllById(deleteOptionList);
-
-      deleteProductImage(imageDTO);
+      
     }catch (Exception e) {
       log.warn("Filed admin patchProduct");
       e.printStackTrace();
@@ -945,33 +983,11 @@ public class AdminServiceImpl implements AdminService {
       throw new IllegalArgumentException("Failed patchProduct", e);
     }
 
+    deleteProductImage(imageDTO);
+
     return productId;
   }
-
-  public void setProductOptionData(Product product, AdminProductPatchDTO patchDTO) {
-    List<PatchOptionDTO> optionDTOList = patchDTO.getOptionList();
-    List<ProductOption> optionEntities = product.getProductOptions();
-
-    for(int i = 0; i < optionDTOList.size(); i++) {
-      PatchOptionDTO dto = optionDTOList.get(i);
-      long dtoOptionId = dto.getOptionId();
-      boolean patchStatus = true;
-
-      for(int j = 0; j < optionEntities.size(); j++) {
-        ProductOption option = optionEntities.get(j);
-
-        if(dtoOptionId == option.getId()){
-          option.patchOptionData(dto);
-          patchStatus = false;
-          break;
-        }
-      }
-
-      if(patchStatus)
-        product.addProductOption(dto.toEntity());
-    }
-  }
-
+  
   public List<String> saveProductImage(Product product, AdminProductImageDTO imageDTO) throws Exception{
     List<String> thumbnails = saveThumbnail(product, imageDTO.getThumbnail());
     List<String> infoImages = saveInfoImage(product, imageDTO.getInfoImage());
@@ -983,13 +999,20 @@ public class AdminServiceImpl implements AdminService {
 }
 ```
 
-개선을 통해 위 코드와 같이 수정되었으며 전체 코드는 아래 링크를 통해 확인하실 수 있습니다.   
-<a href="https://github.com/Youndae/mansshop_boot/blob/master/src/main/java/com/example/mansshop_boot/service/AdminServiceImpl.java#L245">patchProduct 코드</a>
+위와 같이 save가 최초 발생하는 시점부터 try-catch로 감싸 주었습니다.   
+이미지 저장 처리 및 호출되는 하위 메소드들은 예외 발생 시 throws Exception을 통해 상위 메소드로 위임하도록 처리했습니다.   
+저장된 이미지명들은 별도의 saveImages 라는 리스트로 관리하도록 했으며, 예외 발생 시 이 리스트에 담긴 파일명들을 기반으로 파일 삭제를 처리할 수 있도록 처리해 문제를 해결할 수 있었습니다.   
+catch에서 이미지 파일을 삭제한 후 강제로 예외를 발생시켜 데이터베이스 적용 사항 또한 롤백 될 수 있도록 처리했습니다.
+클라이언트 요청 중 삭제 되어야 할 이미지들의 경우 제대로 삭제가 되지 않았더라도 기능에 문제가 발생하지 않으므로 예외처리 밖으로 빼 가장 마지막에 처리될 수 있도록 했습니다.
+
+다른 해결 방안으로 임시 디렉토리에 저장 후 처리가 마무리 되었을 때 옮기는 방법도 있었지만, 여러번의 I/O가 발생한다는 점과 상품 이미지인 만큼 즉시 적용이 이루어져야 한다는 점에서 비효율적이라고 생각해 제외하게 되었습니다.      
+전체 코드는 아래 링크를 통해 확인하실 수 있습니다.   
+<a href="https://github.com/Youndae/mansshop_boot/blob/master/src/main/java/com/example/mansshop_boot/service/AdminServiceImpl.java#L279">patchProduct 코드</a>
 
 
 <br />
 
-### S3 연결로 인한 이미지 출력 처리
+## S3 연결을 통한 이미지 출력 처리
 
 <br />
 
@@ -1033,35 +1056,122 @@ public class MainServiceImpl implements MainService {
 
 <br />
 
-### 비밀번호 찾기
-<br />
-
-로그인 페이지에는 아이디와 비밀번호 찾기 기능이 있습니다.   
-아이디는 사용자에게 이름과 연락처 혹은 이메일을 입력받아 일치하는 아이디를 반환해주는 간단한 처리로 구현했습니다.   
-비밀번호의 경우 일반적으로 많이 수행되는 방법 중 하나인 이메일을 통한 인증번호 입력으로 처리했습니다.   
-사용자에게 아이디, 이름, 이메일을 입력받은 후 해당 정보가 일치한다면 사용자의 이메일로 6자리의 랜덤한 정수를 생성해 전송합니다.   
-그리고 인증번호는 Redis에 사용자 아이디를 key로 담고있도록 처리하고 6분의 만료시간을 설정했습니다.   
-입력시간인 5분보다 1분의 시간을 더 두었는데 이유는 비밀번호 수정 요청까지 인증번호를 체크하기 위해서 입니다.
-
-사용자가 이메일을 통해 인증번호를 입력하고 나면 서버에 아이디와 입력된 인증번호를 같이 전달해 확인을 요청합니다.   
-서버에서는 아이디를 key로 Redis에서 인증번호 데이터를 조회하고 일치한다면 일치 응답을 반환해 비밀번호 변경 페이지로 접근하게 됩니다.   
-이때 React에서는 해당 컴포넌트로 state를 통해 아이디와 인증번호를 같이 전달하도록 처리했습니다.
-
-사용자가 수정할 비밀번호를 입력 후 수정 요청을 전달하게 되면 클라이언트에서는 아이디, 비밀번호, 인증번호를 같이 서버에 전달하도록 했습니다.   
-서버에서는 아이디와 인증번호를 가장 먼저 체크한 뒤 일치여부와 상관없이 Redis 데이터를 폐기합니다.   
-일치하지 않는다면 불일치 응답을 보내게 되며 사용자는 처음부터 다시 인증을 수행하도록 했고, 일치한다면 비밀번호를 BCrypt를 통해 encode한 뒤 수정하도록 처리했습니다.
+# 프론트 엔드 기능
 
 <br />
 
-## 프론트 엔드 기능
+## Redux를 통한 로그인 상태 관리
+
+<br/>
+
+Frontend에서 로그인 상태 관리는 redusjs/toolkit을 통해 처리했습니다.   
+
+```javascript
+//rootReducer.js
+import { combineReducers } from "@reduxjs/toolkit";
+import memberReducer from '../features/member/memberSlice';
+
+const rootReducer = combineReducers({
+  member: memberReducer,
+});
+
+export default rootReducer;
+
+//store.js
+import { configureStore } from '@reduxjs/toolkit';
+import { persistStore, persistReducer} from "redux-persist";
+import storage from 'redux-persist/lib/storage';
+import rootReducer from './rootReducer';
+
+const persistConfig = {
+  key: 'root',
+  storage,
+  whitelist: ['member'],
+};
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+export const store = configureStore({
+  reducer: persistedReducer,
+  devTools: process.env.NODE_ENV !== 'production',
+  middleware: (getDefaultMiddleware) =>
+          getDefaultMiddleware({
+            serializableCheck: {
+              ignoreActions: ['persist/PERSIST', 'persist/REHYDRATE'],
+            },
+          }),
+});
+
+export const persistor = persistStore(store);
+
+
+//memberSlice.js
+import { createSlice } from "@reduxjs/toolkit";
+
+const initialState = {
+  loginStatus: false,
+  id: null,
+  role: null,
+};
+
+const memberSlice = createSlice({
+  name: 'member',
+  initialState,
+  reducers: {
+    login(state, action) {
+      const { userId, role } = action.payload;
+      console.log("login userId : ", userId);
+      console.log("login role : ", role);
+      state.loginStatus = true;
+      state.id = userId;
+      state.role = role;
+    },
+    logout(state) {
+      state.loginStatus = false;
+      state.id = null;
+      state.role = null;
+    },
+  },
+});
+
+export const { login, logout } = memberSlice.actions;
+export default memberSlice.reducer;
+
+//App.js
+function App() {
+  const dispatch = useDispatch();
+
+  //User status Redux
+  useEffect(() => {
+    const accessToken = getToken();
+
+    if(!accessToken) {
+      dispatch(logout());
+      return;
+    }
+
+    axiosInstance.get('member/status', { withCredentials: true })
+            .then(res => {
+              const { userId, role } = res.data;
+              dispatch(login({ userId, role }));
+            })
+  }, [dispatch]);
+  return (
+    //...
+  )
+```
+
+Redux Toolkit과 Redux-persist를 사용해 로그인 상태를 전역적으로 관리하고, 새로고침시에도 상태를 유지할 수 있도록 구성했습니다.   
+memberSlice.js를 통해 상태를 관리하며, store.js에서 persist를 통해 localStorage에 자동 저장됩니다.   
+App.js의 useEffect를 통해 새로고침 또는 페이지 진입 시 로그인 여부를 서버에 검증하고 Redux 상태에 반영함으로써 UX를 확보할 수 있도록 했습니다. 
 
 <br />
 
-### Axios Interceptor
+## Axios Interceptor
 <br />
 
 이번 프로젝트에서는 JWT 요청과 오류 응답에 대한 처리를 수월하게 관리할 수 있도록 interceptor를 사용했습니다.   
-동일하게 리액트를 사용했던 다른 프로젝트에서는 클라이언트에서 토큰을 모두 쿠키에 저장했기 때문에 따로 인터셉터를 사용하지 않고 오류 핸들링만 모듈화했었는데 이번에는 AccessToken을 LocalStorage에 저장하게 되면서 인터셉터를 활용하게 되었습니다.
+동일하게 리액트를 사용했던 다른 프로젝트에서는 클라이언트에서 토큰을 모두 쿠키에 저장했기 때문에 따로 interceptor를 사용하지 않고 오류 핸들링만 모듈화했었는데 이번에는 AccessToken을 LocalStorage에 저장하게 되면서 interceptor를 활용하게 되었습니다.
 
 ```javascript
 //customAxios.js
@@ -1121,9 +1231,6 @@ export const errorHandling = (err) => {
   const errorMessage = err.response.data.errorMessage;
   if(errorStatus === 401){
     //토큰 만료 응답
-    // err.config._retry = true;
-    console.log('axios default response status is 401');
-
     return axiosInstance.get(`reissue`)
             .then(res => {
               window.localStorage.removeItem('Authorization');
@@ -1146,19 +1253,18 @@ export const errorHandling = (err) => {
 
 인터셉터 Request에서는 AccessToken을 헤더에 담는 처리만 하도록 했고, Response에서는 토큰 만료 응답이 반환된 경우 재발급 요청을 보내도록 처리했습니다.   
 이후 재발급이 완료 되었다면 기존 AccessToken 데이터는 삭제하고 새로운 AccessToken 데이터를 담아줍니다.   
-남은 오류중 따로 핸들링 해줘야 하는 오류가 탈취 응답 코드로 설정한 800번 오류인데 이 경우 alert 창을 띄워 사용자에게 알린 뒤 LocalStorage에 저장된 토큰 데이터를 삭제하도록 했습니다.   
+남은 오류 중 따로 핸들링 해줘야 하는 오류가 탈취 응답 코드로 설정한 800번 오류인데 이 경우 alert 창을 띄워 사용자에게 알린 뒤 LocalStorage에 저장된 토큰 데이터를 삭제하도록 했습니다.   
 쿠키는 서버에서 만료된 응답 쿠키를 반환하기 때문에 따로 인터셉터에서 처리하지 않도록 했습니다.   
 403 오류를 포함한 다른 모든 오류에 대해서는 오류페이지로 이동하도록 처리했습니다.
 
 customAxios 모듈에는 하나의 axios가 더 존재하는데 이 axios의 인터셉터는 조금의 차이가 있습니다.   
 Request의 경우 동일하게 처리하지만 Response에 대해서는 토큰 만료 응답만 처리하도록 했습니다.   
-이유는 로그인처럼 응답에 따라 직접 처리해야 하는 요청에서 사용하기 위해서 분리하게 되었습니다.   
-로그인의 경우 잘못된 정보를 입력하는 경우 BadCredentialsException이 발생하고 그 오류에 대해 핸들링 하도록 처리해두었는데 그러다보니 오류페이지로 이동하는 것이 아닌 정보가 잘못 입력되었다는 것을 화면에 출력해줄 필요가 있었습니다.   
+분리 이유는 로그인의 경우 잘못된 아이디나 비밀번호를 입력하는 경우 403이 발생하며 BadCredentialsException이 발생하는데 이 경우 오류 페이지로 이동하는 것이 아닌 정보가 잘못 입력되었다는 문구를 화면에 출력해야 하기 때문입니다. 
 해당 처리에 대해 기존 Axios로 처리할 수 있는 방법을 찾아보고자 했지만 해결책을 찾지 못해 하나의 인스턴스를 추가하게 되었습니다.
 
 <br />
 
-### 상품 옵션 추가 폼 처리
+## 상품 옵션 입력 폼 동적 생성 및 삭제
 <br />
 
 상품 추가 폼은 추가, 수정에서 모두 사용되기 대문에 AddProductForm으로 하위 컴포넌트를 생성해 처리했습니다.   
@@ -1271,37 +1377,7 @@ function AddProductForm(props) {
 이렇게 처리하고 입력되는 데이터 onChange 핸들링에 대해서는 상위 div의 value에 index를 갖도록 처리하게 되면서 해당 index의 데이터 값에 대한 핸들링을 처리할 수 있도록 구현했습니다.
 
 <br />
-
-# 느낀점과 고민중인 부분
-
-계속해서 JDK8로만 개발하다가 이번에 처음 17버전을 사용해보게 되었습니다.   
-SpringBoot 3.x 부터는 17버전을 사용해야 한다고 해서 이번에 적용해보게 되었는데 record 사용에 있어서 불편하다고 느낀점도 있지만 그래도 처음 record가 무엇인지 알아볼 때 생각했던 것 보다는 원활하게 사용할 수 있었습니다.   
-처음에 한가지 걱정했던 점이 record 멤버 변수가 final로 선언되어 setter를 사용할 수 없다는 것이었는데 DTO 위주로 사용하다 보니 따로 setter를 통해 처리해야 하는 경우가 드물고, 있더라도 따로 처리해준 뒤 인스턴스 생성을 하면 되었기 때문에 어렵지 않게 사용했다고 생각합니다.   
-오히려 DTO의 목적에 맞게 계층간 데이터 전송 목적으로 사용할 수 있어 어떻게 DTO를 처리하면 좋을지 더 생각해 볼 수 있는 계기가 되었습니다.
-
-그리고 이번에 stream을 적극적으로 사용해보고자 노력했는데 이번 기회로 Collection 타입의 변수를 어떻게 처리할지 경험을 쌓을 수 있는 좋은 기회였습니다.   
-Stream을 보통 알고리즘 공부할때만 조금씩 사용해봤기 때문에 class 객체에 대한 filter(), map()의 사용은 처리해본 경험이 굉장히 적었는데 이번 프로젝트를 진행하며 감을 잡을 수 있었습니다.   
-Stream으로 처리한 코드들을 볼 때마다 오히려 반복문보다 느리게 처리되는 경우도 있으니 상황에 맞춰 사용해야 한다는 말을 많이 봤습니다.   
-그래서 이번 프로젝트를 진행하며 여러 번의 조회 결과에 대한 응답 DTO 매핑에 대해서는 Stream을 사용하지 않고 반복문을 주로 사용했습니다.   
-이유로는 반복문으로 처리하면서 한번만 거치고 나면 삭제해도 되는 처리가 많았기 때문에 검색 횟수를 줄이기 위해 기존 리스트에서 remove를 통해 해당 인덱스 데이터를 삭제하도록 했습니다.   
-또한 break를 통해 반복문을 제어하도록 했기 때문에 그 부분에서 Stream과 수행시간 차이가 발생하는 것을 확인할 수 있었습니다.   
-아직 Stream을 완벽히 사용하지 못하고 모든것을 알지 못하기 때문에 제가 아직 알지 못하는 포인트에서 이 차이를 메꿀 수 있는 방법이 있을 수 있겠지만 아직까지는 가독성이 좋고 좀 더 편하게 사용할 수 있다는 점이 장점이라고 생각합니다.   
-Stream은 앞으로 적극적으로 활용해 경험을 쌓고 자유자재로 사용해 반복문과의 선택지에서 더 효율적인 방법을 확실하게 선택할 수 있는 역량을 기르고 싶습니다.
-
-
-프로젝트를 진행하며 발생했던 오류 중 클라이언트에서 새로고침 또는 url 입력을 통한 페이지 이동 시 토큰 탈취로 판단이 된다는 문제가 있었습니다.   
-로그를 통해 확인해보니 다른 토큰은 정상적으로 서버에 넘어오지만 AccessToken이 넘어오지 않아 토큰 구성이 이상해 탈취로 판단한 것이었습니다.   
-이 프로젝트에서는 AccessToken, RefreshToken, Ino 이렇게 세가지의 토큰 값을 통해 인증 / 인가를 처리합니다.   
-Ino가 존재하더라도 장기간 미접속으로 AccessToken, RefreshToken이 존재하지 않을수는 있지만 AccessToken이나 RefreshToken 둘 중 하나만 존재할수는 없다고 생각했습니다.   
-그래서 그런 경우 탈취로 판단하도록 처리했는데 문제는 통합빌드로 처리하게 되면서 새로고침 또는 url 접근으로 인한 최초 접근하는 부분이 React Component가 아닌 Spring Boot 서버라는 점이었습니다.   
-그래서 Local Storage에 담아두었던 AccessToken은 서버에 전달되지 않고 쿠키에 저장되어있는 RefreshToken과 Ino만 전달되어 탈취로 판단하는 것이었습니다.   
-여러 방향으로 어떻게 수정해야 할지 고민을 많이 해봤는데 결과적으로는 RefreshToken과 ino만 존재하더라도 이후 처리를 진행하도록 하는 방향으로 수정하게 되었습니다.   
-이유로는 처음부터 모든 토큰을 검증하는 것이 아닌 있는지만 확인하고 ino와 AccessToken의 Claim을 통해 Redis 데이터와 비교하며 검증을 하도록 설계했습니다.   
-그럼 AccessToken이 없으면 권한이 필요한 요청이 허용되지 않는다는 것이므로 문제 발생의 여지가 없었습니다.   
-다음으로는 재발급의 경우인데 이 경우에도 탈취에 조금이라도 대응하겠다는 취지로 AccessToken, RefreshToken, Ino가 모두 있어야만 재발급을 처리하도록 설계했습니다.   
-그래서 Redis의 AccessToken 데이터 만료시간도 토큰 만료시간보다 길게 잡아두었고 클라이언트에서는 만료시간을 아예 알지 못하고 있어 재발급 시 같이 담아 요청하도록 했기 때문에 재발급에서도 문제가 발생하지 않게 됩니다.   
-제 생각으로는 보안에 대해 과하게 집중하면서 여러 상황에 대해 고려하지 못한 것이 가장 문제였다고 생각합니다.   
-이번 문제 발생과 해결로 인해 더 신경써야 하는 부분일수록 최대한 모든 상황을 고려해 설계해야 한다는 점을 느낄 수 있었습니다.
+<br />
 
 
 ---

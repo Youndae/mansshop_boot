@@ -1273,7 +1273,7 @@ public class AdminServiceImpl implements AdminService {
         return result;
     }
 
-    public int getFailedMessageCount(String queueName) {
+    private int getFailedMessageCount(String queueName) {
         WebClient webClient = WebClient.builder()
                 .baseUrl("http://localhost:15672")
                 .defaultHeaders(headers -> headers.setBasicAuth(rabbitMQUser, rabbitMQPw))
