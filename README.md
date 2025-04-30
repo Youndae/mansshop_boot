@@ -1,6 +1,5 @@
 # Man's Shop
 
----
 
 # 프로젝트 요약
 
@@ -70,6 +69,7 @@ RabbitMQ의 경우 도입 이전 배포 테스트 수행으로 인해 RabbitMQ�
 </strong>
 
 <br/>
+<br/>
 
 # ERD
 <img src="src/main/resources/README_image/erd.jpg">
@@ -77,7 +77,7 @@ RabbitMQ의 경우 도입 이전 배포 테스트 수행으로 인해 RabbitMQ�
 <br/>
 
 
-## 페이지별 기능 상세
+# 페이지별 기능 상세
 
 <details>
   <summary><strong>메인 화면</strong></summary>
@@ -200,7 +200,7 @@ RabbitMQ의 경우 도입 이전 배포 테스트 수행으로 인해 RabbitMQ�
 
 # 기능 및 개선 내역
 
-## 목차
+### 목차
 * <strong>백엔드</strong>
   1. [JMeter 테스트 수행 및 결과](#JMeter-테스트-수행-및-결과)
   2. [OAuth2 요청 및 토큰 발급 처리](#OAuth2-요청-처리)
@@ -224,9 +224,8 @@ RabbitMQ의 경우 도입 이전 배포 테스트 수행으로 인해 RabbitMQ�
 
 ## 백엔드
 
----
 
-## JMeter 테스트 수행 및 결과
+### JMeter 테스트 수행 및 결과
 <br />
 
 리팩토링 이후 JMeter를 통한 테스트를 진행했습니다.   
@@ -252,7 +251,7 @@ JMeter는 데스크탑에서 실행했고 공유기로 인한 같은 로컬 환�
 
 <br />
 
-## OAuth2 요청 및 토큰 발급 처리
+### OAuth2 요청 및 토큰 발급 처리
 <br />
 
 <img src="src/main/resources/README_image/login_view.jpg">
@@ -389,7 +388,7 @@ Redirect를 처리할 때 Authorization 헤더에 토큰을 담는 것은 보안
 
 <br />
 
-## 인증 인가 처리
+### 인증 인가 처리
 <br />
 
 인증 인가 처리는 JWT와 Spring Security를 같이 사용했습니다.   
@@ -506,7 +505,7 @@ ino가 존재한다면 토큰 검증 및 Redis 데이터와 비교를 처리하�
 
 <br />
 
-## 주문 및 매출 집계 처리 개선 RabbitMQ 적용
+### 주문 및 매출 집계 처리 개선 RabbitMQ 적용
 <br />
 
 Spring Boot 버전으로 새로 진행하면서 기존에 있던 집계 테이블은 제거했습니다.   
@@ -583,7 +582,9 @@ RabbitMQ의 기본적인 설정들과 Queue 정의는 RabbitMQConfig 클래스�
 
 <br />
 
-## RabbitMQ 실패 메시지 재처리
+### RabbitMQ 실패 메시지 재처리
+
+<br/>
 
 RabbitMQ를 사용한 이유중 하나는 실패 메시지 관리 및 재시도 용이성입니다.   
 그래서 이 실패 메시지 관리를 어떻게 할지 고민을 해봤습니다.   
@@ -1012,7 +1013,7 @@ catch에서 이미지 파일을 삭제한 후 강제로 예외를 발생시켜 �
 
 <br />
 
-## S3 연결을 통한 이미지 출력 처리
+### S3 연결을 통한 이미지 출력 처리
 
 <br />
 
@@ -1056,11 +1057,11 @@ public class MainServiceImpl implements MainService {
 
 <br />
 
-# 프론트 엔드 기능
+## 프론트 엔드 기능
 
 <br />
 
-## Redux를 통한 로그인 상태 관리
+### Redux를 통한 로그인 상태 관리
 
 <br/>
 
@@ -1167,7 +1168,7 @@ App.js의 useEffect를 통해 새로고침 또는 페이지 진입 시 로그인
 
 <br />
 
-## Axios Interceptor
+### Axios Interceptor
 <br />
 
 이번 프로젝트에서는 JWT 요청과 오류 응답에 대한 처리를 수월하게 관리할 수 있도록 interceptor를 사용했습니다.   
@@ -1264,7 +1265,7 @@ Request의 경우 동일하게 처리하지만 Response에 대해서는 토큰 �
 
 <br />
 
-## 상품 옵션 입력 폼 동적 생성 및 삭제
+### 상품 옵션 입력 폼 동적 생성 및 삭제
 <br />
 
 상품 추가 폼은 추가, 수정에서 모두 사용되기 대문에 AddProductForm으로 하위 컴포넌트를 생성해 처리했습니다.   
