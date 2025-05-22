@@ -2,28 +2,46 @@ package com.example.mansshop_boot.service.unit;
 
 import com.example.mansshop_boot.config.customException.exception.CustomAccessDeniedException;
 import com.example.mansshop_boot.config.customException.exception.CustomNotFoundException;
+import com.example.mansshop_boot.config.customException.exception.CustomOrderSessionExpiredException;
 import com.example.mansshop_boot.domain.dto.cart.business.CartMemberDTO;
+import com.example.mansshop_boot.domain.dto.order.business.OrderDataDTO;
 import com.example.mansshop_boot.domain.dto.order.business.OrderProductInfoDTO;
 import com.example.mansshop_boot.domain.dto.order.in.OrderProductRequestDTO;
 import com.example.mansshop_boot.domain.dto.order.out.OrderDataResponseDTO;
+import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
 import com.example.mansshop_boot.domain.entity.Cart;
 import com.example.mansshop_boot.domain.entity.CartDetail;
 import com.example.mansshop_boot.domain.entity.Member;
 import com.example.mansshop_boot.domain.entity.ProductOption;
+import com.example.mansshop_boot.domain.enumeration.Result;
+import com.example.mansshop_boot.domain.vo.order.OrderItemVO;
+import com.example.mansshop_boot.domain.vo.order.PreOrderDataVO;
 import com.example.mansshop_boot.repository.cart.CartDetailRepository;
 import com.example.mansshop_boot.repository.cart.CartRepository;
 import com.example.mansshop_boot.repository.product.ProductOptionRepository;
 import com.example.mansshop_boot.service.OrderServiceImpl;
+import com.example.mansshop_boot.service.unit.fixture.OrderUnitFixture;
+import com.example.mansshop_boot.service.util.CookieHeaderParser;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.util.WebUtils;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
@@ -33,6 +51,12 @@ public class OrderServiceUnitTest {
 
     @InjectMocks
     private OrderServiceImpl orderService;
+
+    @Mock
+    private RedisTemplate<String, PreOrderDataVO> redisTemplate;
+
+    @Mock
+    private ValueOperations<String, PreOrderDataVO> valueOperations;
 
     @Mock
     private CartRepository cartRepository;
@@ -46,35 +70,37 @@ public class OrderServiceUnitTest {
     @Test
     @DisplayName(value = "상품 페이지에서 선택한 상품 바로 구매를 위한 상품 데이터 조회")
     void getProductOrderData() {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
         OrderProductRequestDTO dto1 = new OrderProductRequestDTO(1L, 3);
         OrderProductRequestDTO dto2 = new OrderProductRequestDTO(2L, 4);
         List<OrderProductRequestDTO> optionIdAndCountDTO = List.of(dto1, dto2);
         List<Long> optionIds = List.of(1L, 2L);
-
-        OrderProductInfoDTO optionDTO1 = new OrderProductInfoDTO(
-                "testProductId1",
-                1L,
-                "testProductName1",
-                "testSize1",
-                "testColor1",
-                10000
-        );
-
-        OrderProductInfoDTO optionDTO2 = new OrderProductInfoDTO(
-                "testProductId1",
-                2L,
-                "testProductName1",
-                "testSize1",
-                "testColor1",
-                20000
-        );
-
-        List<OrderProductInfoDTO> orderDataDTO = List.of(optionDTO1, optionDTO2);
+        List<OrderProductInfoDTO> orderDataDTO = OrderUnitFixture.createOrderProductInfoDTOList();
 
         when(productOptionRepository.findOrderData(optionIds))
                 .thenReturn(orderDataDTO);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
-        OrderDataResponseDTO result = Assertions.assertDoesNotThrow(() -> orderService.getProductOrderData(optionIdAndCountDTO));
+        OrderDataResponseDTO result = Assertions.assertDoesNotThrow(
+                () -> orderService.getProductOrderData(optionIdAndCountDTO, request, response, null)
+        );
+
+        ArgumentCaptor<String> cookieCaptor = ArgumentCaptor.forClass(String.class);
+        verify(response).addHeader(eq("Set-Cookie"), cookieCaptor.capture());
+
+        Map<String, String> cookieAttributes = CookieHeaderParser.parseSetCookieHeader(cookieCaptor.getValue());
+
+        Assertions.assertTrue(cookieAttributes.containsKey("order"));
+        Assertions.assertNotNull(cookieAttributes.get("order"));
+        Assertions.assertTrue(cookieAttributes.containsKey("Path"));
+        Assertions.assertEquals("/", cookieAttributes.get("Path"));
+        Assertions.assertTrue(cookieAttributes.containsKey("Max-Age"));
+        Assertions.assertEquals(String.valueOf(Duration.ofMinutes(10).getSeconds()), cookieAttributes.get("Max-Age"));
+        Assertions.assertTrue(cookieAttributes.containsKey("Secure"));
+        Assertions.assertTrue(cookieAttributes.containsKey("HttpOnly"));
+        Assertions.assertTrue(cookieAttributes.containsKey("SameSite"));
+        Assertions.assertEquals("Strict", cookieAttributes.get("SameSite"));
 
         Assertions.assertNotNull(result);
         Assertions.assertFalse(result.orderData().isEmpty());
@@ -85,6 +111,8 @@ public class OrderServiceUnitTest {
     @Test
     @DisplayName(value = "상품 페이지에서 선택한 상품 바로 구매를 위한 상품 데이터 조회. 데이터가 없는 경우")
     void getProductOrderDataEmpty() {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
         OrderProductRequestDTO dto1 = new OrderProductRequestDTO(1L, 3);
         OrderProductRequestDTO dto2 = new OrderProductRequestDTO(2L, 4);
         List<OrderProductRequestDTO> optionIdAndCountDTO = List.of(dto1, dto2);
@@ -93,62 +121,46 @@ public class OrderServiceUnitTest {
         when(productOptionRepository.findOrderData(optionIds))
                 .thenReturn(Collections.emptyList());
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> orderService.getProductOrderData(optionIdAndCountDTO));
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> orderService.getProductOrderData(optionIdAndCountDTO, request, response, null)
+        );
     }
 
     @Test
     @DisplayName(value = "장바구니 선택 상품 주문을 위한 상품 데이터 조회.")
     void getCartOrderData() {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
         List<Long> cartDetailIds = List.of(1L, 2L);
         CartMemberDTO cartMemberDTO = new CartMemberDTO("testUser", null);
-        Cart cartEntity = Cart.builder()
-                .id(1L)
-                .member(
-                        Member.builder()
-                                .userId("testUser")
-                                .build()
-                )
-                .cookieId(null)
-                .build();
-        CartDetail cartDetail1 = CartDetail.builder()
-                .cart(cartEntity)
-                .productOption(ProductOption.builder().id(1L).build())
-                .cartCount(3)
-                .build();
-
-        CartDetail cartDetail2 = CartDetail.builder()
-                .cart(cartEntity)
-                .productOption(ProductOption.builder().id(2L).build())
-                .cartCount(4)
-                .build();
-
-        OrderProductInfoDTO optionDTO1 = new OrderProductInfoDTO(
-                "testProductId1",
-                1L,
-                "testProductName1",
-                "testSize1",
-                "testColor1",
-                10000
-        );
-
-        OrderProductInfoDTO optionDTO2 = new OrderProductInfoDTO(
-                "testProductId1",
-                2L,
-                "testProductName1",
-                "testSize1",
-                "testColor1",
-                20000
-        );
-        List<CartDetail> cartDetails = List.of(cartDetail1, cartDetail2);
-        List<OrderProductInfoDTO> orderDataDTO = List.of(optionDTO1, optionDTO2);
+        Cart cartEntity = OrderUnitFixture.createCart();
+        List<OrderProductInfoDTO> orderDataDTO = OrderUnitFixture.createOrderProductInfoDTOList();
 
         when(cartDetailRepository.findAllById(cartDetailIds))
-                .thenReturn(cartDetails);
+                .thenReturn(cartEntity.getCartDetailList());
         when(cartRepository.findById(1L)).thenReturn(Optional.of(cartEntity));
         when(productOptionRepository.findOrderData(cartDetailIds))
                 .thenReturn(orderDataDTO);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
-        OrderDataResponseDTO result = Assertions.assertDoesNotThrow(() -> orderService.getCartOrderData(cartDetailIds, cartMemberDTO));
+        OrderDataResponseDTO result = Assertions.assertDoesNotThrow(() -> orderService.getCartOrderData(cartDetailIds, cartMemberDTO, request, response));
+
+        ArgumentCaptor<String> cookieCaptor = ArgumentCaptor.forClass(String.class);
+        verify(response).addHeader(eq("Set-Cookie"), cookieCaptor.capture());
+
+        Map<String, String> cookieAttributes = CookieHeaderParser.parseSetCookieHeader(cookieCaptor.getValue());
+
+        Assertions.assertTrue(cookieAttributes.containsKey("order"));
+        Assertions.assertNotNull(cookieAttributes.get("order"));
+        Assertions.assertTrue(cookieAttributes.containsKey("Path"));
+        Assertions.assertEquals("/", cookieAttributes.get("Path"));
+        Assertions.assertTrue(cookieAttributes.containsKey("Max-Age"));
+        Assertions.assertEquals(String.valueOf(Duration.ofMinutes(10).getSeconds()), cookieAttributes.get("Max-Age"));
+        Assertions.assertTrue(cookieAttributes.containsKey("Secure"));
+        Assertions.assertTrue(cookieAttributes.containsKey("HttpOnly"));
+        Assertions.assertTrue(cookieAttributes.containsKey("SameSite"));
+        Assertions.assertEquals("Strict", cookieAttributes.get("SameSite"));
 
         Assertions.assertNotNull(result);
         Assertions.assertFalse(result.orderData().isEmpty());
@@ -158,13 +170,15 @@ public class OrderServiceUnitTest {
     @Test
     @DisplayName(value = "장바구니 선택 상품 주문을 위한 상품 데이터 조회. 장바구니 상세 데이터가 없는 경우")
     void getCartOrderDataDetailEmpty() {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
         List<Long> cartDetailIds = List.of(1L, 2L);
         CartMemberDTO cartMemberDTO = new CartMemberDTO("testUser", null);
 
         when(cartDetailRepository.findAllById(cartDetailIds))
                 .thenReturn(Collections.emptyList());
 
-        Assertions.assertThrows(CustomNotFoundException.class, () -> orderService.getCartOrderData(cartDetailIds, cartMemberDTO));
+        Assertions.assertThrows(CustomNotFoundException.class, () -> orderService.getCartOrderData(cartDetailIds, cartMemberDTO, request, response));
 
         verify(cartRepository, never()).findById(anyLong());
         verify(productOptionRepository, never()).findOrderData(List.of(anyLong()));
@@ -173,6 +187,8 @@ public class OrderServiceUnitTest {
     @Test
     @DisplayName(value = "장바구니 선택 상품 주문을 위한 상품 데이터 조회. 조회한 장바구니가 사용자 데이터가 아닌 경우")
     void getCartOrderDataDetailAccessDenied() {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
         List<Long> cartDetailIds = List.of(1L, 2L);
         CartMemberDTO cartMemberDTO = new CartMemberDTO("Anonymous", null);
         Cart cartEntity = Cart.builder()
@@ -200,8 +216,110 @@ public class OrderServiceUnitTest {
         when(cartDetailRepository.findAllById(cartDetailIds)).thenReturn(cartDetails);
         when(cartRepository.findById(cartEntity.getId())).thenReturn(Optional.of(cartEntity));
 
-        Assertions.assertThrows(CustomAccessDeniedException.class, () -> orderService.getCartOrderData(cartDetailIds, cartMemberDTO));
+        Assertions.assertThrows(CustomAccessDeniedException.class, () -> orderService.getCartOrderData(cartDetailIds, cartMemberDTO, request, response));
 
         verify(productOptionRepository, never()).findOrderData(List.of(anyLong()));
+    }
+
+    @Test
+    @DisplayName(value = "결제 API 호출 전 데이터 검증")
+    void validateOrder() {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        OrderDataResponseDTO requestDTO = OrderUnitFixture.createOrderDataResponseDTO();
+        Cookie orderToken = new Cookie("order", "orderTestValue");
+
+        List<OrderItemVO> orderItems = requestDTO.orderData().stream().map(OrderDataDTO::toOrderItemVO).toList();
+        PreOrderDataVO validateData = new PreOrderDataVO("Anonymous", orderItems, requestDTO.totalPrice());
+
+        when(request.getCookies()).thenReturn(new Cookie[] { orderToken });
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(redisTemplate.opsForValue().get(orderToken.getValue())).thenReturn(validateData);
+
+
+        ResponseMessageDTO result = Assertions.assertDoesNotThrow(
+                () -> orderService.validateOrder(requestDTO, null, request, response)
+        );
+
+        Assertions.assertEquals(Result.OK.getResultKey(), result.message());
+    }
+
+    @Test
+    @DisplayName(value = "결제 API 호출 전 데이터 검증. orderToken이 없는 경우")
+    void validateOrderTokenIsNull() {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        OrderDataResponseDTO requestDTO = OrderUnitFixture.createOrderDataResponseDTO();
+
+        when(request.getCookies()).thenReturn(null);
+
+        Assertions.assertThrows(
+                CustomOrderSessionExpiredException.class,
+                () -> orderService.validateOrder(requestDTO, null, request, response)
+        );
+
+        verify(redisTemplate, never()).opsForValue();
+    }
+
+    @Test
+    @DisplayName(value = "결제 API 호출 전 데이터 검증. 검증 데이터가 존재하지 않는 경우")
+    void validateOrderValidateDataIsNull() {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        OrderDataResponseDTO requestDTO = OrderUnitFixture.createOrderDataResponseDTO();
+        Cookie orderToken = new Cookie("order", "orderTestValue");
+
+        when(request.getCookies()).thenReturn(new Cookie[] { orderToken });
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(redisTemplate.opsForValue().get(orderToken.getValue())).thenReturn(null);
+
+        Assertions.assertThrows(
+                CustomOrderSessionExpiredException.class,
+                () -> orderService.validateOrder(requestDTO, null, request, response)
+        );
+
+        ArgumentCaptor<String> cookieCaptor = ArgumentCaptor.forClass(String.class);
+        verify(response).addHeader(eq("Set-Cookie"), cookieCaptor.capture());
+
+        Map<String, String> cookieAttributes = CookieHeaderParser.parseSetCookieHeader(cookieCaptor.getValue());
+
+        Assertions.assertTrue(cookieAttributes.containsKey("order"));
+        Assertions.assertEquals("", cookieAttributes.get("order"));
+        Assertions.assertTrue(cookieAttributes.containsKey("Path"));
+        Assertions.assertEquals("/", cookieAttributes.get("Path"));
+        Assertions.assertTrue(cookieAttributes.containsKey("Max-Age"));
+        Assertions.assertEquals("0", cookieAttributes.get("Max-Age"));
+    }
+
+    @Test
+    @DisplayName(value = "결제 API 호출 전 데이터 검증. 검증 데이터와 일치하지 않는 경우")
+    void validateOrderInValidData() {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        OrderDataResponseDTO requestDTO = OrderUnitFixture.createOrderDataResponseDTO();
+        Cookie orderToken = new Cookie("order", "orderTestValue");
+        OrderItemVO orderItem = new OrderItemVO("testProduct1", 2L, 3, 50000);
+        PreOrderDataVO validateData = new PreOrderDataVO("Anonymous", List.of(orderItem), requestDTO.totalPrice());
+
+        when(request.getCookies()).thenReturn(new Cookie[] { orderToken });
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(redisTemplate.opsForValue().get(orderToken.getValue())).thenReturn(validateData);
+
+        Assertions.assertThrows(
+                CustomOrderSessionExpiredException.class,
+                () -> orderService.validateOrder(requestDTO, null, request, response)
+        );
+
+        ArgumentCaptor<String> cookieCaptor = ArgumentCaptor.forClass(String.class);
+        verify(response).addHeader(eq("Set-Cookie"), cookieCaptor.capture());
+
+        Map<String, String> cookieAttributes = CookieHeaderParser.parseSetCookieHeader(cookieCaptor.getValue());
+
+        Assertions.assertTrue(cookieAttributes.containsKey("order"));
+        Assertions.assertEquals("", cookieAttributes.get("order"));
+        Assertions.assertTrue(cookieAttributes.containsKey("Path"));
+        Assertions.assertEquals("/", cookieAttributes.get("Path"));
+        Assertions.assertTrue(cookieAttributes.containsKey("Max-Age"));
+        Assertions.assertEquals("0", cookieAttributes.get("Max-Age"));
     }
 }

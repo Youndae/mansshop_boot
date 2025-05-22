@@ -35,7 +35,7 @@ public record AdminReviewDetailDTO(
                 createdAt.toLocalDate(),
                 updatedAt.toLocalDate(),
                 content,
-                replyUpdatedAt.toLocalDate(),
+                replyUpdatedAt == null ? null : replyUpdatedAt.toLocalDate(),
                 replyContent
         );
     }

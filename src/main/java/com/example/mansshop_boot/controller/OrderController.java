@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -72,14 +73,12 @@ public class OrderController {
     @DefaultApiResponse
     @SwaggerAuthentication
     @PostMapping("/product")
-    public ResponseEntity<OrderDataResponseDTO> orderProduct(@Schema(name = "주문 요청 상품 데이터", type = "array") @RequestBody List<OrderProductRequestDTO> requestDTO){
-        /**
-         * 여기랑 cart 테스트.
-         * 이후 cartDetail 테이블에서 cartPrice 삭제.
-         * 아마 장바구니 페이지에서만 필요할텐데 전체적으로 한번 훑어보는 정도로만 체크.
-         * 끝나면 관리자 리뷰 기능 추가.
-         */
-        OrderDataResponseDTO responseDTO = orderService.getProductOrderData(requestDTO);
+    public ResponseEntity<OrderDataResponseDTO> orderProduct(@Schema(name = "주문 요청 상품 데이터", type = "array") @RequestBody List<OrderProductRequestDTO> requestDTO,
+															Principal principal,
+															HttpServletRequest request,
+															HttpServletResponse response){
+
+        OrderDataResponseDTO responseDTO = orderService.getProductOrderData(requestDTO, request, response, principal);
 
         return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
@@ -96,12 +95,25 @@ public class OrderController {
     public ResponseEntity<OrderDataResponseDTO> orderCart(@Schema(name = "장바구니 상세 데이터 아이디 리스트", type = "array")
                                                           @RequestBody List<Long> cartDetailIds,
                                                             HttpServletRequest request,
+															HttpServletResponse response,
                                                             Principal principal) {
 
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
-        OrderDataResponseDTO responseDTO = orderService.getCartOrderData(cartDetailIds, cartMemberDTO);
+        OrderDataResponseDTO responseDTO = orderService.getCartOrderData(cartDetailIds, cartMemberDTO, request, response);
 
         return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
 
+	@Operation(summary = "결제 API 호출 이전 주문 데이터 검증", hidden = true)
+	@Parameter()
+	@PostMapping("/validate")
+	public ResponseEntity<ResponseMessageDTO> validateOrder(@RequestBody OrderDataResponseDTO requestDTO,
+															Principal principal,
+															HttpServletRequest request,
+															HttpServletResponse response) {
+
+		ResponseMessageDTO responseDTO = orderService.validateOrder(requestDTO, principal, request, response);
+
+		return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+	}
 }

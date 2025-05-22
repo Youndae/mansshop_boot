@@ -245,11 +245,11 @@ public class MainController {
                         in = ParameterIn.PATH
             )
     })
-    @GetMapping("/order/{term}/{page}")
+    @GetMapping("/order/{term}")
     public ResponseEntity<PagingResponseDTO<MyPageOrderDTO>> nonMemberOrderList(@RequestParam(name = "recipient") String recipient,
                                                 @RequestParam(name = "phone") String phone,
                                                 @PathVariable(name = "term") String term,
-                                                @PathVariable(name = "page") int page){
+                                                @RequestParam(name = "page", required = false, defaultValue = "1") int page){
 
         MemberOrderDTO memberOrderDTO = MemberOrderDTO.builder()
                                             .userId("Anonymous")

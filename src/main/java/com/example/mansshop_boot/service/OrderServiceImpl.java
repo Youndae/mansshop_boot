@@ -3,6 +3,7 @@ package com.example.mansshop_boot.service;
 import com.example.mansshop_boot.config.customException.ErrorCode;
 import com.example.mansshop_boot.config.customException.exception.CustomAccessDeniedException;
 import com.example.mansshop_boot.config.customException.exception.CustomNotFoundException;
+import com.example.mansshop_boot.config.customException.exception.CustomOrderSessionExpiredException;
 import com.example.mansshop_boot.domain.dto.cart.business.CartMemberDTO;
 import com.example.mansshop_boot.domain.dto.order.business.*;
 import com.example.mansshop_boot.domain.dto.order.in.OrderProductDTO;
@@ -10,23 +11,40 @@ import com.example.mansshop_boot.domain.dto.order.in.OrderProductRequestDTO;
 import com.example.mansshop_boot.domain.dto.order.in.PaymentDTO;
 import com.example.mansshop_boot.domain.dto.order.out.OrderDataResponseDTO;
 import com.example.mansshop_boot.domain.dto.rabbitMQ.RabbitMQProperties;
+import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
 import com.example.mansshop_boot.domain.entity.*;
 import com.example.mansshop_boot.domain.enumeration.RabbitMQPrefix;
 import com.example.mansshop_boot.domain.enumeration.Result;
+import com.example.mansshop_boot.domain.vo.order.OrderItemVO;
+import com.example.mansshop_boot.domain.vo.order.PreOrderDataVO;
 import com.example.mansshop_boot.repository.cart.CartDetailRepository;
 import com.example.mansshop_boot.repository.cart.CartRepository;
 import com.example.mansshop_boot.repository.product.ProductOptionRepository;
 import com.example.mansshop_boot.repository.product.ProductRepository;
 import com.example.mansshop_boot.repository.productOrder.ProductOrderRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.WebUtils;
 
+import java.security.Principal;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +64,10 @@ public class OrderServiceImpl implements OrderService{
     private final RabbitTemplate rabbitTemplate;
 
     private final RabbitMQProperties rabbitMQProperties;
+
+    private final RedisTemplate<String, PreOrderDataVO> orderRedisTemplate;
+
+	private static final String ANONYMOUS = "Anonymous";
 
     /**
      *
@@ -145,18 +167,28 @@ public class OrderServiceImpl implements OrderService{
     }
 
     @Override
-    public OrderDataResponseDTO getProductOrderData(List<OrderProductRequestDTO> optionIdAndCountDTO) {
+    public OrderDataResponseDTO getProductOrderData(List<OrderProductRequestDTO> optionIdAndCountDTO, 
+													HttpServletRequest request, 
+													HttpServletResponse response, 
+													Principal principal) {
 
         List<OrderProductInfoDTO> orderProductInfoDTO = getOrderDataDTOList(optionIdAndCountDTO);
 
         if(orderProductInfoDTO.isEmpty())
             throw new IllegalArgumentException("product Order Data is empty");
 
-        return mappingOrderResponseDTO(optionIdAndCountDTO, orderProductInfoDTO);
+        OrderDataResponseDTO responseDTO = mappingOrderResponseDTO(optionIdAndCountDTO, orderProductInfoDTO);
+		String userId = principal != null ? principal.getName() : ANONYMOUS;
+        saveOrderValidateData(responseDTO, request, response, userId);
+
+        return responseDTO;
     }
 
     @Override
-    public OrderDataResponseDTO getCartOrderData(List<Long> cartDetailIds, CartMemberDTO cartMemberDTO) {
+    public OrderDataResponseDTO getCartOrderData(List<Long> cartDetailIds, 
+												CartMemberDTO cartMemberDTO, 
+												HttpServletRequest request, 
+												HttpServletResponse response) {
         List<CartDetail> cartDetails = cartDetailRepository.findAllById(cartDetailIds);
 
         if(cartDetails.isEmpty())
@@ -180,7 +212,10 @@ public class OrderServiceImpl implements OrderService{
 
         List<OrderProductInfoDTO> orderProductInfoDTO = getOrderDataDTOList(optionIdAndCountDTO);
 
-        return mappingOrderResponseDTO(optionIdAndCountDTO, orderProductInfoDTO);
+        OrderDataResponseDTO responseDTO = mappingOrderResponseDTO(optionIdAndCountDTO, orderProductInfoDTO);
+        saveOrderValidateData(responseDTO, request, response, cartMemberDTO.uid());
+
+        return responseDTO;
     }
 
     public List<OrderProductInfoDTO> getOrderDataDTOList(List<OrderProductRequestDTO> optionIdAndCountDTO) {
@@ -205,4 +240,137 @@ public class OrderServiceImpl implements OrderService{
 
         return new OrderDataResponseDTO(orderDataDTOList, totalPrice);
     }
+
+	// 주문 검증 데이터 저장 및 토큰 생성, 쿠키 생성
+	private void saveOrderValidateData(OrderDataResponseDTO requestDTO,
+									   HttpServletRequest request,
+									   HttpServletResponse response,
+									   String userId) {
+		String originToken = getOrderToken(request);
+
+		if(originToken != null)
+			deleteTokenData(originToken);
+
+		String orderToken = createOrderToken();
+		setOrderToken(response, orderToken);
+		List<OrderItemVO> orderItemVOList = requestDTO.orderData().stream().map(OrderDataDTO::toOrderItemVO).toList();
+		PreOrderDataVO preOrderDataVO = new PreOrderDataVO(userId, orderItemVOList, requestDTO.totalPrice());
+		orderRedisTemplate.opsForValue().set(orderToken, preOrderDataVO, Duration.ofMinutes(10));
+	}
+
+	public void deleteTokenData(String token) {
+		orderRedisTemplate.delete(token);
+	}
+
+	// 결제 API 호출 전 데이터 검증
+	@Override
+	public ResponseMessageDTO validateOrder(OrderDataResponseDTO requestDTO, 
+											Principal principal, 
+											HttpServletRequest request, 
+											HttpServletResponse response) {
+		ObjectMapper om = new ObjectMapper();
+		String orderToken = getOrderToken(request);
+		String uid = principal != null ? principal.getName() : ANONYMOUS;
+		
+		if(orderToken == null){
+			log.warn("Order Session Expired. orderToken is null");
+			throw new CustomOrderSessionExpiredException(
+				ErrorCode.ORDER_SESSION_EXPIRED, 
+				ErrorCode.ORDER_SESSION_EXPIRED.getMessage()
+			);
+		}
+		
+		PreOrderDataVO preOrderDataVO = orderRedisTemplate.opsForValue().get(orderToken);
+
+		if(preOrderDataVO == null){
+			log.warn("Order Session Expired. Validate Data is null - token: {}", orderToken);
+			deleteOrderToken(response);
+			throw new CustomOrderSessionExpiredException(
+				ErrorCode.ORDER_SESSION_EXPIRED, 
+				ErrorCode.ORDER_SESSION_EXPIRED.getMessage()
+			);
+		}
+		
+		if(!validateOrderData(preOrderDataVO, requestDTO, uid)){
+			try {
+				deleteOrderToken(response);
+				log.error("Order Data Validation Failed - token: {}, userId: {}, submittedData: {}, redisData: {}",
+						orderToken, uid, om.writeValueAsString(requestDTO), om.writeValueAsString(preOrderDataVO));
+			} catch (JsonProcessingException e) {
+				log.error("OrderService.validateOrder :: JsonProcessingException - Order Data Validation Failed - token: {}, userId: {}, submittedData: {}, redisData: {}",
+							orderToken, uid, requestDTO, preOrderDataVO);
+			}
+			throw new CustomOrderSessionExpiredException(
+				ErrorCode.ORDER_SESSION_EXPIRED, 
+				ErrorCode.ORDER_SESSION_EXPIRED.getMessage()
+			);
+		}
+
+		return new ResponseMessageDTO(Result.OK.getResultKey());
+	}
+
+	// 요청 데이터와 Redis 데이터 비교 검증
+	private boolean validateOrderData(PreOrderDataVO preOrderDataVO, OrderDataResponseDTO requestDTO, String uid) {
+		if(!preOrderDataVO.userId().equals(uid) || 
+				preOrderDataVO.totalPrice() != requestDTO.totalPrice()){
+			log.error("Order Data Validation Failed. UserId or TotalPrice is different - userId: {}, validatePrice: {}, requestPrice: {}",
+					uid, preOrderDataVO.totalPrice(), requestDTO.totalPrice());
+			return false;
+		}
+		
+		List<OrderItemVO> preOrderData = preOrderDataVO.orderData();
+		List<OrderDataDTO> requestData = requestDTO.orderData();
+
+		for(OrderDataDTO data : requestData) {
+			OrderItemVO dataVO = data.toOrderItemVO();
+			if(!preOrderData.contains(dataVO))
+				return false;
+		}
+
+		return true;
+	}
+
+	//Order Token 생성
+	private String createOrderToken() {
+		return UUID.randomUUID().toString();
+	}
+
+	//Order Token 조회
+	private String getOrderToken(HttpServletRequest request) {
+		Cookie orderToken = WebUtils.getCookie(request, "order");
+		if(orderToken == null)
+			return null;
+
+		return orderToken.getValue();
+	}
+
+	//Order Token 쿠키에 저장
+	//유효기간 10분, secure, httpOnly, sameSite Strict 설정
+	private void setOrderToken(HttpServletResponse response, String orderToken) {
+		response.addHeader(
+			"Set-Cookie",
+			createOrderTokenCookie(orderToken, Duration.ofMinutes(10))
+		);
+	}
+
+	//Order Token 쿠키 생성
+	private String createOrderTokenCookie(String orderToken, Duration maxAge) {
+		return ResponseCookie
+					.from("order", orderToken)
+					.path("/")
+					.maxAge(maxAge)
+					.secure(true)
+					.httpOnly(true)
+					.sameSite("Strict")
+					.build()
+					.toString();
+	}
+
+	//Order Token 쿠키 삭제
+	private void deleteOrderToken(HttpServletResponse response) {
+		response.addHeader(
+			"Set-Cookie",
+			createOrderTokenCookie("", Duration.ZERO)
+		);
+	}
 }

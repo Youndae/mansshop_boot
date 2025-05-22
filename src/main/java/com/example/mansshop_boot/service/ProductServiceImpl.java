@@ -23,12 +23,14 @@ import com.example.mansshop_boot.repository.productReview.ProductReviewReplyRepo
 import com.example.mansshop_boot.repository.productReview.ProductReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -192,7 +194,14 @@ public class ProductServiceImpl implements ProductService{
      * 둘다 Null이 아닌 경우 정상으로 판단해 해당 상품에 대해 관심상품 등록
      */
     @Override
-    public String likeProduct(String productId, Principal principal) {
+    public String likeProduct(Map<String, String> productIdMap, Principal principal) {
+        String productId = productIdMap.get("productId");
+
+        if(!productIdMap.containsKey("productId") || productId == null || productId.isBlank()){
+            log.warn("ProductService.likeProduct :: IllegalArgumentException by productIdMap");
+            throw new IllegalArgumentException();
+        }
+
         ProductLike productLike = setLikeProduct(productId, principal);
 
         productLikeRepository.save(productLike);

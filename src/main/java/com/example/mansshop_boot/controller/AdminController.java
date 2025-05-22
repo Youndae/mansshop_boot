@@ -847,7 +847,7 @@ public class AdminController {
     @Operation(summary = "리뷰 답변 작성")
     @DefaultApiResponse
     @SwaggerAuthentication
-    @PostMapping("/review")
+    @PostMapping("/review/reply")
     public ResponseEntity<ResponseMessageDTO> postReviewReply(@RequestBody AdminReviewRequestDTO postDTO,
                                                             Principal principal) {
 
@@ -1117,7 +1117,7 @@ public class AdminController {
             required = true,
             in = ParameterIn.PATH
     )
-    @GetMapping("/sales/product/{productId}")
+    @GetMapping("/sales/product/detail/{productId}")
     public ResponseEntity<AdminProductSalesDetailDTO> getProductSales(@PathVariable(name = "productId") String productId) {
 
         AdminProductSalesDetailDTO responseDTO = adminService.getProductSalesDetail(productId);

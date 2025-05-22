@@ -939,6 +939,9 @@ public class AdminServiceImpl implements AdminService {
                 .productReview(reviewEntity)
                 .build();
 
+
+        reviewEntity.setStatus(true);
+        productReviewRepository.save(reviewEntity);
         productReviewReplyRepository.save(entity);
 
         return Result.OK.getResultKey();

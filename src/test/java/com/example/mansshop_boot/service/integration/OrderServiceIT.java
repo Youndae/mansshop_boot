@@ -5,13 +5,17 @@ import com.example.mansshop_boot.domain.dto.cart.business.CartMemberDTO;
 import com.example.mansshop_boot.domain.dto.order.in.OrderProductRequestDTO;
 import com.example.mansshop_boot.domain.dto.order.out.OrderDataResponseDTO;
 import com.example.mansshop_boot.service.OrderService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
+import java.security.Principal;
 import java.util.List;
 
 @SpringBootTest(classes = MansShopBootApplication.class)
@@ -28,8 +32,11 @@ public class OrderServiceIT {
         OrderProductRequestDTO data2 = new OrderProductRequestDTO(41L, 3);
         OrderProductRequestDTO data3 = new OrderProductRequestDTO(42L, 5);
         List<OrderProductRequestDTO> requestDTO = List.of(data1, data2, data3);
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        Principal principal = Mockito.mock(Principal.class);
 
-        OrderDataResponseDTO result = orderService.getProductOrderData(requestDTO);
+        OrderDataResponseDTO result = orderService.getProductOrderData(requestDTO, request, response, principal);
 
         Assertions.assertNotNull(result);
     }
@@ -39,8 +46,10 @@ public class OrderServiceIT {
     void getCartOrderData() {
         CartMemberDTO cartMemberDTO = new CartMemberDTO("tester2", null);
         List<Long> detailIds = List.of(839L, 840L, 841L, 842L);
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
 
-        OrderDataResponseDTO result = orderService.getCartOrderData(detailIds, cartMemberDTO);
+        OrderDataResponseDTO result = orderService.getCartOrderData(detailIds, cartMemberDTO, request, response);
 
         Assertions.assertNotNull(result);
     }

@@ -27,6 +27,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/product")
@@ -239,9 +240,10 @@ public class ProductController {
     @PostMapping("/like")
     @PreAuthorize("hasAnyRole('ROLE_MEMBER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
     public ResponseEntity<ResponseMessageDTO> likeProduct(@Schema(name = "productId", description = "상품 아이디")
-                                             @RequestBody String productId,
-                                        Principal principal) {
-        String responseMessage = productService.likeProduct(productId, principal);
+                                                            @RequestBody Map<String, String> productIdMap,
+                                                          Principal principal) {
+
+        String responseMessage = productService.likeProduct(productIdMap, principal);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ResponseMessageDTO(responseMessage));

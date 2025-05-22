@@ -57,6 +57,13 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return toResponseEntity(ErrorCode.NOT_FOUND);
     }
 
+	@ExceptionHandler(CustomOrderSessionExpiredException.class)
+	public ResponseEntity<?> orderSessionExpiredException(Exception e) {
+		log.warn("orderSessionExpiredException : {}", e.getMessage());
+		
+		return toResponseEntity(ErrorCode.ORDER_SESSION_EXPIRED);
+	}
+
     private ResponseEntity<?> toResponseEntity(ErrorCode errorCode){
 
         return ResponseEntity.status(errorCode.getHttpStatus())

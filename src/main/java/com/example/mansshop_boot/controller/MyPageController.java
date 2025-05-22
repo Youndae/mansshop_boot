@@ -368,14 +368,14 @@ public class MyPageController {
      *
      * @param principal
      *
-     * 상품 문의 작성 또는 수정 시 문의 카테고리 설정을 위한 카테고리 리스트 조회.
+     * 회원 문의 작성 또는 수정 시 문의 카테고리 설정을 위한 카테고리 리스트 조회.
      */
     @Operation(summary = "회원의 문의 작성 시 필요한 문의 분류 리스트 조회",
             description = "관리자에도 동일한 기능이 있으나, 거기에서는 모든 분류를 조회하고 여기에서는 노출되어야 할 분류만 조회"
     )
     @DefaultApiResponse
     @SwaggerAuthentication
-    @GetMapping("/classification")
+    @GetMapping("/qna/classification")
     public ResponseEntity<List<QnAClassificationDTO>> getQnAClassification(Principal principal) {
         List<QnAClassificationDTO> responseDTO = myPageService.getQnAClassification(principal);
 

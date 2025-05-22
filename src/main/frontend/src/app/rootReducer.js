@@ -1,5 +1,5 @@
 import { combineReducers } from "@reduxjs/toolkit";
-import memberReducer from '../features/member/memberSlice';
+import memberReducer from '../modules/member/memberSlice';
 
 const rootReducer = combineReducers({
     member: memberReducer,

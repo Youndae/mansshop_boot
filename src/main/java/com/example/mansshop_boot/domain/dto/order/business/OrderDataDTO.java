@@ -1,5 +1,7 @@
 package com.example.mansshop_boot.domain.dto.order.business;
 
+import com.example.mansshop_boot.domain.vo.order.OrderItemVO;
+
 public record OrderDataDTO(
         String productId
         , long optionId
@@ -21,4 +23,8 @@ public record OrderDataDTO(
                 , infoDTO.price() * count
         );
     }
+
+	public OrderItemVO toOrderItemVO() {
+		return new OrderItemVO(productId, optionId, count, price);
+	}
 }

@@ -8,6 +8,7 @@ import com.example.mansshop_boot.domain.dto.product.out.ProductReviewDTO;
 import org.springframework.data.domain.Page;
 
 import java.security.Principal;
+import java.util.Map;
 
 public interface ProductService {
 
@@ -17,7 +18,7 @@ public interface ProductService {
 
     Page<ProductQnAResponseDTO> getDetailQnA(ProductDetailPageDTO pageDTO, String productId);
 
-    String likeProduct(String productId, Principal principal);
+    String likeProduct(Map<String, String> productId, Principal principal);
 
     String deLikeProduct(String productId, Principal principal);
 
