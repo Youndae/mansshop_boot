@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../memberSlice';
 
+import { setToken} from "../../../common/utils/axios/tokenUtils";
 import { postLogin } from '../services/memberService';
 import { enhancedResponseInterceptor } from '../../../common/utils/axios/axiosInterceptors';
 import { RESPONSE_MESSAGE } from '../../../common/constants/responseMessageType';
@@ -42,11 +43,8 @@ function Login() {
 	const loginSubmit = async () => {
 		try {
 			const res = await postLogin(userData);
-			console.log('login res : ', res);
-			const authorization = res.headers['authorization'];
-			window.localStorage.setItem('Authorization', authorization);
-
-			dispatch(login(res.data));
+			setToken(res);
+			dispatch(login(res.data.userStatus));
 			navigate(state);
 		} catch (err) {
 			console.log(err);

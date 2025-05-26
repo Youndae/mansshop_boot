@@ -1,15 +1,20 @@
 package com.example.mansshop_boot.service;
 
 import com.example.mansshop_boot.config.customException.ErrorCode;
+import com.example.mansshop_boot.config.customException.exception.CustomAccessDeniedException;
 import com.example.mansshop_boot.config.jwt.JWTTokenProvider;
+import com.example.mansshop_boot.domain.dto.member.out.TokenExpirationResponseDTO;
 import com.example.mansshop_boot.domain.dto.token.TokenDTO;
 import com.example.mansshop_boot.domain.enumeration.Result;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+
+import java.time.Instant;
 
 @Service
 @Slf4j
@@ -17,6 +22,9 @@ import org.springframework.stereotype.Service;
 public class JWTTokenServiceImpl implements JWTTokenService{
 
     private final JWTTokenProvider jwtTokenProvider;
+
+    @Value("#{jwt['token.access.expiration']}")
+    private long accessTokenExpiration;
 
     /**
      *
@@ -89,12 +97,11 @@ public class JWTTokenServiceImpl implements JWTTokenService{
      * ino가 존재하지 않는다면 탈취로 판단.
      */
     @Override
-    public String reIssueToken(TokenDTO tokenDTO, HttpServletResponse response) {
+    public TokenExpirationResponseDTO reIssueToken(TokenDTO tokenDTO, HttpServletResponse response) {
 
         // ino가 존재하지 않는다면 무조건 탈취로 판단.
         if(tokenDTO.inoValue() == null) {
             deleteCookieAndThrowException(response);
-            return Result.FAIL.getResultKey();
         }else {
             String accessTokenClaim = jwtTokenProvider.decodeToken(tokenDTO.accessTokenValue());
 
@@ -105,8 +112,6 @@ public class JWTTokenServiceImpl implements JWTTokenService{
                     jwtTokenProvider.deleteCookie(response);
                 else
                     deleteTokenAndCookieAndThrowException(refreshTokenClaim, tokenDTO.inoValue(), response);
-
-                return Result.FAIL.getResultKey();
             }else {
                 String claimByRefreshToken = jwtTokenProvider.verifyRefreshToken(
                         tokenDTO.refreshTokenValue()
@@ -116,12 +121,13 @@ public class JWTTokenServiceImpl implements JWTTokenService{
 
                 if(accessTokenClaim.equals(claimByRefreshToken)) {
                     jwtTokenProvider.issueTokens(accessTokenClaim, tokenDTO.inoValue(), response);
-                    return Result.OK.getResultKey();
+                    return new TokenExpirationResponseDTO(Instant.now().plusMillis(accessTokenExpiration));
                 }else {
                     deleteTokenAndCookieAndThrowException(accessTokenClaim, tokenDTO.inoValue(), response);
-                    return Result.FAIL.getResultKey();
                 }
             }
         }
+
+        throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
     }
 }

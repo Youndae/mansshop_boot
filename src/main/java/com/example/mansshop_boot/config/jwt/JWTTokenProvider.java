@@ -45,17 +45,17 @@ public class JWTTokenProvider {
     @Value("#{jwt['token.refresh.header']}")
     private String refreshHeader;
 
-    @Value("#{jwt['redis.expirationDay']}")
-    private Long redisExpiration;
+    @Value("#{jwt['redis.accessExpiration']}")
+    private Long redisAtExpiration;
+
+    @Value("#{jwt['redis.refreshExpiration']}")
+    private Long redisRtExpiration;
 
     @Value("#{jwt['redis.accessPrefix']}")
     private String redisAccessPrefix;
 
     @Value("#{jwt['redis.refreshPrefix']}")
     private String redisRefreshPrefix;
-
-    @Value("#{jwt['cookie.tokenAgeDay']}")
-    private Long tokenCookieAge;
 
     @Value("#{jwt['cookie.ino.header']}")
     private String inoHeader;
@@ -415,15 +415,16 @@ public class JWTTokenProvider {
         String refreshToken = createToken(userId, refreshSecret, refreshExpiration);
         String accessKey = setRedisKey(redisAccessPrefix, ino, userId);
         String refreshKey = setRedisKey(redisRefreshPrefix, ino, userId);
-        Duration tokenExpiration = Duration.ofDays(redisExpiration);
-        saveTokenToRedis(accessKey, accessToken, tokenExpiration);
+        Duration accessTokenExpiration = Duration.ofHours(redisAtExpiration);
+        Duration tokenExpiration = Duration.ofDays(redisRtExpiration);
+        saveTokenToRedis(accessKey, accessToken, accessTokenExpiration);
         saveTokenToRedis(refreshKey, refreshToken, tokenExpiration);
 
         accessToken = tokenPrefix + accessToken;
         refreshToken = tokenPrefix + refreshToken;
 
         setAccessTokenToResponseHeader(accessToken, response);
-        setTokenCookie(refreshHeader, refreshToken, Duration.ofDays(refreshExpiration), response);
+        setTokenCookie(refreshHeader, refreshToken, Duration.ofDays(redisRtExpiration), response);
         setTokenCookie(inoHeader, ino, Duration.ofDays(inoCookieAge), response);
     }
 

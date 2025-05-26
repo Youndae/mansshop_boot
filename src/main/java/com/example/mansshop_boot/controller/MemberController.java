@@ -12,6 +12,7 @@ import com.example.mansshop_boot.domain.dto.member.in.JoinDTO;
 import com.example.mansshop_boot.domain.dto.member.in.LoginDTO;
 import com.example.mansshop_boot.domain.dto.member.in.UserCertificationDTO;
 import com.example.mansshop_boot.domain.dto.member.in.UserResetPwDTO;
+import com.example.mansshop_boot.domain.dto.member.out.LoginResponseDTO;
 import com.example.mansshop_boot.domain.dto.member.out.UserSearchIdResponseDTO;
 import com.example.mansshop_boot.domain.dto.member.out.UserStatusResponseDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
@@ -74,11 +75,11 @@ public class MemberController {
             )
     })
     @PostMapping("/login")
-    public ResponseEntity<UserStatusResponseDTO> loginProc(@RequestBody LoginDTO loginDTO,
-                                        HttpServletRequest request,
-                                        HttpServletResponse response){
+    public ResponseEntity<LoginResponseDTO> loginProc(@RequestBody LoginDTO loginDTO,
+                                                      HttpServletRequest request,
+                                                      HttpServletResponse response){
 
-        UserStatusResponseDTO result = memberService.loginProc(loginDTO, request, response);
+        LoginResponseDTO result = memberService.loginProc(loginDTO, request, response);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(result);

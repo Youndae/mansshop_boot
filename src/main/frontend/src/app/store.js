@@ -1,12 +1,15 @@
-import { configureStore } from '@reduxjs/toolkit';
+import {combineReducers, configureStore} from '@reduxjs/toolkit';
 import { persistStore, persistReducer} from "redux-persist";
 import storage from 'redux-persist/lib/storage';
-import rootReducer from './rootReducer';
+import memberReducer from '../modules/member/memberSlice';
 
+const rootReducer = combineReducers({
+    member: memberReducer,
+});
 const persistConfig = {
     key: 'root',
     storage,
-    whitelist: ['member'],
+    blacklist: ['member'],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

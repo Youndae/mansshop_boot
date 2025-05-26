@@ -2,6 +2,7 @@ package com.example.mansshop_boot.controller;
 
 import com.example.mansshop_boot.annotation.swagger.DefaultApiResponse;
 import com.example.mansshop_boot.annotation.swagger.SwaggerAuthentication;
+import com.example.mansshop_boot.domain.dto.member.out.TokenExpirationResponseDTO;
 import com.example.mansshop_boot.domain.dto.token.TokenDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
 import com.example.mansshop_boot.domain.enumeration.Result;
@@ -19,6 +20,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.WebUtils;
+
+import java.time.Instant;
 
 @RestController
 @RequestMapping("/api")
@@ -51,7 +54,7 @@ public class TokenController {
     @DefaultApiResponse
     @SwaggerAuthentication
     @GetMapping("/reissue")
-    public ResponseEntity<ResponseMessageDTO> reIssueToken(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<TokenExpirationResponseDTO> reIssueToken(HttpServletRequest request, HttpServletResponse response) {
         String accessToken = request.getHeader(accessHeader).replace(tokenPrefix, "");
         Cookie refreshToken = WebUtils.getCookie(request, refreshHeader);
         Cookie ino = WebUtils.getCookie(request, inoHeader);
@@ -62,13 +65,9 @@ public class TokenController {
                 .inoValue(ino == null ? null : ino.getValue())
                 .build();
 
-        String responseMessage = tokenService.reIssueToken(tokenDTO, response);
-        HttpStatus status = HttpStatus.OK;
+        TokenExpirationResponseDTO responseDTO = tokenService.reIssueToken(tokenDTO, response);
 
-        if(responseMessage.equals(Result.FAIL.getResultKey()))
-            status = HttpStatus.FORBIDDEN;
-
-        return ResponseEntity.status(status)
-                .body(new ResponseMessageDTO(responseMessage));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
     }
 }

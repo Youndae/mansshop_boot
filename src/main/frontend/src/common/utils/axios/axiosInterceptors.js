@@ -1,4 +1,5 @@
-import { getToken, setToken, removeToken } from './tokenUtils';
+import { getToken, removeToken } from './tokenUtils';
+import { getReIssueToken } from "../../services/authService";
 import { axiosEnhanced } from './axiosEnhanced';
 
 // 공통 Request Interceptor
@@ -14,10 +15,8 @@ export const simpleResponseInterceptor = async (error) => {
     if(error.response?.status === 401) {
         error.config._retry = true;
 
-        const res = await axiosEnhanced.get('/reissue');
-        const token = res.headers['authorization'];
-        setToken(token);
-        error.config.headers['Authorization'] = token;
+        await getReIssueToken();
+        error.config.headers['Authorization'] = getToken();
 
         return axiosEnhanced(error.config);
     }

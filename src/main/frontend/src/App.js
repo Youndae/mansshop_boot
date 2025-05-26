@@ -104,6 +104,7 @@ function App() {
 			console.error('회원 상태 확인 실패: ', err);
 			dispatch(logout());
 		})
+
   }, [dispatch]);
 
   return (
