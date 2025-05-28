@@ -35,6 +35,7 @@ import com.example.mansshop_boot.repository.productSales.ProductSalesSummaryRepo
 import com.example.mansshop_boot.repository.qnaClassification.QnAClassificationRepository;
 import com.example.mansshop_boot.service.AdminServiceImpl;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,6 +45,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
@@ -52,8 +54,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 
-@SpringBootTest(classes = MansShopBootApplication.class)
-@ActiveProfiles("test")
+@ExtendWith(SpringExtension.class)
 public class AdminServiceUnitTest {
 
     @InjectMocks
@@ -61,9 +62,6 @@ public class AdminServiceUnitTest {
 
     @Mock
     private AdminServiceImpl adminServiceMock;
-
-    @Value("#{filePath['file.product.path']}")
-    private String filePath;
 
     @Mock
     private ProductRepository productRepository;

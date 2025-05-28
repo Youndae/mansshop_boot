@@ -6,6 +6,7 @@ import com.example.mansshop_boot.domain.enumeration.OrderStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Schema(name = "주문 요청 데이터")
@@ -53,6 +54,7 @@ public record PaymentDTO(
                 .deliveryFee(deliveryFee)
                 .paymentType(paymentType)
                 .orderStat(OrderStatus.ORDER.getStatusStr())
+                .createdAt(LocalDateTime.now())
                 .build();
     }
 }

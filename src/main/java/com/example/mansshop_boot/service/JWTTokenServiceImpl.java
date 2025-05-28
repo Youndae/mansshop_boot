@@ -2,8 +2,8 @@ package com.example.mansshop_boot.service;
 
 import com.example.mansshop_boot.config.customException.ErrorCode;
 import com.example.mansshop_boot.config.customException.exception.CustomAccessDeniedException;
+import com.example.mansshop_boot.config.customException.exception.CustomTokenStealingException;
 import com.example.mansshop_boot.config.jwt.JWTTokenProvider;
-import com.example.mansshop_boot.domain.dto.member.out.TokenExpirationResponseDTO;
 import com.example.mansshop_boot.domain.dto.token.TokenDTO;
 import com.example.mansshop_boot.domain.enumeration.Result;
 import jakarta.servlet.http.HttpServletResponse;
@@ -97,7 +97,7 @@ public class JWTTokenServiceImpl implements JWTTokenService{
      * ino가 존재하지 않는다면 탈취로 판단.
      */
     @Override
-    public TokenExpirationResponseDTO reIssueToken(TokenDTO tokenDTO, HttpServletResponse response) {
+    public String reIssueToken(TokenDTO tokenDTO, HttpServletResponse response) {
 
         // ino가 존재하지 않는다면 무조건 탈취로 판단.
         if(tokenDTO.inoValue() == null) {
@@ -112,6 +112,8 @@ public class JWTTokenServiceImpl implements JWTTokenService{
                     jwtTokenProvider.deleteCookie(response);
                 else
                     deleteTokenAndCookieAndThrowException(refreshTokenClaim, tokenDTO.inoValue(), response);
+
+                throw new CustomTokenStealingException(ErrorCode.TOKEN_STEALING, ErrorCode.TOKEN_STEALING.getMessage());
             }else {
                 String claimByRefreshToken = jwtTokenProvider.verifyRefreshToken(
                         tokenDTO.refreshTokenValue()
@@ -121,13 +123,13 @@ public class JWTTokenServiceImpl implements JWTTokenService{
 
                 if(accessTokenClaim.equals(claimByRefreshToken)) {
                     jwtTokenProvider.issueTokens(accessTokenClaim, tokenDTO.inoValue(), response);
-                    return new TokenExpirationResponseDTO(Instant.now().plusMillis(accessTokenExpiration));
+                    return Result.OK.getResultKey();
                 }else {
                     deleteTokenAndCookieAndThrowException(accessTokenClaim, tokenDTO.inoValue(), response);
                 }
             }
         }
 
-        throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
+        throw new CustomTokenStealingException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
     }
 }

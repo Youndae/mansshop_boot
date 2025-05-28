@@ -13,8 +13,6 @@ import com.example.mansshop_boot.domain.dto.member.in.JoinDTO;
 import com.example.mansshop_boot.domain.dto.member.in.LoginDTO;
 import com.example.mansshop_boot.domain.dto.member.in.UserCertificationDTO;
 import com.example.mansshop_boot.domain.dto.member.in.UserResetPwDTO;
-import com.example.mansshop_boot.domain.dto.member.out.LoginResponseDTO;
-import com.example.mansshop_boot.domain.dto.member.out.TokenExpirationResponseDTO;
 import com.example.mansshop_boot.domain.dto.member.out.UserSearchIdResponseDTO;
 import com.example.mansshop_boot.domain.dto.member.out.UserStatusResponseDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
@@ -44,7 +42,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.WebUtils;
 
 import java.security.Principal;
-import java.time.Instant;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -113,7 +110,7 @@ public class MemberServiceImpl implements MemberService{
      *
      */
     @Override
-    public LoginResponseDTO loginProc(LoginDTO dto, HttpServletRequest request, HttpServletResponse response) {
+    public UserStatusResponseDTO loginProc(LoginDTO dto, HttpServletRequest request, HttpServletResponse response) {
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(dto.userId(), dto.userPw());
         Authentication authentication =
@@ -123,10 +120,7 @@ public class MemberServiceImpl implements MemberService{
 
         if(userId != null)
             if (checkInoAndIssueToken(userId, request, response))
-                return new LoginResponseDTO(
-                        new UserStatusResponseDTO(customUser),
-                        new TokenExpirationResponseDTO(Instant.now().plusMillis(accessTokenExpiration))
-                );
+                return new UserStatusResponseDTO(customUser);
 
         throw new CustomBadCredentialsException(ErrorCode.BAD_CREDENTIALS, ErrorCode.BAD_CREDENTIALS.getMessage());
     }

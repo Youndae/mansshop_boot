@@ -25,7 +25,7 @@
 
 # 프로젝트 구조
 
-<img src="src/main/resources/README_image/project_structure.jpg">
+<img src="src/main/resources/README_image/structure.jpg">
 
 * React 기반 Frontend와 Java, Spring Boot 기반 Backend의 통합 빌드
   * Gradle build를 통해 frontend가 같이 빌드
@@ -33,10 +33,15 @@
   * Frontend에서는 Axios를 통한 통신
 * Frontend 구조 설계
   * src/main/frontend에 위치
-  * public/image에 버튼 등의 정적 이미지 파일을 배치
-  * src/app과 src/features에 Redux 관련 store 및 설정, 상태 관리 모듈을 배치
-  * src/component 하위에 css, page, ui로 나눠주고 page는 각 페이지 Component들을 배치. UI에서는 기본 버튼, 페이지네이션 버튼 등의 UI 관련 Component를 배치함으로써 재사용성 증대
-  * src/modules에 공통 처리 로직들을 분리해 모듈화 함으로써 코드 중복 최소화
+  * src 하위에 크게 modules와 common으로 분리.
+    * common은 2개 이상의 도메인에서 재사용되는 공통 로직 및 Component
+      * 단 한번이라도 다른 도메인에서 사용된다면 common으로 분리하도록 규칙을 설계
+    * modules는 각 도메인별 로직 및 Component
+  * API 요청은 Axios로 처리
+    * 각 컴포넌트에서 호출하는 것이 아닌 각 도메인 또는 common의 Service를 통해 api.js 파일로 접근해 호출하는 구조.
+    * 별다른 비즈니스 로직이 존재하지 않더라도 Service를 거치는 구조로 설계
+    * utils의 경우 간결한 로직 및 api.js를 호출하지 않는 구조로 설계
+  * 컴포넌트와 로직 모두 중복을 최소화 할 수 있도록 설계
 * Backend 구조 설계
   * annotation, auth, config, controller, domain, repository, service 구조로 설계
   * 각 Layer 별 분리를 기반으로 패키지 구조 설계
@@ -82,23 +87,23 @@ RabbitMQ의 경우 도입 이전 배포 테스트 수행으로 인해 RabbitMQ�
 <details>
   <summary><strong>메인 화면</strong></summary>
 
-  * BEST, NEW, 상품 분류별 목록 출력
-  * 상품 리스트 페이징
-  * 상품명 검색
-  * 장바구니
-    * 장바구니 상품 수량 증감
-    * 장바구니 상품 선택 또는 전체 삭제
-    * 장바구니 상품 선택 또는 전체 구매
-  * 주문 조회(비 로그인시에만 출력. 로그인 시 마이페이지에서 조회 가능)
-  * 로그인
-    * 회원가입
-    * 로컬 로그인 및 OAuth2 로그인 ( Google, Kakao, Naver )
-    * 아이디 및 비밀번호 찾기 ( 비밀번호 찾기 기능은 Mail로 인증번호 전송을 통한 인증 이후 처리 )
-    * 로그아웃
-  * 비회원
-    * 장바구니( Cookie 기반 )
-    * 주문 및 결제
-    * 주문 내역 조회 ( 받는사람, 연락처 기반 )
+* BEST, NEW, 상품 분류별 목록 출력
+* 상품 리스트 페이징
+* 상품명 검색
+* 장바구니
+  * 장바구니 상품 수량 증감
+  * 장바구니 상품 선택 또는 전체 삭제
+  * 장바구니 상품 선택 또는 전체 구매
+* 주문 조회(비 로그인시에만 출력. 로그인 시 마이페이지에서 조회 가능)
+* 로그인
+  * 회원가입
+  * 로컬 로그인 및 OAuth2 로그인 ( Google, Kakao, Naver )
+  * 아이디 및 비밀번호 찾기 ( 비밀번호 찾기 기능은 Mail로 인증번호 전송을 통한 인증 이후 처리 )
+  * 로그아웃
+* 비회원
+  * 장바구니( Cookie 기반 )
+  * 주문 및 결제
+  * 주문 내역 조회 ( 받는사람, 연락처 기반 )
 </details>
 
 <br/>
@@ -211,7 +216,7 @@ RabbitMQ의 경우 도입 이전 배포 테스트 수행으로 인해 RabbitMQ�
   7. [count 쿼리 캐싱](#count-쿼리-캐싱)
   8. [상품 추가 및 수정에서 JPA 이슈와 파일관리](#상품-추가-및-수정에서-JPA-이슈와-파일관리)
   9. [S3 연결을 통한 이미지 출력 처리](#S3-연결을-통한-이미지-출력-처리)
-  
+
 <br/>
 
 * <strong>프론트 엔드</strong>
@@ -231,18 +236,18 @@ RabbitMQ의 경우 도입 이전 배포 테스트 수행으로 인해 RabbitMQ�
 리팩토링 이후 JMeter를 통한 테스트를 진행했습니다.   
 테스트 목적은 기능에 대한 성능 최적화입니다.   
 사용하지 않는 구형 노트북에 Ubuntu 24.04.01을 설치한 뒤 Docker로 MySQL, Redis, RabbitMQ를 사용해 배포했습니다.   
-JMeter는 데스크탑에서 실행했고 공유기로 인한 같은 로컬 환경에서의 테스트로 진행했습니다.   
+JMeter는 데스크탑에서 실행했고 공유기로 인한 같은 로컬 환경에서의 테스트로 진행했습니다.
 
 테스트 데이터로는 사용자 및 상품 데이터 2000개 가량, 그 외 테이블들은 250만개 이상의 더미데이터를 담아두고 테스트했습니다.   
 테스트 설정은 500 Thread, 5 Ramp-up, Loop count 1 환경에서 수행했으며, 관리자의 경우 상대적으로 요청이 적게 발생하는 만큼 20 Thread, 1 Ramp-up 환경으로 수행했습니다.   
 이 설정은 가장 원활하게 처리되던 메인 페이지 조회 기능 기준으로 여러 수치에 대한 테스트를 진행하며 결정하게 되었습니다.   
-평균적으로 200ms를 넘어가지 않는 기능이었지만, 500 Thread가 넘는 수치에서는 1500ms 이상의 비정상적으로 치솟는 결과를 볼 수 있었기에 최적화에 가장 적합한 최대치라고 생각했습니다.   
+평균적으로 200ms를 넘어가지 않는 기능이었지만, 500 Thread가 넘는 수치에서는 1500ms 이상의 비정상적으로 치솟는 결과를 볼 수 있었기에 최적화에 가장 적합한 최대치라고 생각했습니다.
 
 하단의 이미지는 테스트 결과를 정리한 엑셀 파일의 일부입니다.   
-가장 문제가 많아 최적화를 많이 수행한 부분이 관리자 파트였기 때문에 관리자 기능 위주로 자료를 준비했습니다.   
+가장 문제가 많아 최적화를 많이 수행한 부분이 관리자 파트였기 때문에 관리자 기능 위주로 자료를 준비했습니다.
 
 테스트의 통과 기준은 평균 500ms대 까지로 잡았고, 목표에 맞춰 최적화를 수행했습니다.   
-최적화는 데이터베이스 인덱싱, 쿼리 튜닝, 코드 레벨에서의 데이터 파싱 및 JPA 최적화를 수행했으며, 모든 요청에 대해 목표를 달성할 수 있었습니다.   
+최적화는 데이터베이스 인덱싱, 쿼리 튜닝, 코드 레벨에서의 데이터 파싱 및 JPA 최적화를 수행했으며, 모든 요청에 대해 목표를 달성할 수 있었습니다.
 
 이 테스트를 수행하기 이전 브라우저나 Postman을 통한 단일 요청 테스트에서는 모두 정상적인 수치를 보여주던 기능들이었지만, 운영 환경과 같은 다중 요청이 발생하는 경우 또 다른 결과를 볼 수 있다는 점을 알 수 있게 된 좋은 기회였습니다.
 또한, 쿼리 튜닝과 인덱싱, JPA에 대해 좀 더 깊게 고민할 수 있었습니다.
@@ -360,28 +365,36 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 ```
 ```javascript
 //Oauth.jsx
+function OAuth() {
+  const navigate = useNavigate();
 
-useEffect(() => {
-  tokenRequest();
-}, []);
+  useEffect(() => {
+    const issuedToken = async () => {
+      try{
+        const res = await tokenRequest();
+        const authorization = res.data.authorization;
+        window.localStorage.setItem('authorization', authorization);
 
-const tokenRequest = async () => {
+        const prevUrl = window.sessionStorage.getItem('prev');
+        navigate(prevUrl);
+      }catch(err){
+        console.log(err);
+      }
+    }
 
-  await axiosInstance.get('member/oAuth/token')
-          .then(res => {
-            const authorization = res.headers.get('authorization');
-            window.localStorage.setItem('Authorization', authorization);
+    issuedToken();
+  }, []);
 
-            const prevUrl = window.sessionStorage.getItem('prev');
-            navigate(prevUrl);
-          })
+  return null;
 }
+
+export default OAuth;
 ```
 
 SuccessHandler에서는 사용자 아이디를 기반으로 임시 토큰을 생성한 뒤 응답 쿠키에 토큰을 담아 /oAuth 경로로 Redirect 합니다.      
 그럼 Oauth 컴포넌트로 접근하게 되는데 이 컴포넌트는 아무런 UI를 처리하지 않는 컴포넌트입니다.   
 단지 랜더링 시점에 useEffect를 통해 임시 토큰을 담아 정식 토큰 발급 요청을 보내게 되고, 정상적으로 토큰이 발급 되었다면 SessionStorage에 담아두었던 prev를 꺼내 로그인 이전 페이지로 이동하게 됩니다.   
-이때, 발급 받은 토큰의 처리는 Axios Interceptor에 의해 처리되는데, Frontend 기능 내역에 따로 정리해두었습니다.   
+이때, 발급 받은 토큰의 처리는 Axios Interceptor에 의해 처리되는데, Frontend 기능 내역에 따로 정리해두었습니다.
 
 Redirect를 처리할 때 Authorization 헤더에 토큰을 담는 것은 보안상 적절하지 않다고 생각해 이렇게 처리했습니다.   
 서버의 특정 요청 경로를 만들고 처리하는 방법도 테스트해봤지만 원하는 방법으로 해결할 수 없어 UI가 없는 컴포넌트를 통해 처리하게 되어 아쉬움이 남는 기능입니다.
@@ -393,26 +406,24 @@ Redirect를 처리할 때 Authorization 헤더에 토큰을 담는 것은 보안
 
 인증 인가 처리는 JWT와 Spring Security를 같이 사용했습니다.   
 SpringSecurity는 검증된 토큰을 기반으로 Authentication 객체를 SecurityContextHolder.setAuthentication()을 통해 담아 관리하게 됩니다.   
-권한 관리는 컨트롤러 혹은 메소드 단위로 @PreAuthorize Annotation을 통해 관리합니다.   
+권한 관리는 컨트롤러 혹은 메소드 단위로 @PreAuthorize Annotation을 통해 관리합니다.
 
 JWT는 AccessToken과 RefreshToken 구조로 설계했습니다.   
 또한, 다중 디바이스 로그인을 허용하기 위해 ino라는 디바이스 식별 목적의 값이 같이 처리되는 구조입니다.   
-AccessToken은 1시간, RefreshToken은 2주의 만료기간을 갖도록 처리했으며, ino는 JWT로 생성하는 것이 아니기 때문에 자체적인 만료 기간은 없습니다.   
+AccessToken은 1시간, RefreshToken은 2주의 만료기간을 갖도록 처리했으며, ino는 JWT로 생성하는 것이 아니기 때문에 자체적인 만료 기간은 없습니다.
 
 서버에서의 토큰 관리는 Redis로 관리하게 됩니다.   
 이때 key 구조는 at 또는 rt 라는 각 토큰의 약어로 시작합니다. 토큰 약어 + ino + 사용자 아이디 구조로 키값을 생성하게 됩니다.   
-클라이언트에서는 AccessToken을 LocalStorage에 보관하며 RefreshToken과 ino는 쿠키로 관리합니다.   
-쿠키 만료시점은 토큰 만료 시간과 다르게 30일을 갖게 되며, ino는 9999일의 긴 기간을 주어 사실상 만료되지 않도록 설계했습니다.   
-클라이언트의 만료 시간을 길게 설계한데는 탈취 대응에 대한 이유가 있습니다.   
-만약 사용자의 미접속 기간이 토큰 만료시간보다 길어졌을 때, 탈취를 당했다면 Redis 데이터와 비교를 통해 판단할 수 있기 때문입니다.   
-ino가 제거되지 않는 한 해당 디바이스의 Redis Key 구조는 동일할 것이기 때문에 이 과정에서 비교를 통해 탈취 여부를 판단할 수 있게 됩니다.   
-ino의 경우 절대 사라지지 않는 값은 아니며, 로그아웃이나 탈취로 판단되는 경우 서버에서 만료 쿠키를 응답에 담아 반환함으로써 제거하게 됩니다.   
+클라이언트에서는 AccessToken과 만료시간을 LocalStorage에 보관하며 RefreshToken과 ino는 쿠키로 관리합니다.   
+각 만료시간은 토큰 만료시간과 동일하게 갖게 되며, ino는 9999일의 긴 기간을 주어 사실상 만료되지 않도록 설계하고 로그아웃 또는 토큰이 탈취된 경우에만 제거됩니다.   
+ino가 제거되지 않는 한 해당 디바이스의 Redis Key 구조는 동일하기 때문에 전체 토큰이 만료되더라도 재 로그인 과정에서 Redis 데이터 비교를 통해 토큰 탈취를 판단할 수 있습니다.
 
 서버에서 응답할 때 AccessToken은 Authorization Header에 담아 반환하게 되며, RefreshToken과 ino는 응답 쿠키에 담아 반환합니다.   
 이때, 쿠키 설정으로는 SameSite Strict, HttpOnly, Secure 설정을 하도록 설계했습니다.   
+각 요청에 따라 구조의 차이가 조금은 존재하지만, 공통적으로 응답 body에 AccessToken의 만료시간을 같이 담아 반환하게 됩니다.   
+응답을 받은 클라이언트에서는 LocalStorage에 { token: 토큰값, expires: 만료시간 } 구조로 저장하게 됩니다.
 
 재발급 방식은 Refresh Token Rotation 방식으로 처리해 긴 만료시간을 갖는 Refresh Token의 단점을 상쇄할 수 있도록 했습니다.
-
 
 ```java
 @Override
@@ -491,7 +502,7 @@ protected void doFilterInternal(HttpServletRequest request,
 ```
 
 SecurityFilterChain 설정에서 beforeFilter에 JWTAuthorizationFilter를 설정해 두었기 떄문에 모든 요청은 위 필터를 거치게 됩니다.   
-처리 과정에서 가장 먼저 ino 존재 여부를 확인하게 되는데 ino가 없는 경우 토큰 검증은 가능하지만 Redis 데이터와 비교가 불가능하기 때문에 검증을 수행하지 않고 인증 처리를 하지 않도록 설계했습니다.   
+처리 과정에서 가장 먼저 ino 존재 여부를 확인하게 되는데 ino가 없는 경우 토큰 검증은 가능하지만 Redis 데이터와 비교가 불가능하기 때문에 검증을 수행하지 않고 인증 처리를 하지 않도록 설계했습니다.
 
 ino가 존재한다면 토큰 검증 및 Redis 데이터와 비교를 처리하게 됩니다.   
 조건에 따라 검증이 안되는 잘못된 토큰 혹은 Redis 데이터와 불일치 하는 탈취라고 판단되는 토큰, 정상 토큰으로 나눠집니다.   
@@ -499,9 +510,9 @@ ino가 존재한다면 토큰 검증 및 Redis 데이터와 비교를 처리하�
 이 경우 Redis 데이터 처리가 불가능하기 때문에 응답 쿠키로 만료된 쿠키들을 담아준 뒤 800이라는 상태값과 함께 바로 응답을 반환하게 됩니다.   
 탈취로 판단된 토큰의 경우 동일하게 응답 쿠키에 만료된 쿠키들을 담아주고 Redis 데이터까지 삭제한 뒤 800이라는 상태값과 함께 바로 응답을 반환하게 됩니다.   
 800 응답을 받은 클라이언트에서는 LocalStorage에 저장된 AccessToken을 제거하고 인증 과정에서 문제가 있었음을 사용자에게 알려 재로그인을 유도합니다.   
-쿠키의 경우 응답 쿠키가 바로 적용되기도 하고 HttpOnly 설정으로 인해 제어할 수 없으므로 따로 처리하지 않습니다.   
+쿠키의 경우 응답 쿠키가 바로 적용되기도 하고 HttpOnly 설정으로 인해 제어할 수 없으므로 따로 처리하지 않습니다.
 
-토큰이 정상으로 판단되는 경우 RDB 데이터를 조회한 뒤 Authentication 객체 생성 및 SecurityContextHolder에 담아 관리하도록 처리합니다.   
+토큰이 정상으로 판단되는 경우 RDB 데이터를 조회한 뒤 Authentication 객체 생성 및 SecurityContextHolder에 담아 관리하도록 처리합니다.
 
 <br />
 
@@ -511,11 +522,11 @@ ino가 존재한다면 토큰 검증 및 Redis 데이터와 비교를 처리하�
 Spring Boot 버전으로 새로 진행하면서 기존에 있던 집계 테이블은 제거했습니다.   
 매출 기능에 대해 다양한 데이터를 보여주도록 개선하게 되면서 집계 테이블의 효율성이 떨어졌기 때문에 주문 및 상세 테이블에서의 집계 쿼리로 처리했습니다.   
 단일 요청에서 준수한 성능을 보여줬기에 이 설계를 유지하고 있었는데 JMeter로 다중 요청 테스트를 진행해보니 측정 불가 수준의 성능 문제가 발생했습니다.
-이 문제를 해결하기 위해 인덱싱과 쿼리 튜닝을 진행해봤지만 해결할 수 없었기에 집계 테이블을 다시 설계하게 되었고, 일별 집계 테이블과 상품 옵션별 월 매출 집계 테이블로 나눠 추가했습니다.   
+이 문제를 해결하기 위해 인덱싱과 쿼리 튜닝을 진행해봤지만 해결할 수 없었기에 집계 테이블을 다시 설계하게 되었고, 일별 집계 테이블과 상품 옵션별 월 매출 집계 테이블로 나눠 추가했습니다.
 
 매출 기능은 이 개선을 통해 해결할 수 있었지만, 이 처리로 인해 주문 처리의 복잡도가 증가했습니다.   
 주문 데이터 처리, 장바구니 데이터 처리, 상품 총 판매량 수정 처리, 옵션별 재고 수정, 2개의 집계 테이블에 대한 처리까지 모두 포함되어야 했습니다.   
-하지만 사용자 입장에서 보면 주문 데이터 처리와 장바구니 데이터 처리만 관심사일 뿐, 다른 처리들은 사용자의 관심밖의 일이라고 생각해 이걸 기다리도록 처리하는건 비효율적이라고 생각했습니다.   
+하지만 사용자 입장에서 보면 주문 데이터 처리와 장바구니 데이터 처리만 관심사일 뿐, 다른 처리들은 사용자의 관심밖의 일이라고 생각해 이걸 기다리도록 처리하는건 비효율적이라고 생각했습니다.
 
 이 문제를 해결하기 위한 방법으로 Batch 처리와 비동기 처리 방식를 생각할 수 있었습니다.   
 하지만, 매출과 재고, 판매량의 실시간성이 보장되어야 한다는 점에서 Batch 처리는 적합하지 않았고, 비동기 처리 중 방법을 찾게 되었습니다.   
@@ -573,7 +584,7 @@ public class RabbitMQProperties {
 }
 ```
 
-이 처리를 통해 rabbitMQProperties.getQueue().get(rabbitMQPrefix.getKey()).getRouting(); 과 같은 코드를 통해 바로 Routing Key를 사용할 수 있습니다.   
+이 처리를 통해 rabbitMQProperties.getQueue().get(rabbitMQPrefix.getKey()).getRouting(); 과 같은 코드를 통해 바로 Routing Key를 사용할 수 있습니다.
 
 현재 RabbitMQ가 적용되어 있는 기능은 주문 처리 기능밖에 없기 때문에 별도의 Producer를 두지 않고 메소드에서 바로 convertAndSend()를 통해 호출하게 됩니다.   
 RabbitMQ의 기본적인 설정들과 Queue 정의는 RabbitMQConfig 클래스에 정의해두었으며, 아래 링크를 통해 전체 코드를 확인하실 수 있습니다.
@@ -587,20 +598,20 @@ RabbitMQ의 기본적인 설정들과 Queue 정의는 RabbitMQConfig 클래스�
 <br/>
 
 RabbitMQ를 사용한 이유중 하나는 실패 메시지 관리 및 재시도 용이성입니다.   
-그래서 이 실패 메시지 관리를 어떻게 할지 고민을 해봤습니다.   
+그래서 이 실패 메시지 관리를 어떻게 할지 고민을 해봤습니다.
 
 실패 메시지 처리는 Management를 사용하는 만큼 관리자의 수동 처리를 하는 방법이 있고, 로그를 확인 후 재처리를 하는 방법도 있습니다.   
 여러 방법 중 저는 UI를 통해 재처리 요청으로 수행하는 방법을 택했습니다.   
-운영을 담당하는 개발자가 있는 경우에는 처리 방안이 다양하지만, 개발 후 제공만 하는 경우에는 제한적이라고 생각했기 때문입니다.   
+운영을 담당하는 개발자가 있는 경우에는 처리 방안이 다양하지만, 개발 후 제공만 하는 경우에는 제한적이라고 생각했기 때문입니다.
 
 기본적인 기능 설계로는 메시지 개수 조회, 재처리 요청 순으로 처리할 수 있도록 가닥을 잡았습니다.   
-여러 조회 테스트와 재처리 테스트를 수행해보고 방법을 택하게 되었는데 그 중 HTTP 요청을 통한 조회, receive()를 통한 재처리로 결정하게 되었습니다.   
+여러 조회 테스트와 재처리 테스트를 수행해보고 방법을 택하게 되었는데 그 중 HTTP 요청을 통한 조회, receive()를 통한 재처리로 결정하게 되었습니다.
 
 HTTP 요청을 통한 조회의 경우 두가지 경로가 존재했습니다.   
 '/api/queues/{vhost}/{queueName}/get' 요청과 '/api/queues/{vhost}/{queueName}' 요청으로 두가지 방법이 있는데 차이점으로는 /get의 경우 메시지내용까지 가져온다는 차이점이 있습니다.   
 만약 조회 즉시 재처리 요청을 수행해야 한다면 /get으로 처리하는 방법이 더 유효할 것이라고 생각합니다.   
 receive()나 HTTP 요청을 통한 추가 조회 및 재처리 요청이 발생하지 않아도 되고 메시지 데이터를 파싱해 바로 브로커에게 메시지를 넘겨줄 수 있기 때문입니다.   
-하지만 제가 원하는 기능은 관리자가 재처리 버튼을 눌렀을 때 재처리를 시도하는 것이 목적이었기 때문에 적합하지 않다고 생각했고, 메시지 내용 없이 단순히 개수만 반환하는 요청을 사용했습니다.   
+하지만 제가 원하는 기능은 관리자가 재처리 버튼을 눌렀을 때 재처리를 시도하는 것이 목적이었기 때문에 적합하지 않다고 생각했고, 메시지 내용 없이 단순히 개수만 반환하는 요청을 사용했습니다.
 
 ```java
 @Service
@@ -657,7 +668,7 @@ public class AdminServiceImpl implements AdminService {
 모든 Queue에 대한 정보를 담고 있는 RabbitMQProperties를 사용해 모든 DLQ 명을 리스트화 한 뒤 요청을 반복적으로 보내 메시지 개수를 조회했습니다.   
 이후 메시지가 존재하는 DLQ명과 개수만 담아 클라이언트에게 반환하게 됩니다.
 
-그럼 클라이언트에서는 실패 메시지가 존재하는 것을 확인 후 재처리 버튼을 통해 요청을 보내게 되면 Request Body에 조회 요청 시 반환된 데이터를 그대로 담아서 보내게 됩니다.   
+그럼 클라이언트에서는 실패 메시지가 존재하는 것을 확인 후 재처리 버튼을 통해 요청을 보내게 되면 Request Body에 조회 요청 시 반환된 데이터를 그대로 담아서 보내게 됩니다.
 
 ```java
 @Override
@@ -689,7 +700,7 @@ private void retryMessages(FailedQueueDTO dto) {
 ```
 
 서버는 클라이언트로부터 전달받은 리스트를 기반으로 재처리 요청을 시도하게 되는데 이때 메시지의 개수만큼만 반복하게 됩니다.   
-개수만큼 반복하도록 제어하지 않는다면 메시지의 재 실패로 인해 다시 DLQ에 적재되는 경우 무한루프가 발생할 수 있기 때문입니다.   
+개수만큼 반복하도록 제어하지 않는다면 메시지의 재 실패로 인해 다시 DLQ에 적재되는 경우 무한루프가 발생할 수 있기 때문입니다.
 
 재처리 요청은 HTTP 요청으로 처리하는 방법도 있었지만, 그렇게 처리하는 경우 너무 많은 횟수의 TCP 연결 및 요청이 반복적으로 발생해야 해서 큰 오버헤드가 발생할 수 있다는 단점이 있습니다.   
 반면, receive()를 통한 처리는 RabbitMQ AMQP에 의해 TCP 연결을 유지한채 지속적인 처리가 가능하기 떄문에 더 효율적으로 실패 메시지 처리가 가능하기 때문에 receive()로 처리했습니다.
@@ -701,14 +712,14 @@ private void retryMessages(FailedQueueDTO dto) {
 
 다중 요청 테스트 이후 쿼리 최적화를 수행하다보니 인덱스로는 한계가 있는 쿼리들이 존재했습니다.   
 이 쿼리들은 공통적으로 Pagination을 위한 LIMIT 처리와 여러 테이블간의 JOIN이 포함되어 있었습니다.    
-특히 관리자 기능에서 많이 발생했는데, 사용자는 자신의 데이터만 조회한다는 조건이 붙는 반면, 관리자는 테이블의 전체 데이터를 기반으로 조회하기 때문에 성능에 큰 영향을 미쳤습니다.   
+특히 관리자 기능에서 많이 발생했는데, 사용자는 자신의 데이터만 조회한다는 조건이 붙는 반면, 관리자는 테이블의 전체 데이터를 기반으로 조회하기 때문에 성능에 큰 영향을 미쳤습니다.
 
-문제 해결을 위해 EXPLAIN ANALYZE를 통해 실행 계획을 분석한 결과, 기준이 되는 테이블의 모든 데이터를 먼저 조회한 후 JOIN을 수행하고 나서야 LIMIT이 적용되는 것을 확인할 수 있었습니다.   
+문제 해결을 위해 EXPLAIN ANALYZE를 통해 실행 계획을 분석한 결과, 기준이 되는 테이블의 모든 데이터를 먼저 조회한 후 JOIN을 수행하고 나서야 LIMIT이 적용되는 것을 확인할 수 있었습니다.
 
 성능 최적화를 위한 첫번째 방법으로는 JOIN 되는 기준 테이블 데이터를 줄이는 것이었습니다.   
 이를 해결하기 위해 FROM 절의 SubQuery를 사용하여 기준 테이블을 별도로 조회해 데이터 양을 줄일 수 있었고, 쿼리 성능을 크게 향상 시킬 수 있었습니다.   
 하지만, QueryDSL 환경에서는 FROM 절의 SubQuery 사용이 어렵다는 문제가 있었습니다.   
-JPQL 기반인 QueryDSL은 객체 중심으로만 처리할 수 있으며, 임시 테이블처럼 FROM 절에서의 SubQuery를 사용하는 경우 타입 안정성 보장이 어렵다는 것이 원인이었습니다.   
+JPQL 기반인 QueryDSL은 객체 중심으로만 처리할 수 있으며, 임시 테이블처럼 FROM 절에서의 SubQuery를 사용하는 경우 타입 안정성 보장이 어렵다는 것이 원인이었습니다.
 
 이 문제는 Native Query로 처리해 해결했습니다.
 
@@ -842,10 +853,10 @@ Native Query를 사용하며 가장 신경이 쓰였던 부분은 가독성과 �
 
 Sub Query 사용을 통해 조회 쿼리의 성능을 높이는데는 성공했지만, Pagination에 사용될 count 쿼리는 여전히 문제였습니다.   
 Full scan을 해야 하다보니 상품 문의 테이블 기준 300만개의 데이터가 있음에도 600ms 의 시간이 걸렸습니다.   
-여러 인덱스를 추가해보기도 하고 DISTINCT를 사용해보기도 했지만, 이것보다 더 빠른 속도를 볼 수는 없었고 결국 캐싱으로 처리하기로 결정했습니다.   
+여러 인덱스를 추가해보기도 하고 DISTINCT를 사용해보기도 했지만, 이것보다 더 빠른 속도를 볼 수는 없었고 결국 캐싱으로 처리하기로 결정했습니다.
 
 JWT의 관리로 인해 Redis를 사용하고 있었기 때문에 Redis를 통한 캐싱을 처리하기로 결정했고, 전략은 주기적인 갱신이 아닌 요청 발생시에 확인 후 갱신하는 방법을 택했습니다.   
-관리자 요청의 경우 비교적 자주 발생하는 요청이 아니라고 생각했기 때문에 주기적인 갱신으로 리소스를 소비할 필요가 없다고 생각했기 때문입니다.   
+관리자 요청의 경우 비교적 자주 발생하는 요청이 아니라고 생각했기 때문에 주기적인 갱신으로 리소스를 소비할 필요가 없다고 생각했기 때문입니다.
 
 캐싱되는 데이터는 조건이 없는 Full Scan 요청입니다. 저장되는 KEY 값의 관리는 Enum을 통해 관리하고 TTL은 yml로 관리할 수 있도록 분리했습니다.   
 TTL은 @Value로 가져와서 사용하기보다 CacheProperties 객체에 담아 사용할 수 있도록 처리했습니다.
@@ -945,7 +956,7 @@ MERGE 옵션이 활성화 되어 있다면 상위 엔티티의 갱신이 이루�
 
 
 이 처리 과정에서는 파일의 저장 및 삭제 처리도 포함되어 있습니다.   
-고민했던 점은 롤백에 대한 점이었습니다. 데이터베이스 롤백의 경우 @Transactional을 통해 처리할 수 있지만, 파일은 그렇지 않다는 점이 문제였습니다.   
+고민했던 점은 롤백에 대한 점이었습니다. 데이터베이스 롤백의 경우 @Transactional을 통해 처리할 수 있지만, 파일은 그렇지 않다는 점이 문제였습니다.
 
 이 문제를 해결하기 위해서는 예외가 발생했을 때 저장된 파일이 어떤게 있는지 알 수 있어야 한다고 생각했습니다.
 
@@ -977,7 +988,7 @@ public class AdminServiceImpl implements AdminService {
         productOptionRepository.deleteAllById(deleteOptionList);
       
     }catch (Exception e) {
-      log.warn("Filed admin patchProduct");
+      log.warn("Failed admin patchProduct");
       e.printStackTrace();
       saveImages.forEach(this::deleteImage);
 
@@ -1025,7 +1036,7 @@ S3 연동을 이번에 처음 해봤기 때문에 이미지 파일을 어떻게 
 
 여기서 첫번째 방법에 대해서는 S3에 직접 접근하는 형태이기 때문에 해당 방법을 택해서는 안되겠다고 생각했습니다.   
 두번째 방법은 개발자가 직접 url의 유효시간을 설정해 처리하는 방법이기 때문에 안전한 방법이라고는 하지만 전달되는 url에 S3 버킷명과 같은 불필요한 정보가 포함된다는 점이 마음에 걸렸습니다.   
-이 정보들은 노출되더라도 해당 파일에 접근할 수 없기 때문에 괜찮다는 말이 있었지만 그래도 불필요하게 노출할 필요는 없다고 생각해 다른 방법을 찾게 되었습니다.   
+이 정보들은 노출되더라도 해당 파일에 접근할 수 없기 때문에 괜찮다는 말이 있었지만 그래도 불필요하게 노출할 필요는 없다고 생각해 다른 방법을 찾게 되었습니다.
 
 그래서 최종적으로 택한 방법은 백엔드 서버를 proxy 서버로 활용하는 방법입니다.   
 이렇게 처리하는 경우 기존 로컬에 저장된 파일을 불러와 반환할때 처럼 다른 정보는 노출하지 않고 요청 url 정도만 노출하는 형태로 처리할 수 있었습니다.
@@ -1065,7 +1076,7 @@ public class MainServiceImpl implements MainService {
 
 <br/>
 
-Frontend에서 로그인 상태 관리는 redusjs/toolkit을 통해 처리했습니다.   
+Frontend에서 로그인 상태 관리는 reduxjs/toolkit을 통해 처리했습니다.
 
 ```javascript
 //rootReducer.js
@@ -1079,15 +1090,18 @@ const rootReducer = combineReducers({
 export default rootReducer;
 
 //store.js
-import { configureStore } from '@reduxjs/toolkit';
+import {combineReducers, configureStore} from '@reduxjs/toolkit';
 import { persistStore, persistReducer} from "redux-persist";
 import storage from 'redux-persist/lib/storage';
-import rootReducer from './rootReducer';
+import memberReducer from '../modules/member/memberSlice';
 
+const rootReducer = combineReducers({
+  member: memberReducer,
+});
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['member'],
+  blacklist: ['member'],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -1121,8 +1135,6 @@ const memberSlice = createSlice({
   reducers: {
     login(state, action) {
       const { userId, role } = action.payload;
-      console.log("login userId : ", userId);
-      console.log("login role : ", role);
       state.loginStatus = true;
       state.id = userId;
       state.role = role;
@@ -1140,31 +1152,41 @@ export default memberSlice.reducer;
 
 //App.js
 function App() {
-  const dispatch = useDispatch();
+    const dispatch = useDispatch();
 
-  //User status Redux
-  useEffect(() => {
-    const accessToken = getToken();
-
-    if(!accessToken) {
-      dispatch(logout());
-      return;
-    }
-
-    axiosInstance.get('member/status', { withCredentials: true })
-            .then(res => {
-              const { userId, role } = res.data;
-              dispatch(login({ userId, role }));
-            })
-  }, [dispatch]);
-  return (
-    //...
-  )
+    useEffect(() => {
+      const accessToken = getToken();
+  
+      if(!accessToken) {
+        dispatch(logout());
+        return;
+      }
+  
+      getMemberStatus()
+              .then(({ userId, role}) => {
+                dispatch(login({ userId, role }));
+              })
+              .catch((err) => {
+                console.error('회원 상태 확인 실패: ', err);
+  
+                if(err.response.status === 403)
+                  removeToken();
+  
+                dispatch(logout());
+              })
+  
+    }, [dispatch]);
+    return (
+        <BrowserRouter>
+          {/* ... */}
+        </BrowserRouter>
+    )
+}
 ```
 
 Redux Toolkit과 Redux-persist를 사용해 로그인 상태를 전역적으로 관리하고, 새로고침시에도 상태를 유지할 수 있도록 구성했습니다.   
 memberSlice.js를 통해 상태를 관리하며, store.js에서 persist를 통해 localStorage에 자동 저장됩니다.   
-App.js의 useEffect를 통해 새로고침 또는 페이지 진입 시 로그인 여부를 서버에 검증하고 Redux 상태에 반영함으로써 UX를 확보할 수 있도록 했습니다. 
+App.js의 useEffect를 통해 새로고침 또는 페이지 진입 시 로그인 여부를 서버에 검증하고 Redux 상태에 반영함으로써 UX를 확보할 수 있도록 했습니다.
 
 <br />
 
@@ -1172,96 +1194,115 @@ App.js의 useEffect를 통해 새로고침 또는 페이지 진입 시 로그인
 <br />
 
 이번 프로젝트에서는 JWT 요청과 오류 응답에 대한 처리를 수월하게 관리할 수 있도록 interceptor를 사용했습니다.   
-동일하게 리액트를 사용했던 다른 프로젝트에서는 클라이언트에서 토큰을 모두 쿠키에 저장했기 때문에 따로 interceptor를 사용하지 않고 오류 핸들링만 모듈화했었는데 이번에는 AccessToken을 LocalStorage에 저장하게 되면서 interceptor를 활용하게 되었습니다.
+axios 관련 파일은 모두 common/utils/axios 하위에 위치해있습니다.   
+AccessToken을 LocalStorage에 저장하고 관리하기 떄문에 tokenUtils.js에서 토큰 저장 및 조회, 삭제를 처리합니다.   
+axios 설정은 Simple과 Enhanced로 나눠지는데 Simple은 401에 대한 응답만 처리하는 interceptor를 갖고 있고,   
+Enhanced는 401, 403, 800에 대한 응답을 처리하는 interceptor를 갖습니다.   
+두 Axios에서 401 응답은 동일한 처리를 하기 때문에 Enhanced의 Interceptor는 해당하는 응답값이 없는 경우 Simple의 Interceptor로 보내 401을 체크합니다.
 
 ```javascript
-//customAxios.js
+//tokenUtils.js
+export const getToken = () => localStorage.getItem('Authorization');
 
-import axios from 'axios';
+export const setToken = (res) => {
+  const token = res.headers['authorization'];
 
-export const axiosInstance = axios.create({
-  baseURL: '/api',
-  withCredentials: true,
-})
+  localStorage.setItem('Authorization', token);
+}
+export const removeToken = () => localStorage.removeItem('Authorization');
 
-axiosInstance.interceptors.request.use(
-        (config) => {
-          const accessToken = getToken();
+//axiosInterceptors.js
+import { getToken, removeToken } from './tokenUtils';
+import { getReIssueToken } from "../../services/authService";
+import { axiosEnhanced } from './axiosEnhanced';
 
-          config.headers['Authorization'] = `${accessToken}`;
-
-          return config;
-        },
-        (error) => {
-          console.log('axios interceptor Error : ', error);
-        }
-)
-
-axiosInstance.interceptors.response.use(
-        (res) => {
-          return res;
-        },
-        async (err) => {
-          console.log('axios interceptor response');
-          await errorHandling(err);
-        }
-)
-
-const getToken = () => {
-
-  const token = window.localStorage.getItem('Authorization');
-  console.log('getToken : ', token);
-
-  return token;
+// 공통 Request Interceptor
+export const requestInterceptor = (config) => {
+  const token = getToken();
+  if (token)
+    config.headers['Authorization'] = token;
+  return config;
 };
 
+// 401에 대한 처리만 하는 interceptor
+export const simpleResponseInterceptor = async (error) => {
+  if(error.response?.status === 401) {
+    error.config._retry = true;
 
-export const checkResponseMessageOk = (res) => {
+    try {
+      const res = await getReIssueToken();
 
-  if(res.data.message === 'OK')
-    return true;
-  else{
-    alert('오류가 발생했습니다.\n문제가 계속된다면 관리자에게 문의해주세요');
-    return false;
+      if(res.data.message === RESPONSE_MESSAGE.OK) {
+        setToken(res);
+
+        error.config.headers['Authorization'] = getToken();
+
+        return axiosEnhanced(error.config);
+      }
+    }catch (err) {
+      console.error('Token ReIssue failed : ', err);
+    }
   }
 
-}
+  return Promise.reject(error);
+};
 
-export const errorHandling = (err) => {
-  const errorStatus = err.response.status;
-  const errorMessage = err.response.data.errorMessage;
-  if(errorStatus === 401){
-    //토큰 만료 응답
-    return axiosInstance.get(`reissue`)
-            .then(res => {
-              window.localStorage.removeItem('Authorization');
+// 401, 403, 800 에 대한 처리만 하는 interceptor
+export const enhancedResponseInterceptor = async (error) => {
+  const status = error.response?.status;
+  const message = error.response?.data?.errorMessage;
 
-              const authorization = res.headers['authorization'];
-              window.localStorage.setItem('Authorization', authorization);
-
-              return axiosInstance(err.config);
-            })
-  }else if(errorStatus === 800){
-    //토큰 탈취 응답
-    window.localStorage.removeItem('Authorization');
-    alert('로그인 정보에 문제가 발생해 로그아웃됩니다.\n문제가 계속된다면 관리자에게 문의해주세요.');
-    window.location.href='/';
-  }else {
+  if(status === 800) {
+    removeToken();
+    alert('로그인 정보에 문제가 발생해 로그아웃됩니다.\n문제가 계속된다면 관리자에게 문제해주세요.');
+    window.location.href = '/';
+  } else if(status === 403 || message === 'AccessDeniedException') {
     window.location.href = '/error';
+  } else {
+    return simpleResponseInterceptor(error);
   }
-}
+
+  return Promise.reject(error);
+};
+
+//axiosSimple.js
+import axios from 'axios';
+import { requestInterceptor, simpleResponseInterceptor } from './axiosInterceptors';
+
+// AccessDenied, TokenStealing(800)이 절대 발생할 수 없다는 보장이 있으면서,
+// 403에 대한 처리를 직접 작성하는 경우 사용되는 axios
+// ex) login에서 403(BadCredentials) 발생 시 오류로 분류할게 아니라 잘못 입력되었다고 overlap 출력을 해야 하는 경우
+export const axiosSimple = axios.create({
+  baseURL: '/api',
+  withCredentials: true,
+});
+
+axiosSimple.interceptors.request.use(requestInterceptor);
+axiosSimple.interceptors.response.use(
+        res => res,
+        err => simpleResponseInterceptor(err)
+);
+
+//axiosEnhanced.js
+import axios from 'axios';
+import { requestInterceptor, enhancedResponseInterceptor } from './axiosInterceptors';
+
+// 대부분의 요청에 사용되는 axios
+export const axiosEnhanced = axios.create({
+  baseURL: '/api',
+  withCredentials: true,
+});
+
+axiosEnhanced.interceptors.request.use(requestInterceptor);
+axiosEnhanced.interceptors.response.use(
+        res => res,
+        enhancedResponseInterceptor
+)
 ```
-
-인터셉터 Request에서는 AccessToken을 헤더에 담는 처리만 하도록 했고, Response에서는 토큰 만료 응답이 반환된 경우 재발급 요청을 보내도록 처리했습니다.   
-이후 재발급이 완료 되었다면 기존 AccessToken 데이터는 삭제하고 새로운 AccessToken 데이터를 담아줍니다.   
-남은 오류 중 따로 핸들링 해줘야 하는 오류가 탈취 응답 코드로 설정한 800번 오류인데 이 경우 alert 창을 띄워 사용자에게 알린 뒤 LocalStorage에 저장된 토큰 데이터를 삭제하도록 했습니다.   
-쿠키는 서버에서 만료된 응답 쿠키를 반환하기 때문에 따로 인터셉터에서 처리하지 않도록 했습니다.   
-403 오류를 포함한 다른 모든 오류에 대해서는 오류페이지로 이동하도록 처리했습니다.
-
-customAxios 모듈에는 하나의 axios가 더 존재하는데 이 axios의 인터셉터는 조금의 차이가 있습니다.   
-Request의 경우 동일하게 처리하지만 Response에 대해서는 토큰 만료 응답만 처리하도록 했습니다.   
-분리 이유는 로그인의 경우 잘못된 아이디나 비밀번호를 입력하는 경우 403이 발생하며 BadCredentialsException이 발생하는데 이 경우 오류 페이지로 이동하는 것이 아닌 정보가 잘못 입력되었다는 문구를 화면에 출력해야 하기 때문입니다. 
-해당 처리에 대해 기존 Axios로 처리할 수 있는 방법을 찾아보고자 했지만 해결책을 찾지 못해 하나의 인스턴스를 추가하게 되었습니다.
+Request Interceptor에서는 AccessToken 조회 후 존재한다면 Authorization 헤더에 담는 처리만 합니다.
+401 응답이 발생하는 경우 토큰 만료라는 의미이기 때문에 getReIssueToken() 함수 내부에서 재발급 요청 이후 토큰 저장까지 처리합니다.
+이후 저장된 토큰을 통해 사용자 요청을 재전달 할 수 있도록 처리했습니다.
+800 응답의 경우 토큰이 탈취되었다는 응답이기 때문에 사용자에게 안내 문구를 출력 후 모든 토큰이 제거됩니다.
 
 <br />
 
@@ -1279,99 +1320,99 @@ AddProductForm에서는 이 optionList의 사이즈만큼 폼을 출력하고 �
 ```javascript
 //AddProduct Component
 function AddProduct() {
-    //...
-    const [optionList, setOptionList] = useState([]);
-    
-    //...
-    //옵션 추가 버튼 핸들링
-    const handleAddOption = () => {
-        const optionArr = [...optionList];
-        
-        optionArr.push({
-            optionId: 0,
-            size: '',
-            color: '',
-            optionStock: '',
-            optionIsOpen: true
-        });
-        
-        setOptionList(optionArr);
-    }
-    
-    //옵션 폼 입력 onChange 핸들링
-    const handleOptionOnChange = (e) => {
-      const idx = e.target.parentElement.parentElement.getAttribute('value');
-      let value = e.target.value;
-  
-      if(e.target.name === 'optionStock')
-        value = Number(value);
-  
-      optionList[idx] = {
-        ...optionList[idx],
-        [e.target.name]: value,
-      };
-  
-      setOptionList([...optionList]);
-    }
+  //...
+  const [optionList, setOptionList] = useState([]);
+
+  //...
+  //옵션 추가 버튼 핸들링
+  const handleAddOption = () => {
+    const optionArr = [...optionList];
+
+    optionArr.push({
+      optionId: 0,
+      size: '',
+      color: '',
+      optionStock: '',
+      optionIsOpen: true
+    });
+
+    setOptionList(optionArr);
+  }
+
+  //옵션 폼 입력 onChange 핸들링
+  const handleOptionOnChange = (e) => {
+    const idx = e.target.parentElement.parentElement.getAttribute('value');
+    let value = e.target.value;
+
+    if(e.target.name === 'optionStock')
+      value = Number(value);
+
+    optionList[idx] = {
+      ...optionList[idx],
+      [e.target.name]: value,
+    };
+
+    setOptionList([...optionList]);
+  }
 }
 
 
 //AddProductForm Component
 function AddProductForm(props) {
-    //...
-    
-    return(
-        //...
-            <div className="option-header">
-              <h3>상품 옵션</h3>
-              <DefaultBtn
-                      btnText={'옵션 추가'}
-                      onClick={handleAddOption}
-              />
+  //...
+
+  return(
+          //...
+          <div className="option-header">
+            <h3>상품 옵션</h3>
+            <DefaultBtn
+                    btnText={'옵션 추가'}
+                    onClick={handleAddOption}
+            />
+          </div>
+  {optionList.map((data, index) => {
+    let sizeText = '';
+    let colorText = '';
+    if(data.size !== null)
+      sizeText = data.size;
+    if(data.color !== null)
+      colorText = data.color;
+    return (
+            <div key={index} value={index} className="option-detail">
+              <div className="option-detail-header">
+                <DefaultBtn
+                        btnText={'옵션 삭제'}
+                        onClick={handleRemoveOption}
+                        name={data.optionId}
+                        value={index}
+                />
+              </div>
+              <div className="option-size">
+                <label className="product-label">사이즈</label>
+                <input className="product-input" type={'text'} name={'size'} onChange={handleOptionOnChange} value={sizeText}/>
+              </div>
+              <div className="option-color">
+                <label className="product-label">컬러</label>
+                <input className="product-input" type={'text'} name={'color'} onChange={handleOptionOnChange} value={colorText}/>
+              </div>
+              <div className="option-stock">
+                <label className="product-label">재고</label>
+                <input className="product-input" type={'number'} name={'optionStock'} onChange={handleOptionOnChange} value={data.optionStock}/>
+              </div>
+              <div className="option-isOpen">
+                <label className="product-label">옵션 공개여부</label>
+                <div className="product-isOpen-radio isOpen-radio">
+                  <label className="radio-label-label">공개</label>
+                  <input className="radio-input" type={'radio'} name={`optionIsOpen/${index}`} onChange={handleOptionRadioOnChange} checked={data.optionIsOpen}/>
+                  <label className="radio-label">비공개</label>
+                  <input className="radio-input" type={'radio'} name={`optionIsOpen/${index}`} onChange={handleOptionRadioOnChange} checked={!data.optionIsOpen}/>
+                </div>
+              </div>
             </div>
-            {optionList.map((data, index) => {
-              let sizeText = '';
-              let colorText = '';
-              if(data.size !== null)
-                sizeText = data.size;
-              if(data.color !== null)
-                colorText = data.color;
-              return (
-                      <div key={index} value={index} className="option-detail">
-                        <div className="option-detail-header">
-                          <DefaultBtn
-                                  btnText={'옵션 삭제'}
-                                  onClick={handleRemoveOption}
-                                  name={data.optionId}
-                                  value={index}
-                          />
-                        </div>
-                        <div className="option-size">
-                          <label className="product-label">사이즈</label>
-                          <input className="product-input" type={'text'} name={'size'} onChange={handleOptionOnChange} value={sizeText}/>
-                        </div>
-                        <div className="option-color">
-                          <label className="product-label">컬러</label>
-                          <input className="product-input" type={'text'} name={'color'} onChange={handleOptionOnChange} value={colorText}/>
-                        </div>
-                        <div className="option-stock">
-                          <label className="product-label">재고</label>
-                          <input className="product-input" type={'number'} name={'optionStock'} onChange={handleOptionOnChange} value={data.optionStock}/>
-                        </div>
-                        <div className="option-isOpen">
-                          <label className="product-label">옵션 공개여부</label>
-                          <div className="product-isOpen-radio isOpen-radio">
-                            <label className="radio-label-label">공개</label>
-                            <input className="radio-input" type={'radio'} name={`optionIsOpen/${index}`} onChange={handleOptionRadioOnChange} checked={data.optionIsOpen}/>
-                            <label className="radio-label">비공개</label>
-                            <input className="radio-input" type={'radio'} name={`optionIsOpen/${index}`} onChange={handleOptionRadioOnChange} checked={!data.optionIsOpen}/>
-                          </div>
-                        </div>
-                      </div>
-              )
-            })}
-        //...
     )
+  })}
+  //...
+)
 }
 ```
 
@@ -1393,7 +1434,7 @@ function AddProductForm(props) {
 > * OAuth2 로그인
 > * 회원이 포인트를 보유하고 사용할 수 있도록 기능 추가
 > * 관리자
->   * 회원 문의 분류 추가
+    >   * 회원 문의 분류 추가
 >   * 회원문의, 상품문의 분리되어 있던 것 문의 내역으로 통합하고 하위 카테고리 생성
 >   * 회원 문의에서 문의 타입에 대한 카테고리를 관리자가 직접 생성할 수 있도록 처리
 >   * 상품 관리 하나만 있던 탭을 하위 카테고리 생성
@@ -1423,7 +1464,7 @@ function AddProductForm(props) {
 > OAuth2 응답 처리할 interface와 record 생성   
 > OAuthProvider, Role enum 생성   
 > file 경로 담아둘 properties 생성   
-> oauth.yml 내용 작성   
+> oauth.yml 내용 작성
 
 <br />
 
@@ -1431,7 +1472,7 @@ function AddProductForm(props) {
 > 인증 / 인가 JWT로 수정.   
 > filePath 처럼 jwt 관련 값들에 대해서 properties 생성   
 > TokenProvider 작성중   
-> React, Spring 통합 빌드 중 발생했던 url 입력 시 404 white label 페이지 출력 문제 해결   
+> React, Spring 통합 빌드 중 발생했던 url 입력 시 404 white label 페이지 출력 문제 해결
 >> WebController에서 ErrorController 를 implements해서 해결하는 방법과 ErrorPageRegistrar Bean을 통해 처리하는 방법 두가지를 확인.   
 >> 둘다 일단 작성은 해두고 ErrorPageRegistrar의 경우 주석처리 해둔 상태.   
 >> 좀 더 테스트해보고 결정할 계획.   
@@ -1454,8 +1495,8 @@ function AddProductForm(props) {
 > execution 작성하는 방법에 대해 여러 방면으로 알아봤지만 모두 동일하게 처리해주고 있었고, Springboot 3으로 올라오면서 수정된 점이 있나 확인해봤으나 답을 찾지 못함.   
 > 당장 꼭 필요한 설정은 아니라서 service와 repository, controller 정도만 걸쳐있으면 되는 상황이기 때문에 일단은 보류해두고 프로젝트 마무리한 뒤 테스트 프로젝트로 체크가 필요.   
 > 또 다른 문제점으로는 로그가 제대로 찍히지 않는 문제가 발생.   
-> log4j2를 gradle dependencies에 추가하는 것으로 문제는 해결했으나 좀 더 확인이 필요.   
-> 
+> log4j2를 gradle dependencies에 추가하는 것으로 문제는 해결했으나 좀 더 확인이 필요.
+>
 > react는 메인 페이지 작성 완료.   
 > UI 구성 테스트를 위해 더미 데이터를 생성해 작성.
 
@@ -1467,8 +1508,8 @@ function AddProductForm(props) {
 >> 리스트 정상 출력 확인.   
 >> 로그인 후 토큰 정상적으로 반환되는 것 확인.   
 >> 상품 검색 정상 처리 확인.   
->> 페이징 정상 동작 확인.   
-> 
+>> 페이징 정상 동작 확인.
+>
 > backend
 >> main(best) 리스트 데이터, new, 카테고리 데이터, 로그인 처리, oAuth2 로그인 처리, 토큰 발급 처리, 통합 빌드 후 view 접근 구현 및 테스트 완료.   
 >> 로컬 로그인 시 토큰 정상 응답 확인.   
@@ -1484,8 +1525,8 @@ function AddProductForm(props) {
 >> 상세 페이지 구현. 정상 출력 확인.   
 >> 상세 페이지 옵션 select box onChange 처리 구현 및 테스트 완료.   
 >> 썸네일에 마우스 올라가면 대표 썸네일 변경 구현 및 테스트 완료.   
->> 옵션 선택 후 수량 증감 구현. 수량 증감과 그에 따른 총 금액 변경 테스트 완료.   
-> 
+>> 옵션 선택 후 수량 증감 구현. 수량 증감과 그에 따른 총 금액 변경 테스트 완료.
+>
 > backend
 >> 상세페이지에서 리뷰, QnA 개수 출력을 위해 totalElements 반환하도록 수정.   
 >> 리뷰와 QnA 답변에 대한 처리를 위해 groupId와 Step 필드 추가.   
@@ -1497,7 +1538,7 @@ function AddProductForm(props) {
 ### 2024/05/31
 > frontend
 >> 상세페이지 데이터 전체 출력 구현 및 테스트 완료.    
->> 리뷰, QnA 답변의 경우 안쪽으로 한단 들어가도록 처리.   
+>> 리뷰, QnA 답변의 경우 안쪽으로 한단 들어가도록 처리.
 >
 > backend
 >> 리뷰, QnA 답변에 대한 처리 테이블 분리로 수정.   
@@ -1519,7 +1560,7 @@ function AddProductForm(props) {
 >> 상품 상세페이지 바로주문, 관심상품 등록 제외한 나머지 기능 마무리. 테스트 완료.
 >> 장바구니 페이지 구현 완료. 테스트 완료.
 >> 주문 페이지 완료.
-> 
+>
 > backend
 >> 장바구니 담기, 선택 또는 전체 상품 삭제, 장바구니 내 수량 증감 구현 및 테스트 완료.   
 >> 결제 처리 완료. 테스트 완료.
@@ -1554,7 +1595,7 @@ function AddProductForm(props) {
 >> 마이페이지의 sideNav 컴포넌트 스크롤 내려도 내려가지 않도록 position fixed로 처리하면서 content 부분이 사이드와 붙는 문제가 있어 css 조정을 위해 className 받는 방법으로 해결.
 >> 상품 상세페이지에서 옵션이 하나뿐인 상품에 대해 옵션 select box 출력하지 않도록 수정.   
 >> 상품 상세페이지에서 바로구매 버튼 클릭 시 결제 페이지로 데이터 전달하도록 처리 및 테스트 완료.
-> 
+>
 > backend
 >> 주문 조회 쿼리 기간별로 조회하도록 수정.   
 >> 특정 데이터를 전달해주는 경우를 제외한 나머지 응답의 body를 모두 "OK"로 처리하기 위해 Result Enum에 OK를 추가.   
@@ -1589,8 +1630,8 @@ function AddProductForm(props) {
 >> 문의 사항 목록 출력, 상세 출력, 작성, 수정 페이지 처리 완료.   
 >> 문의사항 작성, 수정 및 상품 문의, 문의사항 답글 정상 출력과 작성 확인 완료.   
 >> 각 문의 사항 상세 페이지는 겹치기 때문에 컴포넌트를 분리해서 호출해 사용하도록 처리.   
->> 문의 사항 중 작성과 수정 역시 겹치기 때문에 컴포넌트 분리.   
-> 
+>> 문의 사항 중 작성과 수정 역시 겹치기 때문에 컴포넌트 분리.
+>
 > backend
 >> 모든 문의 내역 기능에 대한 처리 구현 완료.   
 >> 문의 사항 수정과 삭제를 제외한 모든 기능 테스트 완료.
@@ -1600,7 +1641,7 @@ function AddProductForm(props) {
 ### 2024/06/13
 > frontend
 >> 응답이 데이터가 아닌 메세지로 전달되는 요청에 대한 응답 처리를 모듈로 보내 체크하도록 수정.   
->> Image File 요청을 하나의 컴포넌트에만 작성하기 위해 Image 컴포넌트 생성해서 대부분의 이미지 처리는 해당 컴포넌트를 통해 처리하도록 수정.   
+>> Image File 요청을 하나의 컴포넌트에만 작성하기 위해 Image 컴포넌트 생성해서 대부분의 이미지 처리는 해당 컴포넌트를 통해 처리하도록 수정.
 >>> ProductDetail의 Thumbnail 부분은 Image 컴포넌트로 연결하지 않고 별개로 처리.   
 >>> Image 컴포넌트는 받는 모든 imageName에 대해 파일 요청을 보내는 반면 ProductDetail의 Thumbnail 부분은 해당 상품의 썸네일 파일들을 모두 담아두었다가   
 >>> 마우스 오버 시 해당 파일로 firstThumbnail 값을 수정해야 하기 때문에 별개로 처리하도록 함.   
@@ -1608,15 +1649,15 @@ function AddProductForm(props) {
 >>> NavBar의 Classification 버튼같은 다른 디자인의 버튼은 연결하지 않고 그 외 동일하게 사용되는 버튼에 대해서만 연결.   
 >> ProductDetail 컴포넌트에서 사용하던 dayjs 제거. 서버에서 LocalDate를 사용하게 되면서 dayjs로 처리해야 할 필요가 없어짐.   
 >> 가격에 대한 3자리 단위 콤마 처리를 모두 module에 연결해 처리하도록 수정.   
->> 상품 상세페이지내에서 상품 문의 작성 기능 처리 및 테스트 완료.   
-> 
+>> 상품 상세페이지내에서 상품 문의 작성 기능 처리 및 테스트 완료.
+>
 > backend
 >> 상품 상세페이지의 상품 문의 작성 기능 구현 및 테스트 완료.   
 >> 마이페이지 문의 사항 수정과 삭제 모두 테스트 완료.   
 >> 응답 메세지를 Result Enum을 통해 반환하도록 수정.   
 >> 서비스에서 ResponseEntity를 생성한 뒤 반환하도록 처리했었으나 재사용성이 떨어진다고 생각해 다시 객체 반환으로 수정.   
 >> ResponseEntity 생성은 Controller에서 처리.
->> MyPage QnA 관련 DTO가 많아 dto.mypage.qna 패키지를 따로 생성해 분리. 그 안에서도 클라이언트 요청시 RequestBody로 받는 DTO는 req 패키지에 추가 분리.   
+>> MyPage QnA 관련 DTO가 많아 dto.mypage.qna 패키지를 따로 생성해 분리. 그 안에서도 클라이언트 요청시 RequestBody로 받는 DTO는 req 패키지에 추가 분리.
 
 <br />
 
@@ -1626,7 +1667,7 @@ function AddProductForm(props) {
 >> 모든 마이페이지 컴포넌트, 메인 및 상품 관련 컴포넌트 처리 완료. 테스트도 완료.   
 >> Admin 페이지의 sideNav 구현 및 수정 완료.   
 >> Admin 페이지에 사용될 컴포넌트 생성.  내부 내용은 아직 없고 주석으로 필요한 데이터만 작성해둔 상태.
-> 
+>
 > backend
 >> 마이페이지 리뷰 작성, 수정, 삭제 처리 구현, 테스트 완료.   
 >> 마이페이지 정보 수정 getData, 수정 처리 구현, 테스트 완료.   
@@ -1644,7 +1685,7 @@ function AddProductForm(props) {
 >> 상세 페이지에서 상품의 공개, 비공개 처리와 옵션의 삭제, 공개, 비공개 처리를 추가할지 고민중.   
 >> 추가, 수정 페이지에서는 각 옵션의 추가 및 삭제를 수행할 수 있도록 처리.   
 >> 재고 컴포넌트 생성 및 테스트 완료.   
->> 테이블 구조로 상품 출력 후 상품 하단으로 옵션 출력하도록 처리.   
+>> 테이블 구조로 상품 출력 후 상품 하단으로 옵션 출력하도록 처리.
 >
 > backend
 >> 관리자 페이지 중 상품 목록에 출력할 데이터 처리.   
@@ -1667,8 +1708,8 @@ function AddProductForm(props) {
 > frontend
 >> 관리자 상품 할인 설정 구현.   
 >> 할인중인 삼품 목록만 출력하도록 하고 상품명을 통한 검색, 페이징 기능 제공.   
->> 상단 할인 추가 버튼 클릭 시 할인 설정 페이지로 이동하고 해당 페이지에서는 select box로 상품 분류와 상품을 선택. 선택한 상품들을 한번에 동일한 할인율을 적용할 수 있도록 구현.   
-> 
+>> 상단 할인 추가 버튼 클릭 시 할인 설정 페이지로 이동하고 해당 페이지에서는 select box로 상품 분류와 상품을 선택. 선택한 상품들을 한번에 동일한 할인율을 적용할 수 있도록 구현.
+>
 > backend
 >> 할인 상품 컴포넌트에 대한 처리 완료. 테스트도 완료.   
 >> 목록 컴포넌트 접근 시 할인중인 상품만 조회해 반환하도록 처리.   
@@ -1698,7 +1739,7 @@ function AddProductForm(props) {
 
 ### 2024/06/26
 > frontend
->> 기간별 매출 관련 컴포넌트 구현. 기능 테스트까지 완료.   
+>> 기간별 매출 관련 컴포넌트 구현. 기능 테스트까지 완료.
 >
 > backend
 >> 상품별 매출 관련 처리 구현 완료. 서비스 테스트 코드로 체크 완료.
@@ -1720,7 +1761,7 @@ function AddProductForm(props) {
 >> 페이징 기능에 대해 모듈화.   
 >> 오류 페이지 컴포넌트 생성 및 잘못된 url에 대해 오류 페이지 컴포넌트로 연결하도록 처리.   
 >> axios 에러 핸들링 처리.   
->> 직접 axios 에러에 대해 핸들링 해야 되는 경우(ex. 로그인)를 감안해 axiosDefault를 추가.   
+>> 직접 axios 에러에 대해 핸들링 해야 되는 경우(ex. 로그인)를 감안해 axiosDefault를 추가.
 >
 > backend
 >> 미처리 주문 목록에 대한 쿼리 작성.   
@@ -1730,7 +1771,7 @@ function AddProductForm(props) {
 >> 마이페이지 주문 목록 리스트 쿼리 조건을 잘못 설정해 한가지 상품만 출력되던 문제 해결.   
 >> 아임포트 결제 API 연결을 위해 properties에 데이터 추가와 PaymentController 추가 및 의존성 추가.   
 >> 비밀번호 찾기에 대한 처리 추가.   
->> 비밀번호 찾기 요청 시 메일로 전송할 수 있도록 javaMailSender 추가 및 gmail smtp 설정과 properties에 필요한 데이터 추가.   
+>> 비밀번호 찾기 요청 시 메일로 전송할 수 있도록 javaMailSender 추가 및 gmail smtp 설정과 properties에 필요한 데이터 추가.
 >
 > All
 >> 계획했던 모든 기능 및 페이지 구현 완료.   
@@ -2018,7 +2059,7 @@ function AddProductForm(props) {
 >>> 아직 아쉬운 부분으로는 전체 메소드 처리 시간이 2초 조금 안되는 시간이 걸린다는 부분.   
 >>> 더 빠르게 처리하기 위해서는 다시 매출 정리 테이블을 생성하거나 파티셔닝을 통한 방법이 있을 것으로 생각하는데   
 >>> 매출 정리 테이블 생성은 사용자의 주문 처리 과정이 너무 길어지게 될 것 같고, 그렇다고 배치처리로 돌리자니 실시간 매출 확인이 어려울 것 같아서 고민 중.   
->>> 파티셔닝은 아직 학습이 부족해 추후 테스트 해볼 계획.   
+>>> 파티셔닝은 아직 학습이 부족해 추후 테스트 해볼 계획.
 >>
 >> 메인 페이지 상품 목록 정렬 수정.
 >>> 날짜를 기준으로 역순 정렬이 되도록 하고 있는데 이번에 더미데이터를 추가하면서 날짜는 동일 날짜로 처리하다보니 순서가 계속 섞이는 문제가 발생.   
@@ -2033,16 +2074,16 @@ function AddProductForm(props) {
 >>> RefreshToken과 ino는 쿠키에 저장되어있었으니 알아서 넘어가 서버에서 받았지만 LocalStorage에 저장한 AccessToken은 받을 수 없어 여기에서 걸린 것.   
 >>> 이 문제에 대해 AccessToken이 존재하지만 RefreshToken과 ino가 존재하지 않거나 둘중 하나만 존재하는 경우를 탈취로 판단하도록 수정.   
 >>> RefreshToken과 ino가 존재하더라도 AccessToken이 존재하지 않는 경우 검증을 진행하지 않고 넘겨 컴포넌트에서 요청 시 재 검증하도록 수정.   
->>> 토큰 재발급 시에도 AccessToken이 같이 넘어오도록 설계했기 때문에 RefreshToken과 ino만으로는 어차피 할 수 있는게 없다고 생각해 이렇게 처리.   
+>>> 토큰 재발급 시에도 AccessToken이 같이 넘어오도록 설계했기 때문에 RefreshToken과 ino만으로는 어차피 할 수 있는게 없다고 생각해 이렇게 처리.
 >>
->> 주문 내역에서 리뷰 작성 여부에 따른 버튼 출력 부분 수정.   
->>> 기존 int로 처리되어있던 상태값을 TINYINT와 boolean으로 수정하면서 누락된 부분으로 수정.   
+>> 주문 내역에서 리뷰 작성 여부에 따른 버튼 출력 부분 수정.
+>>> 기존 int로 처리되어있던 상태값을 TINYINT와 boolean으로 수정하면서 누락된 부분으로 수정.
 >>
->> OAuth2 최초 로그인 사용자 추가 정보 받는 컴포넌트 제거.   
+>> OAuth2 최초 로그인 사용자 추가 정보 받는 컴포넌트 제거.
 >>> 실제 운영되는 서비스라면 사용자 정보를 서버로부터 받을 수 있기 때문에 해당 부분 처리 제거.   
->>> 백엔드에서도 최초 로그인 시 해당 컴포넌트로 redirect 하는 코드를 제거.   
->> 
->> 장바구니 추가 처리 수정.   
+>>> 백엔드에서도 최초 로그인 시 해당 컴포넌트로 redirect 하는 코드를 제거.
+>>
+>> 장바구니 추가 처리 수정.
 >>> 장바구니에 이미 존재하는 상품을 다시 장바구니에 담는 경우 수량만 증가시켜주도록 처리해야 하는데 해당 부분이 누락.   
 >>> 데이터 추가 등록이 아닌 수량 증감 처리를 하도록 수정.
 
@@ -2054,13 +2095,13 @@ function AddProductForm(props) {
 >
 > front-end
 >> axios 모듈의 axiosDefault에 대해 interceptor를 추가. Request는 axiosInstance와 동일하나 Response에 대해서는 토큰 재발급 요청만 처리.   
->> axiosDefault의 목적은 오류에 대해 직접 핸들링 하는 것이 목적이기 때문에 재발급만 interceptor를 통해 처리.   
+>> axiosDefault의 목적은 오류에 대해 직접 핸들링 하는 것이 목적이기 때문에 재발급만 interceptor를 통해 처리.
 >
 > back-end
 >> 서비스에서 반환되는 데이터를 응답 DTO가 아닌 결과에 대한 DTO를 반환하도록 수정.   
 >> 그리고 ResponseMappingService를 새로 만들어 해당 서비스를 통해 응답 매핑을 처리하도록 추가.   
->> Stream으로 처리할 수 있는 Collection 타입 매핑들을 수정.   
-> 
+>> Stream으로 처리할 수 있는 Collection 타입 매핑들을 수정.
+>
 > 테스트
 >> 수정 내역에 대한 테스트 완료.
 
@@ -2086,7 +2127,7 @@ function AddProductForm(props) {
 >> 기존 저장, 삭제를 모두 처리하던 메소드를 저장과 삭제를 기준으로 1차 분리. 그리고 각 엔티티에 대한 처리로 2차 분리.
 >> OrderService의 payment 메소드 분리.   
 >> PaymentDTO 값을 통한 데이터 처리 메소드, 장바구니 처리 관련 메소드, 옵션 재고 수정 및 상품 판매량 수정 메소드로 각각 분리하고 payment에서는 호출하도록 처리.
-> 
+>
 > domain.dto 패키지 구조 개선.
 >> 각 기능별 in, out, business 로 나눠서 분리.
 > OAuth2와 Security 처리에 대한 USER, Service, SuccessHandler auth 패키지 생성해 하위로 이동.
@@ -2095,17 +2136,17 @@ function AddProductForm(props) {
 
 ### 2024/10/29
 > 리팩토링
->> CartDetail 테이블에서 detailPrice 컬럼 제거.   
+>> CartDetail 테이블에서 detailPrice 컬럼 제거.
 >>> 제거 이유로는 할인율이 적용되는 이상 고정적인 값을 갖고 있는게 의미가 없기 때문.   
 >>> 연관 부분 수정 및 확인 완료.
 >>
->> 주문 페이지 이동 시 React에서 바로 넘겨주던 처리를 서버에 요청 이후 해당 컴포넌트로 넘겨주도록 수정.   
+>> 주문 페이지 이동 시 React에서 바로 넘겨주던 처리를 서버에 요청 이후 해당 컴포넌트로 넘겨주도록 수정.
 >>> 이 부분 수정 역시 할인율이 적용되는 경우와 데이터 무결성을 위해 서버 요청 방식으로 수정.   
 >>> 만약 서버에 요청하지 않고 처리할 경우, 할인이 종료되었는데도 불구하고 기존 페이지 로딩 시점의 가격으로 처리될 우려가 있기 때문에 서버에서 다시 데이터를 받아오도록 해야 한다.
 >>
 >> 관리자 리뷰 관리 기능 추가.
 >>> 누락 기능으로 이번에 추가.   
->>> 여기에는 ReviewStatus도 없었기 때문에 status라는 이름의 컬럼을 ProductReview 테이블에 추가.   
+>>> 여기에는 ReviewStatus도 없었기 때문에 status라는 이름의 컬럼을 ProductReview 테이블에 추가.
 
 <br/>
 
@@ -2151,19 +2192,19 @@ function AddProductForm(props) {
 ### 2025/02/19 ~ 2025/03/16
 > ver 1.4 리팩토링
 > 목표
->> 1. Swagger 적용.   
+>> 1. Swagger 적용.
 >> 2. JMeter 부하 테스트 결과를 통한 코드레벨 또는 데이터베이스 최적화 수행 및 재 테스트
 >> 3. Redis를 통한 캐싱 처리로 조회 성능 개선
 >> 4. 테스트 코드 재작성
 >> 5. React Redux 개선
-> 
+>
 > 리팩토링 처리 내역
 >> 1. Swagger 적용. ( 2025/02/19 ~ 2025/02/21 )
 >>> springdoc-openapi 를 통한 Swagger 의존성 추가 및 설정, 각 Controller에 대한 문서화 완료.   
 >>> 중복되는 Response에 대한 @ApiResponse는 @DefaultApiResponse라는 Custom Annotation을 생성해 간결하게 처리.   
 >>> JWT에 대한 @Parameter, @SecurityRequirement에 대해서는 @SwaggerAuthentication 이라는 Custom Annotation을 통해 처리.   
 >>> 관리자 기능 중 상품 추가, 수정 기능은 여러 필드로 이미지를 받고 있으므로 DTO로 받도록 처리하고 있는데 Swagger에서는 MultipartFile이 내부 필드에 존재하는 경우 처리하지 못한다는 점 때문에 테스트 불가로 description 작성.
-> 
+>
 >> 2 - 1. 쿼리 개선 및 인덱스 개선 ( 2025/02/23 ~ 2025/02/27 )
 >>> 대부분 기능이 비즈니스 로직 보다도 쿼리 성능에서 문제가 발생.   
 >>> 서브 쿼리 및 JOIN 개선으로 개선 및 인덱스 개선으로 최적화 수행.   
@@ -2180,7 +2221,7 @@ function AddProductForm(props) {
 >>> 기간별 테이블의 경우 auto_increment로 처리되는 id를 두고 period 컬럼에 DATE 타입으로 처리. 그날의 총 매출과 카드 매출, 현금 매출, 주문량, 상품 판매량, 배송비로 설계.   
 >>> 상품별 테이블의 경우 동일하게 auto_increment로 처리되는 id, 날짜 처리를 위한 DATE 타입 컬럼, 주문량, 상품 분류 아이디, 상품 아이디, 옵션 아이디, 매출, 판매량으로 설계.   
 >>> 두 테이블 모두 일별 기준으로 데이터를 처리. 상품별 테이블의 경우 특정 날짜에 대해 옵션 아이디는 unique를 유지해야 함.   
->>> 매출 집계 테이블을 제외한 나머지 테이블에 대해서는 대부분 DATETIME(3)으로 createdAt, updatedAt 타입을 개선.   
+>>> 매출 집계 테이블을 제외한 나머지 테이블에 대해서는 대부분 DATETIME(3)으로 createdAt, updatedAt 타입을 개선.
 >
 >> 2 - 3. 주문 처리 시 비동기 처리를 위한 RabbitMQ 학습 및 적용 ( 2025/03/07 ~ 2025/03/16 )
 >>> RabbitMQ에 대한 기본적인 개념, 실패시 재처리 시도에 대한 개념 학습 이후 적용.   
@@ -2200,13 +2241,13 @@ function AddProductForm(props) {
 >>> 이 처리를 위해 webflux 3.4.0 의존성 추가.   
 >>> 기능은 모든 DLQ를 조회하고 그 중 메시지가 존재하는 DLQ만 반환하도록 구현.   
 >>> DLQ명 리스트는 RabbitMQProperties를 활용.
-> 
+>
 >> DLQ Message 재시도 기능 추가.
 >>> 클라이언트로부터 DLQ명과 메시지 개수를 전달받아 처리.   
 >>> 재시도 요청은 HTTP 요청으로 처리하는 경우 메시지 개수만큼 요청을 보내야 하므로 사용하지 않고 RabbitTemplate의 receive()를 통해 처리.   
 >>> payload는 Object 타입으로 convert 후 사용.   
 >>> 역직렬화 이슈로 인해 해당 기능에 사용되는 record 타입 DTO를 class 타입으로 수정.   
->>> 기존 사용되던 ProductOrderDTO의 경우 ProductOrder 엔티티가 포함되고 있어 해당 엔티티에 대한 수정까지 필요해졌기에 불가피하게 List 타입 필드 하나만 갖고 있는 DTO를 새로 생성해서 처리.   
+>>> 기존 사용되던 ProductOrderDTO의 경우 ProductOrder 엔티티가 포함되고 있어 해당 엔티티에 대한 수정까지 필요해졌기에 불가피하게 List 타입 필드 하나만 갖고 있는 DTO를 새로 생성해서 처리.
 >
 >> 발생한 문제 및 해결
 >>> 재시도 구현 중 payload를 제대로 역직렬화 하지 못해서 consumer에 정상적으로 접근하지 못하고 오류가 발생하는 것을 확인.   
@@ -2231,7 +2272,7 @@ function AddProductForm(props) {
 ### 2025/04/23 ~ 2025/04/30
 > 테스트 코드 작성중
 >> 04/23 처리 내역
->>> CartService 단위 테스트 작성 및 테스트 완료.   
+>>> CartService 단위 테스트 작성 및 테스트 완료.
 >>>> 장바구니 선택 상품 처리 과정 수정.   
 >>>> 장바구니 데이터가 없는 경우 Exception 처리 추가.   
 >>>> 장바구니 상세 데이터의 개수만 조회하던 쿼리를 Id 리스트로 받도록 개선.   
@@ -2241,9 +2282,9 @@ function AddProductForm(props) {
 >>>> JWTTokenService의 reissueToken 메소드 수정.   
 >>>> ino가 없는 경우의 처리와 AccessToken decode에 실패했을 시 RefreshToken decode 성공 여부에 따른 처리 분기 나눠서 처리할 수 있도록 개선.   
 >>> MemberService 단위 테스트 작성 중.
-> 
+>
 >> 4/27 ~ 4/29
->>> Frontend Redux 개선.   
+>>> Frontend Redux 개선.
 >>>> Redux 대신 Redux/toolkit 사용.   
 >>>> 기존의 잘못된 설계로 인해 Backend에서 get 요청마다 UserStatus를 같이 반환하던 부분들을 전체 수정.   
 >>>> Frontend에서 요청마다 state 확인 후 dispatch 하는 부분들도 모두 제거.   
@@ -2255,7 +2296,7 @@ function AddProductForm(props) {
 >>
 >>> MemberService 단위 테스트 완료.   
 >>> MyPageService 단위 테스트 완료.
-> 
+>
 >> 4/30
 >>> OrderService 단위 테스트 완료.
 
@@ -2268,7 +2309,7 @@ function AddProductForm(props) {
 >>> 컴포넌트와 page 명확히 분리하고 service -> api 구조로 변경   
 >>> 공통 컴포넌트 및 유틸도 따로 분리.   
 >>> 상수 적극 활용, 모듈화를 통해 클린 코드 목적.
-> 
+>
 >> 5/20
 >>> 백엔드 수정.   
 >>> 주문 페이지에서 결제 API 호출 직전 데이터 검증을 수행하도록 개선.   
@@ -2276,7 +2317,7 @@ function AddProductForm(props) {
 >>> 이런 구조로 설계.   
 >>> 서비스 코드 수정 및 추가, 단위 테스트 코드 수정 및 작성 후 단위 테스트 수행 완료.   
 >>> 처리 과정에서 발생하는 예외에 대해 처리하기 위해 440 코드로 CustomOrderSessionExpiredException을 생성.   
->>> 프론트 엔드 main, member, product 완료.   
+>>> 프론트 엔드 main, member, product 완료.
 >
 >> 5/21
 >>> 프론트 엔드 리팩토링 끝.
@@ -2306,3 +2347,21 @@ function AddProductForm(props) {
 >> 로그인 및 재발급, 상태 체크 요청 수정   
 >> 클라이언트에서 AccessToken 저장 구조를 변경하게 되면서 만료 기간을 body에 담아 반환할 수 있도록 수정.   
 >> 기존 id, role을 반환하던 DTO는 유지하고 만료기간을 Instant 타입 필드로 갖는 DTO 생성, 두 DTO를 필드로 갖는 DTO 생성 
+
+<br />
+
+### 2025/05/28
+> 기능 추가 및 개선
+>> 주문 처리 시 실패하는 경우에 대한 대응
+>>> 주문 처리의 경우 외부 API에 의해 결제되기 때문에 단순 롤백으로 끝나면 안됨.   
+>>> 실패하는 경우 Redis에 요청 객체를 담도록 처리하고 관라자 UI 를 통해 해결할 수 있도록 구현.   
+>>> 만약 Redis 조차도 실패하는 경우 주문 로그로 남기도록 처리.   
+>>> 비즈니스 로직 구현은 끝났고, Controller 요청도 처리 완료.   
+>>> 프론트엔드는 아직 미구현상태.   
+>>> 또한, 로그로 남겼을때 로그 조회를 통한 자동화는 이후 기능 추가로 처리.   
+>>> 현재로서는 로그에서 어떻게 UI를 보여주고 재처리를 할지 학습이 좀 필요.   
+>> 토큰 저장 구조 롤백
+>>> AccessToken 만료 기간을 프론트엔드에서 제어하고 제거하도록 하면 백엔드에서의 검증 로직 설계가 완전히 뒤집어져야 함.   
+>>> 그럼 BoardProject와 동일한 설계로 Interceptor가 필요없어지는 상황이 발생.   
+>>> RefreshToken의 경우 HttpOnly 쿠키에 저장되기 때문에 이걸 확인할 방법도 없어서 비회원의 경우 계속해서 재발급 요청 처리가 필요하게 되며 확실한 검증이 불가능하다고 판단.   
+>>> 다시 롤백하면서 백엔드에서 생성했던 DTO들도 전부 롤백

@@ -18,6 +18,10 @@ import { CART_SELECT_TYPE } from '../constants/CartSelectType';
 import { numberComma } from '../../../common/utils/formatNumberComma';
 import { getProductOption } from '../../../common/utils/productOptionUtils';
 
+import countUpBtn from '../../../assets/image/up.jpg';
+import countDownBtn from '../../../assets/image/down.jpg';
+import removeBtn from '../../../assets/image/del.jpg';
+
 import ImageForm from '../../../common/components/ImageForm';
 import DefaultButton from '../../../common/components/DefaultButton';
 
@@ -272,7 +276,7 @@ function CartDetail(props) {
 								statusIdx={index}
 							/>
 							<span className={'product-name'}>{cart.productName}</span>
-							<img src={`${process.env.PUBLIC_URL}/image/del.jpg`} name={cart.cartDetailId}
+							<img src={removeBtn} name={cart.cartDetailId}
 								 onClick={handleRemoveProduct} alt="삭제"/>
 						</div>
 						<div className="cart-data-content">
@@ -287,9 +291,9 @@ function CartDetail(props) {
 									<input type={'text'} className={'cart-input'} value={cart.count}
 										   readOnly={true}/>
 									<div className="cart-count">
-										<img src={`${process.env.PUBLIC_URL}/image/up.jpg`} name={cart.cartDetailId}
+										<img src={countUpBtn} name={cart.cartDetailId}
 											 onClick={handleIncrease} alt="상품 수량 증가"/>
-										<img src={`${process.env.PUBLIC_URL}/image/down.jpg`}
+										<img src={countDownBtn}
 											 name={cart.cartDetailId} onClick={handleDecrease} alt="상품 수량 감소"/>
 									</div>
 								</div>

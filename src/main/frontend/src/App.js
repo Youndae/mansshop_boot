@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useDispatch } from 'react-redux';
 import { login, logout } from './modules/member/memberSlice';
 import { getMemberStatus } from "./common/services/authService";
-import { getToken } from './common/utils/axios/tokenUtils';
+import {getToken, removeToken} from './common/utils/axios/tokenUtils';
 import {
     BrowserRouter,
     Routes,
@@ -102,6 +102,10 @@ function App() {
 		})
 		.catch((err) => {
 			console.error('회원 상태 확인 실패: ', err);
+
+			if(err.response.status === 403)
+				removeToken();
+
 			dispatch(logout());
 		})
 

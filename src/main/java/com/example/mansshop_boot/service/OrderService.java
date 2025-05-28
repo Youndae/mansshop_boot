@@ -1,6 +1,7 @@
 package com.example.mansshop_boot.service;
 
 import com.example.mansshop_boot.domain.dto.cart.business.CartMemberDTO;
+import com.example.mansshop_boot.domain.dto.order.business.FailedOrderDTO;
 import com.example.mansshop_boot.domain.dto.order.in.OrderProductRequestDTO;
 import com.example.mansshop_boot.domain.dto.order.in.PaymentDTO;
 import com.example.mansshop_boot.domain.dto.order.out.OrderDataResponseDTO;
@@ -21,4 +22,6 @@ public interface OrderService {
     OrderDataResponseDTO getCartOrderData(List<Long> cartDetailIds, CartMemberDTO cartMemberDTO, HttpServletRequest request, HttpServletResponse response);
 
 	ResponseMessageDTO validateOrder(OrderDataResponseDTO requestDTO, Principal principal, HttpServletRequest request, HttpServletResponse response);
+
+    String retryErrorOrderMessage(List<FailedOrderDTO> failedDataList);
 }

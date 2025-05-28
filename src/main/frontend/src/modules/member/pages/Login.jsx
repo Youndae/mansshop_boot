@@ -8,6 +8,10 @@ import { postLogin } from '../services/memberService';
 import { enhancedResponseInterceptor } from '../../../common/utils/axios/axiosInterceptors';
 import { RESPONSE_MESSAGE } from '../../../common/constants/responseMessageType';
 
+import googleOAuthBtn from '../../../assets/image/web_light_sq_ctn@1x.png';
+import naverOAuthBtn from '../../../assets/image/btnG_official.png';
+import kakaoOAuthBtn from '../../../assets/image/kakao_login_medium_narrow.png';
+
 import DefaultButton from '../../../common/components/DefaultButton';
 
 import '../../../styles/member.css';
@@ -44,7 +48,7 @@ function Login() {
 		try {
 			const res = await postLogin(userData);
 			setToken(res);
-			dispatch(login(res.data.userStatus));
+			dispatch(login(res.data));
 			navigate(state);
 		} catch (err) {
 			console.log(err);
@@ -128,17 +132,17 @@ function Login() {
                         <div className="oauth-btn">
                             <div className="oauth-btn">
                                 <label htmlFor={'oauth-google'}>
-                                    <img src={`${process.env.PUBLIC_URL}/image/web_light_sq_ctn@1x.png`} alt={'구글 로그인'}/>
+                                    <img src={googleOAuthBtn} alt={'구글 로그인'}/>
                                 </label>
                             </div>
                             <div className="oauth-btn">
                             <label htmlFor={'oauth-naver'}>
-                                <img src={`${process.env.PUBLIC_URL}/image/btnG_official.png`} alt={'네이버 로그인'}/>
+                                <img src={naverOAuthBtn} alt={'네이버 로그인'}/>
                             </label>
                             </div>
                             <div className="oauth-btn">
                                 <label htmlFor={'oauth-kakao'}>
-                                    <img src={`${process.env.PUBLIC_URL}/image/kakao_login_medium_narrow.png`} alt={'카카오 로그인'}/>
+                                    <img src={kakaoOAuthBtn} alt={'카카오 로그인'}/>
                                 </label>
                             </div>
                         </div>

@@ -1,6 +1,7 @@
 package com.example.mansshop_boot.service.unit;
 
 import com.example.mansshop_boot.config.customException.ErrorCode;
+import com.example.mansshop_boot.config.customException.exception.CustomTokenStealingException;
 import com.example.mansshop_boot.config.jwt.JWTTokenProvider;
 import com.example.mansshop_boot.domain.dto.token.TokenDTO;
 import com.example.mansshop_boot.domain.enumeration.Result;
@@ -91,9 +92,9 @@ public class JWTTokenServiceUnitTest {
 
         doNothing().when(jwtTokenService).deleteCookieAndThrowException(response);
 
-        String result = jwtTokenService.reIssueToken(tokenDTO, response);
+        Assertions.assertThrows(CustomTokenStealingException.class,
+                () -> jwtTokenService.reIssueToken(tokenDTO, response));
 
-        Assertions.assertEquals(Result.FAIL.getResultKey(), result);
         verify(jwtTokenService).deleteCookieAndThrowException(response);
     }
 
@@ -111,10 +112,10 @@ public class JWTTokenServiceUnitTest {
         when(tokenProvider.decodeToken(tokenDTO.refreshTokenValue())).thenReturn(USER_ID);
         doNothing().when(jwtTokenService).deleteTokenAndCookieAndThrowException(USER_ID, tokenDTO.inoValue(), response);
 
-        String result = jwtTokenService.reIssueToken(tokenDTO, response);
+        Assertions.assertThrows(CustomTokenStealingException.class,
+                () -> jwtTokenService.reIssueToken(tokenDTO, response));
 
         verify(jwtTokenService).deleteTokenAndCookieAndThrowException(USER_ID, tokenDTO.inoValue(), response);
-        Assertions.assertEquals(Result.FAIL.getResultKey(), result);
     }
 
     @Test
@@ -130,10 +131,10 @@ public class JWTTokenServiceUnitTest {
         when(tokenProvider.decodeToken(tokenDTO.accessTokenValue())).thenReturn(Result.WRONG_TOKEN.getResultKey());
         when(tokenProvider.decodeToken(tokenDTO.refreshTokenValue())).thenReturn(Result.WRONG_TOKEN.getResultKey());
 
-        String result = jwtTokenService.reIssueToken(tokenDTO, response);
+        Assertions.assertThrows(CustomTokenStealingException.class,
+                () -> jwtTokenService.reIssueToken(tokenDTO, response));
 
         verify(tokenProvider).deleteCookie(response);
-        Assertions.assertEquals(Result.FAIL.getResultKey(), result);
     }
 
     @Test
@@ -150,10 +151,10 @@ public class JWTTokenServiceUnitTest {
         when(tokenProvider.verifyRefreshToken(tokenDTO.refreshTokenValue(), tokenDTO.inoValue(), USER_ID)).thenReturn(Result.WRONG_TOKEN.getResultKey());
         doNothing().when(jwtTokenService).deleteTokenAndCookieAndThrowException(USER_ID, tokenDTO.inoValue(), response);
 
-        String result = jwtTokenService.reIssueToken(tokenDTO, response);
+        Assertions.assertThrows(CustomTokenStealingException.class,
+                () -> jwtTokenService.reIssueToken(tokenDTO, response));
 
         verify(jwtTokenService).deleteTokenAndCookieAndThrowException(USER_ID, tokenDTO.inoValue(), response);
-        Assertions.assertEquals(Result.FAIL.getResultKey(), result);
     }
 
     @Test
@@ -169,9 +170,9 @@ public class JWTTokenServiceUnitTest {
         when(tokenProvider.decodeToken(tokenDTO.accessTokenValue())).thenReturn(USER_ID);
         when(tokenProvider.verifyRefreshToken(tokenDTO.refreshTokenValue(), tokenDTO.inoValue(), USER_ID)).thenReturn(Result.TOKEN_STEALING.getResultKey());
         doNothing().when(jwtTokenService).deleteTokenAndCookieAndThrowException(USER_ID, tokenDTO.inoValue(), response);
-        String result = jwtTokenService.reIssueToken(tokenDTO, response);
+        Assertions.assertThrows(CustomTokenStealingException.class,
+                () -> jwtTokenService.reIssueToken(tokenDTO, response));
 
         verify(jwtTokenService).deleteTokenAndCookieAndThrowException(USER_ID, tokenDTO.inoValue(), response);
-        Assertions.assertEquals(Result.FAIL.getResultKey(), result);
     }
 }

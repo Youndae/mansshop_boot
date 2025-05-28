@@ -5,6 +5,7 @@ import com.example.mansshop_boot.domain.dto.admin.in.*;
 import com.example.mansshop_boot.domain.dto.admin.out.*;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyInsertDTO;
+import com.example.mansshop_boot.domain.dto.order.business.FailedOrderDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.rabbitMQ.FailedQueueDTO;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.Page;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Set;
 
 public interface AdminService {
 
@@ -90,4 +92,8 @@ public interface AdminService {
     List<FailedQueueDTO> getFailedMessageList();
 
     String retryFailedMessages(List<FailedQueueDTO> queueDTOList);
+
+    List<FailedOrderRedisResponseDTO> getFailedOrderDataByRedis();
+
+    String retryFailedOrderDataByRedis();
 }

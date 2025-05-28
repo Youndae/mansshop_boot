@@ -31,7 +31,7 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public MessageConverter jackson2JsonMessageConverter() {
+    public Jackson2JsonMessageConverter jackson2JsonMessageConverter() {
         ObjectMapper om = new ObjectMapper();
         om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         // 이 설정을 하지 않으면 LocalDate에 대해 [2025, 2, 1] 이런식으로 처리된다. 반면, 이 설정을 하면 "2025-02-01"로 되기 떄문에 정상적인 매핑이 가능.

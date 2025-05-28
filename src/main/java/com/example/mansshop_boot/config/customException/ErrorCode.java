@@ -13,7 +13,9 @@ public enum ErrorCode {
     TOKEN_EXPIRED(401, "TokenExpiredException"),
     NOT_FOUND(400, "NotFoundException"),
     NULL_POINTER(500, "NullPointerException"),
-	ORDER_SESSION_EXPIRED(440, "OrderSessionExpiredException");
+	ORDER_SESSION_EXPIRED(440, "OrderSessionExpiredException"),
+    ORDER_DATA_FAILED(441, "OrderDataFailedException"),
+    DB_CONNECTION_ERROR(500, "DBConnectionError");
 
     private final int httpStatus;
 

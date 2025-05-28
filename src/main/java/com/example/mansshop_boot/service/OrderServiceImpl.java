@@ -3,8 +3,10 @@ package com.example.mansshop_boot.service;
 import com.example.mansshop_boot.config.customException.ErrorCode;
 import com.example.mansshop_boot.config.customException.exception.CustomAccessDeniedException;
 import com.example.mansshop_boot.config.customException.exception.CustomNotFoundException;
+import com.example.mansshop_boot.config.customException.exception.CustomOrderDataFailedException;
 import com.example.mansshop_boot.config.customException.exception.CustomOrderSessionExpiredException;
 import com.example.mansshop_boot.domain.dto.cart.business.CartMemberDTO;
+import com.example.mansshop_boot.domain.dto.fallback.FallbackProperties;
 import com.example.mansshop_boot.domain.dto.order.business.*;
 import com.example.mansshop_boot.domain.dto.order.in.OrderProductDTO;
 import com.example.mansshop_boot.domain.dto.order.in.OrderProductRequestDTO;
@@ -13,6 +15,7 @@ import com.example.mansshop_boot.domain.dto.order.out.OrderDataResponseDTO;
 import com.example.mansshop_boot.domain.dto.rabbitMQ.RabbitMQProperties;
 import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
 import com.example.mansshop_boot.domain.entity.*;
+import com.example.mansshop_boot.domain.enumeration.FallbackMapKey;
 import com.example.mansshop_boot.domain.enumeration.RabbitMQPrefix;
 import com.example.mansshop_boot.domain.enumeration.Result;
 import com.example.mansshop_boot.domain.vo.order.OrderItemVO;
@@ -22,6 +25,7 @@ import com.example.mansshop_boot.repository.cart.CartRepository;
 import com.example.mansshop_boot.repository.product.ProductOptionRepository;
 import com.example.mansshop_boot.repository.product.ProductRepository;
 import com.example.mansshop_boot.repository.productOrder.ProductOrderRepository;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -30,6 +34,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -41,6 +47,7 @@ import org.springframework.web.util.WebUtils;
 
 import java.security.Principal;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -50,6 +57,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class OrderServiceImpl implements OrderService{
+
+	private static final Logger failedOrderLogger = LoggerFactory.getLogger("com.example.mansshop.order.failed");
 
     private final ProductOrderRepository productOrderRepository;
 
@@ -66,6 +75,10 @@ public class OrderServiceImpl implements OrderService{
     private final RabbitMQProperties rabbitMQProperties;
 
     private final RedisTemplate<String, PreOrderDataVO> orderRedisTemplate;
+
+	private final RedisTemplate<String, FailedOrderDTO> failedOrderRedisTemplate;
+
+	private final FallbackProperties fallbackProperties;
 
 	private static final String ANONYMOUS = "Anonymous";
 
@@ -92,51 +105,39 @@ public class OrderServiceImpl implements OrderService{
     @Override
     @Transactional(rollbackFor = RuntimeException.class)
     public String payment(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO) {
-        ProductOrderDataDTO productOrderDataDTO = createOrderDataDTO(paymentDTO, cartMemberDTO);
-        ProductOrder order = productOrderDataDTO.productOrder();
-        productOrderRepository.save(order);
+		boolean successFlag = false;
 
-        String orderExchange = rabbitMQProperties.getExchange()
-                                                .get(RabbitMQPrefix.EXCHANGE_ORDER.getKey())
-                                                .getName();
+		try {
+			ProductOrderDataDTO productOrderDataDTO = createOrderDataDTO(paymentDTO, cartMemberDTO);
+			ProductOrder order = productOrderDataDTO.productOrder();
 
-        //주문 타입이 cart인 경우 장바구니에서 선택한 상품 또는 전체 상품 주문이므로 해당 상품을 장바구니에서 삭제해준다.
-        if(paymentDTO.orderType().equals("cart"))
-            rabbitTemplate.convertAndSend(
-                    orderExchange,
-                    getQueueRoutingKey(RabbitMQPrefix.QUEUE_ORDER_CART),
-                    new OrderCartDTO(cartMemberDTO, productOrderDataDTO.orderOptionIds())
-            );
+			productOrderRepository.save(order);
+			successFlag = true;
 
-        // ProductOption의 재고 수정
-        rabbitTemplate.convertAndSend(
-                orderExchange,
-                getQueueRoutingKey(RabbitMQPrefix.QUEUE_ORDER_PRODUCT_OPTION),
-                new OrderProductMessageDTO(productOrderDataDTO)
-        );
+			String orderExchange = rabbitMQProperties.getExchange()
+					.get(RabbitMQPrefix.EXCHANGE_ORDER.getKey())
+					.getName();
 
-        // Product의 salesQuantity 수정
-        rabbitTemplate.convertAndSend(
-                orderExchange,
-                getQueueRoutingKey(RabbitMQPrefix.QUEUE_ORDER_PRODUCT),
-                new OrderProductMessageDTO(productOrderDataDTO)
-        );
+			if(paymentDTO.orderType().equals("cart"))
+				sendMessage(orderExchange, RabbitMQPrefix.QUEUE_ORDER_CART, new OrderCartDTO(cartMemberDTO, productOrderDataDTO.orderOptionIds()));
 
-        // Period Summary 처리
-        rabbitTemplate.convertAndSend(
-                orderExchange,
-                getQueueRoutingKey(RabbitMQPrefix.QUEUE_PERIOD_SUMMARY),
-                new PeriodSummaryQueueDTO(order)
-        );
+			sendMessage(orderExchange, RabbitMQPrefix.QUEUE_ORDER_PRODUCT_OPTION, new OrderProductMessageDTO(productOrderDataDTO));
+			sendMessage(orderExchange, RabbitMQPrefix.QUEUE_ORDER_PRODUCT, new OrderProductMessageDTO(productOrderDataDTO));
+			sendMessage(orderExchange, RabbitMQPrefix.QUEUE_PERIOD_SUMMARY, new PeriodSummaryQueueDTO(order));
+			sendMessage(orderExchange, RabbitMQPrefix.QUEUE_PRODUCT_SUMMARY, new OrderProductSummaryDTO(productOrderDataDTO));
 
-        // Product Summary 처리
-        rabbitTemplate.convertAndSend(
-                orderExchange,
-                getQueueRoutingKey(RabbitMQPrefix.QUEUE_PRODUCT_SUMMARY),
-                new OrderProductSummaryDTO(productOrderDataDTO)
-        );
-
-        return Result.OK.getResultKey();
+			return Result.OK.getResultKey();
+		}catch (Exception e) {
+			log.error("payment Error : ", e);
+			if(!successFlag) {
+				log.error("handleFallback call");
+				handleOrderFallback(paymentDTO, cartMemberDTO, e);
+				throw new CustomOrderDataFailedException(ErrorCode.ORDER_DATA_FAILED, ErrorCode.ORDER_DATA_FAILED.getMessage());
+			}else {
+				log.error("payment Message Queue Error : ", e);
+				return Result.OK.getResultKey();
+			}
+		}
     }
 
     private String getQueueRoutingKey(RabbitMQPrefix rabbitMQPrefix) {
@@ -144,6 +145,35 @@ public class OrderServiceImpl implements OrderService{
                                 .get(rabbitMQPrefix.getKey())
                                 .getRouting();
     }
+
+	private <T> void sendMessage(String exchange, RabbitMQPrefix rabbitMQPrefix, T data) {
+		rabbitTemplate.convertAndSend(
+				exchange,
+				getQueueRoutingKey(rabbitMQPrefix),
+				data
+		);
+	}
+
+	private void handleOrderFallback(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO, Exception e) {
+		FailedOrderDTO failedDTO = new FailedOrderDTO(paymentDTO, cartMemberDTO, LocalDateTime.now(), e.getMessage());
+		ObjectMapper om = new ObjectMapper();
+		try {
+			String randomString = UUID.randomUUID().toString();
+			String keyPrefix = fallbackProperties.getRedis().get(FallbackMapKey.ORDER.getKey()).getPrefix();
+			log.info("orderServiceImpl.handleOrderFallback : keyPrefix = {}", keyPrefix);
+			String orderKey = keyPrefix.concat(randomString);
+			log.info("orderServiceImpl.handleOrderFallback : orderKey = {}", orderKey);
+			failedOrderRedisTemplate.opsForValue().set(orderKey, failedDTO);
+		}catch (Exception e1) {
+			try {
+				failedOrderLogger.error("handleOrderFallback Error :: request Data : {}", om.writeValueAsString(failedDTO));
+			}catch (JsonProcessingException e2) {
+				failedOrderLogger.error("handleOrderFallback Error :: JsonProcessingException - request Data : {}", failedDTO);
+			}
+			log.error("handleOrderFallback Error Message : ", e1);
+		}
+	}
+
 
     public ProductOrderDataDTO createOrderDataDTO(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO) {
         ProductOrder productOrder = paymentDTO.toOrderEntity(cartMemberDTO.uid());
@@ -372,5 +402,13 @@ public class OrderServiceImpl implements OrderService{
 			"Set-Cookie",
 			createOrderTokenCookie("", Duration.ZERO)
 		);
+	}
+
+	@Override
+	public String retryErrorOrderMessage(List<FailedOrderDTO> failedDataList) {
+
+		failedDataList.forEach(v -> payment(v.paymentDTO(), v.cartMemberDTO()));
+
+		return Result.OK.getResultKey();
 	}
 }

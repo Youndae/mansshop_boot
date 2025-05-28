@@ -17,6 +17,7 @@ import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListD
 import com.example.mansshop_boot.domain.enumeration.AdminListType;
 import com.example.mansshop_boot.service.AdminService;
 import com.example.mansshop_boot.service.MyPageService;
+import com.example.mansshop_boot.service.OrderService;
 import com.example.mansshop_boot.service.ResponseMappingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -46,6 +47,8 @@ public class AdminController {
     private final MyPageService myPageService;
 
     private final ResponseMappingService responseMappingService;
+
+    private final OrderService orderService;
 
     /**
      *
@@ -1150,6 +1153,22 @@ public class AdminController {
     @PostMapping("/message")
     public ResponseEntity<ResponseMessageDTO> retryDLQMessages(@RequestBody List<FailedQueueDTO> failedQueueDTO) {
         String responseMessage = adminService.retryFailedMessages(failedQueueDTO);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
+    }
+
+    @GetMapping("/message/order")
+    public ResponseEntity<List<FailedOrderRedisResponseDTO>> getFailedOrderDataByRedis() {
+        List<FailedOrderRedisResponseDTO> responseDTO = adminService.getFailedOrderDataByRedis();
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(responseDTO);
+    }
+
+    @PostMapping("/message/order")
+    public ResponseEntity<ResponseMessageDTO> retryRedisOrderMessage() {
+        String responseMessage = adminService.retryFailedOrderDataByRedis();
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ResponseMessageDTO(responseMessage));

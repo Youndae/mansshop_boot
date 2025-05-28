@@ -6,6 +6,8 @@ import { RESPONSE_MESSAGE } from '../../../../common/constants/responseMessageTy
 import { mainProductPagingObject } from '../../../../common/utils/paginationUtils';
 import { handlePageChange } from '../../../../common/utils/paginationUtils';
 
+import removeBtn from '../../../../assets/image/del.jpg';
+
 import MyPageSideNav from '../../components/MyPageSideNav';
 import Pagination from '../../../../common/components/Pagination';
 import ImageForm from '../../../../common/components/ImageForm';
@@ -150,7 +152,7 @@ function ReviewListContent(props) {
         <div className="mypage-like-data-detail">
             <div className="mypage-like-detail-content">
                 <div className="mypage-like-remove">
-                    <img className="mypage-like-delete-btn" src={`${process.env.PUBLIC_URL}/image/del.jpg`} name={data.reviewId}
+                    <img className="mypage-like-delete-btn" src={removeBtn} name={data.reviewId}
                          onClick={handleDeleteReview} alt={''}/>
                 </div>
                 <div className="mypage-like-thumb" >

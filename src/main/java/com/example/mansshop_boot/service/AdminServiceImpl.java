@@ -8,8 +8,10 @@ import com.example.mansshop_boot.domain.dto.admin.in.*;
 import com.example.mansshop_boot.domain.dto.admin.out.*;
 import com.example.mansshop_boot.domain.dto.cache.CacheProperties;
 import com.example.mansshop_boot.domain.dto.cache.CacheRequest;
+import com.example.mansshop_boot.domain.dto.fallback.FallbackProperties;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyInsertDTO;
+import com.example.mansshop_boot.domain.dto.order.business.FailedOrderDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.PagingMappingDTO;
@@ -66,6 +68,8 @@ import java.util.stream.IntStream;
 @Slf4j
 public class AdminServiceImpl implements AdminService {
 
+    private final RedisTemplate<String, FailedOrderDTO> failedOrderRedisTemplate;
+
     @Value("#{filePath['file.product.path']}")
     private String filePath;
 
@@ -74,6 +78,8 @@ public class AdminServiceImpl implements AdminService {
     private final ProductOptionRepository productOptionRepository;
 
     private final PrincipalService principalService;
+
+    private final OrderService orderService;
 
     private final ClassificationRepository classificationRepository;
 
@@ -124,6 +130,8 @@ public class AdminServiceImpl implements AdminService {
     private String rabbitMQPw;
 
     private final RabbitMQProperties rabbitMQProperties;
+
+    private final FallbackProperties fallbackProperties;
 
     @PostConstruct
     void init() {
@@ -298,7 +306,7 @@ public class AdminServiceImpl implements AdminService {
                 productOptionRepository.deleteAllById(deleteOptionList);
 
         }catch (Exception e) {
-            log.warn("Filed admin patchProduct");
+            log.warn("Failed admin patchProduct");
             e.printStackTrace();
             saveImages.forEach(this::deleteImage);
 
@@ -1318,5 +1326,53 @@ public class AdminServiceImpl implements AdminService {
                 }
             }
         }
+    }
+
+    /**
+     * 주문 데이터 처리 중 문제가 발생해 Redis에 적재된 데이터 조회
+     */
+    @Override
+    public List<FailedOrderRedisResponseDTO> getFailedOrderDataByRedis() {
+        List<FailedOrderDTO> dataList = getFailedRedisDataList();
+
+        if(dataList.isEmpty())
+            return Collections.emptyList();
+
+        return dataList.stream()
+                        .map(FailedOrderRedisResponseDTO::new)
+                        .toList();
+    }
+
+    private Set<String> getFailedOrderRedisKeys() {
+        String keyPrefix = fallbackProperties.getRedis().get(FallbackMapKey.ORDER.getKey()).getPrefix();
+
+        return failedOrderRedisTemplate.keys(keyPrefix + "*");
+    }
+
+    @Override
+    public String retryFailedOrderDataByRedis() {
+        //TODO: 컨트롤러에서 orderService 재 호출로 재처리 시도
+        List<FailedOrderDTO> dataList = getFailedRedisDataList();
+
+        if(dataList.isEmpty())
+            return Result.EMPTY.getResultKey();
+
+        dataList.forEach(v -> orderService.payment(v.paymentDTO(), v.cartMemberDTO()));
+
+        return Result.OK.getResultKey();
+    }
+
+    public List<FailedOrderDTO> getFailedRedisDataList()  {
+        Set<String> keys = getFailedOrderRedisKeys();
+
+        if(keys.isEmpty())
+            return Collections.emptyList();
+
+        return failedOrderRedisTemplate.opsForValue().multiGet(keys);
+    }
+
+    public void retryFailedOrderDataByJSON() {
+        //TODO: 관리자가 로그 확인해서 입력하면 해당 데이터를 FailedOrderDTO로 파싱해서 반환
+        //TODO: 그럼 컨트롤러에서 orderService 재호출
     }
 }

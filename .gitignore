@@ -25,6 +25,7 @@ filePath.properties
 jwt.properties
 rabbitMQ.yml
 cache.yml
+recovery.yml
 .idea
 *.iws
 *.iml

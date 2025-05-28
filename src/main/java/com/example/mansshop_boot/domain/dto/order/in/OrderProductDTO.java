@@ -20,7 +20,7 @@ public class OrderProductDTO{
         @Schema(name = "productId", description = "상품 아이디")
         private String productId;
         @Schema(name = "detailCount", description = "상품 수량")
-        private Integer detailCount;
+        private int detailCount;
         @Schema(name = "detailPrice", description = "상품 총 가격")
         private int detailPrice;
 

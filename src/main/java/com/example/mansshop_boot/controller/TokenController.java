@@ -2,10 +2,8 @@ package com.example.mansshop_boot.controller;
 
 import com.example.mansshop_boot.annotation.swagger.DefaultApiResponse;
 import com.example.mansshop_boot.annotation.swagger.SwaggerAuthentication;
-import com.example.mansshop_boot.domain.dto.member.out.TokenExpirationResponseDTO;
 import com.example.mansshop_boot.domain.dto.token.TokenDTO;
 import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
-import com.example.mansshop_boot.domain.enumeration.Result;
 import com.example.mansshop_boot.service.JWTTokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.Cookie;
@@ -20,8 +18,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.WebUtils;
-
-import java.time.Instant;
 
 @RestController
 @RequestMapping("/api")
@@ -54,7 +50,7 @@ public class TokenController {
     @DefaultApiResponse
     @SwaggerAuthentication
     @GetMapping("/reissue")
-    public ResponseEntity<TokenExpirationResponseDTO> reIssueToken(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<ResponseMessageDTO> reIssueToken(HttpServletRequest request, HttpServletResponse response) {
         String accessToken = request.getHeader(accessHeader).replace(tokenPrefix, "");
         Cookie refreshToken = WebUtils.getCookie(request, refreshHeader);
         Cookie ino = WebUtils.getCookie(request, inoHeader);
@@ -65,9 +61,9 @@ public class TokenController {
                 .inoValue(ino == null ? null : ino.getValue())
                 .build();
 
-        TokenExpirationResponseDTO responseDTO = tokenService.reIssueToken(tokenDTO, response);
+        String responseMessage = tokenService.reIssueToken(tokenDTO, response);
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(responseDTO);
+                .body(new ResponseMessageDTO(responseMessage));
     }
 }

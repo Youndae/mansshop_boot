@@ -20,6 +20,10 @@ import { handleLocationPathToLogin } from '../../../common/utils/locationPathUti
 import { getClickPageNumber } from '../../../common/utils/paginationUtils';
 import { numberComma } from '../../../common/utils/formatNumberComma';
 
+import countUpBtn from '../../../assets/image/up.jpg';
+import countDownBtn from '../../../assets/image/down.jpg';
+import removeBtn from '../../../assets/image/del.jpg';
+
 
 import ProductDetailThumbnail from '../components/ProductDetailThumbnail';
 import Pagination from '../../../common/components/Pagination';
@@ -738,11 +742,11 @@ function TempOrderTableBody(props) {
 					<input type={'text'} value={selectOption.count} readOnly={true}/>
 					<div className="product-temp-count">
 						<div className="count-up-down">
-							<img src={`${process.env.PUBLIC_URL}/image/up.jpg`} name={idx} onClick={handleCountUp} alt={'증가'}/>
-							<img src={`${process.env.PUBLIC_URL}/image/down.jpg`} onClick={handleCountDown} name={idx} alt={'감소'}/>
+							<img src={countUpBtn} name={idx} onClick={handleCountUp} alt={'증가'}/>
+							<img src={countDownBtn} onClick={handleCountDown} name={idx} alt={'감소'}/>
 						</div>
 						<div className="count-remove">
-							<img src={`${process.env.PUBLIC_URL}/image/del.jpg`} onClick={handleOptionRemove} name={idx} alt={'삭제'}/>
+							<img src={removeBtn} onClick={handleOptionRemove} name={idx} alt={'삭제'}/>
 						</div>
 					</div>
 				</td>

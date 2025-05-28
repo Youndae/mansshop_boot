@@ -141,7 +141,12 @@ function Order(){
 		}catch (err) {
             console.log('requestOrder error');
             console.log(err);
-			alert('오류가 발생했습니다.\n문제가 계속된다면 관리자에게 문의해주세요.');
+            console.log('errorMessage : ', err.response.data.errorMessage);
+            if(err.response.status === 441 || (err.response.status === 500 && err.response.data.errorMessage === 'DBConnectionError')) {
+                alert('결제가 완료 되었으나 데이터 처리에 문제가 발생했습니다.\n빠르게 조치하겠습니다.\n불편을드려 죄송합니다.');
+            }else{
+                alert('오류가 발생했습니다.\n관리자에게 문의해주세요.');
+            }
 		}
 	}
 
