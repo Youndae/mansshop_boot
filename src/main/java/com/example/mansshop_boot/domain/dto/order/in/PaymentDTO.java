@@ -39,7 +39,7 @@ public record PaymentDTO(
         int productCount
 ) {
 
-    public ProductOrder toOrderEntity(String uid) {
+    public ProductOrder toOrderEntity(String uid, LocalDateTime createdAt) {
         return ProductOrder.builder()
                 .member(
                         Member.builder()
@@ -54,7 +54,7 @@ public record PaymentDTO(
                 .deliveryFee(deliveryFee)
                 .paymentType(paymentType)
                 .orderStat(OrderStatus.ORDER.getStatusStr())
-                .createdAt(LocalDateTime.now())
+                .createdAt(createdAt)
                 .build();
     }
 }

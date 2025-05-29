@@ -79,7 +79,8 @@ import AdminPeriodSalesDetail from './modules/admin/pages/sales/AdminPeriodSales
 import AdminPeriodSalesDailyOrderList from './modules/admin/pages/sales/AdminPeriodSalesDailyOrderList';
 import AdminProductSales from './modules/admin/pages/sales/AdminProductSales';
 import AdminProductSalesDetail from './modules/admin/pages/sales/AdminProductSalesDetail';
-import AdminFailedQueueList from './modules/admin/pages/queue/AdminFailedQueueList';
+import AdminFailedQueueList from './modules/admin/pages/data/AdminFailedQueueList';
+import AdminFailedOrderList from "./modules/admin/pages/data/AdminFailedOrderList";
 
 // error
 import Error from './modules/error/Error';
@@ -180,7 +181,8 @@ function App() {
 				<Route path='admin/sales/product' element={<AdminProductSales />} />
 				<Route path='admin/sales/product/:productId' element={<AdminProductSalesDetail />} />
 				
-				<Route path='admin/failedQueue' element={<AdminFailedQueueList />} />
+				<Route path='admin/data/queue' element={<AdminFailedQueueList />} />
+				<Route path='admin/data/order' element={<AdminFailedOrderList />} />
 
 				<Route path='error' element={<Error />} />
 				<Route path='/*' element={<Error />} />

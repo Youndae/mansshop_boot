@@ -22,7 +22,7 @@ import AdminOrderModalDetail from '../../components/modal/AdminOrderModalDetail'
 */
 function AdminAllOrderList() {
 	const [params] = useSearchParams();
-	const { page, keyword, searchType = 'recipient' } = Object.fromEntries([...params]);
+	const { page, keyword, searchType = 'recipient' } = Object.fromEntries(params);
 	
 	const [data, setData] = useState([]);
     const [pagingData, setPagingData] = useState({

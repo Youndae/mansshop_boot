@@ -104,6 +104,11 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue failedOrderQueue() {
+        return createQueueWithDLQExchange(RabbitMQPrefix.QUEUE_FAILED_ORDER.getKey(), RabbitMQPrefix.EXCHANGE_ORDER.getKey());
+    }
+
+    @Bean
     public DirectExchange orderExchange() {
         return createExchange(exchange.get(RabbitMQPrefix.EXCHANGE_ORDER.getKey()).getName(), true);
     }
@@ -154,6 +159,14 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Binding failedOrderBinding() {
+        return setBinding(failedOrderQueue(),
+                orderExchange(),
+                queue.get(RabbitMQPrefix.QUEUE_FAILED_ORDER.getKey()).getRouting()
+        );
+    }
+
+    @Bean
     public Queue orderProductDLQ() {
         return createQueue(queue.get(RabbitMQPrefix.QUEUE_ORDER_PRODUCT.getKey()).getDlq());
     }
@@ -176,6 +189,11 @@ public class RabbitMQConfig {
     @Bean
     public Queue orderCartDLQ() {
         return createQueue(queue.get(RabbitMQPrefix.QUEUE_ORDER_CART.getKey()).getDlq());
+    }
+
+    @Bean
+    public Queue failedOrderDLQ() {
+        return createQueue(queue.get(RabbitMQPrefix.QUEUE_FAILED_ORDER.getKey()).getDlq());
     }
 
     @Bean
@@ -225,6 +243,15 @@ public class RabbitMQConfig {
         return setBinding(orderCartDLQ(),
                 createExchange(exchange.get(RabbitMQPrefix.EXCHANGE_ORDER.getKey()).getDlq(), true),
                 queue.get(RabbitMQPrefix.QUEUE_ORDER_CART.getKey()).getDlqRouting()
+        );
+    }
+
+    @Bean
+    public Binding failedOrderDLQBinding() {
+
+        return setBinding(orderCartDLQ(),
+                createExchange(exchange.get(RabbitMQPrefix.EXCHANGE_ORDER.getKey()).getDlq(), true),
+                queue.get(RabbitMQPrefix.QUEUE_FAILED_ORDER.getKey()).getDlqRouting()
         );
     }
 }

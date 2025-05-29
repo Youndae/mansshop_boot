@@ -108,23 +108,13 @@ public class OrderServiceImpl implements OrderService{
 		boolean successFlag = false;
 
 		try {
-			ProductOrderDataDTO productOrderDataDTO = createOrderDataDTO(paymentDTO, cartMemberDTO);
+			ProductOrderDataDTO productOrderDataDTO = createOrderDataDTO(paymentDTO, cartMemberDTO, LocalDateTime.now());
 			ProductOrder order = productOrderDataDTO.productOrder();
 
 			productOrderRepository.save(order);
 			successFlag = true;
 
-			String orderExchange = rabbitMQProperties.getExchange()
-					.get(RabbitMQPrefix.EXCHANGE_ORDER.getKey())
-					.getName();
-
-			if(paymentDTO.orderType().equals("cart"))
-				sendMessage(orderExchange, RabbitMQPrefix.QUEUE_ORDER_CART, new OrderCartDTO(cartMemberDTO, productOrderDataDTO.orderOptionIds()));
-
-			sendMessage(orderExchange, RabbitMQPrefix.QUEUE_ORDER_PRODUCT_OPTION, new OrderProductMessageDTO(productOrderDataDTO));
-			sendMessage(orderExchange, RabbitMQPrefix.QUEUE_ORDER_PRODUCT, new OrderProductMessageDTO(productOrderDataDTO));
-			sendMessage(orderExchange, RabbitMQPrefix.QUEUE_PERIOD_SUMMARY, new PeriodSummaryQueueDTO(order));
-			sendMessage(orderExchange, RabbitMQPrefix.QUEUE_PRODUCT_SUMMARY, new OrderProductSummaryDTO(productOrderDataDTO));
+			sendOrderQueueMessage(paymentDTO, cartMemberDTO, productOrderDataDTO, order);
 
 			return Result.OK.getResultKey();
 		}catch (Exception e) {
@@ -135,10 +125,48 @@ public class OrderServiceImpl implements OrderService{
 				throw new CustomOrderDataFailedException(ErrorCode.ORDER_DATA_FAILED, ErrorCode.ORDER_DATA_FAILED.getMessage());
 			}else {
 				log.error("payment Message Queue Error : ", e);
+				handleOrderMQFallback(paymentDTO, cartMemberDTO, e);
 				return Result.OK.getResultKey();
 			}
 		}
     }
+
+	@Override
+	public String retryFailedOrder(FailedOrderDTO failedOrderDTO, FallbackMapKey fallbackMapKey) {
+		try {
+			ProductOrderDataDTO productOrderDataDTO = createOrderDataDTO(failedOrderDTO.paymentDTO(), failedOrderDTO.cartMemberDTO(), failedOrderDTO.failedTime());
+			ProductOrder order = productOrderDataDTO.productOrder();
+			String exchange = getOrderExchange();
+			if(fallbackMapKey == FallbackMapKey.ORDER)
+				sendMessage(exchange, RabbitMQPrefix.QUEUE_FAILED_ORDER, productOrderDataDTO);
+			sendOrderQueueMessage(failedOrderDTO.paymentDTO(), failedOrderDTO.cartMemberDTO(), productOrderDataDTO, order);
+
+			return Result.OK.getResultKey();
+		}catch (Exception e) {
+			log.error("retry payment Message Queue Error : ", e);
+			handleOrderMQFallback(failedOrderDTO.paymentDTO(), failedOrderDTO.cartMemberDTO(), e);
+			throw new CustomOrderDataFailedException(ErrorCode.ORDER_DATA_FAILED, ErrorCode.ORDER_DATA_FAILED.getMessage());
+		}
+	}
+
+
+	private void sendOrderQueueMessage(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO, ProductOrderDataDTO productOrderDataDTO, ProductOrder order) throws Exception {
+		String orderExchange = getOrderExchange();
+
+		if(paymentDTO.orderType().equals("cart"))
+			sendMessage(orderExchange, RabbitMQPrefix.QUEUE_ORDER_CART, new OrderCartDTO(cartMemberDTO, productOrderDataDTO.orderOptionIds()));
+
+		sendMessage(orderExchange, RabbitMQPrefix.QUEUE_ORDER_PRODUCT_OPTION, new OrderProductMessageDTO(productOrderDataDTO));
+		sendMessage(orderExchange, RabbitMQPrefix.QUEUE_ORDER_PRODUCT, new OrderProductMessageDTO(productOrderDataDTO));
+		sendMessage(orderExchange, RabbitMQPrefix.QUEUE_PERIOD_SUMMARY, new PeriodSummaryQueueDTO(order));
+		sendMessage(orderExchange, RabbitMQPrefix.QUEUE_PRODUCT_SUMMARY, new OrderProductSummaryDTO(productOrderDataDTO));
+	}
+
+	private String getOrderExchange() {
+		return rabbitMQProperties.getExchange()
+								.get(RabbitMQPrefix.EXCHANGE_ORDER.getKey())
+								.getName();
+	}
 
     private String getQueueRoutingKey(RabbitMQPrefix rabbitMQPrefix) {
         return rabbitMQProperties.getQueue()
@@ -155,14 +183,21 @@ public class OrderServiceImpl implements OrderService{
 	}
 
 	private void handleOrderFallback(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO, Exception e) {
+		orderRedisFallbackProcess(paymentDTO, cartMemberDTO, e, FallbackMapKey.ORDER);
+	}
+
+	private void handleOrderMQFallback(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO, Exception e) {
+		orderRedisFallbackProcess(paymentDTO, cartMemberDTO, e, FallbackMapKey.ORDER_MESSAGE);
+	}
+
+	private void orderRedisFallbackProcess(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO, Exception e, FallbackMapKey fallbackMapKey) {
 		FailedOrderDTO failedDTO = new FailedOrderDTO(paymentDTO, cartMemberDTO, LocalDateTime.now(), e.getMessage());
 		ObjectMapper om = new ObjectMapper();
 		try {
 			String randomString = UUID.randomUUID().toString();
-			String keyPrefix = fallbackProperties.getRedis().get(FallbackMapKey.ORDER.getKey()).getPrefix();
-			log.info("orderServiceImpl.handleOrderFallback : keyPrefix = {}", keyPrefix);
+			String keyPrefix = fallbackProperties.getRedis().get(fallbackMapKey.getKey()).getPrefix();
 			String orderKey = keyPrefix.concat(randomString);
-			log.info("orderServiceImpl.handleOrderFallback : orderKey = {}", orderKey);
+
 			failedOrderRedisTemplate.opsForValue().set(orderKey, failedDTO);
 		}catch (Exception e1) {
 			try {
@@ -175,8 +210,8 @@ public class OrderServiceImpl implements OrderService{
 	}
 
 
-    public ProductOrderDataDTO createOrderDataDTO(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO) {
-        ProductOrder productOrder = paymentDTO.toOrderEntity(cartMemberDTO.uid());
+    public ProductOrderDataDTO createOrderDataDTO(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO, LocalDateTime createdAt) {
+        ProductOrder productOrder = paymentDTO.toOrderEntity(cartMemberDTO.uid(), createdAt);
         List<OrderProductDTO> orderProductList = paymentDTO.orderProduct();
         List<String> orderProductIds = new ArrayList<>();// 주문한 상품 옵션 아이디를 담아줄 리스트
         List<Long> orderOptionIds = new ArrayList<>();
@@ -402,13 +437,5 @@ public class OrderServiceImpl implements OrderService{
 			"Set-Cookie",
 			createOrderTokenCookie("", Duration.ZERO)
 		);
-	}
-
-	@Override
-	public String retryErrorOrderMessage(List<FailedOrderDTO> failedDataList) {
-
-		failedDataList.forEach(v -> payment(v.paymentDTO(), v.cartMemberDTO()));
-
-		return Result.OK.getResultKey();
 	}
 }

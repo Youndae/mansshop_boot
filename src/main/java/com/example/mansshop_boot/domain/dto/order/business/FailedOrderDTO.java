@@ -2,7 +2,6 @@ package com.example.mansshop_boot.domain.dto.order.business;
 
 import com.example.mansshop_boot.domain.dto.cart.business.CartMemberDTO;
 import com.example.mansshop_boot.domain.dto.order.in.PaymentDTO;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import java.time.LocalDateTime;
 

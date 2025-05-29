@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 
-import { getFailedQueueList, retryDLQMessages } from '../../services/adminFailedQueueService';
+import { getFailedQueueList, retryDLQMessages } from '../../services/adminDataService';
 import { RESPONSE_MESSAGE } from '../../../../common/constants/responseMessageType';
 
 import AdminSideNav from '../../components/AdminSideNav';
@@ -46,7 +46,7 @@ function AdminFailedQueueList() {
 	return (
         <div className="mypage">
             <AdminSideNav
-                categoryStatus={'failedQueue'}
+                categoryStatus={'data'}
             />
             <div className="admin-content">
                 <div className="admin-content-header admin-product-header">

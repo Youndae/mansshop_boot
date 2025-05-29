@@ -20,5 +20,9 @@ export const SIDE_MENU_MAP = {
     sales: [
         { link: '/admin/sales/period', text: '기간별 매출' },
         { link: '/admin/sales/product', text: '상품별 매출' },
+    ],
+    data: [
+        { link: '/admin/data/queue', text: '실패 메시지 관리'},
+        { link: '/admin/data/order', text: '실패 주문 관리'}
     ]
 }

@@ -7,7 +7,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum FallbackMapKey {
 
-    ORDER("order");
+    ORDER("order"),
+    ORDER_MESSAGE("orderMessage");
 
     private final String key;
 }

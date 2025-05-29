@@ -93,7 +93,7 @@ public interface AdminService {
 
     String retryFailedMessages(List<FailedQueueDTO> queueDTOList);
 
-    List<FailedOrderRedisResponseDTO> getFailedOrderDataByRedis();
+    long getFailedOrderDataByRedis();
 
     String retryFailedOrderDataByRedis();
 }

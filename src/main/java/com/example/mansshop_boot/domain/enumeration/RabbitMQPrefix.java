@@ -12,7 +12,8 @@ public enum RabbitMQPrefix {
     QUEUE_ORDER_PRODUCT_OPTION("orderProductOption"),
     QUEUE_PERIOD_SUMMARY("periodSalesSummary"),
     QUEUE_PRODUCT_SUMMARY("productSalesSummary"),
-    QUEUE_ORDER_CART("orderCart");
+    QUEUE_ORDER_CART("orderCart"),
+    QUEUE_FAILED_ORDER("failedOrder");
 
     private final String key;
 }

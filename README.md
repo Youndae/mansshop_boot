@@ -206,53 +206,147 @@ RabbitMQ의 경우 도입 이전 배포 테스트 수행으로 인해 RabbitMQ�
 # 기능 및 개선 내역
 
 ### 목차
-* <strong>백엔드</strong>
-  1. [JMeter 테스트 수행 및 결과](#JMeter-테스트-수행-및-결과)
-  2. [OAuth2 요청 및 토큰 발급 처리](#OAuth2-요청-및-토큰-발급-처리)
-  3. [인증 인가 처리](#인증-인가-처리)
-  4. [주문 및 매출 집계 처리 개선 RabbitMQ 적용](#주문-및-매출-집계-처리-개선-RabbitMQ-적용)
-  5. [RabbitMQ 실패 메시지 재처리](#RabbitMQ-실패-메시지-재처리)
-  6. [쿼리 튜닝](#쿼리-튜닝)
-  7. [count 쿼리 캐싱](#count-쿼리-캐싱)
-  8. [상품 추가 및 수정에서 JPA 이슈와 파일관리](#상품-추가-및-수정에서-JPA-이슈와-파일관리)
-  9. [S3 연결을 통한 이미지 출력 처리](#S3-연결을-통한-이미지-출력-처리)
+* <strong>[백엔드](#백엔드)</strong>
+  * [기능](#기능)
+    1. [인증 인가 처리](#인증-인가-처리)
+    2. [OAuth2 요청 및 토큰 발급 처리](#OAuth2-요청-및-토큰-발급-처리)
+    3. [S3 연결을 통한 이미지 출력 처리](#S3-연결을-통한-이미지-출력-처리)
+  * [개선 및 문제 해결](#개선-및-문제-해결)
+    1. [JMeter 테스트 수행 및 결과](#JMeter-테스트-수행-및-결과)
+    2. [주문 및 매출 집계 처리 개선 RabbitMQ 적용](#주문-및-매출-집계-처리-개선-RabbitMQ-적용)
+    3. [주문 데이터 처리 실패 대응](#주문-데이터-처리-실패-대응)
+    4. [RabbitMQ 실패 메시지 재처리](#RabbitMQ-실패-메시지-재처리)
+    5. [쿼리 튜닝](#쿼리-튜닝)
+    6. [count 쿼리 캐싱](#count-쿼리-캐싱)
+    7. [상품 추가 및 수정에서 JPA 이슈와 파일관리](#상품-추가-및-수정에서-JPA-이슈와-파일관리)
 
-<br/>
 
-* <strong>프론트 엔드</strong>
+* <strong>[프론트 엔드](#프론트-엔드-기능)</strong>
   1. [Redux를 통한 로그인 상태 관리](#Redux를-통한-로그인-상태-관리)
   2. [Axios Interceptor](#Axios-Interceptor)
   3. [상품 옵션 입력 폼 동적 생성 및 삭제](#상품-옵션-입력-폼-동적-생성-및-삭제)
 
-
 <br/>
 
 ## 백엔드
-
-
-### JMeter 테스트 수행 및 결과
 <br />
 
-리팩토링 이후 JMeter를 통한 테스트를 진행했습니다.   
-테스트 목적은 기능에 대한 성능 최적화입니다.   
-사용하지 않는 구형 노트북에 Ubuntu 24.04.01을 설치한 뒤 Docker로 MySQL, Redis, RabbitMQ를 사용해 배포했습니다.   
-JMeter는 데스크탑에서 실행했고 공유기로 인한 같은 로컬 환경에서의 테스트로 진행했습니다.
+### 기능
 
-테스트 데이터로는 사용자 및 상품 데이터 2000개 가량, 그 외 테이블들은 250만개 이상의 더미데이터를 담아두고 테스트했습니다.   
-테스트 설정은 500 Thread, 5 Ramp-up, Loop count 1 환경에서 수행했으며, 관리자의 경우 상대적으로 요청이 적게 발생하는 만큼 20 Thread, 1 Ramp-up 환경으로 수행했습니다.   
-이 설정은 가장 원활하게 처리되던 메인 페이지 조회 기능 기준으로 여러 수치에 대한 테스트를 진행하며 결정하게 되었습니다.   
-평균적으로 200ms를 넘어가지 않는 기능이었지만, 500 Thread가 넘는 수치에서는 1500ms 이상의 비정상적으로 치솟는 결과를 볼 수 있었기에 최적화에 가장 적합한 최대치라고 생각했습니다.
+---
 
-하단의 이미지는 테스트 결과를 정리한 엑셀 파일의 일부입니다.   
-가장 문제가 많아 최적화를 많이 수행한 부분이 관리자 파트였기 때문에 관리자 기능 위주로 자료를 준비했습니다.
+### 인증 인가 처리
+<br />
 
-테스트의 통과 기준은 평균 500ms대 까지로 잡았고, 목표에 맞춰 최적화를 수행했습니다.   
-최적화는 데이터베이스 인덱싱, 쿼리 튜닝, 코드 레벨에서의 데이터 파싱 및 JPA 최적화를 수행했으며, 모든 요청에 대해 목표를 달성할 수 있었습니다.
+인증 인가 처리는 JWT와 Spring Security를 같이 사용했습니다.   
+SpringSecurity는 검증된 토큰을 기반으로 Authentication 객체를 SecurityContextHolder.setAuthentication()을 통해 담아 관리하게 됩니다.   
+권한 관리는 컨트롤러 혹은 메소드 단위로 @PreAuthorize Annotation을 통해 관리합니다.
 
-이 테스트를 수행하기 이전 브라우저나 Postman을 통한 단일 요청 테스트에서는 모두 정상적인 수치를 보여주던 기능들이었지만, 운영 환경과 같은 다중 요청이 발생하는 경우 또 다른 결과를 볼 수 있다는 점을 알 수 있게 된 좋은 기회였습니다.
-또한, 쿼리 튜닝과 인덱싱, JPA에 대해 좀 더 깊게 고민할 수 있었습니다.
+JWT는 AccessToken과 RefreshToken 구조로 설계했습니다.   
+또한, 다중 디바이스 로그인을 허용하기 위해 ino라는 디바이스 식별 목적의 값이 같이 처리되는 구조입니다.   
+AccessToken은 1시간, RefreshToken은 2주의 만료기간을 갖도록 처리했으며, ino는 JWT로 생성하는 것이 아니기 때문에 자체적인 만료 기간은 없습니다.
 
-<img src="src/main/resources/README_image/jmeter_2.jpg">
+서버에서의 토큰 관리는 Redis로 관리하게 됩니다.   
+이때 key 구조는 at 또는 rt 라는 각 토큰의 약어로 시작합니다. 토큰 약어 + ino + 사용자 아이디 구조로 키값을 생성하게 됩니다.   
+클라이언트에서는 AccessToken과 만료시간을 LocalStorage에 보관하며 RefreshToken과 ino는 쿠키로 관리합니다.   
+각 만료시간은 토큰 만료시간과 동일하게 갖게 되며, ino는 9999일의 긴 기간을 주어 사실상 만료되지 않도록 설계하고 로그아웃 또는 토큰이 탈취된 경우에만 제거됩니다.   
+ino가 제거되지 않는 한 해당 디바이스의 Redis Key 구조는 동일하기 때문에 전체 토큰이 만료되더라도 재 로그인 과정에서 Redis 데이터 비교를 통해 토큰 탈취를 판단할 수 있습니다.
+
+서버에서 응답할 때 AccessToken은 Authorization Header에 담아 반환하게 되며, RefreshToken과 ino는 응답 쿠키에 담아 반환합니다.   
+이때, 쿠키 설정으로는 SameSite Strict, HttpOnly, Secure 설정을 하도록 설계했습니다.   
+각 요청에 따라 구조의 차이가 조금은 존재하지만, 공통적으로 응답 body에 AccessToken의 만료시간을 같이 담아 반환하게 됩니다.   
+응답을 받은 클라이언트에서는 LocalStorage에 { token: 토큰값, expires: 만료시간 } 구조로 저장하게 됩니다.
+
+재발급 방식은 Refresh Token Rotation 방식으로 처리해 긴 만료시간을 갖는 Refresh Token의 단점을 상쇄할 수 있도록 했습니다.
+
+```java
+@Override
+protected void doFilterInternal(HttpServletRequest request,
+                                HttpServletResponse response,
+                                FilterChain chain) throws ServletException, IOException {
+  
+    String accessToken = request.getHeader(accessHeader);
+    Cookie refreshToken = WebUtils.getCookie(request, refreshHeader);
+    Cookie inoToken = WebUtils.getCookie(request, inoHeader);
+    String username = null; // Authentication 객체 생성 시 필요한 사용자 아이디
+  
+    if(inoToken != null){
+      String inoValue = inoToken.getValue();
+      if(accessToken != null && refreshToken != null) {
+        String refreshTokenValue = refreshToken.getValue();
+        String accessTokenValue = accessToken.replace(tokenPrefix, "");
+  
+        if(!jwtTokenProvider.checkTokenPrefix(accessToken)
+                || !jwtTokenProvider.checkTokenPrefix(refreshTokenValue)){
+          chain.doFilter(request, response);
+          return;
+        }else {
+          String claimByAccessToken = jwtTokenProvider.verifyAccessToken(accessTokenValue, inoValue);
+  
+          if(claimByAccessToken.equals(Result.WRONG_TOKEN.getResultKey())
+                  || claimByAccessToken.equals(Result.TOKEN_STEALING.getResultKey())){
+            jwtTokenService.deleteCookieAndThrowException(response);
+            return;
+          }else if(claimByAccessToken.equals(Result.TOKEN_EXPIRATION.getResultKey())){
+            if(request.getRequestURI().equals("/api/reissue")) {
+              chain.doFilter(request, response);
+            }else
+              jwtTokenService.tokenExpirationResponse(response);
+  
+            return;
+          }else {
+            username = claimByAccessToken;
+          }
+        }
+      }else if(accessToken != null && refreshToken == null){
+        String decodeTokenClaim = jwtTokenProvider.decodeToken(accessToken.replace(tokenPrefix, ""));
+  
+        jwtTokenService.deleteTokenAndCookieAndThrowException(decodeTokenClaim, inoValue, response);
+        return;
+      }else {
+        chain.doFilter(request, response);
+        return;
+      }
+    }
+  
+    if(username != null){
+      Member memberEntity = memberRepository.findByUserId(username);
+      String userId;
+      Collection<? extends GrantedAuthority> authorities;
+      CustomUserDetails userDetails;
+  
+      if(memberEntity.getProvider().equals("local"))
+        userDetails = new CustomUser(memberEntity);
+      else
+        userDetails = new CustomOAuth2User(
+                memberEntity.toOAuth2DTOUseFilter()
+        );
+  
+      userId = userDetails.getUserId();
+      authorities = userDetails.getAuthorities();
+  
+      Authentication authentication =
+              new UsernamePasswordAuthenticationToken(userId, null, authorities);
+  
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+  
+    chain.doFilter(request, response);
+}
+```
+
+SecurityFilterChain 설정에서 beforeFilter에 JWTAuthorizationFilter를 설정해 두었기 떄문에 모든 요청은 위 필터를 거치게 됩니다.   
+처리 과정에서 가장 먼저 ino 존재 여부를 확인하게 되는데 ino가 없는 경우 토큰 검증은 가능하지만 Redis 데이터와 비교가 불가능하기 때문에 검증을 수행하지 않고 인증 처리를 하지 않도록 설계했습니다.
+
+ino가 존재한다면 토큰 검증 및 Redis 데이터와 비교를 처리하게 됩니다.   
+조건에 따라 검증이 안되는 잘못된 토큰 혹은 Redis 데이터와 불일치 하는 탈취라고 판단되는 토큰, 정상 토큰으로 나눠집니다.   
+잘못된 토큰이라는 응답의 경우 토큰은 있으나 Redis 데이터가 없거나, 토큰 검증이 실패한 토큰입니다.   
+이 경우 Redis 데이터 처리가 불가능하기 때문에 응답 쿠키로 만료된 쿠키들을 담아준 뒤 800이라는 상태값과 함께 바로 응답을 반환하게 됩니다.   
+탈취로 판단된 토큰의 경우 동일하게 응답 쿠키에 만료된 쿠키들을 담아주고 Redis 데이터까지 삭제한 뒤 800이라는 상태값과 함께 바로 응답을 반환하게 됩니다.   
+800 응답을 받은 클라이언트에서는 LocalStorage에 저장된 AccessToken을 제거하고 인증 과정에서 문제가 있었음을 사용자에게 알려 재로그인을 유도합니다.   
+쿠키의 경우 응답 쿠키가 바로 적용되기도 하고 HttpOnly 설정으로 인해 제어할 수 없으므로 따로 처리하지 않습니다.
+
+토큰이 정상으로 판단되는 경우 RDB 데이터를 조회한 뒤 Authentication 객체 생성 및 SecurityContextHolder에 담아 관리하도록 처리합니다.
 
 <br />
 
@@ -401,119 +495,81 @@ Redirect를 처리할 때 Authorization 헤더에 토큰을 담는 것은 보안
 
 <br />
 
-### 인증 인가 처리
+### S3 연결을 통한 이미지 출력 처리
+
 <br />
 
-인증 인가 처리는 JWT와 Spring Security를 같이 사용했습니다.   
-SpringSecurity는 검증된 토큰을 기반으로 Authentication 객체를 SecurityContextHolder.setAuthentication()을 통해 담아 관리하게 됩니다.   
-권한 관리는 컨트롤러 혹은 메소드 단위로 @PreAuthorize Annotation을 통해 관리합니다.
+배포 처리를 진행하며 S3에 이미지 파일을 저장하도록 했습니다.   
+S3 연동을 이번에 처음 해봤기 때문에 이미지 파일을 어떻게 불러올지에 대해 알아봤을 때 3가지 방법이 있었습니다.
+1. S3 파일의 url을 통한 요청
+2. preSignedUrl을 통한 요청
+3. 백엔드 서버를 proxy 서버로서 다운로드 받은 뒤 반환하는 요청
 
-JWT는 AccessToken과 RefreshToken 구조로 설계했습니다.   
-또한, 다중 디바이스 로그인을 허용하기 위해 ino라는 디바이스 식별 목적의 값이 같이 처리되는 구조입니다.   
-AccessToken은 1시간, RefreshToken은 2주의 만료기간을 갖도록 처리했으며, ino는 JWT로 생성하는 것이 아니기 때문에 자체적인 만료 기간은 없습니다.
+여기서 첫번째 방법에 대해서는 S3에 직접 접근하는 형태이기 때문에 해당 방법을 택해서는 안되겠다고 생각했습니다.   
+두번째 방법은 개발자가 직접 url의 유효시간을 설정해 처리하는 방법이기 때문에 안전한 방법이라고는 하지만 전달되는 url에 S3 버킷명과 같은 불필요한 정보가 포함된다는 점이 마음에 걸렸습니다.   
+이 정보들은 노출되더라도 해당 파일에 접근할 수 없기 때문에 괜찮다는 말이 있었지만 그래도 불필요하게 노출할 필요는 없다고 생각해 다른 방법을 찾게 되었습니다.
 
-서버에서의 토큰 관리는 Redis로 관리하게 됩니다.   
-이때 key 구조는 at 또는 rt 라는 각 토큰의 약어로 시작합니다. 토큰 약어 + ino + 사용자 아이디 구조로 키값을 생성하게 됩니다.   
-클라이언트에서는 AccessToken과 만료시간을 LocalStorage에 보관하며 RefreshToken과 ino는 쿠키로 관리합니다.   
-각 만료시간은 토큰 만료시간과 동일하게 갖게 되며, ino는 9999일의 긴 기간을 주어 사실상 만료되지 않도록 설계하고 로그아웃 또는 토큰이 탈취된 경우에만 제거됩니다.   
-ino가 제거되지 않는 한 해당 디바이스의 Redis Key 구조는 동일하기 때문에 전체 토큰이 만료되더라도 재 로그인 과정에서 Redis 데이터 비교를 통해 토큰 탈취를 판단할 수 있습니다.
-
-서버에서 응답할 때 AccessToken은 Authorization Header에 담아 반환하게 되며, RefreshToken과 ino는 응답 쿠키에 담아 반환합니다.   
-이때, 쿠키 설정으로는 SameSite Strict, HttpOnly, Secure 설정을 하도록 설계했습니다.   
-각 요청에 따라 구조의 차이가 조금은 존재하지만, 공통적으로 응답 body에 AccessToken의 만료시간을 같이 담아 반환하게 됩니다.   
-응답을 받은 클라이언트에서는 LocalStorage에 { token: 토큰값, expires: 만료시간 } 구조로 저장하게 됩니다.
-
-재발급 방식은 Refresh Token Rotation 방식으로 처리해 긴 만료시간을 갖는 Refresh Token의 단점을 상쇄할 수 있도록 했습니다.
+그래서 최종적으로 택한 방법은 백엔드 서버를 proxy 서버로 활용하는 방법입니다.   
+이렇게 처리하는 경우 기존 로컬에 저장된 파일을 불러와 반환할때 처럼 다른 정보는 노출하지 않고 요청 url 정도만 노출하는 형태로 처리할 수 있었습니다.
+개인적으로 최대한 불필요한 정보는 노출하지 않도록 하자는 생각을 하고 있기 때문에 이 방법이 가장 유용한 방법이라 생각해 이 방법으로 처리했습니다.
 
 ```java
-@Override
-protected void doFilterInternal(HttpServletRequest request,
-                                HttpServletResponse response,
-                                FilterChain chain) throws ServletException, IOException {
-  
-    String accessToken = request.getHeader(accessHeader);
-    Cookie refreshToken = WebUtils.getCookie(request, refreshHeader);
-    Cookie inoToken = WebUtils.getCookie(request, inoHeader);
-    String username = null; // Authentication 객체 생성 시 필요한 사용자 아이디
-  
-    if(inoToken != null){
-      String inoValue = inoToken.getValue();
-      if(accessToken != null && refreshToken != null) {
-        String refreshTokenValue = refreshToken.getValue();
-        String accessTokenValue = accessToken.replace(tokenPrefix, "");
-  
-        if(!jwtTokenProvider.checkTokenPrefix(accessToken)
-                || !jwtTokenProvider.checkTokenPrefix(refreshTokenValue)){
-          chain.doFilter(request, response);
-          return;
-        }else {
-          String claimByAccessToken = jwtTokenProvider.verifyAccessToken(accessTokenValue, inoValue);
-  
-          if(claimByAccessToken.equals(Result.WRONG_TOKEN.getResultKey())
-                  || claimByAccessToken.equals(Result.TOKEN_STEALING.getResultKey())){
-            jwtTokenService.deleteCookieAndThrowException(response);
-            return;
-          }else if(claimByAccessToken.equals(Result.TOKEN_EXPIRATION.getResultKey())){
-            if(request.getRequestURI().equals("/api/reissue")) {
-              chain.doFilter(request, response);
-            }else
-              jwtTokenService.tokenExpirationResponse(response);
-  
-            return;
-          }else {
-            username = claimByAccessToken;
-          }
-        }
-      }else if(accessToken != null && refreshToken == null){
-        String decodeTokenClaim = jwtTokenProvider.decodeToken(accessToken.replace(tokenPrefix, ""));
-  
-        jwtTokenService.deleteTokenAndCookieAndThrowException(decodeTokenClaim, inoValue, response);
-        return;
-      }else {
-        chain.doFilter(request, response);
-        return;
-      }
+//MainServiceImpl
+@Service
+@RequiredArgsConstructor
+public class MainServiceImpl implements MainService {
+    private final AmazonS3 amazonS3;
+    
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
+    
+    @Override
+    public ResponseEntity<InputStreamResource> getImageFile(String imageName) {
+        S3Object s3Object = amazonS3.getObject(bucket, imageName);
+        InputStreamResource resource = new InputStreamResource(s3Object.getObjectContent());
+        
+        return ResponseEntity.status(HttpStatus.OK)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + imageName + "\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .contentLength(s3Object.getObjectMetadata().getContentLength())
+                .body(resource);
     }
-  
-    if(username != null){
-      Member memberEntity = memberRepository.findByUserId(username);
-      String userId;
-      Collection<? extends GrantedAuthority> authorities;
-      CustomUserDetails userDetails;
-  
-      if(memberEntity.getProvider().equals("local"))
-        userDetails = new CustomUser(memberEntity);
-      else
-        userDetails = new CustomOAuth2User(
-                memberEntity.toOAuth2DTOUseFilter()
-        );
-  
-      userId = userDetails.getUserId();
-      authorities = userDetails.getAuthorities();
-  
-      Authentication authentication =
-              new UsernamePasswordAuthenticationToken(userId, null, authorities);
-  
-      SecurityContextHolder.getContext().setAuthentication(authentication);
-    }
-  
-    chain.doFilter(request, response);
 }
 ```
 
-SecurityFilterChain 설정에서 beforeFilter에 JWTAuthorizationFilter를 설정해 두었기 떄문에 모든 요청은 위 필터를 거치게 됩니다.   
-처리 과정에서 가장 먼저 ino 존재 여부를 확인하게 되는데 ino가 없는 경우 토큰 검증은 가능하지만 Redis 데이터와 비교가 불가능하기 때문에 검증을 수행하지 않고 인증 처리를 하지 않도록 설계했습니다.
+<br />
 
-ino가 존재한다면 토큰 검증 및 Redis 데이터와 비교를 처리하게 됩니다.   
-조건에 따라 검증이 안되는 잘못된 토큰 혹은 Redis 데이터와 불일치 하는 탈취라고 판단되는 토큰, 정상 토큰으로 나눠집니다.   
-잘못된 토큰이라는 응답의 경우 토큰은 있으나 Redis 데이터가 없거나, 토큰 검증이 실패한 토큰입니다.   
-이 경우 Redis 데이터 처리가 불가능하기 때문에 응답 쿠키로 만료된 쿠키들을 담아준 뒤 800이라는 상태값과 함께 바로 응답을 반환하게 됩니다.   
-탈취로 판단된 토큰의 경우 동일하게 응답 쿠키에 만료된 쿠키들을 담아주고 Redis 데이터까지 삭제한 뒤 800이라는 상태값과 함께 바로 응답을 반환하게 됩니다.   
-800 응답을 받은 클라이언트에서는 LocalStorage에 저장된 AccessToken을 제거하고 인증 과정에서 문제가 있었음을 사용자에게 알려 재로그인을 유도합니다.   
-쿠키의 경우 응답 쿠키가 바로 적용되기도 하고 HttpOnly 설정으로 인해 제어할 수 없으므로 따로 처리하지 않습니다.
 
-토큰이 정상으로 판단되는 경우 RDB 데이터를 조회한 뒤 Authentication 객체 생성 및 SecurityContextHolder에 담아 관리하도록 처리합니다.
+## 개선 및 문제 해결
 
+---
+
+### JMeter 테스트 수행 및 결과
+<br />
+
+리팩토링 이후 JMeter를 통한 테스트를 진행했습니다.   
+테스트 목적은 기능에 대한 성능 최적화입니다.   
+사용하지 않는 구형 노트북에 Ubuntu 24.04.01을 설치한 뒤 Docker로 MySQL, Redis, RabbitMQ를 사용해 배포했습니다.   
+JMeter는 데스크탑에서 실행했고 공유기로 인한 같은 로컬 환경에서의 테스트로 진행했습니다.
+
+테스트 데이터로는 사용자 및 상품 데이터 2000개 가량, 그 외 테이블들은 250만개 이상의 더미데이터를 담아두고 테스트했습니다.   
+테스트 설정은 500 Thread, 5 Ramp-up, Loop count 1 환경에서 수행했으며, 관리자의 경우 상대적으로 요청이 적게 발생하는 만큼 20 Thread, 1 Ramp-up 환경으로 수행했습니다.   
+이 설정은 가장 원활하게 처리되던 메인 페이지 조회 기능 기준으로 여러 수치에 대한 테스트를 진행하며 결정하게 되었습니다.   
+평균적으로 200ms를 넘어가지 않는 기능이었지만, 500 Thread가 넘는 수치에서는 1500ms 이상의 비정상적으로 치솟는 결과를 볼 수 있었기에 최적화에 가장 적합한 최대치라고 생각했습니다.
+
+하단의 이미지는 테스트 결과를 정리한 엑셀 파일의 일부입니다.   
+가장 문제가 많아 최적화를 많이 수행한 부분이 관리자 파트였기 때문에 관리자 기능 위주로 자료를 준비했습니다.
+
+테스트의 통과 기준은 평균 500ms대 까지로 잡았고, 목표에 맞춰 최적화를 수행했습니다.   
+최적화는 데이터베이스 인덱싱, 쿼리 튜닝, 코드 레벨에서의 데이터 파싱 및 JPA 최적화를 수행했으며, 모든 요청에 대해 목표를 달성할 수 있었습니다.
+
+이 테스트를 수행하기 이전 브라우저나 Postman을 통한 단일 요청 테스트에서는 모두 정상적인 수치를 보여주던 기능들이었지만, 운영 환경과 같은 다중 요청이 발생하는 경우 또 다른 결과를 볼 수 있다는 점을 알 수 있게 된 좋은 기회였습니다.
+또한, 쿼리 튜닝과 인덱싱, JPA에 대해 좀 더 깊게 고민할 수 있었습니다.
+
+<img src="src/main/resources/README_image/jmeter_2.jpg">
+
+<br />
+<br />
 <br />
 
 ### 주문 및 매출 집계 처리 개선 RabbitMQ 적용
@@ -592,6 +648,101 @@ RabbitMQ의 기본적인 설정들과 Queue 정의는 RabbitMQConfig 클래스�
 <a href="https://github.com/Youndae/mansshop_boot/blob/master/src/main/java/com/example/mansshop_boot/config/rabbitMQ/config/RabbitMQConfig.java">RabbitMQConfig 전체 코드</a>
 
 <br />
+
+### 주문 데이터 처리 실패 대응
+
+<br/>
+
+주문 데이터의 경우 결제 API 호출 이후 처리되는 기능이기 때문에 롤백이 아닌 꼭 처리되어야 하는 기능입니다.   
+
+```java
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class OrderServiceImpl implements OrderService {
+  @Override
+  @Transactional(rollbackFor = RuntimeException.class)
+  public String payment(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO) {
+    //주문 데이터 처리 플래그
+    boolean successFlag = false;
+
+    try {
+      ProductOrderDataDTO productOrderDataDTO = createOrderDataDTO(paymentDTO, cartMemberDTO, LocalDateTime.now());
+      ProductOrder order = productOrderDataDTO.productOrder();
+
+      productOrderRepository.save(order);
+      successFlag = true;
+      
+      //장바구니, 상품 옵션별 재고, 상품 총 판매량, 기간별 매출, 상품별 매출 RabbitMQ 처리
+      sendOrderQueueMessage(paymentDTO, cartMemberDTO, productOrderDataDTO, order);
+
+      return Result.OK.getResultKey();
+    }catch (Exception e) {
+      log.error("payment Error : ", e);
+      //주문 데이터 처리부터 실패했다면
+      if(!successFlag) {
+        log.error("handleFallback call");
+        handleOrderFallback(paymentDTO, cartMemberDTO, e);
+        throw new CustomOrderDataFailedException(ErrorCode.ORDER_DATA_FAILED, ErrorCode.ORDER_DATA_FAILED.getMessage());
+      }else {
+        //주문 데이터 처리는 성공했으나, RabbitMQ에서 예외가 발생했다면
+        log.error("payment Message Queue Error : ", e);
+        handleOrderMQFallback(paymentDTO, cartMemberDTO, e);
+        return Result.OK.getResultKey();
+      }
+    }
+  }
+}
+```
+
+처리 실패 분기는 2가지로 나눴습니다.   
+주문 데이터 처리부터 실패하는 경우와 주문 데이터는 성공했으나 RabbitMQ 호출과정에서의 실패입니다.   
+RabbitMQ의 경우 Dead Letter Queue까지 처리하고 있기 때문에 여기에서 문제가 발생하는 경우는 RabbitMQ의 장애 상황일 것이라고 생각하고 있습니다.   
+처리 실패 분기가 나눠져야 하는 이유는 재처리 시도에서 주문 데이터부터 처리할지, 비동기 처리 내역만 재처리를 해야 할지 나눠야 하기 때문입니다.   
+
+```java
+private void handleOrderFallback(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO, Exception e) {
+    orderRedisFallbackProcess(paymentDTO, cartMemberDTO, e, FallbackMapKey.ORDER);
+}
+
+private void handleOrderMQFallback(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO, Exception e) {
+    orderRedisFallbackProcess(paymentDTO, cartMemberDTO, e, FallbackMapKey.ORDER_MESSAGE);
+}
+
+private void orderRedisFallbackProcess(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO, Exception e, FallbackMapKey fallbackMapKey) {
+    FailedOrderDTO failedDTO = new FailedOrderDTO(paymentDTO, cartMemberDTO, LocalDateTime.now(), e.getMessage());
+    ObjectMapper om = new ObjectMapper();
+    try {
+        String randomString = UUID.randomUUID().toString();
+        String keyPrefix = fallbackProperties.getRedis().get(fallbackMapKey.getKey()).getPrefix();
+        String orderKey = keyPrefix.concat(randomString);
+
+        failedOrderRedisTemplate.opsForValue().set(orderKey, failedDTO);
+    }catch (Exception e1) {
+        try {
+            failedOrderLogger.error("handleOrderFallback Error :: request Data : {}", om.writeValueAsString(failedDTO));
+        }catch (JsonProcessingException e2) {
+            failedOrderLogger.error("handleOrderFallback Error :: JsonProcessingException - request Data : {}", failedDTO);
+        }
+        log.error("handleOrderFallback Error Message : ", e1);
+    }
+}
+```
+
+처리에 실패하는 경우 전체 실패인지, RabbitMQ 실패인지에 따라 다른 key prefix로 저장하게 됩니다.   
+이 prefix를 통해 재처리 요청 발생 시 어떻게 실패된 데이터인지 구분하고 주문 데이터 처리의 포함을 결정하게 됩니다.   
+Redis까지 장애가 발생하는 최악의 경우를 감안해 Redis도 실패하는 경우 별도의 주문 로그 파일에 기록할 수 있도록 처리했습니다.
+
+재처리의 경우 관리자 UI로 실패 데이터 개수를 반환하고 재처리 버튼을 통해 전체 재처리를 수행할 수 있습니다.
+재처리는 모두 RabbitMQ를 통해 처리합니다.   
+주문 데이터 처리는 사용자에게 응답을 위해 주문 데이터만 동기로 처리했습니다.   
+하지만, 실패 데이터 처리는 몇건이 쌓여있을지 예측이 불가능하기 때문에 대량의 처리를 감안해 RabbitMQ로 처리하도록 했습니다.   
+그럼 대량의 실패가 발생한 상황에서도 병목없이 처리할 수 있으며, consumer에서 concurrency를 3으로 설정해 병렬 처리로 인한 이점까지 얻을 수 있습니다.   
+
+아쉬운점은 실패 로그로 남는 경우 어떻게 해야할지 아직 감이 잡히지 않아 마무리하지 못한 점입니다.   
+추후 리팩토링을 통해 로그를 통한 후처리까지 구현할 계획입니다.
+
+<br/>
 
 ### RabbitMQ 실패 메시지 재처리
 
@@ -1021,50 +1172,6 @@ catch에서 이미지 파일을 삭제한 후 강제로 예외를 발생시켜 �
 전체 코드는 아래 링크를 통해 확인하실 수 있습니다.   
 <a href="https://github.com/Youndae/mansshop_boot/blob/master/src/main/java/com/example/mansshop_boot/service/AdminServiceImpl.java#L279">patchProduct 코드</a>
 
-
-<br />
-
-### S3 연결을 통한 이미지 출력 처리
-
-<br />
-
-배포 처리를 진행하며 S3에 이미지 파일을 저장하도록 했습니다.   
-S3 연동을 이번에 처음 해봤기 때문에 이미지 파일을 어떻게 불러올지에 대해 알아봤을 때 3가지 방법이 있었습니다.
-1. S3 파일의 url을 통한 요청
-2. preSignedUrl을 통한 요청
-3. 백엔드 서버를 proxy 서버로서 다운로드 받은 뒤 반환하는 요청
-
-여기서 첫번째 방법에 대해서는 S3에 직접 접근하는 형태이기 때문에 해당 방법을 택해서는 안되겠다고 생각했습니다.   
-두번째 방법은 개발자가 직접 url의 유효시간을 설정해 처리하는 방법이기 때문에 안전한 방법이라고는 하지만 전달되는 url에 S3 버킷명과 같은 불필요한 정보가 포함된다는 점이 마음에 걸렸습니다.   
-이 정보들은 노출되더라도 해당 파일에 접근할 수 없기 때문에 괜찮다는 말이 있었지만 그래도 불필요하게 노출할 필요는 없다고 생각해 다른 방법을 찾게 되었습니다.
-
-그래서 최종적으로 택한 방법은 백엔드 서버를 proxy 서버로 활용하는 방법입니다.   
-이렇게 처리하는 경우 기존 로컬에 저장된 파일을 불러와 반환할때 처럼 다른 정보는 노출하지 않고 요청 url 정도만 노출하는 형태로 처리할 수 있었습니다.
-개인적으로 최대한 불필요한 정보는 노출하지 않도록 하자는 생각을 하고 있기 때문에 이 방법이 가장 유용한 방법이라 생각해 이 방법으로 처리했습니다.
-
-```java
-//MainServiceImpl
-@Service
-@RequiredArgsConstructor
-public class MainServiceImpl implements MainService {
-    private final AmazonS3 amazonS3;
-    
-    @Value("${cloud.aws.s3.bucket}")
-    private String bucket;
-    
-    @Override
-    public ResponseEntity<InputStreamResource> getImageFile(String imageName) {
-        S3Object s3Object = amazonS3.getObject(bucket, imageName);
-        InputStreamResource resource = new InputStreamResource(s3Object.getObjectContent());
-        
-        return ResponseEntity.status(HttpStatus.OK)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + imageName + "\"")
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .contentLength(s3Object.getObjectMetadata().getContentLength())
-                .body(resource);
-    }
-}
-```
 
 <br />
 
@@ -2365,3 +2472,12 @@ function AddProductForm(props) {
 >>> 그럼 BoardProject와 동일한 설계로 Interceptor가 필요없어지는 상황이 발생.   
 >>> RefreshToken의 경우 HttpOnly 쿠키에 저장되기 때문에 이걸 확인할 방법도 없어서 비회원의 경우 계속해서 재발급 요청 처리가 필요하게 되며 확실한 검증이 불가능하다고 판단.   
 >>> 다시 롤백하면서 백엔드에서 생성했던 DTO들도 전부 롤백
+
+<br />
+
+### 2025/05/29
+> 주문 실패 처리 대응 개선 및 재처리 구현
+>> 주문 처리 실패시 RabbitMQ 실패에 대한 대응도 필요하기 때문에 해당 부분을 추가.   
+>> 재처리시에도 전체 실패와 RabbitMQ 실패를 구분해서 처리하도록 구현.   
+>> 클라이언트에서는 개수만 받도록 구현.   
+>> Admin 도메인에 추가했고 DLQ 재시도와 유사한 기능이기 떄문에 둘을 하나의 카테고리에 담도록 수정.

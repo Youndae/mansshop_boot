@@ -1332,45 +1332,54 @@ public class AdminServiceImpl implements AdminService {
      * 주문 데이터 처리 중 문제가 발생해 Redis에 적재된 데이터 조회
      */
     @Override
-    public List<FailedOrderRedisResponseDTO> getFailedOrderDataByRedis() {
-        List<FailedOrderDTO> dataList = getFailedRedisDataList();
+    public long getFailedOrderDataByRedis() {
 
-        if(dataList.isEmpty())
-            return Collections.emptyList();
+        Set<String> failedOrderKeys = getFailedOrderRedisKeys(FallbackMapKey.ORDER);
+        Set<String> failedMessageKeys = getFailedOrderRedisKeys(FallbackMapKey.ORDER_MESSAGE);
 
-        return dataList.stream()
-                        .map(FailedOrderRedisResponseDTO::new)
-                        .toList();
+        return failedOrderKeys.size() + failedMessageKeys.size();
     }
 
-    private Set<String> getFailedOrderRedisKeys() {
-        String keyPrefix = fallbackProperties.getRedis().get(FallbackMapKey.ORDER.getKey()).getPrefix();
+    private Set<String> getFailedOrderRedisKeys(FallbackMapKey fallbackMapKey) {
+        String keyPrefix = fallbackProperties.getRedis().get(fallbackMapKey.getKey()).getPrefix();
 
         return failedOrderRedisTemplate.keys(keyPrefix + "*");
     }
 
     @Override
     public String retryFailedOrderDataByRedis() {
-        //TODO: 컨트롤러에서 orderService 재 호출로 재처리 시도
-        List<FailedOrderDTO> dataList = getFailedRedisDataList();
+        Set<String> failedOrderKeys = getFailedOrderRedisKeys(FallbackMapKey.ORDER);
+        Set<String> failedMessageKeys = getFailedOrderRedisKeys(FallbackMapKey.ORDER_MESSAGE);
 
-        if(dataList.isEmpty())
+        if(failedOrderKeys.isEmpty() && failedMessageKeys.isEmpty())
             return Result.EMPTY.getResultKey();
 
-        dataList.forEach(v -> orderService.payment(v.paymentDTO(), v.cartMemberDTO()));
+        if(!failedOrderKeys.isEmpty())
+            retryFailedOrderData(failedOrderKeys, FallbackMapKey.ORDER);
+
+        if(!failedMessageKeys.isEmpty())
+            retryFailedOrderData(failedMessageKeys, FallbackMapKey.ORDER_MESSAGE);
 
         return Result.OK.getResultKey();
     }
 
-    public List<FailedOrderDTO> getFailedRedisDataList()  {
-        Set<String> keys = getFailedOrderRedisKeys();
+    private void retryFailedOrderData(Set<String> keys, FallbackMapKey fallbackMapKey) {
+        List<String> keyList = keys.stream().toList();
+        List<FailedOrderDTO> dataList = failedOrderRedisTemplate.opsForValue().multiGet(keyList);
+        for(int i = 0; i < dataList.size(); i++) {
+            FailedOrderDTO data = dataList.get(i);
 
-        if(keys.isEmpty())
-            return Collections.emptyList();
+            String response = orderService.retryFailedOrder(data, fallbackMapKey);
 
-        return failedOrderRedisTemplate.opsForValue().multiGet(keys);
+            if(response.equals(Result.OK.getResultKey()))
+                failedOrderRedisTemplate.delete(keyList.get(i));
+        }
     }
 
+    /**
+     * 실패 로그를 통한 로그 조회 및 재처리 메서드
+     * 아직 보류.
+     */
     public void retryFailedOrderDataByJSON() {
         //TODO: 관리자가 로그 확인해서 입력하면 해당 데이터를 FailedOrderDTO로 파싱해서 반환
         //TODO: 그럼 컨트롤러에서 orderService 재호출

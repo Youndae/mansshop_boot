@@ -8,6 +8,7 @@ import com.example.mansshop_boot.repository.cart.CartRepository;
 import com.example.mansshop_boot.repository.periodSales.PeriodSalesSummaryRepository;
 import com.example.mansshop_boot.repository.product.ProductOptionRepository;
 import com.example.mansshop_boot.repository.product.ProductRepository;
+import com.example.mansshop_boot.repository.productOrder.ProductOrderRepository;
 import com.example.mansshop_boot.repository.productSales.ProductSalesSummaryRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -35,18 +36,22 @@ public class OrderConsumer {
 
     private final CartDetailRepository cartDetailRepository;
 
+    private final ProductOrderRepository productOrderRepository;
+
     public OrderConsumer(ProductRepository productRepository,
                          ProductOptionRepository productOptionRepository,
                          PeriodSalesSummaryRepository periodSalesSummaryRepository,
                          ProductSalesSummaryRepository productSalesSummaryRepository,
                          CartRepository cartRepository,
-                         CartDetailRepository cartDetailRepository) {
+                         CartDetailRepository cartDetailRepository,
+                         ProductOrderRepository productOrderRepository) {
         this.productRepository = productRepository;
         this.productOptionRepository = productOptionRepository;
         this.periodSalesSummaryRepository = periodSalesSummaryRepository;
         this.productSalesSummaryRepository = productSalesSummaryRepository;
         this.cartRepository = cartRepository;
         this.cartDetailRepository = cartDetailRepository;
+        this.productOrderRepository = productOrderRepository;
     }
 
     /**
@@ -284,4 +289,9 @@ public class OrderConsumer {
             log.error("OrderConsumer::consumeOrderCart : cartId is null. cartMemberDTO is {}", orderCartDTO.getCartMemberDTO());
     }
 
+    @RabbitListener(queues = "${rabbitmq.queue.failedOrder.name}", concurrency = "3")
+    public void consumeFailedOrderData(ProductOrderDataDTO productOrderDataDTO) {
+        ProductOrder order = productOrderDataDTO.productOrder();
+        productOrderRepository.save(order);
+    }
 }

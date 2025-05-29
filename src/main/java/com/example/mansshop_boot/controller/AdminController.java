@@ -1133,7 +1133,6 @@ public class AdminController {
 
     /**
      *
-     *
      * 각 DLQ에 담긴 실패한 메시지 수량 반환.
      */
     @Operation(summary = "RabbitMQ 처리 중 실패한 메시지를 담고 있는 각 DLQ의 메시지 개수 반환. 실패 메시지가 존재하는 DLQ만 반환")
@@ -1147,6 +1146,13 @@ public class AdminController {
                 .body(responseDTO);
     }
 
+    /**
+     *
+     * @param failedQueueDTO
+     *
+     * DLQ 메시지 재시도 요청
+     * 반환된 데이터를 그대로 받아서 처리
+     */
     @Operation(summary = "DLQ 데이터 재시도 요청")
     @DefaultApiResponse
     @SwaggerAuthentication
@@ -1158,14 +1164,22 @@ public class AdminController {
                 .body(new ResponseMessageDTO(responseMessage));
     }
 
+    /**
+     *
+     * Redis에 저장된 실패한 주문 데이터 개수 조회
+     */
     @GetMapping("/message/order")
-    public ResponseEntity<List<FailedOrderRedisResponseDTO>> getFailedOrderDataByRedis() {
-        List<FailedOrderRedisResponseDTO> responseDTO = adminService.getFailedOrderDataByRedis();
+    public ResponseEntity<ResponseIdDTO<Long>> getFailedOrderDataByRedis() {
+        long response = adminService.getFailedOrderDataByRedis();
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(responseDTO);
+                .body(new ResponseIdDTO<>(response));
     }
 
+    /**
+     *
+     * redis에 저장된 실패한 주문 데이터 재처리
+     */
     @PostMapping("/message/order")
     public ResponseEntity<ResponseMessageDTO> retryRedisOrderMessage() {
         String responseMessage = adminService.retryFailedOrderDataByRedis();
