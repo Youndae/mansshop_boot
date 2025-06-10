@@ -35,7 +35,7 @@ public class PatchOptionDTO {
                 .size(size)
                 .color(color)
                 .stock(optionStock)
-                .isOpen(isOptionIsOpen())
+                .isOpen(optionIsOpen)
                 .build();
     }
 
@@ -45,7 +45,7 @@ public class PatchOptionDTO {
                             .size(size)
                             .color(color)
                             .stock(optionStock)
-                            .isOpen(isOptionIsOpen())
+                            .isOpen(optionIsOpen)
                             .build();
     }
 }

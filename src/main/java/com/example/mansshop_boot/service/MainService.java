@@ -15,9 +15,4 @@ public interface MainService {
 
     PagingListDTO<MainListResponseDTO> getClassificationAndSearchList(MainPageDTO pageDTO);
 
-    /*URL getSignedUrl(String imageName);*/
-
-    ResponseEntity<InputStreamResource> getImageFile(String imageName);
-
-
 }

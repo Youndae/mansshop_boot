@@ -8,6 +8,7 @@ import com.example.mansshop_boot.domain.dto.pageable.MainPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;
 import com.example.mansshop_boot.domain.dto.response.PagingResponseDTO;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
+import com.example.mansshop_boot.service.FileService;
 import com.example.mansshop_boot.service.MainService;
 import com.example.mansshop_boot.service.MyPageService;
 import com.example.mansshop_boot.service.ResponseMappingService;
@@ -35,18 +36,15 @@ import java.util.List;
 @Slf4j
 public class MainController {
 
-    @Value("#{filePath['file.product.path']}")
-    private String filePath;
-
     private final MainService mainService;
 
     private final MyPageService myPageService;
 
     private final ResponseMappingService responseMappingService;
 
+    private final FileService fileService;
+
     /**
-     *
-     * @param principal
      *
      * 메인의 BEST 리스트 조회.
      */
@@ -116,7 +114,6 @@ public class MainController {
      *
      * @param page
      * @param keyword
-     * @param principal
      *
      * Navbar의 상품 검색 기능
      */
@@ -164,33 +161,8 @@ public class MainController {
     )
     @GetMapping("/display/{imageName}")
     public ResponseEntity<byte[]> display(@PathVariable(name = "imageName") String imageName) {
-        File file = new File(filePath + imageName);
-        ResponseEntity<byte[]> result = null;
 
-        try {
-            HttpHeaders header = new HttpHeaders();
-
-            String contentType = "";
-            if(imageName.endsWith(".png"))
-                contentType = "image/png";
-            else if(imageName.endsWith(".jpg") || imageName.endsWith(".jpeg"))
-                contentType = "image/jpeg";
-            else if (imageName.endsWith(".gif"))
-                contentType = "image/gif";
-            else
-                contentType = "application/octet-stream";
-
-            header.add("Content-Type", contentType);
-
-            try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
-                byte[] imageBytes = bis.readAllBytes();
-                result = new ResponseEntity<>(imageBytes, header, HttpStatus.OK);
-            }
-        }catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return result;
+        return fileService.getDisplayImage(imageName);
     }
 
     /**
@@ -203,7 +175,7 @@ public class MainController {
     /*@GetMapping("/display/{imageName}")
     public ResponseEntity<InputStreamResource> display(@PathVariable(name = "imageName") String imageName) {
 
-        return mainService.getImageFile(imageName);
+        return fileService.getImageFile(imageName);
     }*/
 
     /**

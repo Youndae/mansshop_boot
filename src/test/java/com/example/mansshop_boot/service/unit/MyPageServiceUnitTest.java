@@ -34,11 +34,13 @@ import com.example.mansshop_boot.repository.qnaClassification.QnAClassificationR
 import com.example.mansshop_boot.service.MyPageServiceImpl;
 import com.example.mansshop_boot.service.PrincipalService;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 
@@ -48,6 +50,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 import static org.mockito.Mockito.*;
 
@@ -96,6 +99,13 @@ public class MyPageServiceUnitTest {
     @Mock
     private ProductOptionRepository productOptionRepository;
 
+    private Principal principal;
+
+    @BeforeEach
+    void init() {
+        principal = Mockito.mock(Principal.class);
+    }
+
 
     @Test
     @DisplayName(value = "주문 목록 조회")
@@ -126,35 +136,23 @@ public class MyPageServiceUnitTest {
         Page<ProductOrder> orderResult = new PageImpl<>(orders, pageable, 2L);
         List<Long> orderIds = orderResult.getContent().stream().map(ProductOrder::getId).toList();
 
-        MyPageOrderDetailDTO detail1 = new MyPageOrderDetailDTO(
-                1L,
-                "testProductId1",
-                1L,
-                1L,
-                "testProductName",
-                "testSize1",
-                "testColor1",
-                1,
-                10000,
-                true,
-                "testThumbnail1"
-        );
-
-        MyPageOrderDetailDTO detail2 = new MyPageOrderDetailDTO(
-                2L,
-                "testProductId2",
-                2L,
-                2L,
-                "testProductName2",
-                "testSize2",
-                "testColor2",
-                1,
-                20000,
-                false,
-                "testThumbnail2"
-        );
-
-        List<MyPageOrderDetailDTO> detailDTOResult = List.of(detail1, detail2);
+        List<MyPageOrderDetailDTO> detailDTOResult = IntStream.range(1, 3)
+                                                            .mapToObj(v ->
+                                                                    new MyPageOrderDetailDTO(
+                                                                            v,
+                                                                            "testProductId" + v,
+                                                                            v,
+                                                                            v,
+                                                                            "testProductName" + v,
+                                                                            "testSize" + v,
+                                                                            "testColor" + v,
+                                                                            1,
+                                                                            v * 10000,
+                                                                            v % 2 == 0,
+                                                                            "testThumbnail" + v
+                                                                    )
+                                                            )
+                                                            .toList();
 
         when(productOrderRepository.findByUserId(memberOrderDTO, pageDTO, pageable))
                 .thenReturn(orderResult);
@@ -194,31 +192,22 @@ public class MyPageServiceUnitTest {
     @DisplayName(value = "관심상품 목록 조회")
     void getLikeList() {
         LikePageDTO pageDTO = new LikePageDTO(1);
-        Principal principal = mock(Principal.class);
         Pageable pageable = PageRequest.of(pageDTO.pageNum() - 1
                 , pageDTO.likeAmount()
                 , Sort.by("createdAt").descending());
-
-        ProductLikeDTO dto1 = new ProductLikeDTO(
-                1L,
-                "testProductId1",
-                "testProductName1",
-                5000,
-                "testProductThumbnail",
-                10,
-                LocalDate.now()
-        );
-        ProductLikeDTO dto2 = new ProductLikeDTO(
-                2L,
-                "testProductId2",
-                "testProductName2",
-                4000,
-                "testProductThumbnail2",
-                5,
-                LocalDate.now()
-        );
-
-        List<ProductLikeDTO> dtoList = List.of(dto1, dto2);
+        List<ProductLikeDTO> dtoList = IntStream.range(1, 3)
+                .mapToObj(v ->
+                        new ProductLikeDTO(
+                                (long) v,
+                                "testProductId" + v,
+                                "testProductName" + v,
+                                5000,
+                                "testProductThumbnail" + v,
+                                5,
+                                LocalDate.now()
+                        )
+                )
+                .toList();
 
         when(principal.getName()).thenReturn("testUser");
         when(productLikeRepository.findByUserId("testUser", pageable))
@@ -247,7 +236,6 @@ public class MyPageServiceUnitTest {
     @DisplayName(value = "상품 문의 목록 조회")
     void getProductQnAList() {
         MyPagePageDTO pageDTO = new MyPagePageDTO(1);
-        Principal principal = mock(Principal.class);
         Pageable pageable = PageRequest.of(pageDTO.pageNum() - 1
                 , pageDTO.amount()
                 , Sort.by("id").descending());
@@ -276,7 +264,6 @@ public class MyPageServiceUnitTest {
     @DisplayName(value = "상품 문의 상세 데이터 조회")
     void getProductQnADetail() {
         long productQnAId = 1L;
-        Principal principal = mock(Principal.class);
         MyPageProductQnADTO dto = new MyPageProductQnADTO(
                 productQnAId,
                 "productName1",
@@ -309,7 +296,6 @@ public class MyPageServiceUnitTest {
     @DisplayName(value = "상품 문의 상세 데이터 조회. 작성자가 일치하지 않는 경우")
     void getProductQnADetailAccessDenied() {
         long productQnAId = 1L;
-        Principal principal = mock(Principal.class);
         MyPageProductQnADTO dto = new MyPageProductQnADTO(
                 productQnAId,
                 "productName1",
@@ -339,8 +325,6 @@ public class MyPageServiceUnitTest {
     @DisplayName(value = "상품 문의 상세 데이터 조회. 문의 데이터가 없는 경우")
     void getProductQnADetailNotFound() {
         long productQnAId = 1L;
-        Principal principal = mock(Principal.class);
-
 
         when(principalService.getNicknameByPrincipal(principal)).thenReturn("testNickname");
         when(productQnARepository.findByQnAId(productQnAId)).thenReturn(null);
@@ -355,7 +339,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "상품 문의 제거")
     void deleteProductQnA() {
-        Principal principal = mock(Principal.class);
         ProductQnA deleteEntity = ProductQnA.builder()
                 .id(1L)
                 .member(Member.builder().userId("testUser").build())
@@ -374,7 +357,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "상품 문의 제거. 작성자가 일치하지 않는 경우")
     void deleteProductQnAWriterIsNotEquals() {
-        Principal principal = mock(Principal.class);
         ProductQnA deleteEntity = ProductQnA.builder()
                 .id(1L)
                 .member(Member.builder().userId("testUser").build())
@@ -390,7 +372,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "상품 문의 제거. 데이터가 존재하지 않는 경우")
     void deleteProductQnANotFoundData() {
-        Principal principal = mock(Principal.class);
 
         when(principalService.getUserIdByPrincipal(principal)).thenReturn("testUser");
         when(productQnARepository.findById(1L)).thenReturn(Optional.empty());
@@ -403,7 +384,6 @@ public class MyPageServiceUnitTest {
     @DisplayName(value = "회원 문의 목록 조회.")
     void getMemberQnAList() {
         MyPagePageDTO pageDTO = new MyPagePageDTO(1);
-        Principal principal = mock(Principal.class);
         String userId = "testUser";
         Pageable pageable = PageRequest.of(pageDTO.pageNum() - 1
                 , pageDTO.amount()
@@ -433,7 +413,6 @@ public class MyPageServiceUnitTest {
     @DisplayName(value = "회원 문의 목록 조회. 데이터가 없는 경우")
     void getMemberQnAListIsEmpty() {
         MyPagePageDTO pageDTO = new MyPagePageDTO(1);
-        Principal principal = mock(Principal.class);
         String userId = "testUser";
         Pageable pageable = PageRequest.of(pageDTO.pageNum() - 1
                 , pageDTO.amount()
@@ -453,7 +432,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "회원 문의 상세 조회")
     void getMemberQnADetail() {
-        Principal principal = mock(Principal.class);
         MemberQnADTO dto = new MemberQnADTO(
                 1L,
                 "teestQnAClassificationName",
@@ -495,7 +473,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "회원 문의 상세 조회. 데이터가 없는 경우")
     void getMemberQnADetailNotFound() {
-        Principal principal = mock(Principal.class);
 
         when(principalService.getNicknameByPrincipal(principal)).thenReturn("testUser");
         when(memberQnARepository.findByQnAId(1L)).thenReturn(null);
@@ -506,7 +483,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "회원 문의 상세 조회. 작성자가 일치하지 않는 경우")
     void getMemberQnADetailWriterIsNotEquals() {
-        Principal principal = mock(Principal.class);
         MemberQnADTO dto = new MemberQnADTO(
                 1L,
                 "teestQnAClassificationName",
@@ -526,7 +502,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "회원 문의 답변 수정. 작성자가 일치하지 않는 경우")
     void patchMemberQnAReplyWriterNotEquals() {
-        Principal principal = mock(Principal.class);
         QnAReplyDTO replyDTO = new QnAReplyDTO(1L, "testReply patch content");
         MemberQnAReply replyEntity = MemberQnAReply.builder()
                 .id(1L)
@@ -544,7 +519,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "회원 문의 답변 수정. 해당 데이터가 없는 경우")
     void patchMemberQnAReplyNotFound() {
-        Principal principal = mock(Principal.class);
         QnAReplyDTO replyDTO = new QnAReplyDTO(1L, "testReply patch content");
 
         when(memberQnAReplyRepository.findById(1L)).thenReturn(Optional.empty());
@@ -556,11 +530,11 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "회원 문의 수정을 위한 데이터 조회")
     void getModifyMemberQnAData() {
-        Principal principal = mock(Principal.class);
-        QnAClassificationDTO dto = new QnAClassificationDTO(1L, "testQnAClassificationName1");
-        QnAClassificationDTO dto2 = new QnAClassificationDTO(2L, "testQnAClassificationName2");
-        QnAClassificationDTO dto3 = new QnAClassificationDTO(3L, "testQnAClassificationName3");
-        List<QnAClassificationDTO> qnAClassificationList = List.of(dto, dto2, dto3);
+        List<QnAClassificationDTO> qnAClassificationList = IntStream.range(1, 4)
+                .mapToObj(v ->
+                        new QnAClassificationDTO(v, "testQnAClassificationName" + v)
+                )
+                .toList();
         MemberQnA entity = MemberQnA.builder()
                 .id(1L)
                 .memberQnATitle("testTitle")
@@ -584,7 +558,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "회원 문의 수정을 위한 데이터 조회. 데이터가 없는 경우")
     void getModifyMemberQnADataNotFound() {
-        Principal principal = mock(Principal.class);
         MemberQnA entity = MemberQnA.builder()
                 .id(1L)
                 .memberQnATitle("testTitle")
@@ -602,7 +575,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "회원 문의 수정 요청. 작성자가 일치하지 않는 경우")
     void patchMemberQnAWriterNotEquals() {
-        Principal principal = mock(Principal.class);
         MemberQnA entity = MemberQnA.builder()
                 .id(1L)
                 .member(Member.builder().userId("testUser").build())
@@ -628,7 +600,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "회원 문의 수정 요청. 데이터가 없는 경우")
     void patchMemberQnANotFound() {
-        Principal principal = mock(Principal.class);
         MemberQnAModifyDTO modifyDTO = new MemberQnAModifyDTO(
                 1L,
                 "testPatchTitle",
@@ -647,7 +618,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "회원 문의 수정 요청. QnAClassification 데이터가 없는 경우")
     void patchMemberQnAClassificationNotFound() {
-        Principal principal = mock(Principal.class);
         MemberQnA entity = MemberQnA.builder()
                 .id(1L)
                 .member(Member.builder().userId("testUser").build())
@@ -673,7 +643,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "회원 문의 삭제 요청. 데이터가 없는 경우")
     void deleteMemberNotFound() {
-        Principal principal = mock(Principal.class);
 
         when(principalService.getUserIdByPrincipal(principal)).thenReturn("testUser");
         when(memberQnARepository.findById(1L)).thenReturn(Optional.empty());
@@ -686,7 +655,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "회원 문의 삭제 요청. 작성자가 일치하지 않는 경우")
     void deleteMemberQnAWriterIsNotEquals() {
-        Principal principal = mock(Principal.class);
         MemberQnA entity = MemberQnA.builder()
                 .id(1L)
                 .member(Member.builder().userId("testUser").build())
@@ -705,32 +673,24 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "작성한 리뷰 목록 조회")
     void getReview() {
-        Principal principal = mock(Principal.class);
         MyPagePageDTO pageDTO = new MyPagePageDTO(1);
         Pageable pageable = PageRequest.of(pageDTO.pageNum() - 1
                 , pageDTO.amount()
                 , Sort.by("id").descending());
-        MyPageReviewDTO dto1 = new MyPageReviewDTO(
-                1L,
-                "testThumbnail1",
-                "testProductName1",
-                "testReviewContent1",
-                LocalDate.now(),
-                LocalDate.now(),
-                "testReviewReplyContent1",
-                LocalDate.now()
-        );
-        MyPageReviewDTO dto2 = new MyPageReviewDTO(
-                2L,
-                "testThumbnail2",
-                "testProductName2",
-                "testReviewContent2",
-                LocalDate.now(),
-                LocalDate.now(),
-                "testReviewReplyContent2",
-                LocalDate.now()
-        );
-        List<MyPageReviewDTO> resultList = List.of(dto1, dto2);
+        List<MyPageReviewDTO> resultList = IntStream.range(0, 2)
+                .mapToObj(v ->
+                        new MyPageReviewDTO(
+                                v,
+                                "testThumbnail" + v,
+                                "testProductName" + v,
+                                "testReviewContent" + v,
+                                LocalDate.now(),
+                                LocalDate.now(),
+                                "testReviewreplyContent" + v,
+                                LocalDate.now()
+                        )
+                )
+                .toList();
 
         when(principalService.getUserIdByPrincipal(principal)).thenReturn("testUser");
         when(productReviewRepository.findAllByUserId("testUser", pageable))
@@ -748,7 +708,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "작성한 리뷰 목록 조회. 데이터가 없는 경우")
     void getReviewIsEmpty() {
-        Principal principal = mock(Principal.class);
         MyPagePageDTO pageDTO = new MyPagePageDTO(1);
         Pageable pageable = PageRequest.of(pageDTO.pageNum() - 1
                 , pageDTO.amount()
@@ -769,7 +728,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "수정할 리뷰 데이터 조회")
     void getPatchReview() {
-        Principal principal = mock(Principal.class);
         ProductReview entity = ProductReview.builder()
                 .id(1L)
                 .member(Member.builder().userId("testUser").build())
@@ -790,7 +748,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "수정할 리뷰 데이터 조회. 데이터가 없는 경우")
     void getPatchReviewNotFound() {
-        Principal principal = mock(Principal.class);
 
         when(principalService.getUserIdByPrincipal(principal)).thenReturn("testUser");
         when(productReviewRepository.findById(1L)).thenReturn(Optional.empty());
@@ -801,7 +758,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "수정할 리뷰 데이터 조회. 작성자가 일치하지 않는 경우")
     void getPatchReviewWriterIsNotEquals() {
-        Principal principal = mock(Principal.class);
         ProductReview entity = ProductReview.builder()
                 .id(1L)
                 .member(Member.builder().userId("testUser").build())
@@ -818,7 +774,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "리뷰 작성 요청. 사용자 데이터가 없는 경우")
     void postReviewWriterNotFound() {
-        Principal principal = mock(Principal.class);
         MyPagePostReviewDTO reviewDTO = new MyPagePostReviewDTO(
                 "testProductId",
                 "testReviewContent",
@@ -841,7 +796,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "리뷰 작성 요청. 상품 데이터가 없는 경우")
     void postReviewProductNotFound() {
-        Principal principal = mock(Principal.class);
         MyPagePostReviewDTO reviewDTO = new MyPagePostReviewDTO(
                 "testProductId",
                 "testReviewContent",
@@ -867,7 +821,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "리뷰 작성 요청. 상품 옵션 데이터가 없는 경우")
     void postReviewProductOptionNotFound() {
-        Principal principal = mock(Principal.class);
         MyPagePostReviewDTO reviewDTO = new MyPagePostReviewDTO(
                 "testProductId",
                 "testReviewContent",
@@ -896,7 +849,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "리뷰 작성 요청. 주문 상세 데이터가 없는 경우")
     void postReviewOrderDetailNotFound() {
-        Principal principal = mock(Principal.class);
         MyPagePostReviewDTO reviewDTO = new MyPagePostReviewDTO(
                 "testProductId",
                 "testReviewContent",
@@ -928,7 +880,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "리뷰 수정 요청. 데이터가 없는 경우")
     void patchReviewNotFound() {
-        Principal principal = mock(Principal.class);
         MyPagePatchReviewDTO reviewDTO = new MyPagePatchReviewDTO(
                 1L,
                 "testPatchReviewContent"
@@ -944,7 +895,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "리뷰 수정 요청. 작성자가 일치하지 않는 경우")
     void patchReviewWriterIsNotEquals() {
-        Principal principal = mock(Principal.class);
         MyPagePatchReviewDTO reviewDTO = new MyPagePatchReviewDTO(
                 1L,
                 "testPatchReviewContent"
@@ -965,7 +915,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "리뷰 삭제 요청. 데이터가 없는 경우")
     void deleteReviewNotFound() {
-        Principal principal = mock(Principal.class);
         long reviewId = 1L;
 
         when(productReviewRepository.findById(reviewId)).thenReturn(Optional.empty());
@@ -979,7 +928,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "리뷰 삭제 요청. 작성자가 일치하지 않는 경우")
     void deleteReviewWriterIsNotEquals() {
-        Principal principal = mock(Principal.class);
         ProductReview entity = ProductReview.builder()
                 .id(1L)
                 .member(Member.builder().userId("testUser").build())
@@ -996,7 +944,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "정보 수정을 위한 사용자 정보 요청")
     void getMemberInfo() {
-        Principal principal = mock(Principal.class);
         Member member = Member.builder()
                 .userId("testUser")
                 .userEmail("testUser@testUser.com")
@@ -1021,7 +968,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "정보 수정을 위한 사용자 정보 요청. 데이터가 없는 경우")
     void getMemberInfoNotFound() {
-        Principal principal = mock(Principal.class);
 
         when(principal.getName()).thenReturn("testUser");
         when(memberRepository.findById("testUser")).thenReturn(Optional.empty());
@@ -1032,7 +978,6 @@ public class MyPageServiceUnitTest {
     @Test
     @DisplayName(value = "정보 수정 요청. 데이터가 없는 경우")
     void patchInfoNotFound() {
-        Principal principal = mock(Principal.class);
 
         when(principal.getName()).thenReturn("testUser");
         when(memberRepository.findById("testUser")).thenReturn(Optional.empty());

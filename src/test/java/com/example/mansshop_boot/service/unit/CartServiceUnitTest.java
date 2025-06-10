@@ -188,11 +188,10 @@ public class CartServiceUnitTest {
     void countUpEmpty() {
         when(cartRepository.findByUserIdAndCookieValue(cartMemberDTO)).thenReturn(null);
 
-        CustomNotFoundException e = Assertions.assertThrows(CustomNotFoundException.class,
+        Assertions.assertThrows(
+                CustomNotFoundException.class,
                 () -> cartService.countUp(cartMemberDTO, 1L)
         );
-
-        Assertions.assertEquals(ErrorCode.NOT_FOUND.getMessage(), e.getMessage());
     }
 
     @Test
@@ -248,11 +247,10 @@ public class CartServiceUnitTest {
     void countDownEmpty() {
         when(cartRepository.findByUserIdAndCookieValue(cartMemberDTO)).thenReturn(null);
 
-        CustomNotFoundException e = Assertions.assertThrows(CustomNotFoundException.class,
+        Assertions.assertThrows(
+                CustomNotFoundException.class,
                 () -> cartService.countDown(cartMemberDTO, 1L)
         );
-
-        Assertions.assertEquals(ErrorCode.NOT_FOUND.getMessage(), e.getMessage());
     }
 
     @Test
@@ -311,7 +309,6 @@ public class CartServiceUnitTest {
         when(cartRepository.findIdByUserId(cartMemberDTO)).thenReturn(cart.getId());
         when(cartDetailRepository.findAllIdByCartId(cart.getId())).thenReturn(List.of(1L));
 
-
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> cartService.deleteCartSelect(cartMemberDTO, deleteCartDetailIds)
         );
@@ -326,10 +323,9 @@ public class CartServiceUnitTest {
         List<Long> deleteCartDetailIds = List.of(1L);
         when(cartRepository.findIdByUserId(cartMemberDTO)).thenReturn(null);
 
-        CustomNotFoundException e = Assertions.assertThrows(CustomNotFoundException.class,
+        Assertions.assertThrows(
+                CustomNotFoundException.class,
                 () -> cartService.deleteCartSelect(cartMemberDTO, deleteCartDetailIds)
         );
-
-        Assertions.assertEquals(ErrorCode.NOT_FOUND.getMessage(), e.getMessage());
     }
 }

@@ -9,6 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "classification")
+@ToString
 public class Classification {
 
     @Id

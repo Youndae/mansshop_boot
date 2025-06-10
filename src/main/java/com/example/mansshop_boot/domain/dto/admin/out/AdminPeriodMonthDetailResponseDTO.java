@@ -26,16 +26,16 @@ public record AdminPeriodMonthDetailResponseDTO(
                                             , List<AdminPeriodClassificationDTO> classificationSales
                                             , List<AdminPeriodSalesListDTO> dailySales) {
         this(
-                monthStatistics.monthSales()
-                , monthStatistics.monthSalesQuantity()
-                , monthStatistics.monthOrderQuantity()
-                , monthStatistics.monthSales() - lastYearStatistics.monthSales()
-                , lastYearStatistics.monthSales()
-                , lastYearStatistics.monthSalesQuantity()
-                , lastYearStatistics.monthOrderQuantity()
-                , bestProduct
-                , classificationSales
-                , dailySales
+                monthStatistics.monthSales(),
+                monthStatistics.monthSalesQuantity(),
+                monthStatistics.monthOrderQuantity(),
+                monthStatistics.monthSales() - lastYearStatistics.monthSales(),
+                lastYearStatistics.monthSales(),
+                lastYearStatistics.monthSalesQuantity(),
+                lastYearStatistics.monthOrderQuantity(),
+                bestProduct,
+                classificationSales,
+                dailySales
         );
     }
 }

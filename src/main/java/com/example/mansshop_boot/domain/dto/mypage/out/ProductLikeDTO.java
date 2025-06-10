@@ -5,13 +5,13 @@ import java.time.LocalDateTime;
 import java.util.Date;
 
 public record ProductLikeDTO(
-        Long likeId
-        , String productId
-        , String productName
-        , int productPrice
-        , String thumbnail
-        , int stock
-        , LocalDate createdAt
+        Long likeId,
+        String productId,
+        String productName,
+        int productPrice,
+        String thumbnail,
+        int stock,
+        LocalDate createdAt
 ) {
 
     public ProductLikeDTO(Long likeId,

@@ -5,6 +5,7 @@ import com.example.mansshop_boot.domain.dto.admin.business.AdminProductSalesDTO;
 import com.example.mansshop_boot.domain.dto.admin.business.AdminProductSalesOptionDTO;
 import com.example.mansshop_boot.domain.dto.admin.business.AdminSalesDTO;
 
+import java.util.Collections;
 import java.util.List;
 
 public record AdminProductSalesDetailDTO(
@@ -43,6 +44,23 @@ public record AdminProductSalesDetailDTO(
                 , optionTotalSales
                 , optionYearSales
                 , optionLastYearSales
+        );
+    }
+
+    public static AdminProductSalesDetailDTO emptyDTO() {
+        return new AdminProductSalesDetailDTO(
+                null,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                Collections.emptyList(),
+                Collections.emptyList(),
+                Collections.emptyList(),
+                Collections.emptyList()
         );
     }
 }

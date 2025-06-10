@@ -3,11 +3,10 @@ package com.example.mansshop_boot.service.unit.fixture;
 import com.example.mansshop_boot.domain.dto.order.business.OrderDataDTO;
 import com.example.mansshop_boot.domain.dto.order.business.OrderProductInfoDTO;
 import com.example.mansshop_boot.domain.dto.order.out.OrderDataResponseDTO;
-import com.example.mansshop_boot.domain.entity.Cart;
-import com.example.mansshop_boot.domain.entity.CartDetail;
-import com.example.mansshop_boot.domain.entity.Member;
-import com.example.mansshop_boot.domain.entity.ProductOption;
+import com.example.mansshop_boot.domain.entity.*;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class OrderUnitFixture {
@@ -113,5 +112,52 @@ public class OrderUnitFixture {
         );
 
         return List.of(optionDTO1, optionDTO2);
+    }
+
+    public static List<ProductOrder> createProductOrderList(List<Member> memberList, Product product) {
+        List<ProductOrder> productOrders = new ArrayList<>();
+        for(int i = 0; i < memberList.size(); i++){
+            Member member = memberList.get(i);
+            ProductOrder productOrder = createProductOrder(i, member);
+            createProductOrderDetailList(productOrder, product);
+            productOrders.add(productOrder);
+        }
+
+        return productOrders;
+    }
+
+    public static ProductOrder createProductOrder(int id, Member member) {
+        return ProductOrder.builder()
+                            .id((long) id)
+                            .member(member)
+                            .recipient(member.getUserName())
+                            .orderPhone(member.getPhone())
+                            .orderAddress(member.getUserName() + "'s home")
+                            .orderMemo(member.getUserName() + "'s memo")
+                            .orderTotalPrice(10000)
+                            .deliveryFee(3500)
+                            .createdAt(LocalDateTime.now())
+                            .productCount(2)
+                            .build();
+    }
+
+    public static List<ProductOrderDetail> createProductOrderDetailList(ProductOrder productOrder, Product product) {
+        List<ProductOrderDetail> productOrderDetails = new ArrayList<>();
+
+        for(int i = 0; i < 2; i++) {
+            ProductOrderDetail detail = ProductOrderDetail.builder()
+                    .productOption(product.getProductOptions().get(i))
+                    .product(product)
+                    .productOrder(productOrder)
+                    .orderDetailCount(1)
+                    .orderDetailPrice(5000)
+                    .orderReviewStatus(false)
+                    .build();
+
+            productOrder.addDetail(detail);
+            productOrderDetails.add(detail);
+        }
+
+        return productOrderDetails;
     }
 }

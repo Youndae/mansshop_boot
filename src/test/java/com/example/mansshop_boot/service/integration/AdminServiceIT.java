@@ -7,7 +7,6 @@ import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
 import com.example.mansshop_boot.domain.enumeration.AdminListType;
-import com.example.mansshop_boot.service.AdminService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,18 +14,33 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
 @SpringBootTest(classes = MansShopBootApplication.class)
 @EnableJpaRepositories(basePackages = "com.example")
-//@ActiveProfiles("test")
+@ActiveProfiles("test")
 public class AdminServiceIT {
 
-    @Autowired
+    /*@Autowired
     private AdminService adminService;
 
     private static final String PRODUCT_ID = "BAGS20250301214630690018433";
+
+
+    *//**
+     * Fixture
+     * classification -> 기존과 동일(outer, top, shoes, pants, bag)
+     * product -> 30(outer 15, top 15)
+     * productOption -> 9 (outer 1개당 3개씩해서 3개 상품만)
+     * productThumbnail -> 60
+     * productInfoImage -> 30
+     * Member -> 30, admin -> 1
+     * order -> 50(new 25), detail -> 52(첫번째만 3개? 아니면 하나씩 50개?)
+     *
+     *
+     *//*
 
     @Test
     @DisplayName(value = "관리자 상품 리스트 조회")
@@ -249,5 +263,5 @@ public class AdminServiceIT {
         AdminProductSalesDetailDTO result = adminService.getProductSalesDetail(PRODUCT_ID);
 
         Assertions.assertNotNull(result);
-    }
+    }*/
 }

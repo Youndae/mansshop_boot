@@ -106,11 +106,28 @@ public class Product {
         this.id = productId;
     }
 
-    public void setPatchData(AdminProductPatchDTO patchDTO) {
+    public void setPatchData(AdminProductPatchDTO patchDTO, Classification classification) {
         this.productName = patchDTO.getProductName();
-        this.classification = Classification.builder().id(patchDTO.getClassification()).build();
+        this.classification = classification;
         this.productPrice = patchDTO.getPrice();
         this.isOpen = patchDTO.getIsOpen();
         this.productDiscount = patchDTO.getDiscount();
+    }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "id='" + id + '\'' +
+                ", classification=" + classification +
+                ", productName='" + productName + '\'' +
+                ", productPrice=" + productPrice +
+                ", thumbnail='" + thumbnail + '\'' +
+                ", isOpen=" + isOpen +
+                ", productSalesQuantity=" + productSalesQuantity +
+                ", productDiscount=" + productDiscount +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", totalStock=" + productOptions.stream().mapToInt(ProductOption::getStock).sum() +
+                '}';
     }
 }

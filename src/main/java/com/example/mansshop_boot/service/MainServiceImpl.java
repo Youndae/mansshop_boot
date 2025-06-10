@@ -32,11 +32,6 @@ public class MainServiceImpl implements MainService{
 
     private final ProductRepository productRepository;
 
-    private final AmazonS3 amazonS3;
-
-    @Value("${cloud.aws.s3.bucket}")
-    private String bucket;
-
     /**
      *
      * @param pageDTO
@@ -55,7 +50,6 @@ public class MainServiceImpl implements MainService{
     /**
      *
      * @param pageDTO
-     * @param principal
      *
      * 분류에 해당하는 상품 목록 조회.
      * 개인 쇼핑몰 컨셉이기 때문에 상품 목록이 엄청 많지 않을 것이라고 생각해 페이징의 직접 구현이 아닌 Pageable을 통한 처리.
@@ -93,47 +87,4 @@ public class MainServiceImpl implements MainService{
         return dto.stream().map(MainListResponseDTO::new).toList();
     }
 
-
-    /**
-     *
-     * @param imageName
-     *
-     * preSignedUrl로 반환.
-     * 테스트를 위해 만료 시간은 1분으로 설정
-     */
-    /*@Override
-    public URL getSignedUrl(String imageName) {
-
-        Date expiration = new Date();
-        long expirationTime = expiration.getTime();
-        expirationTime += 1000 * 60 * 1; //1 minute 최종 설정은 테스트 해보고 결정
-        expiration.setTime(expirationTime);
-
-        GeneratePresignedUrlRequest generatePresignedUrlRequest =
-                new GeneratePresignedUrlRequest(bucket, imageName)
-                        .withMethod(HttpMethod.GET)
-                        .withExpiration(expiration);
-
-
-        return amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
-    }*/
-
-    /**
-     *
-     * @param imageName
-     *
-     * S3로부터 파일을 다운받아 InputStreamResource 타입으로 반환.
-     * 프론트엔드에서는 blob으로 받아 처리.
-     */
-    @Override
-    public ResponseEntity<InputStreamResource> getImageFile(String imageName) {
-        S3Object s3Object = amazonS3.getObject(bucket, imageName);
-        InputStreamResource resource = new InputStreamResource(s3Object.getObjectContent());
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + imageName + "\"")
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .contentLength(s3Object.getObjectMetadata().getContentLength())
-                .body(resource);
-    }
 }

@@ -6,12 +6,15 @@ import com.example.mansshop_boot.domain.entity.ProductOrder;
 import com.example.mansshop_boot.domain.entity.ProductOrderDetail;
 import com.example.mansshop_boot.domain.enumeration.OrderStatus;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public class ProductOrderFixture {
 
+
+    // 저장되지 않은 상태의 ProductOrder, ProductOrderDetail 데이터 생성
     public static List<ProductOrder> createDefaultProductOrder(List<Member> members, List<ProductOption> options) {
         List<ProductOrder> result = new ArrayList<>();
         for(Member m : members) {
@@ -44,6 +47,7 @@ public class ProductOrderFixture {
                     .paymentType("card")
                     .orderStat(OrderStatus.ORDER.getStatusStr())
                     .productCount(productCount)
+                    .createdAt(LocalDateTime.now().minusDays(1))
                     .build();
 
             details.forEach(order::addDetail);
@@ -53,6 +57,7 @@ public class ProductOrderFixture {
         return result;
     }
 
+    // 저장 상태의 ProductOrder, ProductOrderDetail 데이터 생성
     public static List<ProductOrder> createSaveProductOrder(List<Member> members, List<ProductOption> options) {
         List<ProductOrder> result = new ArrayList<>();
         long orderId = 1L;

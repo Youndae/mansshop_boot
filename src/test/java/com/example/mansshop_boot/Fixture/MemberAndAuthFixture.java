@@ -57,7 +57,7 @@ public class MemberAndAuthFixture {
                 .nickname(userId + "nickname")
                 .userEmail(userId + "@" + userId + ".com")
                 .provider("local")
-                .phone("010-1234-1234")
+                .phone("01012341234")
                 .birth(LocalDate.now())
                 .build();
     }
