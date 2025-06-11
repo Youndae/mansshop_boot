@@ -13,14 +13,10 @@ import com.example.mansshop_boot.domain.enumeration.Result;
 import com.example.mansshop_boot.repository.auth.AuthRepository;
 import com.example.mansshop_boot.repository.classification.ClassificationRepository;
 import com.example.mansshop_boot.repository.member.MemberRepository;
-import com.example.mansshop_boot.repository.product.ProductInfoImageRepository;
 import com.example.mansshop_boot.repository.product.ProductOptionRepository;
 import com.example.mansshop_boot.repository.product.ProductRepository;
-import com.example.mansshop_boot.repository.product.ProductThumbnailRepository;
-import com.example.mansshop_boot.repository.productOrder.ProductOrderDetailRepository;
 import com.example.mansshop_boot.repository.productOrder.ProductOrderRepository;
 import com.example.mansshop_boot.service.admin.AdminOrderService;
-import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -62,25 +58,12 @@ public class AdminOrderServiceIT {
     private ProductOptionRepository productOptionRepository;
 
     @Autowired
-    private ProductThumbnailRepository productThumbnailRepository;
-
-    @Autowired
-    private ProductInfoImageRepository productInfoImageRepository;
-
-    @Autowired
     private RedisTemplate<String, Long> redisTemplate;
-
-    @Autowired
-    private EntityManager entityManager;
 
     private List<ProductOrder> productOrderList;
 
     @BeforeEach
     void init() {
-        // member
-        // classification, product productOption
-        // productOrder, productOrderDetail
-
         MemberAndAuthFixtureDTO memberFixture = MemberAndAuthFixture.createDefaultMember(40);
         List<Member> memberList = memberFixture.memberList();
         List<Auth> authList = memberFixture.authList();

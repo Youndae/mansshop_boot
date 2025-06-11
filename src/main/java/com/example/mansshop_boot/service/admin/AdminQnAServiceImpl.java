@@ -59,12 +59,14 @@ public class AdminQnAServiceImpl implements AdminQnAService {
     @Override
     public PagingListDTO<AdminQnAListResponseDTO> getProductQnAList(AdminOrderPageDTO pageDTO) {
         List<AdminQnAListResponseDTO> responseDTO = productQnARepository.findAllByAdminProductQnA(pageDTO);
-        Long totalElements = null;
+        Long totalElements = 0L;
 
-        if(pageDTO.searchType().equals("all") && pageDTO.keyword() == null)
-            totalElements = adminCacheService.getFullScanCountCache(RedisCaching.ADMIN_PRODUCT_QNA_COUNT, new CacheRequest(pageDTO));
-        else
-            totalElements = productQnARepository.findAllByAdminProductQnACount(pageDTO);
+        if(!responseDTO.isEmpty()) {
+            if(pageDTO.searchType().equals("all") && pageDTO.keyword() == null)
+                totalElements = adminCacheService.getFullScanCountCache(RedisCaching.ADMIN_PRODUCT_QNA_COUNT, new CacheRequest(pageDTO));
+            else
+                totalElements = productQnARepository.findAllByAdminProductQnACount(pageDTO);
+        }
 
         PagingMappingDTO pagingMappingDTO = new PagingMappingDTO(totalElements, pageDTO.page(), pageDTO.amount());
 
@@ -149,11 +151,14 @@ public class AdminQnAServiceImpl implements AdminQnAService {
     @Override
     public PagingListDTO<AdminQnAListResponseDTO> getMemberQnAList(AdminOrderPageDTO pageDTO) {
         List<AdminQnAListResponseDTO> responseDTO = memberQnARepository.findAllByAdminMemberQnA(pageDTO);
-        Long totalElements = null;
-        if(pageDTO.searchType().equals("all") && pageDTO.keyword() == null)
-            totalElements = adminCacheService.getFullScanCountCache(RedisCaching.ADMIN_MEMBER_QNA_COUNT, new CacheRequest(pageDTO));
-        else
-            totalElements = memberQnARepository.findAllByAdminMemberQnACount(pageDTO);
+        Long totalElements = 0L;
+
+        if(!responseDTO.isEmpty()) {
+            if(pageDTO.searchType().equals("all") && pageDTO.keyword() == null)
+                totalElements = adminCacheService.getFullScanCountCache(RedisCaching.ADMIN_MEMBER_QNA_COUNT, new CacheRequest(pageDTO));
+            else
+                totalElements = memberQnARepository.findAllByAdminMemberQnACount(pageDTO);
+        }
 
         PagingMappingDTO pagingMappingDTO = new PagingMappingDTO(totalElements, pageDTO.page(), pageDTO.amount());
 

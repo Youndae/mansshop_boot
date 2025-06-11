@@ -5,12 +5,14 @@ import com.example.mansshop_boot.Fixture.ClassificationFixture;
 import com.example.mansshop_boot.Fixture.ProductFixture;
 import com.example.mansshop_boot.MansShopBootApplication;
 import com.example.mansshop_boot.domain.dto.admin.business.PatchOptionDTO;
+import com.example.mansshop_boot.domain.dto.admin.in.AdminDiscountPatchDTO;
 import com.example.mansshop_boot.domain.dto.admin.in.AdminProductImageDTO;
 import com.example.mansshop_boot.domain.dto.admin.in.AdminProductPatchDTO;
 import com.example.mansshop_boot.domain.dto.admin.out.*;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
 import com.example.mansshop_boot.domain.entity.*;
+import com.example.mansshop_boot.domain.enumeration.Result;
 import com.example.mansshop_boot.repository.classification.ClassificationRepository;
 import com.example.mansshop_boot.repository.product.ProductInfoImageRepository;
 import com.example.mansshop_boot.repository.product.ProductOptionRepository;
@@ -711,5 +713,61 @@ public class AdminProductServiceIT {
         Assertions.assertEquals(0, result.pagingData().getTotalPages());
     }
 
+    @Test
+    @DisplayName(value = "상품 분류에 해당하는 상품 리스트 조회.")
+    void getSelectDiscountProduct() {
+        List<AdminDiscountProductDTO> result = Assertions.assertDoesNotThrow(() -> adminProductService.getSelectDiscountProduct(classificationList.get(0).getId()));
 
+        Assertions.assertNotNull(result);
+        Assertions.assertFalse(result.isEmpty());
+        Assertions.assertEquals(productList.size(), result.size());
+    }
+
+    @Test
+    @DisplayName(value = "상품 분류에 해당하는 상품 리스트 조회. 데이터가 없는 경우")
+    void getSelectDiscountProductEmpty() {
+        List<AdminDiscountProductDTO> result = Assertions.assertDoesNotThrow(() -> adminProductService.getSelectDiscountProduct(classificationList.get(1).getId()));
+
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.isEmpty());
+    }
+
+    @Test
+    @DisplayName(value = "상품 할인율 수정. 단일 수정")
+    void patchDiscountOneProduct() {
+        Product fixture = productList.get(0);
+        List<String> productIdList = List.of(fixture.getId());
+        int discount = fixture.getProductDiscount() + 10;
+
+        AdminDiscountPatchDTO patchDTO = new AdminDiscountPatchDTO(productIdList, discount);
+
+        String result = Assertions.assertDoesNotThrow(() -> adminProductService.patchDiscountProduct(patchDTO));
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(Result.OK.getResultKey(), result);
+
+        Product resultEntity = productRepository.findById(fixture.getId()).orElseThrow(IllegalArgumentException::new);
+
+        Assertions.assertEquals(discount, resultEntity.getProductDiscount());
+    }
+
+    @Test
+    @DisplayName(value = "상품 할인율 수정. 다중 수정")
+    void patchDiscountProduct() {
+        List<Product> fixtureList = List.of(productList.get(0), productList.get(1));
+        List<String> productIdList = fixtureList.stream().map(Product::getId).toList();
+        int discount = 60;
+        AdminDiscountPatchDTO patchDTO = new AdminDiscountPatchDTO(productIdList, discount);
+
+        String result = Assertions.assertDoesNotThrow(() -> adminProductService.patchDiscountProduct(patchDTO));
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(Result.OK.getResultKey(), result);
+
+        Product resultEntity1 = productRepository.findById(fixtureList.get(0).getId()).orElseThrow(IllegalArgumentException::new);
+        Product resultEntity2 = productRepository.findById(fixtureList.get(1).getId()).orElseThrow(IllegalArgumentException::new);
+
+        Assertions.assertEquals(discount, resultEntity1.getProductDiscount());
+        Assertions.assertEquals(discount, resultEntity2.getProductDiscount());
+    }
 }

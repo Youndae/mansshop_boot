@@ -90,7 +90,7 @@ public class AdminQnAServiceUnitTest {
     void init() {
         List<Member> memberFixtureList = MemberAndAuthFixture.createDefaultMember(30).memberList();
         List<Product> productFixtureList = ProductFixture.createDefaultProductByOUTER(30);
-        qnaClassificationList = QnAClassificationFixture.createQnAClassificationList();
+        qnaClassificationList = QnAClassificationFixture.createUnitQnAClassificationList();
         productQnAList = ProductQnAUnitFixture.createProductQnAList(memberFixtureList, productFixtureList);
         memberQnAList = MemberQnAUnitFixture.createMemberQnAList(memberFixtureList, qnaClassificationList.get(0));
         productQnAReply = ProductQnAUnitFixture.createProductQnAReply(productQnAList.get(0));

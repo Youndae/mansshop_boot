@@ -193,13 +193,17 @@ public class MemberQnADSLRepositoryImpl implements MemberQnADSLRepository{
 
     public BooleanExpression adminMemberQnASearch(AdminOrderPageDTO pageDTO){
         if(pageDTO.searchType().equals("new")){
-            if(pageDTO.keyword() != null)
-                return memberQnA.member.nickname.eq(pageDTO.keyword()).and(memberQnA.memberQnAStat.isFalse());
-            else
+            if(pageDTO.keyword() != null) {
+                return memberQnA.memberQnAStat.isFalse()
+                        .and(
+                                memberQnA.member.nickname.eq(pageDTO.keyword())
+                                        .or(memberQnA.member.userId.eq(pageDTO.keyword()))
+                        );
+            }else
                 return memberQnA.memberQnAStat.isFalse();
         }else if(pageDTO.searchType().equals("all")) {
             if(pageDTO.keyword() != null)
-                return memberQnA.member.nickname.eq(pageDTO.keyword());
+                return memberQnA.member.nickname.eq(pageDTO.keyword()).or(memberQnA.member.userId.eq(pageDTO.keyword()));
         }
 
         return null;
