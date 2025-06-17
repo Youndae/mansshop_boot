@@ -9,18 +9,18 @@ import java.util.Collections;
 import java.util.List;
 
 public record AdminProductSalesDetailDTO(
-        String productName
-        , long totalSales
-        , long totalSalesQuantity
-        , long yearSales
-        , long yearSalesQuantity
-        , long lastYearComparison
-        , long lastYearSales
-        , long lastYearSalesQuantity
-        , List<AdminPeriodSalesListDTO> monthSales
-        , List<AdminProductSalesOptionDTO> optionTotalSales
-        , List<AdminProductSalesOptionDTO> optionYearSales
-        , List<AdminProductSalesOptionDTO> optionLastYearSales
+        String productName,
+        long totalSales,
+        long totalSalesQuantity,
+        long yearSales,
+        long yearSalesQuantity,
+        long lastYearComparison,
+        long lastYearSales,
+        long lastYearSalesQuantity,
+        List<AdminPeriodSalesListDTO> monthSales,
+        List<AdminProductSalesOptionDTO> optionTotalSales,
+        List<AdminProductSalesOptionDTO> optionYearSales,
+        List<AdminProductSalesOptionDTO> optionLastYearSales
 
 ) {
 

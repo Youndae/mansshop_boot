@@ -6,10 +6,10 @@ import com.example.mansshop_boot.domain.dto.admin.business.AdminClassificationSa
 import java.util.List;
 
 public record AdminClassificationSalesResponseDTO(
-        String classification
-        , long totalSales
-        , long totalSalesQuantity
-        , List<AdminClassificationSalesProductListDTO> productList
+        String classification,
+        long totalSales,
+        long totalSalesQuantity,
+        List<AdminClassificationSalesProductListDTO> productList
 ) {
 
     public AdminClassificationSalesResponseDTO(String classification

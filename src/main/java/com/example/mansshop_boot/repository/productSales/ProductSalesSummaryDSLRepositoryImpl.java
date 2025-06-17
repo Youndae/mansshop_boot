@@ -42,8 +42,8 @@ public class ProductSalesSummaryDSLRepositoryImpl implements ProductSalesSummary
         StringBuilder queryBuilder = new StringBuilder();
 
         queryBuilder.append("SELECT p.productName, ")
-                .append("s.sales, ")
-                .append("s.salesQuantity ")
+                .append("s.salesQuantity, ")
+                .append("s.sales ")
                 .append("FROM (")
                     .append("SELECT productId, ")
                     .append("sum(sales) as sales, ")
@@ -86,9 +86,10 @@ public class ProductSalesSummaryDSLRepositoryImpl implements ProductSalesSummary
         )
                 .from(productSalesSummary)
                 .rightJoin(classification)
-                .on(classification.id.eq(productSalesSummary.classification.id))
-                .where(productSalesSummary.periodMonth.goe(startDate)
-                        .and(productSalesSummary.periodMonth.lt(endDate))
+                .on(
+                        classification.id.eq(productSalesSummary.classification.id)
+                                .and(productSalesSummary.periodMonth.goe(startDate))
+                                .and(productSalesSummary.periodMonth.lt(endDate))
                 )
                 .groupBy(classification.id)
                 .orderBy(classification.classificationStep.asc())
@@ -222,7 +223,7 @@ public class ProductSalesSummaryDSLRepositoryImpl implements ProductSalesSummary
                         Projections.constructor(
                                 AdminSalesDTO.class,
                                 productSalesSummary.sales.longValue().sum().as("sales"),
-                                product.productSalesQuantity.as("salesQuantity")
+                                productSalesSummary.salesQuantity.longValue().sum().as("salesQuantity")
                         )
                 )
                 .from(productSalesSummary)
@@ -241,7 +242,7 @@ public class ProductSalesSummaryDSLRepositoryImpl implements ProductSalesSummary
                                 AdminPeriodSalesListDTO.class,
                                 productSalesSummary.periodMonth.month().as("date"),
                                 productSalesSummary.sales.longValue().sum().as("sales"),
-                                product.productSalesQuantity.as("salesQuantity"),
+                                productSalesSummary.salesQuantity.longValue().sum().as("salesQuantity"),
                                 productSalesSummary.orderQuantity.longValue().sum().as("orderQuantity")
                         )
                 )

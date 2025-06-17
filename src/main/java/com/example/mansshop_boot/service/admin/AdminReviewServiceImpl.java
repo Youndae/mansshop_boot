@@ -50,12 +50,17 @@ public class AdminReviewServiceImpl implements AdminReviewService  {
     @Override
     public PagingListDTO<AdminReviewDTO> getReviewList(AdminOrderPageDTO pageDTO, AdminListType listType) {
         List<AdminReviewDTO> content = productReviewRepository.findAllByAdminReviewList(pageDTO, listType.name());
-        Long totalElements;
+        Long totalElements = 0L;
 
-        if(pageDTO.keyword() == null && listType.equals(AdminListType.ALL))
-            totalElements = adminCacheService.getFullScanCountCache(RedisCaching.ADMIN_REVIEW_COUNT, new CacheRequest(pageDTO, listType.name()));
-        else
-            totalElements = productReviewRepository.countByAdminReviewList(pageDTO, listType.name());
+        if(!content.isEmpty()){
+            if(pageDTO.keyword() == null && listType.equals(AdminListType.ALL))
+                totalElements = adminCacheService.getFullScanCountCache(
+                        RedisCaching.ADMIN_REVIEW_COUNT,
+                        new CacheRequest(pageDTO, listType.name())
+                );
+            else
+                totalElements = productReviewRepository.countByAdminReviewList(pageDTO, listType.name());
+        }
 
         PagingMappingDTO pagingMappingDTO = new PagingMappingDTO(totalElements, pageDTO.page(), pageDTO.amount());
 
@@ -70,7 +75,12 @@ public class AdminReviewServiceImpl implements AdminReviewService  {
      */
     @Override
     public AdminReviewDetailDTO getReviewDetail(long reviewId) {
-        return productReviewRepository.findByAdminReviewDetail(reviewId);
+        AdminReviewDetailDTO responseDTO = productReviewRepository.findByAdminReviewDetail(reviewId);
+
+        if(responseDTO == null)
+            throw new IllegalArgumentException("review Detail Data is null");
+
+        return responseDTO;
     }
 
     /**

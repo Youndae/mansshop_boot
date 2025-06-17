@@ -35,6 +35,14 @@ public class CartFixture {
         return result;
     }
 
+    public static Cart createSaveAnonymousCart(ProductOption option, Member anonymous, String cookieValue) {
+        Cart cart = createCart(anonymous, cookieValue);
+        CartDetail cartDetail = createCartDetail(option, 2);
+        cart.addCartDetail(cartDetail);
+
+        return cart;
+    }
+
     public static List<Cart> createDefaultAnonymousCart(List<ProductOption> options, int count) {
         List<Cart> result = new ArrayList<>();
 

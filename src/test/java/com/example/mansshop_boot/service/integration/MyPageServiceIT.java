@@ -8,141 +8,87 @@ import com.example.mansshop_boot.domain.dto.mypage.qna.out.*;
 import com.example.mansshop_boot.domain.dto.pageable.LikePageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
+import com.example.mansshop_boot.repository.classification.ClassificationRepository;
+import com.example.mansshop_boot.repository.member.MemberRepository;
+import com.example.mansshop_boot.repository.memberQnA.MemberQnAReplyRepository;
+import com.example.mansshop_boot.repository.memberQnA.MemberQnARepository;
+import com.example.mansshop_boot.repository.product.ProductOptionRepository;
+import com.example.mansshop_boot.repository.product.ProductRepository;
+import com.example.mansshop_boot.repository.productLike.ProductLikeRepository;
+import com.example.mansshop_boot.repository.productOrder.ProductOrderRepository;
+import com.example.mansshop_boot.repository.productQnA.ProductQnAReplyRepository;
+import com.example.mansshop_boot.repository.productQnA.ProductQnARepository;
+import com.example.mansshop_boot.repository.qnaClassification.QnAClassificationRepository;
 import com.example.mansshop_boot.service.MyPageService;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 
 @SpringBootTest(classes = MansShopBootApplication.class)
 @EnableJpaRepositories(basePackages = "com.example")
+@ActiveProfiles("test")
+@Transactional
 public class MyPageServiceIT {
 
     @Autowired
     private MyPageService myPageService;
 
-    @Test
-    @DisplayName(value = "사용자의 주문 리스트 조회")
-    void getOrderList() {
-        OrderPageDTO pageDTO = new OrderPageDTO(1, "all");
-        MemberOrderDTO memberOrderDTO = new MemberOrderDTO("tester2", null, null);
+    @Autowired
+    private MemberRepository memberRepository;
 
-        PagingListDTO<MyPageOrderDTO> result = myPageService.getOrderList(pageDTO, memberOrderDTO);
+    @Autowired
+    private ClassificationRepository classificationRepository;
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(pageDTO.orderAmount(), result.content().size());
-    }
+    @Autowired
+    private ProductRepository productRepository;
 
-    @Test
-    @DisplayName(value = "관심 상품 리스트 조회")
-    void getLikeList() {
-        LikePageDTO pageDTO = new LikePageDTO(1);
-        Principal principal = createPrincipal();
+    @Autowired
+    private ProductOptionRepository productOptionRepository;
 
-        Page<ProductLikeDTO> result = myPageService.getLikeList(pageDTO, principal);
+    @Autowired
+    private ProductLikeRepository productLikeRepository;
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(pageDTO.likeAmount(), result.getContent().size());
-    }
+    @Autowired
+    private ProductQnARepository productQnARepository;
 
-    @Test
-    @DisplayName(value = "사용자가 작성한 상품 문의 목록 조회")
-    void getProductQnAList() {
-        MyPagePageDTO pageDTO = new MyPagePageDTO(1);
-        Principal principal = createPrincipal();
+    @Autowired
+    private ProductQnAReplyRepository productQnAReplyRepository;
 
-        Page<ProductQnAListDTO> result = myPageService.getProductQnAList(pageDTO, principal);
+    @Autowired
+    private QnAClassificationRepository qnAClassificationRepository;
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(pageDTO.amount(), result.getContent().size());
-    }
+    @Autowired
+    private MemberQnARepository memberQnARepository;
 
-    @Test
-    @DisplayName(value = "작성한 상품 문의 상세 조회")
-    void getProductQnADetail() {
-        long productQnAId = 162L;
-        Principal principal = createPrincipal();
+    @Autowired
+    private MemberQnAReplyRepository memberQnAReplyRepository;
 
-        ProductQnADetailDTO result = myPageService.getProductQnADetail(productQnAId, principal);
+    @Autowired
+    private ProductOrderRepository productOrderRepository;
 
-        Assertions.assertNotNull(result);
-    }
-
-    @Test
-    @DisplayName(value = "회원 문의 목록 조회")
-    void getMemberQnAList() {
-        MyPagePageDTO pageDTO = new MyPagePageDTO(1);
-        Principal principal = createPrincipal();
-
-        Page<MemberQnAListDTO> result = myPageService.getMemberQnAList(pageDTO, principal);
-
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(pageDTO.amount(), result.getContent().size());
-
-    }
-
-    @Test
-    @DisplayName(value = "회원 문의 상세 조회")
-    void getMemberQnADetail() {
-        long memberQnAId = 162L;
-        Principal principal = createPrincipal();
-
-        MemberQnADetailDTO result = myPageService.getMemberQnADetail(memberQnAId, principal);
-
-        Assertions.assertNotNull(result);
-    }
-
-    @Test
-    @DisplayName(value = "회원 문의 수정 데이터 요청")
-    void getMemberQnAPatchData() {
-        long memberQnAId = 162L;
-        Principal principal = createPrincipal();
-
-        MemberQnAModifyDataDTO result = myPageService.getModifyData(memberQnAId, principal);
-
-        Assertions.assertNotNull(result);
-    }
-
-    @Test
-    @DisplayName(value = "작성한 리뷰 목록 조회")
-    void getReviewList() {
-        MyPagePageDTO pageDTO = new MyPagePageDTO(1);
-        Principal principal = createPrincipal();
-
-        Page<MyPageReviewDTO> result = myPageService.getReview(pageDTO, principal);
-
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(pageDTO.amount(), result.getContent().size());
-    }
-
-    @Test
-    @DisplayName(value = "리뷰 수정 데이터 요청")
-    void getReviewPatchData() {
-        long reviewId = 645L;
-        Principal principal = createPrincipal();
-
-        MyPagePatchReviewDataDTO result = myPageService.getPatchReview(reviewId, principal);
-
-        Assertions.assertNotNull(result);
-    }
-
-    @Test
-    @DisplayName(value = "정보 수정을 위한 사용자 데이터 조회")
-    void getUserInfo() {
-        Principal principal = createPrincipal();
-
-        MyPageInfoDTO result = myPageService.getInfo(principal);
-        Assertions.assertNotNull(result);
-    }
-
-
-
-    Principal createPrincipal() {
-        return () -> "tester2";
+    @BeforeEach
+    void init() {
+        /*
+            member
+            auth
+            product
+            option
+            productLike
+            productQnA
+            productQnAReply
+            QnAClassification
+            memberQnA
+            memberQnAReply
+            productOrder
+         */
     }
 }

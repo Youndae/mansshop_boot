@@ -44,6 +44,7 @@ public class CartDetailDSLRepositoryImpl implements CartDetailDSLRepository{
                 .innerJoin(product)
                 .on(productOption.product.id.eq(product.id))
                 .where(cartDetail.cart.id.eq(cartId))
+                .orderBy(cartDetail.id.desc())
                 .fetch();
 
     }

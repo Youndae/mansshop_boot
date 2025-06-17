@@ -94,10 +94,10 @@ public class CartServiceImpl implements CartService{
      */
     @Override
     @Transactional(rollbackFor = RuntimeException.class)
-    public String addCart(List<AddCartDTO> addList
-                        , CartMemberDTO cartMemberDTO
-                        , HttpServletResponse response
-                        , Principal principal) {
+    public String addCart(List<AddCartDTO> addList,
+                        CartMemberDTO cartMemberDTO,
+                        HttpServletResponse response,
+                        Principal principal) {
         String cookieValue = null;
         List<CartDetail> optionListDetail = new ArrayList<>();
 
@@ -296,7 +296,7 @@ public class CartServiceImpl implements CartService{
         String uid = nonUserId;
         String cartCookieValue = null;
         Cookie anonymousCookie = WebUtils.getCookie(request, cartCookieHeader);
-
+        System.out.println("anonymousCookie : " + anonymousCookie);
         if(principal == null)
             cartCookieValue = anonymousCookie == null ? null : anonymousCookie.getValue();
         else

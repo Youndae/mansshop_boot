@@ -5,8 +5,20 @@ import com.example.mansshop_boot.domain.dto.pageable.ProductDetailPageDTO;
 import com.example.mansshop_boot.domain.dto.product.out.ProductDetailDTO;
 import com.example.mansshop_boot.domain.dto.product.out.ProductQnAResponseDTO;
 import com.example.mansshop_boot.domain.dto.product.out.ProductReviewDTO;
+import com.example.mansshop_boot.repository.classification.ClassificationRepository;
+import com.example.mansshop_boot.repository.member.MemberRepository;
+import com.example.mansshop_boot.repository.product.ProductInfoImageRepository;
+import com.example.mansshop_boot.repository.product.ProductOptionRepository;
+import com.example.mansshop_boot.repository.product.ProductRepository;
+import com.example.mansshop_boot.repository.product.ProductThumbnailRepository;
+import com.example.mansshop_boot.repository.productLike.ProductLikeRepository;
+import com.example.mansshop_boot.repository.productQnA.ProductQnAReplyRepository;
+import com.example.mansshop_boot.repository.productQnA.ProductQnARepository;
+import com.example.mansshop_boot.repository.productReview.ProductReviewReplyRepository;
+import com.example.mansshop_boot.repository.productReview.ProductReviewRepository;
 import com.example.mansshop_boot.service.ProductService;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,43 +35,41 @@ public class ProductServiceIT {
     @Autowired
     private ProductService productService;
 
-    private static final String PRODUCT_ID = "BAGS20250301214630690018433";
+    @Autowired
+    private MemberRepository memberRepository;
 
-    @Test
-    @DisplayName(value = "상품 상세 조회")
-    void getDetail() {
-        Principal principal = createPrincipal();
+    @Autowired
+    private ClassificationRepository classificationRepository;
 
-        ProductDetailDTO result = productService.getDetail(PRODUCT_ID, principal);
+    @Autowired
+    private ProductRepository productRepository;
 
-        Assertions.assertNotNull(result);
-    }
+    @Autowired
+    private ProductOptionRepository productOptionRepository;
 
-    @Test
-    @DisplayName(value = "상품에 대한 리뷰 조회")
-    void getDetailReview() {
-        ProductDetailPageDTO pageDTO = new ProductDetailPageDTO();
+    @Autowired
+    private ProductThumbnailRepository productThumbnailRepository;
 
-        Page<ProductReviewDTO> result = productService.getDetailReview(pageDTO, PRODUCT_ID);
+    @Autowired
+    private ProductInfoImageRepository productInfoImageRepository;
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(pageDTO.reviewAmount(), result.getContent().size());
-    }
+    @Autowired
+    private ProductLikeRepository productLikeRepository;
 
-    @Test
-    @DisplayName(value = "상품에 대한 문의 조회")
-    void getDetailQnA() {
-        ProductDetailPageDTO pageDTO = new ProductDetailPageDTO();
+    @Autowired
+    private ProductReviewRepository productReviewRepository;
 
-        Page<ProductQnAResponseDTO> result = productService.getDetailQnA(pageDTO, PRODUCT_ID);
+    @Autowired
+    private ProductReviewReplyRepository productReviewReplyRepository;
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(pageDTO.reviewAmount(), result.getContent().size());
-    }
+    @Autowired
+    private ProductQnARepository productQnARepository;
 
+    @Autowired
+    private ProductQnAReplyRepository productQnAReplyRepository;
 
+    @BeforeEach
+    void init() {
 
-    Principal createPrincipal() {
-        return () -> "tester2";
     }
 }

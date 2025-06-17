@@ -55,7 +55,7 @@ public class AdminSalesServiceImpl implements AdminSalesService {
      * 데이터가 없다면 date를 제외한 나머지 필드를 0으로 생성해서 저장.
      */
     @Override
-    public AdminPeriodSalesResponseDTO getPeriodSales(int term) {
+    public AdminPeriodSalesResponseDTO<AdminPeriodSalesListDTO> getPeriodSales(int term) {
         List<AdminPeriodSalesListDTO> selectList = periodSalesSummaryRepository.findPeriodList(term);
         Map<Integer, AdminPeriodSalesListDTO> map = selectList.stream()
                 .collect(
@@ -76,11 +76,11 @@ public class AdminSalesServiceImpl implements AdminSalesService {
             contentList.add(content);
         }
 
-        return new AdminPeriodSalesResponseDTO(
-                contentList
-                , yearSales
-                , yearSalesQuantity
-                , yearOrderQuantity
+        return new AdminPeriodSalesResponseDTO<>(
+                contentList,
+                yearSales,
+                yearSalesQuantity,
+                yearOrderQuantity
         );
     }
 
@@ -174,7 +174,7 @@ public class AdminSalesServiceImpl implements AdminSalesService {
         LocalDate endDate = startDate.plusMonths(1);
 
         AdminClassificationSalesDTO classificationSalesDTO = productSalesSummaryRepository.findPeriodClassificationSales(startDate, endDate, classification);
-        System.out.println("classification: " + classificationSalesDTO);
+
         if(classificationSalesDTO == null)
             return new AdminClassificationSalesResponseDTO(
                     classification,
@@ -196,7 +196,7 @@ public class AdminSalesServiceImpl implements AdminSalesService {
      * 해당 일의 분류별 매출, 판매량을 조회하고 그 날의 매출, 판매량, 주문량을 조회한다.
      */
     @Override
-    public AdminPeriodSalesResponseDTO getSalesByDay(String term) {
+    public AdminPeriodSalesResponseDTO<AdminPeriodClassificationDTO> getSalesByDay(String term) {
         int[] termSplit = Arrays.stream(term.split("-"))
                 .mapToInt(Integer::parseInt)
                 .toArray();
@@ -206,7 +206,7 @@ public class AdminSalesServiceImpl implements AdminSalesService {
         AdminClassificationSalesDTO salesDTO = periodSalesSummaryRepository.findDailySales(startDate);
 
         if(salesDTO == null)
-            return new AdminPeriodSalesResponseDTO(
+            return new AdminPeriodSalesResponseDTO<>(
                     Collections.emptyList(),
                     0,
                     0,
@@ -216,7 +216,7 @@ public class AdminSalesServiceImpl implements AdminSalesService {
 
         List<AdminPeriodClassificationDTO> classificationList = productSalesSummaryRepository.findPeriodClassification(startDate, endDate);
 
-        return new AdminPeriodSalesResponseDTO(
+        return new AdminPeriodSalesResponseDTO<>(
                 classificationList
                 , salesDTO.sales()
                 , salesDTO.salesQuantity()
@@ -247,6 +247,16 @@ public class AdminSalesServiceImpl implements AdminSalesService {
                 , Sort.by("createdAt").descending());
 
         Page<ProductOrder> orderList = productOrderRepository.findAllByDay(startDate, endDate, pageable);
+        PagingMappingDTO pagingMappingDTO = PagingMappingDTO.builder()
+                .totalElements(orderList.getTotalElements())
+                .number(orderList.getNumber())
+                .empty(orderList.isEmpty())
+                .totalPages(orderList.getTotalPages())
+                .build();
+
+        if(orderList.isEmpty())
+            return new PagingListDTO<>(Collections.emptyList(), pagingMappingDTO);
+
         List<Long> orderIdList = orderList.stream().map(ProductOrder::getId).toList();
         List<AdminOrderDetailListDTO> orderDetailList = productOrderDetailRepository.findByOrderIds(orderIdList);
 
@@ -261,13 +271,6 @@ public class AdminSalesServiceImpl implements AdminSalesService {
                     return new AdminDailySalesResponseDTO(v, detailContent);
                 })
                 .toList();
-
-        PagingMappingDTO pagingMappingDTO = PagingMappingDTO.builder()
-                .totalElements(orderList.getTotalElements())
-                .number(orderList.getNumber())
-                .empty(orderList.isEmpty())
-                .totalPages(orderList.getTotalPages())
-                .build();
 
         return new PagingListDTO<>(content, pagingMappingDTO);
     }
@@ -305,7 +308,7 @@ public class AdminSalesServiceImpl implements AdminSalesService {
 
         AdminProductSalesDTO totalSalesDTO = productSalesSummaryRepository.getProductSales(productId);
 
-        if(totalSalesDTO == null)
+        if(totalSalesDTO.productName() == null)
             throw new CustomNotFoundException(ErrorCode.NOT_FOUND, ErrorCode.NOT_FOUND.getMessage());
 
         AdminSalesDTO yearSalesDTO = productSalesSummaryRepository.getProductPeriodSales(year, productId);
@@ -325,13 +328,13 @@ public class AdminSalesServiceImpl implements AdminSalesService {
         }
 
         return new AdminProductSalesDetailDTO(
-                totalSalesDTO
-                , yearSalesDTO
-                , lastYearSalesDTO
-                , monthSalesMappingDTO
-                , optionTotalSalesList
-                , optionYearSalesList
-                , optionLastYearSalesList
+                totalSalesDTO,
+                yearSalesDTO,
+                lastYearSalesDTO,
+                monthSalesMappingDTO,
+                optionTotalSalesList,
+                optionYearSalesList,
+                optionLastYearSalesList
         );
     }
 }

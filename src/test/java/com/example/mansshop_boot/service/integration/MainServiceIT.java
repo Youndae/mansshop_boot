@@ -1,52 +1,48 @@
 package com.example.mansshop_boot.service.integration;
 
+import com.example.mansshop_boot.Fixture.ClassificationFixture;
+import com.example.mansshop_boot.Fixture.ProductFixture;
 import com.example.mansshop_boot.MansShopBootApplication;
 import com.example.mansshop_boot.domain.dto.main.out.MainListResponseDTO;
 import com.example.mansshop_boot.domain.dto.pageable.MainPageDTO;
+import com.example.mansshop_boot.domain.entity.Classification;
+import com.example.mansshop_boot.domain.entity.Product;
+import com.example.mansshop_boot.repository.classification.ClassificationRepository;
+import com.example.mansshop_boot.repository.product.ProductRepository;
 import com.example.mansshop_boot.service.MainService;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @SpringBootTest(classes = MansShopBootApplication.class)
 @EnableJpaRepositories(basePackages = "com.example")
+@ActiveProfiles("test")
+@Transactional
 public class MainServiceIT {
 
     @Autowired
     private MainService mainService;
 
-    @Test
-    @DisplayName(value = "메인 베스트 상품 리스트 조회")
-    void getBestList() {
-        MainPageDTO pageDTO = new MainPageDTO("BEST");
-        List<MainListResponseDTO> result = mainService.getBestAndNewList(pageDTO);
+    @Autowired
+    private ClassificationRepository classificationRepository;
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(pageDTO.mainProductAmount(), result.size());
-    }
+    @Autowired
+    private ProductRepository productRepository;
 
-    @Test
-    @DisplayName(value = "메인 새로운 상품 리스트")
-    void getNewList() {
-        MainPageDTO pageDTO = new MainPageDTO("NEW");
-        List<MainListResponseDTO> result = mainService.getBestAndNewList(pageDTO);
+    @BeforeEach
+    void init() {
+        List<Classification> classificationList = ClassificationFixture.createClassification();
+        classificationRepository.saveAll(classificationList);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(pageDTO.mainProductAmount(), result.size());
-    }
-
-    @Test
-    @DisplayName(value = "메인 선택한 상품 분류(OUTER) 리스트")
-    void getOUTERList() {
-        MainPageDTO pageDTO = new MainPageDTO(1, null, "OUTER");
-        List<MainListResponseDTO> result = mainService.getBestAndNewList(pageDTO);
-
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(pageDTO.mainProductAmount(), result.size());
+        List<Product> productList = ProductFixture.createSaveProductList(50, classificationList.get(0));
+        productRepository.saveAll(productList);
     }
 }

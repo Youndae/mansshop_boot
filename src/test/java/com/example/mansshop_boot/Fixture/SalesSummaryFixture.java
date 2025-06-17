@@ -15,7 +15,7 @@ import java.util.*;
 public class SalesSummaryFixture {
 
     public static List<ProductSalesSummary> createProductSalesSummary(List<Product> products) {
-        LocalDate date = LocalDate.of(2023, 1, 1);
+        LocalDate date = LocalDate.now().minusMonths(24);
         List<ProductSalesSummary> result = new ArrayList<>();
         for(int i = 0; i < 24; i++) {
 
