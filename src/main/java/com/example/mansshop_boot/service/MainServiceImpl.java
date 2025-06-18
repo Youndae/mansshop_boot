@@ -83,7 +83,6 @@ public class MainServiceImpl implements MainService{
      * MainListResponseDTo 생성자 내부에서 연산 처리후 생성.
      */
     public List<MainListResponseDTO> mainListDataMapping(List<MainListDTO> dto) {
-
         return dto.stream().map(MainListResponseDTO::new).toList();
     }
 

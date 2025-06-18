@@ -296,7 +296,7 @@ public class CartServiceImpl implements CartService{
         String uid = nonUserId;
         String cartCookieValue = null;
         Cookie anonymousCookie = WebUtils.getCookie(request, cartCookieHeader);
-        System.out.println("anonymousCookie : " + anonymousCookie);
+
         if(principal == null)
             cartCookieValue = anonymousCookie == null ? null : anonymousCookie.getValue();
         else

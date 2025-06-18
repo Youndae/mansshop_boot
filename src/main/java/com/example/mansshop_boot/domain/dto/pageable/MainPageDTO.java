@@ -4,10 +4,10 @@ import com.example.mansshop_boot.domain.enumeration.PageAmount;
 import lombok.Builder;
 
 public record MainPageDTO(
-        int pageNum
-        , int mainProductAmount
-        , String keyword
-        , String classification
+        int pageNum,
+        int mainProductAmount,
+        String keyword,
+        String classification
 ) {
 
     @Builder
@@ -15,10 +15,10 @@ public record MainPageDTO(
                         , String keyword
                         , String classification) {
         this(
-                pageNum
-                , 12
-                , keyword == null ? null : "%" + keyword + "%"
-                , classification
+                pageNum,
+                12,
+                keyword == null ? null : "%" + keyword + "%",
+                classification
         );
     }
 

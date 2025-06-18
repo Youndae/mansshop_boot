@@ -22,13 +22,13 @@ public record MainListResponseDTO(
 ) {
     public MainListResponseDTO(MainListDTO dto) {
         this(
-                dto.productId()
-                , dto.productName()
-                , dto.thumbnail()
-                , dto.price()
-                , dto.discount()
-                , (int) (dto.price() * (1 - ((double) dto.discount() / 100)))
-                , dto.stock() == 0
+                dto.productId(),
+                dto.productName(),
+                dto.thumbnail(),
+                dto.price(),
+                dto.discount(),
+                (int) (dto.price() * (1 - ((double) dto.discount() / 100))),
+                dto.stock() == 0
         );
     }
 }
