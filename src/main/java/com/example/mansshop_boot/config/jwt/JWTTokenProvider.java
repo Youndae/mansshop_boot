@@ -425,7 +425,6 @@ public class JWTTokenProvider {
 
         setAccessTokenToResponseHeader(accessToken, response);
         setTokenCookie(refreshHeader, refreshToken, Duration.ofDays(redisRtExpiration), response);
-        setTokenCookie(inoHeader, ino, Duration.ofDays(inoCookieAge), response);
     }
 
     /**

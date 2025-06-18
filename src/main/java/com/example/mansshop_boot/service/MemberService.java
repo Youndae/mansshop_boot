@@ -22,7 +22,7 @@ public interface MemberService {
 
     UserStatusResponseDTO loginProc(LoginDTO dto, HttpServletRequest request, HttpServletResponse response);
 
-    ResponseEntity<ResponseMessageDTO> oAuthUserIssueToken(HttpServletRequest request, HttpServletResponse response);
+    String oAuthUserIssueToken(HttpServletRequest request, HttpServletResponse response);
 
     String checkJoinId(String userId);
 

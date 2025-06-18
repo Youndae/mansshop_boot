@@ -1,7 +1,5 @@
 package com.example.mansshop_boot.auth.user;
 
-import com.example.mansshop_boot.config.customException.exception.CustomBadCredentialsException;
-import com.example.mansshop_boot.config.customException.ErrorCode;
 import com.example.mansshop_boot.domain.entity.Member;
 import com.example.mansshop_boot.repository.member.MemberRepository;
 import lombok.Setter;
@@ -22,10 +20,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Member member = memberRepository.findByLocalUserId(username);
-        System.out.println("loadUserByUsername member : " + member);
+
         if(member == null)
-            throw new CustomBadCredentialsException(ErrorCode.BAD_CREDENTIALS, ErrorCode.BAD_CREDENTIALS.getMessage());
-        else
-            return new CustomUser(member);
+            throw new UsernameNotFoundException("Username Not Found");
+
+        return new CustomUser(member);
     }
 }

@@ -117,8 +117,6 @@ public class MemberController {
             e.printStackTrace();
             throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
         }
-
-
     }
 
     /**
@@ -156,9 +154,10 @@ public class MemberController {
     @DefaultApiResponse
     @GetMapping("/oAuth/token")
     public ResponseEntity<ResponseMessageDTO> oAuthIssueToken(HttpServletRequest request, HttpServletResponse response) {
+        String responseMessage = memberService.oAuthUserIssueToken(request, response);
 
-
-        return memberService.oAuthUserIssueToken(request, response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessageDTO(responseMessage));
     }
 
     /**

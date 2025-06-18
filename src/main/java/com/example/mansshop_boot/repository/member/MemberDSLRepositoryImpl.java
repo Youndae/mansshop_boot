@@ -40,7 +40,7 @@ public class MemberDSLRepositoryImpl implements MemberDSLRepository{
 
         return jpaQueryFactory.selectFrom(member)
                 .leftJoin(member.auths, auth1).fetchJoin()
-                .where(member.userId.eq(userId).and(member.provider.eq("local")))
+                .where(member.userId.eq(userId))
                 .fetchOne();
     }
 

@@ -82,15 +82,15 @@ public class Member {
     }
 
     @Builder
-    public Member(String userId
-                , String userPw
-                , String userName
-                , String nickname
-                , String userEmail
-                , String provider
-                , Long memberPoint
-                , String phone
-                , LocalDate birth) {
+    public Member(String userId,
+                String userPw,
+                String userName,
+                String nickname,
+                String userEmail,
+                String provider,
+                Long memberPoint,
+                String phone,
+                LocalDate birth) {
         String phoneRegEx = "(\\d{3})(\\d{3,4})(\\d{4})";
 
         this.userId = userId;

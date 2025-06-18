@@ -111,18 +111,22 @@ public class MemberServiceImpl implements MemberService{
      */
     @Override
     public UserStatusResponseDTO loginProc(LoginDTO dto, HttpServletRequest request, HttpServletResponse response) {
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(dto.userId(), dto.userPw());
-        Authentication authentication =
-                authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-        CustomUser customUser = (CustomUser) authentication.getPrincipal();
-        String userId = customUser.getUsername();
+        try {
+            UsernamePasswordAuthenticationToken authenticationToken =
+                    new UsernamePasswordAuthenticationToken(dto.userId(), dto.userPw());
+            Authentication authentication =
+                    authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+            CustomUser customUser = (CustomUser) authentication.getPrincipal();
+            String userId = customUser.getUsername();
 
-        if(userId != null)
-            if (checkInoAndIssueToken(userId, request, response))
-                return new UserStatusResponseDTO(customUser);
+            if(userId != null)
+                if (checkInoAndIssueToken(userId, request, response))
+                    return new UserStatusResponseDTO(customUser);
+        }catch (Exception e) {
+            throw new CustomBadCredentialsException(ErrorCode.BAD_CREDENTIALS, ErrorCode.BAD_CREDENTIALS.getMessage());
+        }
 
-        throw new CustomBadCredentialsException(ErrorCode.BAD_CREDENTIALS, ErrorCode.BAD_CREDENTIALS.getMessage());
+        return null;
     }
 
     /**
@@ -159,7 +163,7 @@ public class MemberServiceImpl implements MemberService{
      * 임시 토큰 검증 후 토큰 발행
      */
     @Override
-    public ResponseEntity<ResponseMessageDTO> oAuthUserIssueToken(HttpServletRequest request, HttpServletResponse response) {
+    public String oAuthUserIssueToken(HttpServletRequest request, HttpServletResponse response) {
 
         Cookie temporaryCookie = WebUtils.getCookie(request, temporaryHeader);
 
@@ -178,10 +182,9 @@ public class MemberServiceImpl implements MemberService{
         jwtTokenProvider.deleteTemporaryTokenAndCookie(temporaryClaimByUserId, response);
 
         if(checkInoAndIssueToken(temporaryClaimByUserId, request, response))
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessageDTO(Result.OK.getResultKey()));
+            return Result.OK.getResultKey();
         else
             throw new CustomBadCredentialsException(ErrorCode.BAD_CREDENTIALS, ErrorCode.BAD_CREDENTIALS.getMessage());
-
     }
 
     /**

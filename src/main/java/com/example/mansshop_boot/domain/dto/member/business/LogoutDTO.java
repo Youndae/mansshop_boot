@@ -4,8 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record LogoutDTO(
-        String authorizationToken
-        , String inoValue
-        , String userId
+        String authorizationToken,
+        String inoValue,
+        String userId
 ) {
 }

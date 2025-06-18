@@ -1,9 +1,9 @@
 package com.example.mansshop_boot.domain.dto.member.business;
 
 public record UserSearchDTO(
-        String userName
-        , String userPhone
-        , String userEmail
+        String userName,
+        String userPhone,
+        String userEmail
 ) {
 
     public UserSearchDTO(String userName, String userPhone, String userEmail) {
