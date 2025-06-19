@@ -2,6 +2,7 @@ package com.example.mansshop_boot.service.integration.admin;
 
 import com.example.mansshop_boot.Fixture.*;
 import com.example.mansshop_boot.Fixture.domain.member.MemberAndAuthFixtureDTO;
+import com.example.mansshop_boot.Fixture.util.PaginationUtils;
 import com.example.mansshop_boot.MansShopBootApplication;
 import com.example.mansshop_boot.domain.dto.admin.out.AdminOrderResponseDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
@@ -89,7 +90,7 @@ public class AdminOrderServiceIT {
     @DisplayName(value = "전체 주문 목록 조회")
     void getAllOrderList() {
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createDefaultAdminOrderPageDTO();
-        int totalPages = (int) Math.ceil((double) productOrderList.size() / pageDTO.amount());
+        int totalPages = PaginationUtils.getTotalPages(productOrderList.size(), pageDTO.amount());
         String cachingKey = RedisCaching.ADMIN_ORDER_COUNT.getKey();
 
         PagingListDTO<AdminOrderResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminOrderService.getAllOrderList(pageDTO));
@@ -184,7 +185,7 @@ public class AdminOrderServiceIT {
     @DisplayName(value = "미처리 주문 목록 조회")
     void getNewOrderList() {
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createDefaultAdminOrderPageDTO();
-        int totalPages = (int) Math.ceil((double) productOrderList.size() / pageDTO.amount());
+        int totalPages = PaginationUtils.getTotalPages(productOrderList.size(), pageDTO.amount());
 
         PagingListDTO<AdminOrderResponseDTO> result = Assertions.assertDoesNotThrow(
                 () -> adminOrderService.getNewOrderList(pageDTO)

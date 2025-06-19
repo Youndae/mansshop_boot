@@ -4,7 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record QnAClassificationDTO(
-        long id
-        , String name
+        long id,
+        String name
 ) {
 }

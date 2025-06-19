@@ -3,6 +3,7 @@ package com.example.mansshop_boot.service.integration.admin;
 import com.example.mansshop_boot.Fixture.AdminPageDTOFixture;
 import com.example.mansshop_boot.Fixture.MemberAndAuthFixture;
 import com.example.mansshop_boot.Fixture.domain.member.MemberAndAuthFixtureDTO;
+import com.example.mansshop_boot.Fixture.util.PaginationUtils;
 import com.example.mansshop_boot.MansShopBootApplication;
 import com.example.mansshop_boot.domain.dto.admin.in.AdminPostPointDTO;
 import com.example.mansshop_boot.domain.dto.admin.out.AdminMemberDTO;
@@ -62,7 +63,7 @@ public class AdminMemberServiceIT {
     @DisplayName(value = "회원 목록 조회")
     void getMemberList() {
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createDefaultAdminOrderPageDTO();
-        int totalPages = (int) Math.ceil((double) memberList.size() / pageDTO.amount());
+        int totalPages = PaginationUtils.getTotalPages(memberList.size(), pageDTO.amount());
 
         Page<AdminMemberDTO> result = Assertions.assertDoesNotThrow(() -> adminMemberService.getMemberList(pageDTO));
 

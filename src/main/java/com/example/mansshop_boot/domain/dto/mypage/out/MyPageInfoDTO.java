@@ -5,20 +5,20 @@ import lombok.Builder;
 
 @Builder
 public record MyPageInfoDTO(
-        String nickname
-        , String phone
-        , String mailPrefix
-        , String mailSuffix
-        , String mailType
+        String nickname,
+        String phone,
+        String mailPrefix,
+        String mailSuffix,
+        String mailType
 ) {
 
     public MyPageInfoDTO(Member member, String[] splitMail, String mailType) {
         this(
-                member.getNickname()
-                , member.getPhone().replaceAll("-", "")
-                , splitMail[0]
-                , splitMail[1]
-                , mailType
+                member.getNickname(),
+                member.getPhone().replaceAll("-", ""),
+                splitMail[0],
+                splitMail[1],
+                mailType
         );
     }
 }

@@ -3,6 +3,7 @@ package com.example.mansshop_boot.service.integration.admin;
 import com.example.mansshop_boot.Fixture.AdminPageDTOFixture;
 import com.example.mansshop_boot.Fixture.ClassificationFixture;
 import com.example.mansshop_boot.Fixture.ProductFixture;
+import com.example.mansshop_boot.Fixture.util.PaginationUtils;
 import com.example.mansshop_boot.MansShopBootApplication;
 import com.example.mansshop_boot.domain.dto.admin.business.PatchOptionDTO;
 import com.example.mansshop_boot.domain.dto.admin.in.AdminDiscountPatchDTO;
@@ -99,7 +100,7 @@ public class AdminProductServiceIT {
     @DisplayName(value = "상품 목록 조회")
     void getProductList() {
         AdminPageDTO pageDTO = AdminPageDTOFixture.createDefaultAdminPageDTO();
-        int totalPages = (int) Math.ceil((double) productList.size() / pageDTO.amount());
+        int totalPages = PaginationUtils.getTotalPages(productList.size(), pageDTO.amount());
         PagingListDTO<AdminProductListDTO> result = Assertions.assertDoesNotThrow(() -> adminProductService.getProductList(pageDTO));
 
         Assertions.assertNotNull(result);
@@ -593,7 +594,7 @@ public class AdminProductServiceIT {
     @DisplayName(value = "상품 재고 리스트 반환")
     void getProductStock() {
         AdminPageDTO pageDTO = AdminPageDTOFixture.createDefaultAdminPageDTO();
-        int totalPages = (int) Math.ceil((double) productList.size() / pageDTO.amount());
+        int totalPages = PaginationUtils.getTotalPages(productList.size(), pageDTO.amount());
         List<Product> fixture = productList.stream()
                                         .sorted(
                                                 Comparator.comparingInt(product ->
@@ -664,7 +665,7 @@ public class AdminProductServiceIT {
     void getDiscountProduct() {
         List<Product> fixtureList = productList.stream().filter(v -> v.getProductDiscount() > 0).toList();
         AdminPageDTO pageDTO = AdminPageDTOFixture.createDefaultAdminPageDTO();
-        int totalPages = (int) Math.ceil((double) fixtureList.size() / pageDTO.amount());
+        int totalPages = PaginationUtils.getTotalPages(fixtureList.size(), pageDTO.amount());
 
         PagingListDTO<AdminDiscountResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminProductService.getDiscountProduct(pageDTO));
 

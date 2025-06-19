@@ -12,10 +12,7 @@ import com.example.mansshop_boot.repository.product.ProductRepository;
 import com.example.mansshop_boot.service.OrderService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -60,6 +57,13 @@ public class OrderServiceIT {
             classification
             product
             productOption
+         */
+    }
+
+    @AfterEach
+    void set() {
+        /*
+            RabbitMQ 처리 repository들의 deleteAll()
          */
     }
 }

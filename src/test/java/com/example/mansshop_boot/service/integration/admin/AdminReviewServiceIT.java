@@ -2,6 +2,7 @@ package com.example.mansshop_boot.service.integration.admin;
 
 import com.example.mansshop_boot.Fixture.*;
 import com.example.mansshop_boot.Fixture.domain.member.MemberAndAuthFixtureDTO;
+import com.example.mansshop_boot.Fixture.util.PaginationUtils;
 import com.example.mansshop_boot.MansShopBootApplication;
 import com.example.mansshop_boot.domain.dto.admin.business.AdminReviewDTO;
 import com.example.mansshop_boot.domain.dto.admin.in.AdminReviewRequestDTO;
@@ -119,7 +120,7 @@ public class AdminReviewServiceIT {
     void getAllReviewList() {
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createDefaultAdminOrderPageDTO();
         AdminListType listType = AdminListType.ALL;
-        int totalPages = (int) Math.ceil((double) allProductReviewList.size() / pageDTO.amount());
+        int totalPages = PaginationUtils.getTotalPages(allProductReviewList.size(), pageDTO.amount());
         int resultContentSize = Math.min(allProductReviewList.size(), pageDTO.amount());
         PagingListDTO<AdminReviewDTO> result = Assertions.assertDoesNotThrow(() -> adminReviewService.getReviewList(pageDTO, listType));
 
@@ -174,7 +175,7 @@ public class AdminReviewServiceIT {
                         v.getMember().getUserName().equals(searchMember.getUserName())
                 )
                 .toList();
-        int totalPages = (int) Math.ceil((double) reviewFixtureList.size() / pageDTO.amount());
+        int totalPages = PaginationUtils.getTotalPages(reviewFixtureList.size(), pageDTO.amount());
         int resultContentSize = Math.min(reviewFixtureList.size(), pageDTO.amount());
 
         PagingListDTO<AdminReviewDTO> result = Assertions.assertDoesNotThrow(() -> adminReviewService.getReviewList(pageDTO, listType));
@@ -206,7 +207,7 @@ public class AdminReviewServiceIT {
                         v.getProduct().getProductName().equals(searchProduct.getProductName())
                 )
                 .toList();
-        int totalPages = (int) Math.ceil((double) reviewFixtureList.size() / pageDTO.amount());
+        int totalPages = PaginationUtils.getTotalPages(reviewFixtureList.size(), pageDTO.amount());
         int resultContentSize = Math.min(reviewFixtureList.size(), pageDTO.amount());
 
         PagingListDTO<AdminReviewDTO> result = Assertions.assertDoesNotThrow(() -> adminReviewService.getReviewList(pageDTO, listType));
@@ -228,7 +229,7 @@ public class AdminReviewServiceIT {
     void getNewReviewList() {
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createDefaultAdminOrderPageDTO();
         AdminListType listType = AdminListType.NEW;
-        int totalPages = (int) Math.ceil((double) newProductReviewList.size() / pageDTO.amount());
+        int totalPages = PaginationUtils.getTotalPages(newProductReviewList.size(), pageDTO.amount());
         int resultContentSize = Math.min(newProductReviewList.size(), pageDTO.amount());
         PagingListDTO<AdminReviewDTO> result = Assertions.assertDoesNotThrow(() -> adminReviewService.getReviewList(pageDTO, listType));
 

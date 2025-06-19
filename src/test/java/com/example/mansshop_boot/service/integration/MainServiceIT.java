@@ -3,6 +3,7 @@ package com.example.mansshop_boot.service.integration;
 import com.example.mansshop_boot.Fixture.ClassificationFixture;
 import com.example.mansshop_boot.Fixture.PageDTOFixture;
 import com.example.mansshop_boot.Fixture.ProductFixture;
+import com.example.mansshop_boot.Fixture.util.PaginationUtils;
 import com.example.mansshop_boot.MansShopBootApplication;
 import com.example.mansshop_boot.domain.dto.main.business.MainListDTO;
 import com.example.mansshop_boot.domain.dto.main.out.MainListResponseDTO;
@@ -130,7 +131,7 @@ public class MainServiceIT {
                 .filter(v -> v.getClassification().getId().equals(classificationId))
                 .toList();
         int contentSize = Math.min(fixtureList.size(), pageDTO.mainProductAmount());
-        int totalPages = (int) Math.ceil((double) fixtureList.size() / pageDTO.mainProductAmount());
+        int totalPages = PaginationUtils.getTotalPages(fixtureList.size(), pageDTO.mainProductAmount());
 
         PagingListDTO<MainListResponseDTO> result = Assertions.assertDoesNotThrow(() -> mainService.getClassificationAndSearchList(pageDTO));
 

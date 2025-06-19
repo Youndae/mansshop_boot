@@ -2,6 +2,7 @@ package com.example.mansshop_boot.service.integration.admin;
 
 import com.example.mansshop_boot.Fixture.*;
 import com.example.mansshop_boot.Fixture.domain.member.MemberAndAuthFixtureDTO;
+import com.example.mansshop_boot.Fixture.util.PaginationUtils;
 import com.example.mansshop_boot.MansShopBootApplication;
 import com.example.mansshop_boot.config.customException.exception.CustomNotFoundException;
 import com.example.mansshop_boot.domain.dto.admin.business.*;
@@ -475,7 +476,7 @@ public class AdminSalesServiceIT {
                                                         && v.getCreatedAt().getMonthValue() == month
                                                         && v.getCreatedAt().getDayOfMonth() == day)
                                                 .toList();
-        int totalPage = (int) Math.ceil((double) orderFixtureList.size() / amount);
+        int totalPages = PaginationUtils.getTotalPages(orderFixtureList.size(), amount);
         int contentSize = Math.min(orderFixtureList.size(), amount);
 
         PagingListDTO<AdminDailySalesResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminSalesService.getOrderListByDay(term, page));
@@ -484,7 +485,7 @@ public class AdminSalesServiceIT {
         Assertions.assertFalse(result.content().isEmpty());
         Assertions.assertEquals(contentSize, result.content().size());
         Assertions.assertEquals(orderFixtureList.size(), result.pagingData().getTotalElements());
-        Assertions.assertEquals(totalPage, result.pagingData().getTotalPages());
+        Assertions.assertEquals(totalPages, result.pagingData().getTotalPages());
         Assertions.assertFalse(result.pagingData().isEmpty());
 
         result.content().forEach(v -> Assertions.assertFalse(v.detailList().isEmpty()));
@@ -507,7 +508,7 @@ public class AdminSalesServiceIT {
     @DisplayName(value = "상품별 매출 조회")
     void getProductSalesList() {
         AdminPageDTO pageDTO = AdminPageDTOFixture.createDefaultAdminPageDTO();
-        int totalPage = (int) Math.ceil((double) productList.size() / pageDTO.amount());
+        int totalPages = PaginationUtils.getTotalPages(productList.size(), pageDTO.amount());
         int contentSize = Math.min(productList.size(), pageDTO.amount());
         Page<AdminProductSalesListDTO> result = Assertions.assertDoesNotThrow(() -> adminSalesService.getProductSalesList(pageDTO));
 
@@ -515,7 +516,7 @@ public class AdminSalesServiceIT {
         Assertions.assertFalse(result.getContent().isEmpty());
         Assertions.assertFalse(result.isEmpty());
         Assertions.assertEquals(productList.size(), result.getTotalElements());
-        Assertions.assertEquals(totalPage, result.getTotalPages());
+        Assertions.assertEquals(totalPages, result.getTotalPages());
         Assertions.assertEquals(contentSize, result.getContent().size());
     }
 
@@ -524,7 +525,7 @@ public class AdminSalesServiceIT {
     void getProductSalesListSalesEmpty() {
         productSalesSummaryRepository.deleteAll();
         AdminPageDTO pageDTO = AdminPageDTOFixture.createDefaultAdminPageDTO();
-        int totalPage = (int) Math.ceil((double) productList.size() / pageDTO.amount());
+        int totalPages = PaginationUtils.getTotalPages(productList.size(), pageDTO.amount());
         int contentSize = Math.min(productList.size(), pageDTO.amount());
         Page<AdminProductSalesListDTO> result = Assertions.assertDoesNotThrow(() -> adminSalesService.getProductSalesList(pageDTO));
 
@@ -532,7 +533,7 @@ public class AdminSalesServiceIT {
         Assertions.assertFalse(result.getContent().isEmpty());
         Assertions.assertFalse(result.isEmpty());
         Assertions.assertEquals(productList.size(), result.getTotalElements());
-        Assertions.assertEquals(totalPage, result.getTotalPages());
+        Assertions.assertEquals(totalPages, result.getTotalPages());
         Assertions.assertEquals(contentSize, result.getContent().size());
 
         result.getContent().forEach(v -> Assertions.assertEquals(0, v.sales()));

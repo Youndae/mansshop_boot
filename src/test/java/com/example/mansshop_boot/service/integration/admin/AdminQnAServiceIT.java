@@ -2,6 +2,7 @@ package com.example.mansshop_boot.service.integration.admin;
 
 import com.example.mansshop_boot.Fixture.*;
 import com.example.mansshop_boot.Fixture.domain.member.MemberAndAuthFixtureDTO;
+import com.example.mansshop_boot.Fixture.util.PaginationUtils;
 import com.example.mansshop_boot.MansShopBootApplication;
 import com.example.mansshop_boot.domain.dto.admin.out.AdminQnAClassificationDTO;
 import com.example.mansshop_boot.domain.dto.admin.out.AdminQnAListResponseDTO;
@@ -148,15 +149,11 @@ public class AdminQnAServiceIT {
         principal = () -> admin.getUserId();
     }
 
-    private int getTotalPages(int listSize, int amount) {
-        return (int) Math.ceil((double) listSize / amount);
-    }
-
     @Test
     @DisplayName(value = "모든 상품 문의 목록 조회.")
     void getAllProductQnAList() {
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createSearchAdminOrderPageDTO(null, ALL_LIST_TYPE, 1);
-        int totalPages = getTotalPages(allProductQnA.size(), pageDTO.amount());
+        int totalPages = PaginationUtils.getTotalPages(allProductQnA.size(), pageDTO.amount());
         PagingListDTO<AdminQnAListResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getProductQnAList(pageDTO));
 
         Assertions.assertNotNull(result);
@@ -204,7 +201,7 @@ public class AdminQnAServiceIT {
                                                 v.getMember().getUserId().equals(searchMemberFixture.getUserId()))
                                         .toList()
                                         .size();
-        int totalPages = getTotalPages(totalElements, pageDTO.amount());
+        int totalPages = PaginationUtils.getTotalPages(totalElements, pageDTO.amount());
         int resultContentSize = Math.min(totalElements, pageDTO.amount());
         PagingListDTO<AdminQnAListResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getProductQnAList(pageDTO));
 
@@ -241,7 +238,7 @@ public class AdminQnAServiceIT {
     @DisplayName(value = "새로운 상품 문의 목록 조회.")
     void getNewProductQnAList() {
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createSearchAdminOrderPageDTO(null, NEW_LIST_TYPE, 1);
-        int totalPages = getTotalPages(newProductQnAList.size(), pageDTO.amount());
+        int totalPages = PaginationUtils.getTotalPages(newProductQnAList.size(), pageDTO.amount());
         PagingListDTO<AdminQnAListResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getProductQnAList(pageDTO));
 
         Assertions.assertNotNull(result);
@@ -266,7 +263,7 @@ public class AdminQnAServiceIT {
                         v.getMember().getUserId().equals(searchMemberFixture.getUserId()))
                 .toList()
                 .size();
-        int totalPages = getTotalPages(totalElements, pageDTO.amount());
+        int totalPages = PaginationUtils.getTotalPages(totalElements, pageDTO.amount());
         int resultContentSize = Math.min(totalElements, pageDTO.amount());
         PagingListDTO<AdminQnAListResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getProductQnAList(pageDTO));
 
@@ -395,7 +392,7 @@ public class AdminQnAServiceIT {
     @DisplayName(value = "전체 회원 문의 목록 조회")
     void getAllMemberQnAList() {
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createSearchAdminOrderPageDTO(null, ALL_LIST_TYPE, 1);
-        int totalPages = getTotalPages(allMemberQnA.size(), pageDTO.amount());
+        int totalPages = PaginationUtils.getTotalPages(allMemberQnA.size(), pageDTO.amount());
         PagingListDTO<AdminQnAListResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getMemberQnAList(pageDTO));
 
         Assertions.assertNotNull(result);
@@ -444,7 +441,7 @@ public class AdminQnAServiceIT {
                         v.getMember().getUserId().equals(searchMemberFixture.getUserId()))
                 .toList()
                 .size();
-        int totalPages = getTotalPages(totalElements, pageDTO.amount());
+        int totalPages = PaginationUtils.getTotalPages(totalElements, pageDTO.amount());
         int resultContentSize = Math.min(totalElements, pageDTO.amount());
         PagingListDTO<AdminQnAListResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getMemberQnAList(pageDTO));
 

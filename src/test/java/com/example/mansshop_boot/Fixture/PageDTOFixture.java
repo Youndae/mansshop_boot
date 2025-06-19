@@ -1,6 +1,9 @@
 package com.example.mansshop_boot.Fixture;
 
+import com.example.mansshop_boot.domain.dto.mypage.business.MyPagePageDTO;
+import com.example.mansshop_boot.domain.dto.pageable.LikePageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.MainPageDTO;
+import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;
 
 public class PageDTOFixture {
 
@@ -10,5 +13,17 @@ public class PageDTOFixture {
 
     public static MainPageDTO createMainPageDTO(int page, String keyword, String classification) {
         return new MainPageDTO(page, keyword, classification);
+    }
+
+    public static OrderPageDTO createDefaultOrderPageDTO(String term) {
+        return new OrderPageDTO(1, term);
+    }
+
+    public static LikePageDTO createDefaultLikePageDTO(int page) {
+        return new LikePageDTO(page);
+    }
+
+    public static MyPagePageDTO createDefaultMyPagePageDTO(int page) {
+        return new MyPagePageDTO(page);
     }
 }

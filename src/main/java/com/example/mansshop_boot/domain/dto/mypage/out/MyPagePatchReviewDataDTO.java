@@ -4,8 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record MyPagePatchReviewDataDTO(
-        long reviewId
-        , String content
-        , String productName
+        long reviewId,
+        String content,
+        String productName
 ) {
 }

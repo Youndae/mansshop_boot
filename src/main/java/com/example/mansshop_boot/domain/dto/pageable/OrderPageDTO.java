@@ -4,9 +4,9 @@ import lombok.Builder;
 
 
 public record OrderPageDTO(
-        int pageNum
-        , int orderAmount
-        , String term
+        int pageNum,
+        int orderAmount,
+        String term
 ) {
 
     @Builder

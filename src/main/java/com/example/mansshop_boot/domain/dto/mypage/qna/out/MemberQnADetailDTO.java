@@ -8,26 +8,26 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record MemberQnADetailDTO(
-        long memberQnAId
-        , String qnaClassification
-        , String qnaTitle
-        , String writer
-        , String qnaContent
-        , LocalDate updatedAt
-        , boolean memberQnAStat
-        , List<MyPageQnAReplyDTO> replyList
+        long memberQnAId,
+        String qnaClassification,
+        String qnaTitle,
+        String writer,
+        String qnaContent,
+        LocalDate updatedAt,
+        boolean memberQnAStat,
+        List<MyPageQnAReplyDTO> replyList
 ) {
 
     public MemberQnADetailDTO(MemberQnADTO memberQnADTO, List<MyPageQnAReplyDTO> replyList) {
         this(
-                memberQnADTO.memberQnAId()
-                , memberQnADTO.qnaClassification()
-                , memberQnADTO.qnaTitle()
-                , memberQnADTO.writer()
-                , memberQnADTO.qnaContent()
-                , memberQnADTO.updatedAt().toLocalDate()
-                , memberQnADTO.memberQnAStat()
-                , replyList
+                memberQnADTO.memberQnAId(),
+                memberQnADTO.qnaClassification(),
+                memberQnADTO.qnaTitle(),
+                memberQnADTO.writer(),
+                memberQnADTO.qnaContent(),
+                memberQnADTO.updatedAt().toLocalDate(),
+                memberQnADTO.memberQnAStat(),
+                replyList
         );
     }
 }

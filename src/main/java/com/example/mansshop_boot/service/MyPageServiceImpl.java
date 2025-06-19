@@ -100,16 +100,18 @@ public class MyPageServiceImpl implements MyPageService{
                                             , Sort.by("orderId").descending());
 
         Page<ProductOrder> order = productOrderRepository.findByUserId(memberOrderDTO, pageDTO, pageable);
-        List<Long> orderIdList = order.getContent().stream().map(ProductOrder::getId).toList();
-        List<MyPageOrderDetailDTO> detailDTOList = productOrderDetailRepository.findByDetailList(orderIdList);
         List<MyPageOrderDTO> contentList = new ArrayList<>();
+        if(!order.getContent().isEmpty()) {
+            List<Long> orderIdList = order.getContent().stream().map(ProductOrder::getId).toList();
+            List<MyPageOrderDetailDTO> detailDTOList = productOrderDetailRepository.findByDetailList(orderIdList);
 
-        for(ProductOrder data : order.getContent()){
-            List<MyPageOrderDetailDTO> orderDetailList = detailDTOList.stream()
-                                                        .filter(dto -> data.getId() == dto.orderId())
-                                                        .toList();
+            for(ProductOrder data : order.getContent()){
+                List<MyPageOrderDetailDTO> orderDetailList = detailDTOList.stream()
+                        .filter(dto -> data.getId() == dto.orderId())
+                        .toList();
 
-            contentList.add(new MyPageOrderDTO(data, orderDetailList));
+                contentList.add(new MyPageOrderDTO(data, orderDetailList));
+            }
         }
 
         PagingMappingDTO pagingMappingDTO = PagingMappingDTO.builder()
@@ -318,6 +320,10 @@ public class MyPageServiceImpl implements MyPageService{
     public String postMemberQnAReply(QnAReplyInsertDTO insertDTO, Principal principal) {
         Member member = memberRepository.findById(principal.getName()).orElseThrow(IllegalArgumentException::new);
         MemberQnA memberQnA = memberQnARepository.findById(insertDTO.qnaId()).orElseThrow(IllegalArgumentException::new);
+
+        if(!member.getUserId().equals("admin") && !member.getUserId().equals(memberQnA.getMember().getUserId()))
+            throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
+
         memberQnA.setMemberQnAStat(false);
         memberQnARepository.save(memberQnA);
 
@@ -364,7 +370,6 @@ public class MyPageServiceImpl implements MyPageService{
      */
     @Override
     public MemberQnAModifyDataDTO getModifyData(long qnaId, Principal principal) {
-
         String userId = principalService.getUserIdByPrincipal(principal);
         MemberQnA memberQnA = memberQnARepository.findModifyDataByIdAndUserId(qnaId, userId);
 
