@@ -1,10 +1,19 @@
 package com.example.mansshop_boot.service.integration;
 
+import com.example.mansshop_boot.Fixture.*;
+import com.example.mansshop_boot.Fixture.domain.member.MemberAndAuthFixtureDTO;
+import com.example.mansshop_boot.Fixture.util.PaginationUtils;
 import com.example.mansshop_boot.MansShopBootApplication;
+import com.example.mansshop_boot.config.customException.exception.CustomAccessDeniedException;
+import com.example.mansshop_boot.config.customException.exception.CustomNotFoundException;
 import com.example.mansshop_boot.domain.dto.pageable.ProductDetailPageDTO;
+import com.example.mansshop_boot.domain.dto.product.business.ProductOptionDTO;
+import com.example.mansshop_boot.domain.dto.product.in.ProductQnAPostDTO;
 import com.example.mansshop_boot.domain.dto.product.out.ProductDetailDTO;
 import com.example.mansshop_boot.domain.dto.product.out.ProductQnAResponseDTO;
 import com.example.mansshop_boot.domain.dto.product.out.ProductReviewDTO;
+import com.example.mansshop_boot.domain.entity.*;
+import com.example.mansshop_boot.domain.enumeration.Result;
 import com.example.mansshop_boot.repository.classification.ClassificationRepository;
 import com.example.mansshop_boot.repository.member.MemberRepository;
 import com.example.mansshop_boot.repository.product.ProductInfoImageRepository;
@@ -25,11 +34,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @SpringBootTest(classes = MansShopBootApplication.class)
 @EnableJpaRepositories(basePackages = "com.example")
+@ActiveProfiles("test")
+@Transactional
 public class ProductServiceIT {
 
     @Autowired
@@ -68,8 +85,436 @@ public class ProductServiceIT {
     @Autowired
     private ProductQnAReplyRepository productQnAReplyRepository;
 
+    private Member member;
+
+    private List<Member> memberList;
+
+    private Product product;
+
+    private ProductLike productLike;
+
+    private List<ProductReview> answerReviewList;
+
+    private List<ProductReview> newReviewList;
+
+    private List<ProductReview> allReviewList;
+
+    private List<ProductReviewReply> reviewReplyList;
+
+    private List<ProductQnA> answerProductQnAList;
+
+    private List<ProductQnA> newProductQnAList;
+
+    private List<ProductQnA> allProductQnAList;
+
+    private List<ProductQnAReply> productQnAReplyList;
+
+    private Principal principal;
+
     @BeforeEach
     void init() {
+        MemberAndAuthFixtureDTO memberAndAuthFixture = MemberAndAuthFixture.createDefaultMember(10);
+        memberList = memberAndAuthFixture.memberList();
+        MemberAndAuthFixtureDTO adminFixture = MemberAndAuthFixture.createAdmin();
+        Member admin = adminFixture.memberList().get(0);
+        List<Member> saveMemberList = new ArrayList<>(memberList);
+        saveMemberList.add(admin);
+        memberRepository.saveAll(saveMemberList);
+        member = memberList.get(0);
 
+        List<Classification> classificationList = ClassificationFixture.createClassification();
+        classificationRepository.saveAll(classificationList);
+
+        product = ProductFixture.createSaveProductList(1, classificationList.get(0)).get(0);
+        productRepository.save(product);
+        productOptionRepository.saveAll(product.getProductOptions());
+        productThumbnailRepository.saveAll(product.getProductThumbnails());
+        productInfoImageRepository.saveAll(product.getProductInfoImages());
+
+        productLike = ProductLikeFixture.createDefaultProductLike(List.of(member), List.of(product)).get(0);
+        productLikeRepository.save(productLike);
+
+        answerReviewList = ProductReviewFixture.createReviewWithCompletedAnswer(memberList, product.getProductOptions());
+        newReviewList = ProductReviewFixture.createDefaultReview(List.of(member), product.getProductOptions());
+        reviewReplyList = ProductReviewFixture.createDefaultReviewReply(answerReviewList, admin);
+
+        allReviewList = new ArrayList<>(answerReviewList);
+        allReviewList.addAll(newReviewList);
+        productReviewRepository.saveAll(allReviewList);
+        productReviewReplyRepository.saveAll(reviewReplyList);
+
+        answerProductQnAList = ProductQnAFixture.createProductQnACompletedAnswer(memberList, List.of(product));
+        newProductQnAList = ProductQnAFixture.createDefaultProductQnA(memberList, List.of(product));
+        productQnAReplyList = ProductQnAFixture.createDefaultProductQnaReply(admin, answerProductQnAList);
+
+        allProductQnAList = new ArrayList<>(answerProductQnAList);
+        allProductQnAList.addAll(newProductQnAList);
+        productQnARepository.saveAll(allProductQnAList);
+        productQnAReplyRepository.saveAll(productQnAReplyList);
+
+        principal = () -> member.getUserId();
+    }
+
+    @Test
+    @DisplayName(value = "상품 상세 정보 조회. 로그인 상태고 해당 상품을 관심상품으로 등록한 경우")
+    void getDetailLikeProduct() {
+        int discountPrice = (int) (product.getProductPrice() * (1 - ((double) product.getProductDiscount() / 100)));
+        ProductDetailPageDTO pageDTO = new ProductDetailPageDTO();
+        int reviewContentSize = Math.min(allReviewList.size(), pageDTO.reviewAmount());
+        int reviewTotalPages = PaginationUtils.getTotalPages(allReviewList.size(), pageDTO.reviewAmount());
+        int qnaContentSize = Math.min(allProductQnAList.size(), pageDTO.qnaAmount());
+        int qnaTotalPages = PaginationUtils.getTotalPages(allProductQnAList.size(), pageDTO.qnaAmount());
+        List<ProductOption> options = product.getProductOptions()
+                .stream()
+                .filter(ProductOption::isOpen)
+                .toList();
+
+        ProductDetailDTO result = Assertions.assertDoesNotThrow(() -> productService.getDetail(product.getId(), principal));
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(product.getId(), result.productId());
+        Assertions.assertEquals(product.getProductName(), result.productName());
+        Assertions.assertEquals(product.getProductPrice(), result.productPrice());
+        Assertions.assertEquals(product.getThumbnail(), result.productImageName());
+        Assertions.assertTrue(result.likeStat());
+        Assertions.assertEquals(product.getProductDiscount(), result.discount());
+        Assertions.assertEquals(discountPrice, result.discountPrice());
+        Assertions.assertEquals(options.size(), result.productOptionList().size());
+        Assertions.assertEquals(product.getProductThumbnails().size(), result.productThumbnailList().size());
+        for(int i = 0; i < product.getProductThumbnails().size(); i++) {
+            String thumbnailName = product.getProductThumbnails().get(i).getImageName();
+            String resultThumbnailName = result.productThumbnailList().get(i);
+
+            Assertions.assertEquals(thumbnailName, resultThumbnailName);
+        }
+        Assertions.assertEquals(product.getProductInfoImages().size(), result.productInfoImageList().size());
+        for(int i = 0; i < product.getProductInfoImages().size(); i++) {
+            String infoImageName = product.getProductInfoImages().get(i).getImageName();
+            String resultInfoImageName = result.productInfoImageList().get(i);
+
+            Assertions.assertEquals(infoImageName, resultInfoImageName);
+        }
+        Assertions.assertFalse(result.productReviewList().empty());
+        Assertions.assertFalse(result.productReviewList().content().isEmpty());
+        Assertions.assertEquals(reviewContentSize, result.productReviewList().content().size());
+        Assertions.assertEquals(reviewTotalPages, result.productReviewList().totalPages());
+        Assertions.assertEquals(allReviewList.size(), result.productReviewList().totalElements());
+
+        Assertions.assertFalse(result.productQnAList().empty());
+        Assertions.assertFalse(result.productQnAList().content().isEmpty());
+        Assertions.assertEquals(qnaContentSize, result.productQnAList().content().size());
+        Assertions.assertEquals(qnaTotalPages, result.productQnAList().totalPages());
+        Assertions.assertEquals(allProductQnAList.size(), result.productQnAList().totalElements());
+    }
+
+    @Test
+    @DisplayName(value = "상품 상세 정보 조회. 로그인 상태고 해당 상품을 관심상품으로 등록하지 않은 경우")
+    void getDetailDeLikeProduct() {
+        int discountPrice = (int) (product.getProductPrice() * (1 - ((double) product.getProductDiscount() / 100)));
+        ProductDetailPageDTO pageDTO = new ProductDetailPageDTO();
+        int reviewContentSize = Math.min(allReviewList.size(), pageDTO.reviewAmount());
+        int reviewTotalPages = PaginationUtils.getTotalPages(allReviewList.size(), pageDTO.reviewAmount());
+        int qnaContentSize = Math.min(allProductQnAList.size(), pageDTO.qnaAmount());
+        int qnaTotalPages = PaginationUtils.getTotalPages(allProductQnAList.size(), pageDTO.qnaAmount());
+        List<ProductOption> options = product.getProductOptions()
+                .stream()
+                .filter(ProductOption::isOpen)
+                .toList();
+        Principal fixturePrincipal = () -> memberList.get(1).getUserId();
+
+        ProductDetailDTO result = Assertions.assertDoesNotThrow(() -> productService.getDetail(product.getId(), fixturePrincipal));
+
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(product.getId(), result.productId());
+        Assertions.assertEquals(product.getProductName(), result.productName());
+        Assertions.assertEquals(product.getProductPrice(), result.productPrice());
+        Assertions.assertEquals(product.getThumbnail(), result.productImageName());
+        Assertions.assertFalse(result.likeStat());
+        Assertions.assertEquals(product.getProductDiscount(), result.discount());
+        Assertions.assertEquals(discountPrice, result.discountPrice());
+        Assertions.assertEquals(options.size(), result.productOptionList().size());
+        Assertions.assertEquals(product.getProductThumbnails().size(), result.productThumbnailList().size());
+        for(int i = 0; i < product.getProductThumbnails().size(); i++) {
+            String thumbnailName = product.getProductThumbnails().get(i).getImageName();
+            String resultThumbnailName = result.productThumbnailList().get(i);
+
+            Assertions.assertEquals(thumbnailName, resultThumbnailName);
+        }
+        Assertions.assertEquals(product.getProductInfoImages().size(), result.productInfoImageList().size());
+        for(int i = 0; i < product.getProductInfoImages().size(); i++) {
+            String infoImageName = product.getProductInfoImages().get(i).getImageName();
+            String resultInfoImageName = result.productInfoImageList().get(i);
+
+            Assertions.assertEquals(infoImageName, resultInfoImageName);
+        }
+        Assertions.assertFalse(result.productReviewList().empty());
+        Assertions.assertFalse(result.productReviewList().content().isEmpty());
+        Assertions.assertEquals(reviewContentSize, result.productReviewList().content().size());
+        Assertions.assertEquals(reviewTotalPages, result.productReviewList().totalPages());
+        Assertions.assertEquals(allReviewList.size(), result.productReviewList().totalElements());
+
+        Assertions.assertFalse(result.productQnAList().empty());
+        Assertions.assertFalse(result.productQnAList().content().isEmpty());
+        Assertions.assertEquals(qnaContentSize, result.productQnAList().content().size());
+        Assertions.assertEquals(qnaTotalPages, result.productQnAList().totalPages());
+        Assertions.assertEquals(allProductQnAList.size(), result.productQnAList().totalElements());
+    }
+
+    @Test
+    @DisplayName(value = "상품 상세 정보 조회. 비회원인 경우")
+    void getDetailAnonymous() {
+        int discountPrice = (int) (product.getProductPrice() * (1 - ((double) product.getProductDiscount() / 100)));
+        ProductDetailPageDTO pageDTO = new ProductDetailPageDTO();
+        int reviewContentSize = Math.min(allReviewList.size(), pageDTO.reviewAmount());
+        int reviewTotalPages = PaginationUtils.getTotalPages(allReviewList.size(), pageDTO.reviewAmount());
+        int qnaContentSize = Math.min(allProductQnAList.size(), pageDTO.qnaAmount());
+        int qnaTotalPages = PaginationUtils.getTotalPages(allProductQnAList.size(), pageDTO.qnaAmount());
+        List<ProductOption> options = product.getProductOptions()
+                .stream()
+                .filter(ProductOption::isOpen)
+                .toList();
+
+        ProductDetailDTO result = Assertions.assertDoesNotThrow(() -> productService.getDetail(product.getId(), null));
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(product.getId(), result.productId());
+        Assertions.assertEquals(product.getProductName(), result.productName());
+        Assertions.assertEquals(product.getProductPrice(), result.productPrice());
+        Assertions.assertEquals(product.getThumbnail(), result.productImageName());
+        Assertions.assertFalse(result.likeStat());
+        Assertions.assertEquals(product.getProductDiscount(), result.discount());
+        Assertions.assertEquals(discountPrice, result.discountPrice());
+        Assertions.assertEquals(options.size(), result.productOptionList().size());
+        Assertions.assertEquals(product.getProductThumbnails().size(), result.productThumbnailList().size());
+        for(int i = 0; i < product.getProductThumbnails().size(); i++) {
+            String thumbnailName = product.getProductThumbnails().get(i).getImageName();
+            String resultThumbnailName = result.productThumbnailList().get(i);
+
+            Assertions.assertEquals(thumbnailName, resultThumbnailName);
+        }
+        Assertions.assertEquals(product.getProductInfoImages().size(), result.productInfoImageList().size());
+        for(int i = 0; i < product.getProductInfoImages().size(); i++) {
+            String infoImageName = product.getProductInfoImages().get(i).getImageName();
+            String resultInfoImageName = result.productInfoImageList().get(i);
+
+            Assertions.assertEquals(infoImageName, resultInfoImageName);
+        }
+        Assertions.assertFalse(result.productReviewList().empty());
+        Assertions.assertFalse(result.productReviewList().content().isEmpty());
+        Assertions.assertEquals(reviewContentSize, result.productReviewList().content().size());
+        Assertions.assertEquals(reviewTotalPages, result.productReviewList().totalPages());
+        Assertions.assertEquals(allReviewList.size(), result.productReviewList().totalElements());
+
+        Assertions.assertFalse(result.productQnAList().empty());
+        Assertions.assertFalse(result.productQnAList().content().isEmpty());
+        Assertions.assertEquals(qnaContentSize, result.productQnAList().content().size());
+        Assertions.assertEquals(qnaTotalPages, result.productQnAList().totalPages());
+        Assertions.assertEquals(allProductQnAList.size(), result.productQnAList().totalElements());
+    }
+
+    @Test
+    @DisplayName(value = "상품 상세 정보 조회. 상품 아이디가 잘못 된 경우")
+    void getDetailWrongId() {
+        Assertions.assertThrows(
+                CustomNotFoundException.class,
+                () -> productService.getDetail("noneProductId", null)
+        );
+    }
+
+    @Test
+    @DisplayName(value = "리뷰 리스트 조회")
+    void getDetailReview() {
+        ProductDetailPageDTO pageDTO = new ProductDetailPageDTO();
+        int contentSize = Math.min(allReviewList.size(), pageDTO.reviewAmount());
+        int totalPages = PaginationUtils.getTotalPages(allReviewList.size(), pageDTO.reviewAmount());
+
+        Page<ProductReviewDTO> result = Assertions.assertDoesNotThrow(() -> productService.getDetailReview(pageDTO, product.getId()));
+
+        Assertions.assertNotNull(result);
+        Assertions.assertFalse(result.getContent().isEmpty());
+        Assertions.assertFalse(result.isEmpty());
+        Assertions.assertEquals(contentSize, result.getContent().size());
+        Assertions.assertEquals(totalPages, result.getTotalPages());
+        Assertions.assertEquals(allReviewList.size(), result.getTotalElements());
+    }
+
+    @Test
+    @DisplayName(value = "리뷰 리스트 조회. 데이터가 없는 경우")
+    void getDetailReviewEmpty() {
+        productReviewRepository.deleteAll();
+        ProductDetailPageDTO pageDTO = new ProductDetailPageDTO();
+
+        Page<ProductReviewDTO> result = Assertions.assertDoesNotThrow(() -> productService.getDetailReview(pageDTO, product.getId()));
+
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.getContent().isEmpty());
+        Assertions.assertTrue(result.isEmpty());
+        Assertions.assertEquals(0, result.getContent().size());
+        Assertions.assertEquals(0, result.getTotalPages());
+    }
+
+    @Test
+    @DisplayName(value = "상품 문의 리스트 조회")
+    void getDetailQnA() {
+        ProductDetailPageDTO pageDTO = new ProductDetailPageDTO();
+        int contentSize = Math.min(allProductQnAList.size(), pageDTO.qnaAmount());
+        int totalPages = PaginationUtils.getTotalPages(allProductQnAList.size(), pageDTO.qnaAmount());
+
+        Page<ProductQnAResponseDTO> result = Assertions.assertDoesNotThrow(() -> productService.getDetailQnA(pageDTO, product.getId()));
+
+        Assertions.assertNotNull(result);
+        Assertions.assertFalse(result.getContent().isEmpty());
+        Assertions.assertFalse(result.isEmpty());
+        Assertions.assertEquals(contentSize, result.getContent().size());
+        Assertions.assertEquals(totalPages, result.getTotalPages());
+        Assertions.assertEquals(allProductQnAList.size(), result.getTotalElements());
+    }
+
+    @Test
+    @DisplayName(value = "상품 문의 리스트 조회. 데이터가 없는 경우")
+    void getDetailQnAEmpty() {
+        productQnARepository.deleteAll();
+        ProductDetailPageDTO pageDTO = new ProductDetailPageDTO();
+
+        Page<ProductQnAResponseDTO> result = Assertions.assertDoesNotThrow(() -> productService.getDetailQnA(pageDTO, product.getId()));
+
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.getContent().isEmpty());
+        Assertions.assertTrue(result.isEmpty());
+        Assertions.assertEquals(0, result.getContent().size());
+        Assertions.assertEquals(0, result.getTotalPages());
+    }
+
+    @Test
+    @DisplayName(value = "관심상품 등록")
+    void likeProduct() {
+        Map<String, String> productIdMap = new HashMap<>();
+        productIdMap.put("productId", product.getId());
+        Principal fixturePrincipal = () -> memberList.get(1).getUserId();
+
+        String result = Assertions.assertDoesNotThrow(() -> productService.likeProduct(productIdMap, fixturePrincipal));
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(Result.OK.getResultKey(), result);
+
+        ProductLike saveProductLike = productLikeRepository.findByMember_UserId(fixturePrincipal.getName()).get(0);
+
+        Assertions.assertNotNull(saveProductLike);
+    }
+
+    @Test
+    @DisplayName(value = "관심상품 등록. Map 데이터가 없는 경우 ")
+    void likeProductWrongProductIdMap() {
+        Map<String, String> productIdMap = new HashMap<>();
+        Principal fixturePrincipal = () -> memberList.get(1).getUserId();
+
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> productService.likeProduct(productIdMap, fixturePrincipal)
+        );
+
+        List<ProductLike> productLikeList = productLikeRepository.findByMember_UserId(fixturePrincipal.getName());
+
+        Assertions.assertTrue(productLikeList.isEmpty());
+    }
+
+    @Test
+    @DisplayName(value = "관심상품 등록. Principal이 null인 경우")
+    void likeProductPrincipalIsNull() {
+        Map<String, String> productIdMap = new HashMap<>();
+        productIdMap.put("productId", product.getId());
+
+        Assertions.assertThrows(
+                CustomAccessDeniedException.class,
+                () -> productService.likeProduct(productIdMap, null)
+        );
+    }
+
+    @Test
+    @DisplayName(value = "관심상품 등록. 상품 아이디가 잘못 된 경우")
+    void likeProductWrongProductId() {
+        Map<String, String> productIdMap = new HashMap<>();
+        productIdMap.put("productId", "noneProductId");
+        Principal fixturePrincipal = () -> memberList.get(1).getUserId();
+
+        Assertions.assertThrows(
+                CustomNotFoundException.class,
+                () -> productService.likeProduct(productIdMap, fixturePrincipal)
+        );
+
+        List<ProductLike> productLikeList = productLikeRepository.findByMember_UserId(fixturePrincipal.getName());
+
+        Assertions.assertTrue(productLikeList.isEmpty());
+    }
+
+    @Test
+    @DisplayName(value = "관심상품 해제")
+    void deLikeProduct() {
+        String productId = productLike.getProduct().getId();
+
+        String result = Assertions.assertDoesNotThrow(() -> productService.deLikeProduct(productId, principal));
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(Result.OK.getResultKey(), result);
+
+        List<ProductLike> productLikeList = productLikeRepository.findByMember_UserId(principal.getName());
+
+        Assertions.assertTrue(productLikeList.isEmpty());
+    }
+
+    @Test
+    @DisplayName(value = "관심상품 해제. Principal이 null인 경우")
+    void deLikeProductPrincipalIsNull() {
+        String productId = productLike.getProduct().getId();
+
+        Assertions.assertThrows(
+                CustomAccessDeniedException.class,
+                () -> productService.deLikeProduct(productId, null)
+        );
+
+        List<ProductLike> productLikeList = productLikeRepository.findByMember_UserId(principal.getName());
+
+        Assertions.assertFalse(productLikeList.isEmpty());
+    }
+
+    @Test
+    @DisplayName(value = "관심상품 해제. 상품 아이디가 잘못 된 경우")
+    void deLikeProductWrongId() {
+        Assertions.assertThrows(
+                CustomNotFoundException.class,
+                () -> productService.deLikeProduct("noneProductId", principal)
+        );
+
+        List<ProductLike> productLikeList = productLikeRepository.findByMember_UserId(principal.getName());
+
+        Assertions.assertFalse(productLikeList.isEmpty());
+    }
+
+    @Test
+    @DisplayName(value = "상품 문의 작성")
+    void postProductQnA() {
+        ProductQnAPostDTO postDTO = new ProductQnAPostDTO(product.getId(), "test post product QnA content");
+
+        String result = Assertions.assertDoesNotThrow(() -> productService.postProductQnA(postDTO, principal));
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(Result.OK.getResultKey(), result);
+
+        ProductQnA saveList = productQnARepository.findAllByMember_UserIdOrderByIdDesc(principal.getName()).get(0);
+
+        Assertions.assertNotNull(saveList);
+        Assertions.assertEquals(postDTO.content(), saveList.getQnaContent());
+    }
+
+    @Test
+    @DisplayName(value = "상품 문의 작성. 상품 아이디가 잘못 된 경우")
+    void postProductQnAWrongProductId() {
+        ProductQnAPostDTO postDTO = new ProductQnAPostDTO("noneProductId", "test post product QnA content");
+
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> productService.postProductQnA(postDTO, principal)
+        );
     }
 }

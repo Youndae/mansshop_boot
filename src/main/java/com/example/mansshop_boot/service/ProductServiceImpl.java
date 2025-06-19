@@ -103,13 +103,13 @@ public class ProductServiceImpl implements ProductService{
         ProductPageableDTO<ProductQnAResponseDTO> productQnA = new ProductPageableDTO<>(getDetailQnA(pageDTO, productId));
 
         return new ProductDetailDTO(
-                        product
-                        , likeStat
-                        , productOption
-                        , productThumbnailList
-                        , productInfoImageList
-                        , productReview
-                        , productQnA
+                        product,
+                        likeStat,
+                        productOption,
+                        productThumbnailList,
+                        productInfoImageList,
+                        productReview,
+                        productQnA
                 );
     }
 
@@ -182,7 +182,7 @@ public class ProductServiceImpl implements ProductService{
 
     /**
      *
-     * @param productId
+     * @param productIdMap
      * @param principal
      * @return
      *
