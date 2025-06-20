@@ -24,10 +24,7 @@ import com.example.mansshop_boot.repository.productQnA.ProductQnAReplyRepository
 import com.example.mansshop_boot.repository.productQnA.ProductQnARepository;
 import com.example.mansshop_boot.repository.qnaClassification.QnAClassificationRepository;
 import com.example.mansshop_boot.service.admin.AdminQnAService;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -38,6 +35,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = MansShopBootApplication.class)
 @EnableJpaRepositories(basePackages = "com.example")
@@ -154,19 +153,19 @@ public class AdminQnAServiceIT {
     void getAllProductQnAList() {
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createSearchAdminOrderPageDTO(null, ALL_LIST_TYPE, 1);
         int totalPages = PaginationUtils.getTotalPages(allProductQnA.size(), pageDTO.amount());
-        PagingListDTO<AdminQnAListResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getProductQnAList(pageDTO));
+        PagingListDTO<AdminQnAListResponseDTO> result = assertDoesNotThrow(() -> adminQnAService.getProductQnAList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertFalse(result.pagingData().isEmpty());
-        Assertions.assertEquals(pageDTO.amount(), result.content().size());
-        Assertions.assertEquals(allProductQnA.size(), result.pagingData().getTotalElements());
-        Assertions.assertEquals(totalPages, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertFalse(result.pagingData().isEmpty());
+        assertEquals(pageDTO.amount(), result.content().size());
+        assertEquals(allProductQnA.size(), result.pagingData().getTotalElements());
+        assertEquals(totalPages, result.pagingData().getTotalPages());
 
         Long cachingResult = redisTemplate.opsForValue().get(PRODUCT_QNA_CACHING_KEY);
 
-        Assertions.assertNotNull(cachingResult);
-        Assertions.assertEquals(allProductQnA.size(), cachingResult);
+        assertNotNull(cachingResult);
+        assertEquals(allProductQnA.size(), cachingResult);
 
         redisTemplate.delete(PRODUCT_QNA_CACHING_KEY);
     }
@@ -178,17 +177,17 @@ public class AdminQnAServiceIT {
         productQnARepository.deleteAll();
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createSearchAdminOrderPageDTO(null, ALL_LIST_TYPE, 1);
 
-        PagingListDTO<AdminQnAListResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getProductQnAList(pageDTO));
+        PagingListDTO<AdminQnAListResponseDTO> result = assertDoesNotThrow(() -> adminQnAService.getProductQnAList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.content().isEmpty());
-        Assertions.assertTrue(result.pagingData().isEmpty());
-        Assertions.assertEquals(0, result.pagingData().getTotalElements());
-        Assertions.assertEquals(0, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertTrue(result.content().isEmpty());
+        assertTrue(result.pagingData().isEmpty());
+        assertEquals(0, result.pagingData().getTotalElements());
+        assertEquals(0, result.pagingData().getTotalPages());
 
         Long cachingResult = redisTemplate.opsForValue().get(PRODUCT_QNA_CACHING_KEY);
 
-        Assertions.assertNull(cachingResult);
+        assertNull(cachingResult);
     }
 
     @Test
@@ -203,35 +202,35 @@ public class AdminQnAServiceIT {
                                         .size();
         int totalPages = PaginationUtils.getTotalPages(totalElements, pageDTO.amount());
         int resultContentSize = Math.min(totalElements, pageDTO.amount());
-        PagingListDTO<AdminQnAListResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getProductQnAList(pageDTO));
+        PagingListDTO<AdminQnAListResponseDTO> result = assertDoesNotThrow(() -> adminQnAService.getProductQnAList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertFalse(result.pagingData().isEmpty());
-        Assertions.assertEquals(resultContentSize, result.content().size());
-        Assertions.assertEquals(totalElements, result.pagingData().getTotalElements());
-        Assertions.assertEquals(totalPages, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertFalse(result.pagingData().isEmpty());
+        assertEquals(resultContentSize, result.content().size());
+        assertEquals(totalElements, result.pagingData().getTotalElements());
+        assertEquals(totalPages, result.pagingData().getTotalPages());
 
         Long cachingResult = redisTemplate.opsForValue().get(PRODUCT_QNA_CACHING_KEY);
 
-        Assertions.assertNull(cachingResult);
+        assertNull(cachingResult);
     }
 
     @Test
     @DisplayName(value = "모든 상품 문의 목록 조회. 검색. 결과가 없는 경우")
     void getAllProductQnAListSearchEmpty() {
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createSearchAdminOrderPageDTO("NoneUser", ALL_LIST_TYPE, 1);
-        PagingListDTO<AdminQnAListResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getProductQnAList(pageDTO));
+        PagingListDTO<AdminQnAListResponseDTO> result = assertDoesNotThrow(() -> adminQnAService.getProductQnAList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.content().isEmpty());
-        Assertions.assertTrue(result.pagingData().isEmpty());
-        Assertions.assertEquals(0, result.pagingData().getTotalElements());
-        Assertions.assertEquals(0, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertTrue(result.content().isEmpty());
+        assertTrue(result.pagingData().isEmpty());
+        assertEquals(0, result.pagingData().getTotalElements());
+        assertEquals(0, result.pagingData().getTotalPages());
 
         Long cachingResult = redisTemplate.opsForValue().get(PRODUCT_QNA_CACHING_KEY);
 
-        Assertions.assertNull(cachingResult);
+        assertNull(cachingResult);
     }
 
     @Test
@@ -239,18 +238,18 @@ public class AdminQnAServiceIT {
     void getNewProductQnAList() {
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createSearchAdminOrderPageDTO(null, NEW_LIST_TYPE, 1);
         int totalPages = PaginationUtils.getTotalPages(newProductQnAList.size(), pageDTO.amount());
-        PagingListDTO<AdminQnAListResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getProductQnAList(pageDTO));
+        PagingListDTO<AdminQnAListResponseDTO> result = assertDoesNotThrow(() -> adminQnAService.getProductQnAList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertFalse(result.pagingData().isEmpty());
-        Assertions.assertEquals(pageDTO.amount(), result.content().size());
-        Assertions.assertEquals(newProductQnAList.size(), result.pagingData().getTotalElements());
-        Assertions.assertEquals(totalPages, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertFalse(result.pagingData().isEmpty());
+        assertEquals(pageDTO.amount(), result.content().size());
+        assertEquals(newProductQnAList.size(), result.pagingData().getTotalElements());
+        assertEquals(totalPages, result.pagingData().getTotalPages());
 
         Long cachingResult = redisTemplate.opsForValue().get(PRODUCT_QNA_CACHING_KEY);
 
-        Assertions.assertNull(cachingResult);
+        assertNull(cachingResult);
     }
 
     @Test
@@ -265,18 +264,18 @@ public class AdminQnAServiceIT {
                 .size();
         int totalPages = PaginationUtils.getTotalPages(totalElements, pageDTO.amount());
         int resultContentSize = Math.min(totalElements, pageDTO.amount());
-        PagingListDTO<AdminQnAListResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getProductQnAList(pageDTO));
+        PagingListDTO<AdminQnAListResponseDTO> result = assertDoesNotThrow(() -> adminQnAService.getProductQnAList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertFalse(result.pagingData().isEmpty());
-        Assertions.assertEquals(resultContentSize, result.content().size());
-        Assertions.assertEquals(totalElements, result.pagingData().getTotalElements());
-        Assertions.assertEquals(totalPages, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertFalse(result.pagingData().isEmpty());
+        assertEquals(resultContentSize, result.content().size());
+        assertEquals(totalElements, result.pagingData().getTotalElements());
+        assertEquals(totalPages, result.pagingData().getTotalPages());
 
         Long cachingResult = redisTemplate.opsForValue().get(PRODUCT_QNA_CACHING_KEY);
 
-        Assertions.assertNull(cachingResult);
+        assertNull(cachingResult);
     }
 
     @Test
@@ -284,21 +283,21 @@ public class AdminQnAServiceIT {
     void patchProductQnAComplete() {
         ProductQnA newProductQnAFixture = newProductQnAList.get(0);
 
-        String result = Assertions.assertDoesNotThrow(() -> adminQnAService.patchProductQnAComplete(newProductQnAFixture.getId()));
+        String result = assertDoesNotThrow(() -> adminQnAService.patchProductQnAComplete(newProductQnAFixture.getId()));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         ProductQnA patchFixture = productQnARepository.findById(newProductQnAFixture.getId()).orElse(null);
 
-        Assertions.assertNotNull(patchFixture);
-        Assertions.assertTrue(patchFixture.isProductQnAStat());
+        assertNotNull(patchFixture);
+        assertTrue(patchFixture.isProductQnAStat());
     }
 
     @Test
     @DisplayName(value = "상품 문의 답변 완료 처리. 데이터가 없는 경우")
     void patchProductQnACompleteNotFound() {
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> adminQnAService.patchProductQnAComplete(0L)
         );
@@ -311,24 +310,24 @@ public class AdminQnAServiceIT {
         String content = "test Reply Content";
         QnAReplyInsertDTO insertDTO = new QnAReplyInsertDTO(newProductQnAFixture.getId(), content);
 
-        String result = Assertions.assertDoesNotThrow(() -> adminQnAService.postProductQnAReply(insertDTO, principal));
+        String result = assertDoesNotThrow(() -> adminQnAService.postProductQnAReply(insertDTO, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         List<MyPageQnAReplyDTO> saveReplyList = productQnAReplyRepository.findAllByQnAId(newProductQnAFixture.getId());
 
-        Assertions.assertFalse(saveReplyList.isEmpty());
+        assertFalse(saveReplyList.isEmpty());
 
         MyPageQnAReplyDTO saveReply = saveReplyList.get(0);
 
-        Assertions.assertEquals(admin.getNickname(), saveReply.writer());
-        Assertions.assertEquals(content, saveReply.replyContent());
+        assertEquals(admin.getNickname(), saveReply.writer());
+        assertEquals(content, saveReply.replyContent());
 
         ProductQnA patchProductQnA = productQnARepository.findById(newProductQnAFixture.getId()).orElse(null);
 
-        Assertions.assertNotNull(patchProductQnA);
-        Assertions.assertTrue(patchProductQnA.isProductQnAStat());
+        assertNotNull(patchProductQnA);
+        assertTrue(patchProductQnA.isProductQnAStat());
     }
 
     @Test
@@ -337,7 +336,7 @@ public class AdminQnAServiceIT {
         String content = "test Reply Content";
         QnAReplyInsertDTO insertDTO = new QnAReplyInsertDTO(0L, content);
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> adminQnAService.postProductQnAReply(insertDTO, principal)
         );
@@ -350,15 +349,15 @@ public class AdminQnAServiceIT {
         String content = "patch reply content";
         QnAReplyDTO replyDTO = new QnAReplyDTO(reply.getId(), content);
 
-        String result = Assertions.assertDoesNotThrow(() -> adminQnAService.patchProductQnAReply(replyDTO, principal));
+        String result = assertDoesNotThrow(() -> adminQnAService.patchProductQnAReply(replyDTO, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         ProductQnAReply patchReply = productQnAReplyRepository.findById(reply.getId()).orElse(null);
 
-        Assertions.assertNotNull(patchReply);
-        Assertions.assertEquals(content, patchReply.getReplyContent());
+        assertNotNull(patchReply);
+        assertEquals(content, patchReply.getReplyContent());
     }
 
     @Test
@@ -367,7 +366,7 @@ public class AdminQnAServiceIT {
         String content = "patch reply content";
         QnAReplyDTO replyDTO = new QnAReplyDTO(0L, content);
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> adminQnAService.patchProductQnAReply(replyDTO, principal)
         );
@@ -382,7 +381,7 @@ public class AdminQnAServiceIT {
 
         Principal nonAdminPrincipal = () -> "writer";
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> adminQnAService.patchProductQnAReply(replyDTO, nonAdminPrincipal)
         );
@@ -393,19 +392,19 @@ public class AdminQnAServiceIT {
     void getAllMemberQnAList() {
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createSearchAdminOrderPageDTO(null, ALL_LIST_TYPE, 1);
         int totalPages = PaginationUtils.getTotalPages(allMemberQnA.size(), pageDTO.amount());
-        PagingListDTO<AdminQnAListResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getMemberQnAList(pageDTO));
+        PagingListDTO<AdminQnAListResponseDTO> result = assertDoesNotThrow(() -> adminQnAService.getMemberQnAList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertFalse(result.pagingData().isEmpty());
-        Assertions.assertEquals(pageDTO.amount(), result.content().size());
-        Assertions.assertEquals(allMemberQnA.size(), result.pagingData().getTotalElements());
-        Assertions.assertEquals(totalPages, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertFalse(result.pagingData().isEmpty());
+        assertEquals(pageDTO.amount(), result.content().size());
+        assertEquals(allMemberQnA.size(), result.pagingData().getTotalElements());
+        assertEquals(totalPages, result.pagingData().getTotalPages());
 
         Long cachingResult = redisTemplate.opsForValue().get(MEMBER_QNA_CACHING_KEY);
 
-        Assertions.assertNotNull(cachingResult);
-        Assertions.assertEquals(allMemberQnA.size(), cachingResult);
+        assertNotNull(cachingResult);
+        assertEquals(allMemberQnA.size(), cachingResult);
 
         redisTemplate.delete(MEMBER_QNA_CACHING_KEY);
     }
@@ -417,17 +416,17 @@ public class AdminQnAServiceIT {
         memberQnARepository.deleteAll();
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createSearchAdminOrderPageDTO(null, ALL_LIST_TYPE, 1);
 
-        PagingListDTO<AdminQnAListResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getMemberQnAList(pageDTO));
+        PagingListDTO<AdminQnAListResponseDTO> result = assertDoesNotThrow(() -> adminQnAService.getMemberQnAList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.content().isEmpty());
-        Assertions.assertTrue(result.pagingData().isEmpty());
-        Assertions.assertEquals(0, result.pagingData().getTotalElements());
-        Assertions.assertEquals(0, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertTrue(result.content().isEmpty());
+        assertTrue(result.pagingData().isEmpty());
+        assertEquals(0, result.pagingData().getTotalElements());
+        assertEquals(0, result.pagingData().getTotalPages());
 
         Long cachingResult = redisTemplate.opsForValue().get(MEMBER_QNA_CACHING_KEY);
 
-        Assertions.assertNull(cachingResult);
+        assertNull(cachingResult);
     }
 
     @Test
@@ -443,35 +442,35 @@ public class AdminQnAServiceIT {
                 .size();
         int totalPages = PaginationUtils.getTotalPages(totalElements, pageDTO.amount());
         int resultContentSize = Math.min(totalElements, pageDTO.amount());
-        PagingListDTO<AdminQnAListResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getMemberQnAList(pageDTO));
+        PagingListDTO<AdminQnAListResponseDTO> result = assertDoesNotThrow(() -> adminQnAService.getMemberQnAList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertFalse(result.pagingData().isEmpty());
-        Assertions.assertEquals(resultContentSize, result.content().size());
-        Assertions.assertEquals(totalElements, result.pagingData().getTotalElements());
-        Assertions.assertEquals(totalPages, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertFalse(result.pagingData().isEmpty());
+        assertEquals(resultContentSize, result.content().size());
+        assertEquals(totalElements, result.pagingData().getTotalElements());
+        assertEquals(totalPages, result.pagingData().getTotalPages());
 
         Long cachingResult = redisTemplate.opsForValue().get(MEMBER_QNA_CACHING_KEY);
 
-        Assertions.assertNull(cachingResult);
+        assertNull(cachingResult);
     }
 
     @Test
     @DisplayName(value = "모든 상품 문의 목록 조회. 검색. 결과가 없는 경우")
     void getAllMemberQnAListSearchEmpty() {
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createSearchAdminOrderPageDTO("NoneUser", ALL_LIST_TYPE, 1);
-        PagingListDTO<AdminQnAListResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getMemberQnAList(pageDTO));
+        PagingListDTO<AdminQnAListResponseDTO> result = assertDoesNotThrow(() -> adminQnAService.getMemberQnAList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.content().isEmpty());
-        Assertions.assertTrue(result.pagingData().isEmpty());
-        Assertions.assertEquals(0, result.pagingData().getTotalElements());
-        Assertions.assertEquals(0, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertTrue(result.content().isEmpty());
+        assertTrue(result.pagingData().isEmpty());
+        assertEquals(0, result.pagingData().getTotalElements());
+        assertEquals(0, result.pagingData().getTotalPages());
 
         Long cachingResult = redisTemplate.opsForValue().get(MEMBER_QNA_CACHING_KEY);
 
-        Assertions.assertNull(cachingResult);
+        assertNull(cachingResult);
     }
 
     @Test
@@ -479,21 +478,21 @@ public class AdminQnAServiceIT {
     void patchMemberQnAComplete() {
         MemberQnA memberQnA = newMemberQnAList.get(0);
 
-        String result = Assertions.assertDoesNotThrow(() -> adminQnAService.patchMemberQnAComplete(memberQnA.getId()));
+        String result = assertDoesNotThrow(() -> adminQnAService.patchMemberQnAComplete(memberQnA.getId()));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         MemberQnA patchMemberQnA = memberQnARepository.findById(memberQnA.getId()).orElse(null);
 
-        Assertions.assertNotNull(patchMemberQnA);
-        Assertions.assertTrue(patchMemberQnA.isMemberQnAStat());
+        assertNotNull(patchMemberQnA);
+        assertTrue(patchMemberQnA.isMemberQnAStat());
     }
 
     @Test
     @DisplayName(value = "회원 문의 답변 완료 처리. 회원 문의 데이터가 없는 경우")
     void patchMemberQnACompleteNotFound() {
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> adminQnAService.patchMemberQnAComplete(0L)
         );
@@ -506,22 +505,22 @@ public class AdminQnAServiceIT {
         String content = "test Reply Content";
         QnAReplyInsertDTO insertDTO = new QnAReplyInsertDTO(memberQnA.getId(), content);
 
-        String result = Assertions.assertDoesNotThrow(() -> adminQnAService.postMemberQnAReply(insertDTO, principal));
+        String result = assertDoesNotThrow(() -> adminQnAService.postMemberQnAReply(insertDTO, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         List<MyPageQnAReplyDTO> replyList = memberQnAReplyRepository.findAllByQnAId(memberQnA.getId());
-        Assertions.assertFalse(replyList.isEmpty());
+        assertFalse(replyList.isEmpty());
 
         MyPageQnAReplyDTO reply = replyList.get(0);
 
-        Assertions.assertEquals(admin.getNickname(), reply.writer());
-        Assertions.assertEquals(content, reply.replyContent());
+        assertEquals(admin.getNickname(), reply.writer());
+        assertEquals(content, reply.replyContent());
 
         MemberQnA patchMemberQnA = memberQnARepository.findById(memberQnA.getId()).orElse(null);
-        Assertions.assertNotNull(patchMemberQnA);
-        Assertions.assertTrue(patchMemberQnA.isMemberQnAStat());
+        assertNotNull(patchMemberQnA);
+        assertTrue(patchMemberQnA.isMemberQnAStat());
     }
 
     @Test
@@ -530,7 +529,7 @@ public class AdminQnAServiceIT {
         String content = "test Reply Content";
         QnAReplyInsertDTO insertDTO = new QnAReplyInsertDTO(0L, content);
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> adminQnAService.postMemberQnAReply(insertDTO, principal)
         );
@@ -539,18 +538,18 @@ public class AdminQnAServiceIT {
     @Test
     @DisplayName(value = "모든 회원 문의 분류 조회")
     void getQnAClassification() {
-        List<AdminQnAClassificationDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getQnAClassification());
+        List<AdminQnAClassificationDTO> result = assertDoesNotThrow(() -> adminQnAService.getQnAClassification());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.isEmpty());
-        Assertions.assertEquals(qnAClassificationList.size(), result.size());
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertEquals(qnAClassificationList.size(), result.size());
 
         for(int i = 0; i < qnAClassificationList.size(); i++) {
             QnAClassification entity = qnAClassificationList.get(i);
             AdminQnAClassificationDTO resultDTO = result.get(i);
 
-            Assertions.assertEquals(entity.getId(), resultDTO.id());
-            Assertions.assertEquals(entity.getQnaClassificationName(), resultDTO.name());
+            assertEquals(entity.getId(), resultDTO.id());
+            assertEquals(entity.getQnaClassificationName(), resultDTO.name());
         }
     }
 
@@ -560,10 +559,10 @@ public class AdminQnAServiceIT {
         memberQnAReplyRepository.deleteAll();
         memberQnARepository.deleteAll();
         qnAClassificationRepository.deleteAll();
-        List<AdminQnAClassificationDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getQnAClassification());
+        List<AdminQnAClassificationDTO> result = assertDoesNotThrow(() -> adminQnAService.getQnAClassification());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.isEmpty());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -571,15 +570,15 @@ public class AdminQnAServiceIT {
     void postQnAClassification() {
         String classificationName = "테스트 분류";
 
-        String result = Assertions.assertDoesNotThrow(() -> adminQnAService.postQnAClassification(classificationName));
+        String result = assertDoesNotThrow(() -> adminQnAService.postQnAClassification(classificationName));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         List<QnAClassification> allQnAClassificationList = qnAClassificationRepository.findAll();
 
-        Assertions.assertFalse(allQnAClassificationList.isEmpty());
-        Assertions.assertEquals(qnAClassificationList.size() + 1, allQnAClassificationList.size());
-        Assertions.assertEquals(classificationName, allQnAClassificationList.get(allQnAClassificationList.size() - 1).getQnaClassificationName());
+        assertFalse(allQnAClassificationList.isEmpty());
+        assertEquals(qnAClassificationList.size() + 1, allQnAClassificationList.size());
+        assertEquals(classificationName, allQnAClassificationList.get(allQnAClassificationList.size() - 1).getQnaClassificationName());
     }
 }

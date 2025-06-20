@@ -24,6 +24,8 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
@@ -104,8 +106,8 @@ public class ProductQnADetailRepositoryTest {
         List<Long> productQnAIds = allProductQnA.stream().mapToLong(ProductQnA::getId).boxed().toList();
         List<ProductQnAReplyListDTO> result = productQnAReplyRepository.getQnAReply(productQnAIds);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(completedQnAReplyList.size(), result.size());
+        assertNotNull(result);
+        assertEquals(completedQnAReplyList.size(), result.size());
     }
 
     @Test
@@ -114,8 +116,8 @@ public class ProductQnADetailRepositoryTest {
         List<Long> productQnAIds = newQnAList.stream().mapToLong(ProductQnA::getId).boxed().toList();
         List<ProductQnAReplyListDTO> result = productQnAReplyRepository.getQnAReply(productQnAIds);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.isEmpty());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
 
@@ -129,7 +131,7 @@ public class ProductQnADetailRepositoryTest {
                                                             .toList();
         List<MyPageQnAReplyDTO> result = productQnAReplyRepository.findAllByQnAId(replyDataList.get(0).getProductQnA().getId());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(replyDataList.size(), result.size());
+        assertNotNull(result);
+        assertEquals(replyDataList.size(), result.size());
     }
 }

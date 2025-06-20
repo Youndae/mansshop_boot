@@ -43,6 +43,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest(classes = MansShopBootApplication.class)
 @EnableJpaRepositories(basePackages = "com.example")
 @ActiveProfiles("test")
@@ -169,42 +171,42 @@ public class ProductServiceIT {
                 .filter(ProductOption::isOpen)
                 .toList();
 
-        ProductDetailDTO result = Assertions.assertDoesNotThrow(() -> productService.getDetail(product.getId(), principal));
+        ProductDetailDTO result = assertDoesNotThrow(() -> productService.getDetail(product.getId(), principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(product.getId(), result.productId());
-        Assertions.assertEquals(product.getProductName(), result.productName());
-        Assertions.assertEquals(product.getProductPrice(), result.productPrice());
-        Assertions.assertEquals(product.getThumbnail(), result.productImageName());
-        Assertions.assertTrue(result.likeStat());
-        Assertions.assertEquals(product.getProductDiscount(), result.discount());
-        Assertions.assertEquals(discountPrice, result.discountPrice());
-        Assertions.assertEquals(options.size(), result.productOptionList().size());
-        Assertions.assertEquals(product.getProductThumbnails().size(), result.productThumbnailList().size());
+        assertNotNull(result);
+        assertEquals(product.getId(), result.productId());
+        assertEquals(product.getProductName(), result.productName());
+        assertEquals(product.getProductPrice(), result.productPrice());
+        assertEquals(product.getThumbnail(), result.productImageName());
+        assertTrue(result.likeStat());
+        assertEquals(product.getProductDiscount(), result.discount());
+        assertEquals(discountPrice, result.discountPrice());
+        assertEquals(options.size(), result.productOptionList().size());
+        assertEquals(product.getProductThumbnails().size(), result.productThumbnailList().size());
         for(int i = 0; i < product.getProductThumbnails().size(); i++) {
             String thumbnailName = product.getProductThumbnails().get(i).getImageName();
             String resultThumbnailName = result.productThumbnailList().get(i);
 
-            Assertions.assertEquals(thumbnailName, resultThumbnailName);
+            assertEquals(thumbnailName, resultThumbnailName);
         }
-        Assertions.assertEquals(product.getProductInfoImages().size(), result.productInfoImageList().size());
+        assertEquals(product.getProductInfoImages().size(), result.productInfoImageList().size());
         for(int i = 0; i < product.getProductInfoImages().size(); i++) {
             String infoImageName = product.getProductInfoImages().get(i).getImageName();
             String resultInfoImageName = result.productInfoImageList().get(i);
 
-            Assertions.assertEquals(infoImageName, resultInfoImageName);
+            assertEquals(infoImageName, resultInfoImageName);
         }
-        Assertions.assertFalse(result.productReviewList().empty());
-        Assertions.assertFalse(result.productReviewList().content().isEmpty());
-        Assertions.assertEquals(reviewContentSize, result.productReviewList().content().size());
-        Assertions.assertEquals(reviewTotalPages, result.productReviewList().totalPages());
-        Assertions.assertEquals(allReviewList.size(), result.productReviewList().totalElements());
+        assertFalse(result.productReviewList().empty());
+        assertFalse(result.productReviewList().content().isEmpty());
+        assertEquals(reviewContentSize, result.productReviewList().content().size());
+        assertEquals(reviewTotalPages, result.productReviewList().totalPages());
+        assertEquals(allReviewList.size(), result.productReviewList().totalElements());
 
-        Assertions.assertFalse(result.productQnAList().empty());
-        Assertions.assertFalse(result.productQnAList().content().isEmpty());
-        Assertions.assertEquals(qnaContentSize, result.productQnAList().content().size());
-        Assertions.assertEquals(qnaTotalPages, result.productQnAList().totalPages());
-        Assertions.assertEquals(allProductQnAList.size(), result.productQnAList().totalElements());
+        assertFalse(result.productQnAList().empty());
+        assertFalse(result.productQnAList().content().isEmpty());
+        assertEquals(qnaContentSize, result.productQnAList().content().size());
+        assertEquals(qnaTotalPages, result.productQnAList().totalPages());
+        assertEquals(allProductQnAList.size(), result.productQnAList().totalElements());
     }
 
     @Test
@@ -222,43 +224,43 @@ public class ProductServiceIT {
                 .toList();
         Principal fixturePrincipal = () -> memberList.get(1).getUserId();
 
-        ProductDetailDTO result = Assertions.assertDoesNotThrow(() -> productService.getDetail(product.getId(), fixturePrincipal));
+        ProductDetailDTO result = assertDoesNotThrow(() -> productService.getDetail(product.getId(), fixturePrincipal));
 
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(product.getId(), result.productId());
-        Assertions.assertEquals(product.getProductName(), result.productName());
-        Assertions.assertEquals(product.getProductPrice(), result.productPrice());
-        Assertions.assertEquals(product.getThumbnail(), result.productImageName());
-        Assertions.assertFalse(result.likeStat());
-        Assertions.assertEquals(product.getProductDiscount(), result.discount());
-        Assertions.assertEquals(discountPrice, result.discountPrice());
-        Assertions.assertEquals(options.size(), result.productOptionList().size());
-        Assertions.assertEquals(product.getProductThumbnails().size(), result.productThumbnailList().size());
+        assertNotNull(result);
+        assertEquals(product.getId(), result.productId());
+        assertEquals(product.getProductName(), result.productName());
+        assertEquals(product.getProductPrice(), result.productPrice());
+        assertEquals(product.getThumbnail(), result.productImageName());
+        assertFalse(result.likeStat());
+        assertEquals(product.getProductDiscount(), result.discount());
+        assertEquals(discountPrice, result.discountPrice());
+        assertEquals(options.size(), result.productOptionList().size());
+        assertEquals(product.getProductThumbnails().size(), result.productThumbnailList().size());
         for(int i = 0; i < product.getProductThumbnails().size(); i++) {
             String thumbnailName = product.getProductThumbnails().get(i).getImageName();
             String resultThumbnailName = result.productThumbnailList().get(i);
 
-            Assertions.assertEquals(thumbnailName, resultThumbnailName);
+            assertEquals(thumbnailName, resultThumbnailName);
         }
-        Assertions.assertEquals(product.getProductInfoImages().size(), result.productInfoImageList().size());
+        assertEquals(product.getProductInfoImages().size(), result.productInfoImageList().size());
         for(int i = 0; i < product.getProductInfoImages().size(); i++) {
             String infoImageName = product.getProductInfoImages().get(i).getImageName();
             String resultInfoImageName = result.productInfoImageList().get(i);
 
-            Assertions.assertEquals(infoImageName, resultInfoImageName);
+            assertEquals(infoImageName, resultInfoImageName);
         }
-        Assertions.assertFalse(result.productReviewList().empty());
-        Assertions.assertFalse(result.productReviewList().content().isEmpty());
-        Assertions.assertEquals(reviewContentSize, result.productReviewList().content().size());
-        Assertions.assertEquals(reviewTotalPages, result.productReviewList().totalPages());
-        Assertions.assertEquals(allReviewList.size(), result.productReviewList().totalElements());
+        assertFalse(result.productReviewList().empty());
+        assertFalse(result.productReviewList().content().isEmpty());
+        assertEquals(reviewContentSize, result.productReviewList().content().size());
+        assertEquals(reviewTotalPages, result.productReviewList().totalPages());
+        assertEquals(allReviewList.size(), result.productReviewList().totalElements());
 
-        Assertions.assertFalse(result.productQnAList().empty());
-        Assertions.assertFalse(result.productQnAList().content().isEmpty());
-        Assertions.assertEquals(qnaContentSize, result.productQnAList().content().size());
-        Assertions.assertEquals(qnaTotalPages, result.productQnAList().totalPages());
-        Assertions.assertEquals(allProductQnAList.size(), result.productQnAList().totalElements());
+        assertFalse(result.productQnAList().empty());
+        assertFalse(result.productQnAList().content().isEmpty());
+        assertEquals(qnaContentSize, result.productQnAList().content().size());
+        assertEquals(qnaTotalPages, result.productQnAList().totalPages());
+        assertEquals(allProductQnAList.size(), result.productQnAList().totalElements());
     }
 
     @Test
@@ -275,48 +277,48 @@ public class ProductServiceIT {
                 .filter(ProductOption::isOpen)
                 .toList();
 
-        ProductDetailDTO result = Assertions.assertDoesNotThrow(() -> productService.getDetail(product.getId(), null));
+        ProductDetailDTO result = assertDoesNotThrow(() -> productService.getDetail(product.getId(), null));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(product.getId(), result.productId());
-        Assertions.assertEquals(product.getProductName(), result.productName());
-        Assertions.assertEquals(product.getProductPrice(), result.productPrice());
-        Assertions.assertEquals(product.getThumbnail(), result.productImageName());
-        Assertions.assertFalse(result.likeStat());
-        Assertions.assertEquals(product.getProductDiscount(), result.discount());
-        Assertions.assertEquals(discountPrice, result.discountPrice());
-        Assertions.assertEquals(options.size(), result.productOptionList().size());
-        Assertions.assertEquals(product.getProductThumbnails().size(), result.productThumbnailList().size());
+        assertNotNull(result);
+        assertEquals(product.getId(), result.productId());
+        assertEquals(product.getProductName(), result.productName());
+        assertEquals(product.getProductPrice(), result.productPrice());
+        assertEquals(product.getThumbnail(), result.productImageName());
+        assertFalse(result.likeStat());
+        assertEquals(product.getProductDiscount(), result.discount());
+        assertEquals(discountPrice, result.discountPrice());
+        assertEquals(options.size(), result.productOptionList().size());
+        assertEquals(product.getProductThumbnails().size(), result.productThumbnailList().size());
         for(int i = 0; i < product.getProductThumbnails().size(); i++) {
             String thumbnailName = product.getProductThumbnails().get(i).getImageName();
             String resultThumbnailName = result.productThumbnailList().get(i);
 
-            Assertions.assertEquals(thumbnailName, resultThumbnailName);
+            assertEquals(thumbnailName, resultThumbnailName);
         }
-        Assertions.assertEquals(product.getProductInfoImages().size(), result.productInfoImageList().size());
+        assertEquals(product.getProductInfoImages().size(), result.productInfoImageList().size());
         for(int i = 0; i < product.getProductInfoImages().size(); i++) {
             String infoImageName = product.getProductInfoImages().get(i).getImageName();
             String resultInfoImageName = result.productInfoImageList().get(i);
 
-            Assertions.assertEquals(infoImageName, resultInfoImageName);
+            assertEquals(infoImageName, resultInfoImageName);
         }
-        Assertions.assertFalse(result.productReviewList().empty());
-        Assertions.assertFalse(result.productReviewList().content().isEmpty());
-        Assertions.assertEquals(reviewContentSize, result.productReviewList().content().size());
-        Assertions.assertEquals(reviewTotalPages, result.productReviewList().totalPages());
-        Assertions.assertEquals(allReviewList.size(), result.productReviewList().totalElements());
+        assertFalse(result.productReviewList().empty());
+        assertFalse(result.productReviewList().content().isEmpty());
+        assertEquals(reviewContentSize, result.productReviewList().content().size());
+        assertEquals(reviewTotalPages, result.productReviewList().totalPages());
+        assertEquals(allReviewList.size(), result.productReviewList().totalElements());
 
-        Assertions.assertFalse(result.productQnAList().empty());
-        Assertions.assertFalse(result.productQnAList().content().isEmpty());
-        Assertions.assertEquals(qnaContentSize, result.productQnAList().content().size());
-        Assertions.assertEquals(qnaTotalPages, result.productQnAList().totalPages());
-        Assertions.assertEquals(allProductQnAList.size(), result.productQnAList().totalElements());
+        assertFalse(result.productQnAList().empty());
+        assertFalse(result.productQnAList().content().isEmpty());
+        assertEquals(qnaContentSize, result.productQnAList().content().size());
+        assertEquals(qnaTotalPages, result.productQnAList().totalPages());
+        assertEquals(allProductQnAList.size(), result.productQnAList().totalElements());
     }
 
     @Test
     @DisplayName(value = "상품 상세 정보 조회. 상품 아이디가 잘못 된 경우")
     void getDetailWrongId() {
-        Assertions.assertThrows(
+        assertThrows(
                 CustomNotFoundException.class,
                 () -> productService.getDetail("noneProductId", null)
         );
@@ -329,14 +331,14 @@ public class ProductServiceIT {
         int contentSize = Math.min(allReviewList.size(), pageDTO.reviewAmount());
         int totalPages = PaginationUtils.getTotalPages(allReviewList.size(), pageDTO.reviewAmount());
 
-        Page<ProductReviewDTO> result = Assertions.assertDoesNotThrow(() -> productService.getDetailReview(pageDTO, product.getId()));
+        Page<ProductReviewDTO> result = assertDoesNotThrow(() -> productService.getDetailReview(pageDTO, product.getId()));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.getContent().isEmpty());
-        Assertions.assertFalse(result.isEmpty());
-        Assertions.assertEquals(contentSize, result.getContent().size());
-        Assertions.assertEquals(totalPages, result.getTotalPages());
-        Assertions.assertEquals(allReviewList.size(), result.getTotalElements());
+        assertNotNull(result);
+        assertFalse(result.getContent().isEmpty());
+        assertFalse(result.isEmpty());
+        assertEquals(contentSize, result.getContent().size());
+        assertEquals(totalPages, result.getTotalPages());
+        assertEquals(allReviewList.size(), result.getTotalElements());
     }
 
     @Test
@@ -345,13 +347,13 @@ public class ProductServiceIT {
         productReviewRepository.deleteAll();
         ProductDetailPageDTO pageDTO = new ProductDetailPageDTO();
 
-        Page<ProductReviewDTO> result = Assertions.assertDoesNotThrow(() -> productService.getDetailReview(pageDTO, product.getId()));
+        Page<ProductReviewDTO> result = assertDoesNotThrow(() -> productService.getDetailReview(pageDTO, product.getId()));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.getContent().isEmpty());
-        Assertions.assertTrue(result.isEmpty());
-        Assertions.assertEquals(0, result.getContent().size());
-        Assertions.assertEquals(0, result.getTotalPages());
+        assertNotNull(result);
+        assertTrue(result.getContent().isEmpty());
+        assertTrue(result.isEmpty());
+        assertEquals(0, result.getContent().size());
+        assertEquals(0, result.getTotalPages());
     }
 
     @Test
@@ -361,14 +363,14 @@ public class ProductServiceIT {
         int contentSize = Math.min(allProductQnAList.size(), pageDTO.qnaAmount());
         int totalPages = PaginationUtils.getTotalPages(allProductQnAList.size(), pageDTO.qnaAmount());
 
-        Page<ProductQnAResponseDTO> result = Assertions.assertDoesNotThrow(() -> productService.getDetailQnA(pageDTO, product.getId()));
+        Page<ProductQnAResponseDTO> result = assertDoesNotThrow(() -> productService.getDetailQnA(pageDTO, product.getId()));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.getContent().isEmpty());
-        Assertions.assertFalse(result.isEmpty());
-        Assertions.assertEquals(contentSize, result.getContent().size());
-        Assertions.assertEquals(totalPages, result.getTotalPages());
-        Assertions.assertEquals(allProductQnAList.size(), result.getTotalElements());
+        assertNotNull(result);
+        assertFalse(result.getContent().isEmpty());
+        assertFalse(result.isEmpty());
+        assertEquals(contentSize, result.getContent().size());
+        assertEquals(totalPages, result.getTotalPages());
+        assertEquals(allProductQnAList.size(), result.getTotalElements());
     }
 
     @Test
@@ -377,13 +379,13 @@ public class ProductServiceIT {
         productQnARepository.deleteAll();
         ProductDetailPageDTO pageDTO = new ProductDetailPageDTO();
 
-        Page<ProductQnAResponseDTO> result = Assertions.assertDoesNotThrow(() -> productService.getDetailQnA(pageDTO, product.getId()));
+        Page<ProductQnAResponseDTO> result = assertDoesNotThrow(() -> productService.getDetailQnA(pageDTO, product.getId()));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.getContent().isEmpty());
-        Assertions.assertTrue(result.isEmpty());
-        Assertions.assertEquals(0, result.getContent().size());
-        Assertions.assertEquals(0, result.getTotalPages());
+        assertNotNull(result);
+        assertTrue(result.getContent().isEmpty());
+        assertTrue(result.isEmpty());
+        assertEquals(0, result.getContent().size());
+        assertEquals(0, result.getTotalPages());
     }
 
     @Test
@@ -393,14 +395,14 @@ public class ProductServiceIT {
         productIdMap.put("productId", product.getId());
         Principal fixturePrincipal = () -> memberList.get(1).getUserId();
 
-        String result = Assertions.assertDoesNotThrow(() -> productService.likeProduct(productIdMap, fixturePrincipal));
+        String result = assertDoesNotThrow(() -> productService.likeProduct(productIdMap, fixturePrincipal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         ProductLike saveProductLike = productLikeRepository.findByMember_UserId(fixturePrincipal.getName()).get(0);
 
-        Assertions.assertNotNull(saveProductLike);
+        assertNotNull(saveProductLike);
     }
 
     @Test
@@ -409,14 +411,14 @@ public class ProductServiceIT {
         Map<String, String> productIdMap = new HashMap<>();
         Principal fixturePrincipal = () -> memberList.get(1).getUserId();
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> productService.likeProduct(productIdMap, fixturePrincipal)
         );
 
         List<ProductLike> productLikeList = productLikeRepository.findByMember_UserId(fixturePrincipal.getName());
 
-        Assertions.assertTrue(productLikeList.isEmpty());
+        assertTrue(productLikeList.isEmpty());
     }
 
     @Test
@@ -425,7 +427,7 @@ public class ProductServiceIT {
         Map<String, String> productIdMap = new HashMap<>();
         productIdMap.put("productId", product.getId());
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomAccessDeniedException.class,
                 () -> productService.likeProduct(productIdMap, null)
         );
@@ -438,14 +440,14 @@ public class ProductServiceIT {
         productIdMap.put("productId", "noneProductId");
         Principal fixturePrincipal = () -> memberList.get(1).getUserId();
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomNotFoundException.class,
                 () -> productService.likeProduct(productIdMap, fixturePrincipal)
         );
 
         List<ProductLike> productLikeList = productLikeRepository.findByMember_UserId(fixturePrincipal.getName());
 
-        Assertions.assertTrue(productLikeList.isEmpty());
+        assertTrue(productLikeList.isEmpty());
     }
 
     @Test
@@ -453,14 +455,14 @@ public class ProductServiceIT {
     void deLikeProduct() {
         String productId = productLike.getProduct().getId();
 
-        String result = Assertions.assertDoesNotThrow(() -> productService.deLikeProduct(productId, principal));
+        String result = assertDoesNotThrow(() -> productService.deLikeProduct(productId, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         List<ProductLike> productLikeList = productLikeRepository.findByMember_UserId(principal.getName());
 
-        Assertions.assertTrue(productLikeList.isEmpty());
+        assertTrue(productLikeList.isEmpty());
     }
 
     @Test
@@ -468,27 +470,27 @@ public class ProductServiceIT {
     void deLikeProductPrincipalIsNull() {
         String productId = productLike.getProduct().getId();
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomAccessDeniedException.class,
                 () -> productService.deLikeProduct(productId, null)
         );
 
         List<ProductLike> productLikeList = productLikeRepository.findByMember_UserId(principal.getName());
 
-        Assertions.assertFalse(productLikeList.isEmpty());
+        assertFalse(productLikeList.isEmpty());
     }
 
     @Test
     @DisplayName(value = "관심상품 해제. 상품 아이디가 잘못 된 경우")
     void deLikeProductWrongId() {
-        Assertions.assertThrows(
+        assertThrows(
                 CustomNotFoundException.class,
                 () -> productService.deLikeProduct("noneProductId", principal)
         );
 
         List<ProductLike> productLikeList = productLikeRepository.findByMember_UserId(principal.getName());
 
-        Assertions.assertFalse(productLikeList.isEmpty());
+        assertFalse(productLikeList.isEmpty());
     }
 
     @Test
@@ -496,15 +498,15 @@ public class ProductServiceIT {
     void postProductQnA() {
         ProductQnAPostDTO postDTO = new ProductQnAPostDTO(product.getId(), "test post product QnA content");
 
-        String result = Assertions.assertDoesNotThrow(() -> productService.postProductQnA(postDTO, principal));
+        String result = assertDoesNotThrow(() -> productService.postProductQnA(postDTO, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         ProductQnA saveList = productQnARepository.findAllByMember_UserIdOrderByIdDesc(principal.getName()).get(0);
 
-        Assertions.assertNotNull(saveList);
-        Assertions.assertEquals(postDTO.content(), saveList.getQnaContent());
+        assertNotNull(saveList);
+        assertEquals(postDTO.content(), saveList.getQnaContent());
     }
 
     @Test
@@ -512,7 +514,7 @@ public class ProductServiceIT {
     void postProductQnAWrongProductId() {
         ProductQnAPostDTO postDTO = new ProductQnAPostDTO("noneProductId", "test post product QnA content");
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> productService.postProductQnA(postDTO, principal)
         );

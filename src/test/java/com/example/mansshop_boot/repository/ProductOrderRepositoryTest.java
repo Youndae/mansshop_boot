@@ -32,6 +32,8 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
@@ -124,9 +126,9 @@ public class ProductOrderRepositoryTest {
 
         Page<ProductOrder> result = productOrderRepository.findByUserId(memberOrderDTO, pageDTO, pageable);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(memberOrder.size(), result.getTotalElements());
-        Assertions.assertEquals(memberOrder.get(memberOrder.size() - 1).getId(), result.getContent().get(0).getId());
+        assertNotNull(result);
+        assertEquals(memberOrder.size(), result.getTotalElements());
+        assertEquals(memberOrder.get(memberOrder.size() - 1).getId(), result.getContent().get(0).getId());
     }
 
     @Test
@@ -140,9 +142,9 @@ public class ProductOrderRepositoryTest {
 
         Page<ProductOrder> result = productOrderRepository.findByUserId(memberOrderDTO, pageDTO, pageable);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(1, result.getContent().size());
-        Assertions.assertEquals(anonymousOrder.getId(), result.getContent().get(0).getId());
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        assertEquals(anonymousOrder.getId(), result.getContent().get(0).getId());
     }
 
     @Test
@@ -161,8 +163,8 @@ public class ProductOrderRepositoryTest {
 
         Page<ProductOrder> result = productOrderRepository.findByUserId(memberOrderDTO, pageDTO, pageable);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.getContent().isEmpty());
+        assertNotNull(result);
+        assertTrue(result.getContent().isEmpty());
     }
 
     @Test
@@ -172,8 +174,8 @@ public class ProductOrderRepositoryTest {
 
         List<AdminOrderDTO> result = productOrderRepository.findAllOrderList(pageDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(orderList.size(), result.size());
+        assertNotNull(result);
+        assertEquals(orderList.size(), result.size());
     }
 
     @Test
@@ -187,9 +189,9 @@ public class ProductOrderRepositoryTest {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(member.getUserId(), "userId", 1);
         List<AdminOrderDTO> result = productOrderRepository.findAllOrderList(pageDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(1, result.size());
-        Assertions.assertEquals(memberOrder.getId(), result.get(0).orderId());
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(memberOrder.getId(), result.get(0).orderId());
     }
 
     @Test
@@ -203,9 +205,9 @@ public class ProductOrderRepositoryTest {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(memberOrder.getRecipient(), "recipient", 1);
         List<AdminOrderDTO> result = productOrderRepository.findAllOrderList(pageDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(1, result.size());
-        Assertions.assertEquals(memberOrder.getId(), result.get(0).orderId());
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(memberOrder.getId(), result.get(0).orderId());
     }
 
     @Test
@@ -214,8 +216,8 @@ public class ProductOrderRepositoryTest {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(null, null, 1);
         Long result = productOrderRepository.findAllOrderListCount(pageDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(orderList.size(), result);
+        assertNotNull(result);
+        assertEquals(orderList.size(), result);
     }
 
     @Test
@@ -224,8 +226,8 @@ public class ProductOrderRepositoryTest {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(member.getUserId(), "userId", 1);
         Long result = productOrderRepository.findAllOrderListCount(pageDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(1L, result);
+        assertNotNull(result);
+        assertEquals(1L, result);
     }
 
     @Test
@@ -239,8 +241,8 @@ public class ProductOrderRepositoryTest {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(memberOrder.getRecipient(), "recipient", 1);
         Long result = productOrderRepository.findAllOrderListCount(pageDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(1L, result);
+        assertNotNull(result);
+        assertEquals(1L, result);
     }
 
     @Test
@@ -249,8 +251,8 @@ public class ProductOrderRepositoryTest {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO("fakeUser", "userId", 1);
         Long result = productOrderRepository.findAllOrderListCount(pageDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(0L, result);
+        assertNotNull(result);
+        assertEquals(0L, result);
     }
 
     @Test
@@ -260,8 +262,8 @@ public class ProductOrderRepositoryTest {
         LocalDateTime todayLastOrderTime = createLastOrderTime();
         List<AdminOrderDTO> result = productOrderRepository.findAllNewOrderList(pageDTO, todayLastOrderTime);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(newOrderList.size(), result.size());
+        assertNotNull(result);
+        assertEquals(newOrderList.size(), result.size());
     }
 
     @Test
@@ -276,9 +278,9 @@ public class ProductOrderRepositoryTest {
         LocalDateTime todayLastOrderTime = createLastOrderTime();
         List<AdminOrderDTO> result = productOrderRepository.findAllNewOrderList(pageDTO, todayLastOrderTime);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(1, result.size());
-        Assertions.assertEquals(memberOrder.getId(), result.get(0).orderId());
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(memberOrder.getId(), result.get(0).orderId());
     }
 
     @Test
@@ -293,9 +295,9 @@ public class ProductOrderRepositoryTest {
         LocalDateTime todayLastOrderTime = createLastOrderTime();
         List<AdminOrderDTO> result = productOrderRepository.findAllNewOrderList(pageDTO, todayLastOrderTime);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(1, result.size());
-        Assertions.assertEquals(memberOrder.getId(), result.get(0).orderId());
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(memberOrder.getId(), result.get(0).orderId());
     }
 
     @Test
@@ -305,8 +307,8 @@ public class ProductOrderRepositoryTest {
         LocalDateTime todayLastOrderTime = createLastOrderTime();
         Long result = productOrderRepository.findAllNewOrderListCount(pageDTO, todayLastOrderTime);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(newOrderList.size(), result);
+        assertNotNull(result);
+        assertEquals(newOrderList.size(), result);
     }
 
     @Test
@@ -316,8 +318,8 @@ public class ProductOrderRepositoryTest {
         LocalDateTime todayLastOrderTime = createLastOrderTime();
         Long result = productOrderRepository.findAllNewOrderListCount(pageDTO, todayLastOrderTime);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(1L, result);
+        assertNotNull(result);
+        assertEquals(1L, result);
     }
 
     @Test
@@ -332,8 +334,8 @@ public class ProductOrderRepositoryTest {
         LocalDateTime todayLastOrderTime = createLastOrderTime();
         Long result = productOrderRepository.findAllNewOrderListCount(pageDTO, todayLastOrderTime);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(1L, result);
+        assertNotNull(result);
+        assertEquals(1L, result);
     }
 
     @Test
@@ -343,8 +345,8 @@ public class ProductOrderRepositoryTest {
         LocalDateTime todayLastOrderTime = createLastOrderTime();
         Long result = productOrderRepository.findAllNewOrderListCount(pageDTO, todayLastOrderTime);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(0L, result);
+        assertNotNull(result);
+        assertEquals(0L, result);
     }
 
     /**
@@ -372,7 +374,7 @@ public class ProductOrderRepositoryTest {
 
         Page<ProductOrder> result = productOrderRepository.findAllByDay(startDate, endDate, pageable);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(orderList.size(), result.getContent().size());
+        assertNotNull(result);
+        assertEquals(orderList.size(), result.getContent().size());
     }
 }

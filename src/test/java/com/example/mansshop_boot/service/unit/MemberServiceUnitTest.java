@@ -33,6 +33,8 @@ import java.util.concurrent.TimeUnit;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @ExtendWith(MockitoExtension.class)
 public class MemberServiceUnitTest {
     
@@ -79,11 +81,11 @@ public class MemberServiceUnitTest {
         when(memberRepository.save(any(Member.class))).thenReturn(member);
         when(authRepository.save(any(Auth.class))).thenReturn(auth);
         
-        String result = Assertions.assertDoesNotThrow(() -> memberService.joinProc(joinDTO));
+        String result = assertDoesNotThrow(() -> memberService.joinProc(joinDTO));
         
         verify(memberRepository).save(any(Member.class));
         verify(authRepository).save(any(Auth.class));
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertEquals(Result.OK.getResultKey(), result);
     }
 
     @Test
@@ -91,9 +93,9 @@ public class MemberServiceUnitTest {
     void checkJoinId() {
         when(memberRepository.findById("userId")).thenReturn(Optional.ofNullable(null));
 
-        String result = Assertions.assertDoesNotThrow(() -> memberService.checkJoinId("userId"));
+        String result = assertDoesNotThrow(() -> memberService.checkJoinId("userId"));
 
-        Assertions.assertEquals(NO_DUPLICATED_RESPONSE_MESSAGE, result);
+        assertEquals(NO_DUPLICATED_RESPONSE_MESSAGE, result);
     }
 
     @Test
@@ -103,9 +105,9 @@ public class MemberServiceUnitTest {
 
         when(memberRepository.findById(member.getUserId())).thenReturn(Optional.of(member));
 
-        String result = Assertions.assertDoesNotThrow(() -> memberService.checkJoinId(member.getUserId()));
+        String result = assertDoesNotThrow(() -> memberService.checkJoinId(member.getUserId()));
 
-        Assertions.assertEquals(DUPLICATED_RESPONSE_MESSAGE, result);
+        assertEquals(DUPLICATED_RESPONSE_MESSAGE, result);
     }
 
     @Test
@@ -113,9 +115,9 @@ public class MemberServiceUnitTest {
     void checkJoinNickname() {
         when(memberRepository.findByNickname("nickname")).thenReturn(null);
 
-        String result = Assertions.assertDoesNotThrow(() -> memberService.checkNickname("nickname", null));
+        String result = assertDoesNotThrow(() -> memberService.checkNickname("nickname", null));
 
-        Assertions.assertEquals(NO_DUPLICATED_RESPONSE_MESSAGE, result);
+        assertEquals(NO_DUPLICATED_RESPONSE_MESSAGE, result);
     }
 
     @Test
@@ -125,9 +127,9 @@ public class MemberServiceUnitTest {
 
         when(memberRepository.findByNickname("nickname")).thenReturn(member);
 
-        String result = Assertions.assertDoesNotThrow(() -> memberService.checkNickname("nickname", null));
+        String result = assertDoesNotThrow(() -> memberService.checkNickname("nickname", null));
 
-        Assertions.assertEquals(DUPLICATED_RESPONSE_MESSAGE, result);
+        assertEquals(DUPLICATED_RESPONSE_MESSAGE, result);
     }
 
     @Test
@@ -137,9 +139,9 @@ public class MemberServiceUnitTest {
 
         when(memberRepository.findByNickname("nicknameElse")).thenReturn(null);
 
-        String result = Assertions.assertDoesNotThrow(() -> memberService.checkNickname("nicknameElse", principal));
+        String result = assertDoesNotThrow(() -> memberService.checkNickname("nicknameElse", principal));
 
-        Assertions.assertEquals(NO_DUPLICATED_RESPONSE_MESSAGE, result);
+        assertEquals(NO_DUPLICATED_RESPONSE_MESSAGE, result);
     }
 
     @Test
@@ -152,9 +154,9 @@ public class MemberServiceUnitTest {
         when(principal.getName()).thenReturn("nickname");
         when(memberRepository.findByNickname("nickname")).thenReturn(member);
 
-        String result = Assertions.assertDoesNotThrow(() -> memberService.checkNickname("nickname", principal));
+        String result = assertDoesNotThrow(() -> memberService.checkNickname("nickname", principal));
 
-        Assertions.assertEquals(DUPLICATED_RESPONSE_MESSAGE, result);
+        assertEquals(DUPLICATED_RESPONSE_MESSAGE, result);
     }
 
     @Test
@@ -170,9 +172,9 @@ public class MemberServiceUnitTest {
         when(principal.getName()).thenReturn(member.getUserId());
         when(memberRepository.findByNickname(member.getNickname())).thenReturn(member);
 
-        String result = Assertions.assertDoesNotThrow(() -> memberService.checkNickname(member.getNickname(), principal));
+        String result = assertDoesNotThrow(() -> memberService.checkNickname(member.getNickname(), principal));
 
-        Assertions.assertEquals(NO_DUPLICATED_RESPONSE_MESSAGE, result);
+        assertEquals(NO_DUPLICATED_RESPONSE_MESSAGE, result);
     }
 
     @Test
@@ -183,10 +185,10 @@ public class MemberServiceUnitTest {
 
         when(memberRepository.searchId(searchDTO)).thenReturn(userId);
 
-        UserSearchIdResponseDTO result = Assertions.assertDoesNotThrow(() -> memberService.searchId(searchDTO));
+        UserSearchIdResponseDTO result = assertDoesNotThrow(() -> memberService.searchId(searchDTO));
 
-        Assertions.assertEquals(Result.OK.getResultKey(), result.message());
-        Assertions.assertEquals(userId, result.userId());
+        assertEquals(Result.OK.getResultKey(), result.message());
+        assertEquals(userId, result.userId());
     }
 
     @Test
@@ -196,10 +198,10 @@ public class MemberServiceUnitTest {
 
         when(memberRepository.searchId(searchDTO)).thenReturn(null);
 
-        UserSearchIdResponseDTO result = Assertions.assertDoesNotThrow(() -> memberService.searchId(searchDTO));
+        UserSearchIdResponseDTO result = assertDoesNotThrow(() -> memberService.searchId(searchDTO));
 
-        Assertions.assertEquals(Result.NOTFOUND.getResultKey(), result.message());
-        Assertions.assertNull(result.userId());
+        assertEquals(Result.NOTFOUND.getResultKey(), result.message());
+        assertNull(result.userId());
     }
 
     @Test
@@ -216,9 +218,9 @@ public class MemberServiceUnitTest {
         doNothing().when(javaMailSender).send(mimeMessage);
         doNothing().when(mimeMessage).addRecipients(MimeMessage.RecipientType.TO, searchDTO.userEmail());
 
-        String result = Assertions.assertDoesNotThrow(() -> memberService.searchPw(searchDTO));
+        String result = assertDoesNotThrow(() -> memberService.searchPw(searchDTO));
 
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertEquals(Result.OK.getResultKey(), result);
     }
 
     @Test
@@ -228,9 +230,9 @@ public class MemberServiceUnitTest {
 
         when(memberRepository.findByPassword(searchDTO)).thenReturn(0L);
 
-        String result = Assertions.assertDoesNotThrow(() -> memberService.searchPw(searchDTO));
+        String result = assertDoesNotThrow(() -> memberService.searchPw(searchDTO));
 
-        Assertions.assertEquals(Result.NOTFOUND.getResultKey(), result);
+        assertEquals(Result.NOTFOUND.getResultKey(), result);
     }
 
     @Test
@@ -243,8 +245,8 @@ public class MemberServiceUnitTest {
         doNothing().when(valueOperations).set(anyString(), anyString(), anyLong(), eq(TimeUnit.MINUTES));
         when(javaMailSender.createMimeMessage()).thenThrow(new RuntimeException("Mail send Fail"));
 
-        String result = Assertions.assertDoesNotThrow(() -> memberService.searchPw(searchDTO));
+        String result = assertDoesNotThrow(() -> memberService.searchPw(searchDTO));
 
-        Assertions.assertEquals(Result.FAIL.getResultKey(), result);
+        assertEquals(Result.FAIL.getResultKey(), result);
     }
 }

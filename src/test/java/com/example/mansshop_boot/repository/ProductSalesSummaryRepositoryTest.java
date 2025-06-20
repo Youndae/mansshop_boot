@@ -31,6 +31,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
@@ -98,14 +100,14 @@ public class ProductSalesSummaryRepositoryTest {
         List<AdminBestSalesProductDTO> dataList = SalesSummaryFixture.createBest5SalesDTO(salesSummaryList, START_DATE);
         List<AdminBestSalesProductDTO> result = productSalesSummaryRepository.findPeriodBestProductOrder(START_DATE, END_DATE);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(5, result.size());
+        assertNotNull(result);
+        assertEquals(5, result.size());
         for(int i = 0; i < 5; i++) {
             AdminBestSalesProductDTO data = dataList.get(i);
             AdminBestSalesProductDTO resultData = result.get(i);
 
-            Assertions.assertEquals(data.productPeriodSalesQuantity(), resultData.productPeriodSalesQuantity());
-            Assertions.assertEquals(data.productPeriodSales(), resultData.productPeriodSales());
+            assertEquals(data.productPeriodSalesQuantity(), resultData.productPeriodSalesQuantity());
+            assertEquals(data.productPeriodSales(), resultData.productPeriodSales());
         }
     }
 
@@ -115,19 +117,19 @@ public class ProductSalesSummaryRepositoryTest {
         Map<String, TestSalesSummaryDTO> dataMap = SalesSummaryFixture.createSalesDataListByClassifications(salesSummaryList, START_DATE);
         List<AdminPeriodClassificationDTO> result = productSalesSummaryRepository.findPeriodClassification(START_DATE, END_DATE);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(classifications.size(), result.size());
+        assertNotNull(result);
+        assertEquals(classifications.size(), result.size());
 
         for(AdminPeriodClassificationDTO resultData : result) {
 
             TestSalesSummaryDTO data = dataMap.getOrDefault(resultData.classification(), null);
 
             if(data == null) {
-                Assertions.assertEquals(0L, resultData.classificationSales());
-                Assertions.assertEquals(0L, resultData.classificationSalesQuantity());
+                assertEquals(0L, resultData.classificationSales());
+                assertEquals(0L, resultData.classificationSalesQuantity());
             }else {
-                Assertions.assertEquals(data.getSales(), resultData.classificationSales());
-                Assertions.assertEquals(data.getSalesQuantity(), resultData.classificationSalesQuantity());
+                assertEquals(data.getSales(), resultData.classificationSales());
+                assertEquals(data.getSalesQuantity(), resultData.classificationSalesQuantity());
             }
         }
     }
@@ -141,10 +143,10 @@ public class ProductSalesSummaryRepositoryTest {
 
         TestSalesSummaryDTO outerSales = dataMap.get(classification);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(outerSales.getSales(), result.sales());
-        Assertions.assertEquals(outerSales.getSalesQuantity(), result.salesQuantity());
-        Assertions.assertEquals(outerSales.getOrderQuantity(), result.orderQuantity());
+        assertNotNull(result);
+        assertEquals(outerSales.getSales(), result.sales());
+        assertEquals(outerSales.getSalesQuantity(), result.salesQuantity());
+        assertEquals(outerSales.getOrderQuantity(), result.orderQuantity());
     }
 
     @Test
@@ -156,7 +158,7 @@ public class ProductSalesSummaryRepositoryTest {
 
         result.forEach(System.out::println);
 
-        Assertions.assertNotNull(result);
+        assertNotNull(result);
 
         for(AdminClassificationSalesProductListDTO resultData : result) {
             String resultKey = resultData.productName() + "_" +
@@ -165,8 +167,8 @@ public class ProductSalesSummaryRepositoryTest {
 
             TestSalesSummaryDTO dataValue = dataMap.get(resultKey);
 
-            Assertions.assertEquals(dataValue.getSales(), resultData.productSales());
-            Assertions.assertEquals(dataValue.getSalesQuantity(), resultData.productSalesQuantity());
+            assertEquals(dataValue.getSales(), resultData.productSales());
+            assertEquals(dataValue.getSalesQuantity(), resultData.productSalesQuantity());
         }
     }
 
@@ -176,12 +178,12 @@ public class ProductSalesSummaryRepositoryTest {
         String classificationId = "TOP";
         List<AdminClassificationSalesProductListDTO> result = productSalesSummaryRepository.findPeriodClassificationProductSales(START_DATE, END_DATE, classificationId);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(topProductOptionList.size(), result.size());
+        assertNotNull(result);
+        assertEquals(topProductOptionList.size(), result.size());
 
         for(AdminClassificationSalesProductListDTO resultData : result) {
-            Assertions.assertEquals(0, resultData.productSales());
-            Assertions.assertEquals(0, resultData.productSalesQuantity());
+            assertEquals(0, resultData.productSales());
+            assertEquals(0, resultData.productSalesQuantity());
         }
     }
 
@@ -195,16 +197,16 @@ public class ProductSalesSummaryRepositoryTest {
                                             , Sort.by("classificationStep").ascending());
         Page<AdminProductSalesListDTO> result = productSalesSummaryRepository.findProductSalesList(pageDTO, pageable);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.isEmpty());
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
 
         for(AdminProductSalesListDTO resultData : result.getContent()) {
             TestProductSalesSummaryDTO dataValue = dataMap.get(resultData.productId());
 
-            Assertions.assertEquals(dataValue.getClassificationId(), resultData.classification());
-            Assertions.assertEquals(dataValue.getProductName(), resultData.productName());
-            Assertions.assertEquals(dataValue.getSales(), resultData.sales());
-            Assertions.assertEquals(dataValue.getSalesQuantity(), resultData.salesQuantity());
+            assertEquals(dataValue.getClassificationId(), resultData.classification());
+            assertEquals(dataValue.getProductName(), resultData.productName());
+            assertEquals(dataValue.getSales(), resultData.sales());
+            assertEquals(dataValue.getSalesQuantity(), resultData.salesQuantity());
         }
     }
 
@@ -219,16 +221,16 @@ public class ProductSalesSummaryRepositoryTest {
                 , Sort.by("classificationStep").ascending());
         Page<AdminProductSalesListDTO> result = productSalesSummaryRepository.findProductSalesList(pageDTO, pageable);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.isEmpty());
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
 
         for(AdminProductSalesListDTO resultData : result.getContent()) {
             TestProductSalesSummaryDTO dataValue = dataMap.get(resultData.productId());
 
-            Assertions.assertEquals(dataValue.getClassificationId(), resultData.classification());
-            Assertions.assertEquals(dataValue.getProductName(), resultData.productName());
-            Assertions.assertEquals(dataValue.getSales(), resultData.sales());
-            Assertions.assertEquals(dataValue.getSalesQuantity(), resultData.salesQuantity());
+            assertEquals(dataValue.getClassificationId(), resultData.classification());
+            assertEquals(dataValue.getProductName(), resultData.productName());
+            assertEquals(dataValue.getSales(), resultData.sales());
+            assertEquals(dataValue.getSalesQuantity(), resultData.salesQuantity());
         }
     }
 
@@ -243,8 +245,8 @@ public class ProductSalesSummaryRepositoryTest {
 
         System.out.println("result : " + result.getContent());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.getContent().isEmpty());
+        assertNotNull(result);
+        assertTrue(result.getContent().isEmpty());
     }
 
     @Test
@@ -264,10 +266,10 @@ public class ProductSalesSummaryRepositoryTest {
 
         AdminProductSalesDTO result = productSalesSummaryRepository.getProductSales(productId);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(productName, result.productName());
-        Assertions.assertEquals(totalSales, result.totalSales());
-        Assertions.assertEquals(totalSalesQuantity, result.totalSalesQuantity());
+        assertNotNull(result);
+        assertEquals(productName, result.productName());
+        assertEquals(totalSales, result.totalSales());
+        assertEquals(totalSalesQuantity, result.totalSalesQuantity());
     }
 
     @Test
@@ -275,10 +277,10 @@ public class ProductSalesSummaryRepositoryTest {
     void getProductSalesEmpty() {
         AdminProductSalesDTO result = productSalesSummaryRepository.getProductSales("fakeProduct");
 
-        Assertions.assertNotNull(result);
-        Assertions.assertNull(result.productName());
-        Assertions.assertEquals(0, result.totalSales());
-        Assertions.assertEquals(0, result.totalSalesQuantity());
+        assertNotNull(result);
+        assertNull(result.productName());
+        assertEquals(0, result.totalSales());
+        assertEquals(0, result.totalSalesQuantity());
     }
 
     @Test
@@ -295,9 +297,9 @@ public class ProductSalesSummaryRepositoryTest {
 
         AdminSalesDTO result = productSalesSummaryRepository.getProductPeriodSales(year, productId);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(sales, result.sales());
-        Assertions.assertEquals(salesQuantity, result.salesQuantity());
+        assertNotNull(result);
+        assertEquals(sales, result.sales());
+        assertEquals(salesQuantity, result.salesQuantity());
     }
 
     @Test
@@ -307,8 +309,8 @@ public class ProductSalesSummaryRepositoryTest {
 
         AdminSalesDTO result = productSalesSummaryRepository.getProductPeriodSales(year, "fakeProduct");
 
-        Assertions.assertEquals(0, result.sales());
-        Assertions.assertEquals(0, result.salesQuantity());
+        assertEquals(0, result.sales());
+        assertEquals(0, result.salesQuantity());
     }
 
     @Test
@@ -319,15 +321,15 @@ public class ProductSalesSummaryRepositoryTest {
         Map<Integer, TestSalesSummaryDTO> dataMap = SalesSummaryFixture.createProductPeriodMonthSalesSummary(salesSummaryList, year, productId);
         List<AdminPeriodSalesListDTO> result = productSalesSummaryRepository.getProductMonthPeriodSales(year, productId);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.isEmpty());
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
 
         for(AdminPeriodSalesListDTO resultData : result) {
             TestSalesSummaryDTO data = dataMap.get(resultData.date());
 
-            Assertions.assertEquals(data.getSales(), resultData.sales());
-            Assertions.assertEquals(data.getSalesQuantity(), resultData.salesQuantity());
-            Assertions.assertEquals(data.getOrderQuantity(), resultData.orderQuantity());
+            assertEquals(data.getSales(), resultData.sales());
+            assertEquals(data.getSalesQuantity(), resultData.salesQuantity());
+            assertEquals(data.getOrderQuantity(), resultData.orderQuantity());
         }
     }
 
@@ -337,8 +339,8 @@ public class ProductSalesSummaryRepositoryTest {
         int year = 2024;
         List<AdminPeriodSalesListDTO> result = productSalesSummaryRepository.getProductMonthPeriodSales(year, "fakeProduct");
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.isEmpty());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -349,16 +351,16 @@ public class ProductSalesSummaryRepositoryTest {
         Map<Long, TestProductOptionSalesSummaryDTO> dataMap = SalesSummaryFixture.createProductOptionPeriodYearSalesSummary(salesSummaryList, year, productId);
         List<AdminProductSalesOptionDTO> result = productSalesSummaryRepository.getProductOptionSales(year, productId);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.isEmpty());
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
 
         for(AdminProductSalesOptionDTO resultData : result) {
             TestProductOptionSalesSummaryDTO data = dataMap.get(resultData.optionId());
 
-            Assertions.assertEquals(data.getSize(), resultData.size());
-            Assertions.assertEquals(data.getColor(), resultData.color());
-            Assertions.assertEquals(data.getSales(), resultData.optionSales());
-            Assertions.assertEquals(data.getSalesQuantity(), resultData.optionSalesQuantity());
+            assertEquals(data.getSize(), resultData.size());
+            assertEquals(data.getColor(), resultData.color());
+            assertEquals(data.getSales(), resultData.optionSales());
+            assertEquals(data.getSalesQuantity(), resultData.optionSalesQuantity());
         }
     }
 
@@ -368,8 +370,8 @@ public class ProductSalesSummaryRepositoryTest {
         int year = 2024;
         List<AdminProductSalesOptionDTO> result = productSalesSummaryRepository.getProductOptionSales(year, "fakeProduct");
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.isEmpty());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -388,10 +390,10 @@ public class ProductSalesSummaryRepositoryTest {
 
         List<ProductSalesSummary> result = productSalesSummaryRepository.findAllByProductOptionIds(periodMonth, optionIds);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.isEmpty());
-        Assertions.assertEquals(optionIds.size(), result.size());
-        Assertions.assertEquals(dataList.size(), result.size());
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertEquals(optionIds.size(), result.size());
+        assertEquals(dataList.size(), result.size());
 
         for(ProductSalesSummary resultData : result) {
             boolean flag = false;
@@ -401,7 +403,7 @@ public class ProductSalesSummaryRepositoryTest {
                 }
             }
 
-            Assertions.assertTrue(flag);
+            assertTrue(flag);
         }
     }
 }

@@ -228,6 +228,7 @@ public class MainController {
                                             .recipient(recipient)
                                             .phone(phone)
                                             .build();
+
         OrderPageDTO orderPageDTO = OrderPageDTO.builder()
                                         .pageNum(page)
                                         .term(term)

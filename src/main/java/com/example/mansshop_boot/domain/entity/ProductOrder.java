@@ -82,4 +82,22 @@ public class ProductOrder {
         this.productCount = productCount;
     }
 
+
+    @Override
+    public String toString() {
+        return "ProductOrder{" +
+                "id=" + id +
+                ", member=" + member +
+                ", recipient='" + recipient + '\'' +
+                ", orderPhone='" + orderPhone + '\'' +
+                ", orderAddress='" + orderAddress + '\'' +
+                ", orderMemo='" + orderMemo + '\'' +
+                ", orderTotalPrice=" + orderTotalPrice +
+                ", deliveryFee=" + deliveryFee +
+                ", createdAt=" + createdAt +
+                ", paymentType='" + paymentType + '\'' +
+                ", orderStat='" + orderStat + '\'' +
+                ", productCount=" + productCount +
+                '}';
+    }
 }

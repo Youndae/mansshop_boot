@@ -23,6 +23,8 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
@@ -108,9 +110,9 @@ public class CartRepositoryTest {
         CartMemberDTO cartMemberDTO = new CartMemberDTO(member.getUserId(), null);
         Cart result = cartRepository.findByUserIdAndCookieValue(cartMemberDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(memberCart.getId(), result.getId());
-        Assertions.assertNull(result.getCookieId());
+        assertNotNull(result);
+        assertEquals(memberCart.getId(), result.getId());
+        assertNull(result.getCookieId());
     }
 
     @Test
@@ -120,9 +122,9 @@ public class CartRepositoryTest {
         CartMemberDTO cartMemberDTO = new CartMemberDTO(anonymous, anonymousCart.getCookieId());
         Cart result = cartRepository.findByUserIdAndCookieValue(cartMemberDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(anonymousCart.getId(), result.getId());
-        Assertions.assertEquals(anonymousCart.getCookieId(), result.getCookieId());
+        assertNotNull(result);
+        assertEquals(anonymousCart.getId(), result.getId());
+        assertEquals(anonymousCart.getCookieId(), result.getCookieId());
     }
 
     @Test
@@ -131,8 +133,8 @@ public class CartRepositoryTest {
         CartMemberDTO cartMemberDTO = new CartMemberDTO(member.getUserId(), null);
         Long result = cartRepository.findIdByUserId(cartMemberDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(memberCart.getId(), result);
+        assertNotNull(result);
+        assertEquals(memberCart.getId(), result);
     }
 
     @Test
@@ -142,7 +144,7 @@ public class CartRepositoryTest {
         CartMemberDTO cartMemberDTO = new CartMemberDTO(anonymous, anonymousCart.getCookieId());
         Long result = cartRepository.findIdByUserId(cartMemberDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(anonymousCart.getId(), result);
+        assertNotNull(result);
+        assertEquals(anonymousCart.getId(), result);
     }
 }

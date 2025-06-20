@@ -54,6 +54,8 @@ import java.util.stream.IntStream;
 
 import static org.mockito.Mockito.*;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @ExtendWith(MockitoExtension.class)
 public class MyPageServiceUnitTest {
 
@@ -158,14 +160,14 @@ public class MyPageServiceUnitTest {
                 .thenReturn(orderResult);
         when(productOrderDetailRepository.findByDetailList(orderIds)).thenReturn(detailDTOResult);
 
-        PagingListDTO<MyPageOrderDTO> result = Assertions.assertDoesNotThrow(() -> myPageService.getOrderList(pageDTO, memberOrderDTO));
+        PagingListDTO<MyPageOrderDTO> result = assertDoesNotThrow(() -> myPageService.getOrderList(pageDTO, memberOrderDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertEquals(orderResult.getContent().size(), result.content().size());
-        Assertions.assertEquals(orderResult.getContent().size(), result.pagingData().getTotalElements());
-        Assertions.assertEquals(1, result.pagingData().getTotalPages());
-        Assertions.assertEquals(1, result.content().get(0).detail().size());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertEquals(orderResult.getContent().size(), result.content().size());
+        assertEquals(orderResult.getContent().size(), result.pagingData().getTotalElements());
+        assertEquals(1, result.pagingData().getTotalPages());
+        assertEquals(1, result.content().get(0).detail().size());
     }
 
     @Test
@@ -180,12 +182,12 @@ public class MyPageServiceUnitTest {
         when(productOrderRepository.findByUserId(memberOrderDTO, pageDTO, pageable))
                 .thenReturn(new PageImpl<>(Collections.emptyList(), pageable, 0L));
 
-        PagingListDTO<MyPageOrderDTO> result = Assertions.assertDoesNotThrow(() -> myPageService.getOrderList(pageDTO, memberOrderDTO));
+        PagingListDTO<MyPageOrderDTO> result = assertDoesNotThrow(() -> myPageService.getOrderList(pageDTO, memberOrderDTO));
 
-        Assertions.assertTrue(result.content().isEmpty());
-        Assertions.assertEquals(0, result.pagingData().getTotalElements());
-        Assertions.assertEquals(0, result.pagingData().getTotalPages());
-        Assertions.assertTrue(result.pagingData().isEmpty());
+        assertTrue(result.content().isEmpty());
+        assertEquals(0, result.pagingData().getTotalElements());
+        assertEquals(0, result.pagingData().getTotalPages());
+        assertTrue(result.pagingData().isEmpty());
     }
 
     @Test
@@ -214,12 +216,12 @@ public class MyPageServiceUnitTest {
                 .thenReturn(new PageImpl<>(dtoList, pageable, 2L));
 
 
-        Page<ProductLikeDTO> result = Assertions.assertDoesNotThrow(() -> myPageService.getLikeList(pageDTO, principal));
+        Page<ProductLikeDTO> result = assertDoesNotThrow(() -> myPageService.getLikeList(pageDTO, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.getContent().isEmpty());
-        Assertions.assertEquals(dtoList.size(), result.getTotalElements());
-        Assertions.assertEquals(1, result.getTotalPages());
+        assertNotNull(result);
+        assertFalse(result.getContent().isEmpty());
+        assertEquals(dtoList.size(), result.getTotalElements());
+        assertEquals(1, result.getTotalPages());
     }
 
     @Test
@@ -227,7 +229,7 @@ public class MyPageServiceUnitTest {
     void getLikeListAccessDenied() {
         LikePageDTO pageDTO = new LikePageDTO(1);
 
-        Assertions.assertThrows(CustomAccessDeniedException.class,
+        assertThrows(CustomAccessDeniedException.class,
                                 () -> myPageService.getLikeList(pageDTO, null)
         );
     }
@@ -251,13 +253,13 @@ public class MyPageServiceUnitTest {
         when(productQnARepository.findByUserId("testUser", pageable))
                 .thenReturn(new PageImpl<>(List.of(dto), pageable, 1L));
 
-        Page<ProductQnAListDTO> result = Assertions.assertDoesNotThrow(() -> myPageService.getProductQnAList(pageDTO, principal));
+        Page<ProductQnAListDTO> result = assertDoesNotThrow(() -> myPageService.getProductQnAList(pageDTO, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.getContent().isEmpty());
-        Assertions.assertEquals(1, result.getTotalElements());
-        Assertions.assertEquals(1, result.getTotalPages());
-        Assertions.assertEquals(1, result.getContent().size());
+        assertNotNull(result);
+        assertFalse(result.getContent().isEmpty());
+        assertEquals(1, result.getTotalElements());
+        assertEquals(1, result.getTotalPages());
+        assertEquals(1, result.getContent().size());
     }
 
     @Test
@@ -285,11 +287,11 @@ public class MyPageServiceUnitTest {
         when(productQnARepository.findByQnAId(productQnAId)).thenReturn(dto);
         when(productQnAReplyRepository.findAllByQnAId(productQnAId)).thenReturn(replyList);
 
-        ProductQnADetailDTO result = Assertions.assertDoesNotThrow(() -> myPageService.getProductQnADetail(productQnAId, principal));
+        ProductQnADetailDTO result = assertDoesNotThrow(() -> myPageService.getProductQnADetail(productQnAId, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(resultDTO.productQnAId(), result.productQnAId());
-        Assertions.assertEquals(resultDTO.writer(), result.writer());
+        assertNotNull(result);
+        assertEquals(resultDTO.productQnAId(), result.productQnAId());
+        assertEquals(resultDTO.writer(), result.writer());
     }
 
     @Test
@@ -316,7 +318,7 @@ public class MyPageServiceUnitTest {
         when(productQnARepository.findByQnAId(productQnAId)).thenReturn(dto);
         when(productQnAReplyRepository.findAllByQnAId(productQnAId)).thenReturn(replyList);
 
-        Assertions.assertThrows(CustomAccessDeniedException.class,
+        assertThrows(CustomAccessDeniedException.class,
                 () -> myPageService.getProductQnADetail(productQnAId, principal)
         );
     }
@@ -329,7 +331,7 @@ public class MyPageServiceUnitTest {
         when(principalService.getNicknameByPrincipal(principal)).thenReturn("testNickname");
         when(productQnARepository.findByQnAId(productQnAId)).thenReturn(null);
 
-        Assertions.assertThrows(CustomNotFoundException.class,
+        assertThrows(CustomNotFoundException.class,
                 () -> myPageService.getProductQnADetail(productQnAId, principal)
         );
 
@@ -348,10 +350,10 @@ public class MyPageServiceUnitTest {
         when(productQnARepository.findById(deleteEntity.getId())).thenReturn(Optional.of(deleteEntity));
         doNothing().when(productQnARepository).deleteById(deleteEntity.getId());
 
-        String result = Assertions.assertDoesNotThrow(() -> myPageService.deleteProductQnA(deleteEntity.getId(), principal));
+        String result = assertDoesNotThrow(() -> myPageService.deleteProductQnA(deleteEntity.getId(), principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
     }
 
     @Test
@@ -365,7 +367,7 @@ public class MyPageServiceUnitTest {
         when(principalService.getUserIdByPrincipal(principal)).thenReturn("Anonymous");
         when(productQnARepository.findById(deleteEntity.getId())).thenReturn(Optional.of(deleteEntity));
 
-        Assertions.assertThrows(CustomAccessDeniedException.class, () -> myPageService.deleteProductQnA(deleteEntity.getId(), principal));
+        assertThrows(CustomAccessDeniedException.class, () -> myPageService.deleteProductQnA(deleteEntity.getId(), principal));
         verify(productQnARepository, never()).deleteById(1L);
     }
 
@@ -376,7 +378,7 @@ public class MyPageServiceUnitTest {
         when(principalService.getUserIdByPrincipal(principal)).thenReturn("testUser");
         when(productQnARepository.findById(1L)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> myPageService.deleteProductQnA(1L, principal));
+        assertThrows(IllegalArgumentException.class, () -> myPageService.deleteProductQnA(1L, principal));
         verify(productQnARepository, never()).deleteById(1L);
     }
 
@@ -400,13 +402,13 @@ public class MyPageServiceUnitTest {
         when(principalService.getUserIdByPrincipal(principal)).thenReturn(userId);
         when(memberQnARepository.findAllByUserId(userId, pageable)).thenReturn(new PageImpl<>(memberQnAList, pageable, 1L));
 
-        Page<MemberQnAListDTO> result = Assertions.assertDoesNotThrow(() -> myPageService.getMemberQnAList(pageDTO, principal));
+        Page<MemberQnAListDTO> result = assertDoesNotThrow(() -> myPageService.getMemberQnAList(pageDTO, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(memberQnAList.size(), result.getTotalElements());
-        Assertions.assertEquals(1, result.getTotalPages());
-        Assertions.assertEquals(dto.memberQnAId(), result.getContent().get(0).memberQnAId());
-        Assertions.assertEquals(dto.memberQnATitle(), result.getContent().get(0).memberQnATitle());
+        assertNotNull(result);
+        assertEquals(memberQnAList.size(), result.getTotalElements());
+        assertEquals(1, result.getTotalPages());
+        assertEquals(dto.memberQnAId(), result.getContent().get(0).memberQnAId());
+        assertEquals(dto.memberQnATitle(), result.getContent().get(0).memberQnATitle());
     }
 
     @Test
@@ -421,12 +423,12 @@ public class MyPageServiceUnitTest {
         when(principalService.getUserIdByPrincipal(principal)).thenReturn(userId);
         when(memberQnARepository.findAllByUserId(userId, pageable)).thenReturn(new PageImpl<>(Collections.emptyList(), pageable, 0L));
 
-        Page<MemberQnAListDTO> result = Assertions.assertDoesNotThrow(() -> myPageService.getMemberQnAList(pageDTO, principal));
+        Page<MemberQnAListDTO> result = assertDoesNotThrow(() -> myPageService.getMemberQnAList(pageDTO, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(0, result.getTotalElements());
-        Assertions.assertEquals(0, result.getTotalPages());
-        Assertions.assertTrue(result.getContent().isEmpty());
+        assertNotNull(result);
+        assertEquals(0, result.getTotalElements());
+        assertEquals(0, result.getTotalPages());
+        assertTrue(result.getContent().isEmpty());
     }
 
     @Test
@@ -460,14 +462,14 @@ public class MyPageServiceUnitTest {
         when(memberQnARepository.findByQnAId(dto.memberQnAId())).thenReturn(dto);
         when(memberQnAReplyRepository.findAllByQnAId(dto.memberQnAId())).thenReturn(replyDTOList);
 
-        MemberQnADetailDTO result = Assertions.assertDoesNotThrow(() -> myPageService.getMemberQnADetail(dto.memberQnAId(), principal));
+        MemberQnADetailDTO result = assertDoesNotThrow(() -> myPageService.getMemberQnADetail(dto.memberQnAId(), principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(dto.memberQnAId(), result.memberQnAId());
-        Assertions.assertEquals(dto.writer(), result.writer());
-        Assertions.assertEquals(dto.updatedAt().toLocalDate(), result.updatedAt());
-        Assertions.assertEquals(dto.qnaContent(), result.qnaContent());
-        Assertions.assertEquals(dto.qnaTitle(), result.qnaTitle());
+        assertNotNull(result);
+        assertEquals(dto.memberQnAId(), result.memberQnAId());
+        assertEquals(dto.writer(), result.writer());
+        assertEquals(dto.updatedAt().toLocalDate(), result.updatedAt());
+        assertEquals(dto.qnaContent(), result.qnaContent());
+        assertEquals(dto.qnaTitle(), result.qnaTitle());
     }
 
     @Test
@@ -477,7 +479,7 @@ public class MyPageServiceUnitTest {
         when(principalService.getNicknameByPrincipal(principal)).thenReturn("testUser");
         when(memberQnARepository.findByQnAId(1L)).thenReturn(null);
 
-        Assertions.assertThrows(CustomNotFoundException.class, () -> myPageService.getMemberQnADetail(1L, principal));
+        assertThrows(CustomNotFoundException.class, () -> myPageService.getMemberQnADetail(1L, principal));
     }
 
     @Test
@@ -496,7 +498,7 @@ public class MyPageServiceUnitTest {
         when(principalService.getNicknameByPrincipal(principal)).thenReturn("testUser");
         when(memberQnARepository.findByQnAId(1L)).thenReturn(dto);
 
-        Assertions.assertThrows(CustomAccessDeniedException.class, () -> myPageService.getMemberQnADetail(1L, principal));
+        assertThrows(CustomAccessDeniedException.class, () -> myPageService.getMemberQnADetail(1L, principal));
     }
 
     @Test
@@ -511,7 +513,7 @@ public class MyPageServiceUnitTest {
         when(principalService.getUserIdByPrincipal(principal)).thenReturn("Anonymous");
         when(memberQnAReplyRepository.findById(replyEntity.getId())).thenReturn(Optional.of(replyEntity));
 
-        Assertions.assertThrows(CustomAccessDeniedException.class, () -> myPageService.patchMemberQnAReply(replyDTO, principal));
+        assertThrows(CustomAccessDeniedException.class, () -> myPageService.patchMemberQnAReply(replyDTO, principal));
 
         verify(memberQnAReplyRepository, never()).save(any(MemberQnAReply.class));
     }
@@ -523,7 +525,7 @@ public class MyPageServiceUnitTest {
 
         when(memberQnAReplyRepository.findById(1L)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> myPageService.patchMemberQnAReply(replyDTO, principal));
+        assertThrows(IllegalArgumentException.class, () -> myPageService.patchMemberQnAReply(replyDTO, principal));
         verify(memberQnAReplyRepository, never()).save(any(MemberQnAReply.class));
     }
 
@@ -546,13 +548,13 @@ public class MyPageServiceUnitTest {
         when(memberQnARepository.findModifyDataByIdAndUserId(entity.getId(), "testUser")).thenReturn(entity);
         when(qnAClassificationRepository.getAllQnAClassificationDTOs()).thenReturn(qnAClassificationList);
 
-        MemberQnAModifyDataDTO result = Assertions.assertDoesNotThrow(() -> myPageService.getModifyData(entity.getId(), principal));
+        MemberQnAModifyDataDTO result = assertDoesNotThrow(() -> myPageService.getModifyData(entity.getId(), principal));
 
-        Assertions.assertEquals(entity.getId(), result.qnaId());
-        Assertions.assertEquals(entity.getMemberQnATitle(), result.qnaTitle());
-        Assertions.assertEquals(entity.getMemberQnAContent(), result.qnaContent());
-        Assertions.assertEquals(entity.getQnAClassification().getId(), result.qnaClassificationId());
-        Assertions.assertEquals(qnAClassificationList.size(), result.classificationList().size());
+        assertEquals(entity.getId(), result.qnaId());
+        assertEquals(entity.getMemberQnATitle(), result.qnaTitle());
+        assertEquals(entity.getMemberQnAContent(), result.qnaContent());
+        assertEquals(entity.getQnAClassification().getId(), result.qnaClassificationId());
+        assertEquals(qnAClassificationList.size(), result.classificationList().size());
     }
 
     @Test
@@ -568,7 +570,7 @@ public class MyPageServiceUnitTest {
         when(principalService.getUserIdByPrincipal(principal)).thenReturn("testUser");
         when(memberQnARepository.findModifyDataByIdAndUserId(entity.getId(), "testUser")).thenReturn(null);
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> myPageService.getModifyData(entity.getId(), principal));
+        assertThrows(IllegalArgumentException.class, () -> myPageService.getModifyData(entity.getId(), principal));
         verify(qnAClassificationRepository, never()).getAllQnAClassificationDTOs();
     }
 
@@ -592,7 +594,7 @@ public class MyPageServiceUnitTest {
         when(memberQnARepository.findById(entity.getId())).thenReturn(Optional.of(entity));
         when(principalService.getUserIdByPrincipal(principal)).thenReturn("Anonymous");
 
-        Assertions.assertThrows(CustomAccessDeniedException.class, () -> myPageService.patchMemberQnA(modifyDTO, principal));
+        assertThrows(CustomAccessDeniedException.class, () -> myPageService.patchMemberQnA(modifyDTO, principal));
         verify(qnAClassificationRepository, never()).findById(anyLong());
         verify(memberQnARepository, never()).save(any(MemberQnA.class));
     }
@@ -609,7 +611,7 @@ public class MyPageServiceUnitTest {
 
         when(memberQnARepository.findById(1L)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> myPageService.patchMemberQnA(modifyDTO, principal));
+        assertThrows(IllegalArgumentException.class, () -> myPageService.patchMemberQnA(modifyDTO, principal));
         verify(principalService, never()).getUserIdByPrincipal(principal);
         verify(qnAClassificationRepository, never()).findById(anyLong());
         verify(memberQnARepository, never()).save(any(MemberQnA.class));
@@ -636,7 +638,7 @@ public class MyPageServiceUnitTest {
         when(principalService.getUserIdByPrincipal(principal)).thenReturn(entity.getMember().getUserId());
         when(qnAClassificationRepository.findById(modifyDTO.classificationId())).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> myPageService.patchMemberQnA(modifyDTO, principal));
+        assertThrows(IllegalArgumentException.class, () -> myPageService.patchMemberQnA(modifyDTO, principal));
         verify(memberQnARepository, never()).save(any(MemberQnA.class));
     }
 
@@ -647,7 +649,7 @@ public class MyPageServiceUnitTest {
         when(principalService.getUserIdByPrincipal(principal)).thenReturn("testUser");
         when(memberQnARepository.findById(1L)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> myPageService.deleteMemberQnA(1L, principal));
+        assertThrows(IllegalArgumentException.class, () -> myPageService.deleteMemberQnA(1L, principal));
 
         verify(memberQnARepository, never()).deleteById(anyLong());
     }
@@ -666,7 +668,7 @@ public class MyPageServiceUnitTest {
         when(principalService.getUserIdByPrincipal(principal)).thenReturn("Anonymous");
         when(memberQnARepository.findById(entity.getId())).thenReturn(Optional.of(entity));
 
-        Assertions.assertThrows(CustomAccessDeniedException.class, () -> myPageService.deleteMemberQnA(entity.getId(), principal));
+        assertThrows(CustomAccessDeniedException.class, () -> myPageService.deleteMemberQnA(entity.getId(), principal));
         verify(memberQnARepository, never()).deleteById(anyLong());
     }
 
@@ -696,13 +698,13 @@ public class MyPageServiceUnitTest {
         when(productReviewRepository.findAllByUserId("testUser", pageable))
                 .thenReturn(new PageImpl<>(resultList, pageable, resultList.size()));
 
-        Page<MyPageReviewDTO> result = Assertions.assertDoesNotThrow(() -> myPageService.getReview(pageDTO, principal));
+        Page<MyPageReviewDTO> result = assertDoesNotThrow(() -> myPageService.getReview(pageDTO, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.getContent().isEmpty());
-        Assertions.assertEquals(resultList.size(), result.getTotalElements());
-        Assertions.assertEquals(1, result.getTotalPages());
-        Assertions.assertEquals(resultList.size(), result.getContent().size());
+        assertNotNull(result);
+        assertFalse(result.getContent().isEmpty());
+        assertEquals(resultList.size(), result.getTotalElements());
+        assertEquals(1, result.getTotalPages());
+        assertEquals(resultList.size(), result.getContent().size());
     }
 
     @Test
@@ -717,12 +719,12 @@ public class MyPageServiceUnitTest {
         when(productReviewRepository.findAllByUserId("testUser", pageable))
                 .thenReturn(new PageImpl<>(Collections.emptyList(), pageable, 0L));
 
-        Page<MyPageReviewDTO> result = Assertions.assertDoesNotThrow(() -> myPageService.getReview(pageDTO, principal));
+        Page<MyPageReviewDTO> result = assertDoesNotThrow(() -> myPageService.getReview(pageDTO, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.getContent().isEmpty());
-        Assertions.assertEquals(0, result.getTotalElements());
-        Assertions.assertEquals(0, result.getTotalPages());
+        assertNotNull(result);
+        assertTrue(result.getContent().isEmpty());
+        assertEquals(0, result.getTotalElements());
+        assertEquals(0, result.getTotalPages());
     }
 
     @Test
@@ -738,11 +740,11 @@ public class MyPageServiceUnitTest {
         when(principalService.getUserIdByPrincipal(principal)).thenReturn("testUser");
         when(productReviewRepository.findById(entity.getId())).thenReturn(Optional.of(entity));
 
-        MyPagePatchReviewDataDTO result = Assertions.assertDoesNotThrow(() -> myPageService.getPatchReview(entity.getId(), principal));
+        MyPagePatchReviewDataDTO result = assertDoesNotThrow(() -> myPageService.getPatchReview(entity.getId(), principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(entity.getReviewContent(), result.content());
-        Assertions.assertEquals(entity.getProduct().getProductName(), result.productName());
+        assertNotNull(result);
+        assertEquals(entity.getReviewContent(), result.content());
+        assertEquals(entity.getProduct().getProductName(), result.productName());
     }
 
     @Test
@@ -752,7 +754,7 @@ public class MyPageServiceUnitTest {
         when(principalService.getUserIdByPrincipal(principal)).thenReturn("testUser");
         when(productReviewRepository.findById(1L)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> myPageService.getPatchReview(1L, principal));
+        assertThrows(IllegalArgumentException.class, () -> myPageService.getPatchReview(1L, principal));
     }
 
     @Test
@@ -768,7 +770,7 @@ public class MyPageServiceUnitTest {
         when(principalService.getUserIdByPrincipal(principal)).thenReturn("Anonymous");
         when(productReviewRepository.findById(entity.getId())).thenReturn(Optional.of(entity));
 
-        Assertions.assertThrows(CustomAccessDeniedException.class, () -> myPageService.getPatchReview(entity.getId(), principal));
+        assertThrows(CustomAccessDeniedException.class, () -> myPageService.getPatchReview(entity.getId(), principal));
     }
 
     @Test
@@ -784,7 +786,7 @@ public class MyPageServiceUnitTest {
         when(principal.getName()).thenReturn("testUser");
         when(memberRepository.findById("testUser")).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> myPageService.postReview(reviewDTO, principal));
+        assertThrows(IllegalArgumentException.class, () -> myPageService.postReview(reviewDTO, principal));
 
         verify(productRepository, never()).findById(reviewDTO.productId());
         verify(productOptionRepository, never()).findById(reviewDTO.optionId());
@@ -810,7 +812,7 @@ public class MyPageServiceUnitTest {
         when(memberRepository.findById(member.getUserId())).thenReturn(Optional.of(member));
         when(productRepository.findById(reviewDTO.productId())).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> myPageService.postReview(reviewDTO, principal));
+        assertThrows(IllegalArgumentException.class, () -> myPageService.postReview(reviewDTO, principal));
 
         verify(productOptionRepository, never()).findById(reviewDTO.optionId());
         verify(productOrderDetailRepository, never()).findById(reviewDTO.detailId());
@@ -839,7 +841,7 @@ public class MyPageServiceUnitTest {
         when(productRepository.findById(reviewDTO.productId())).thenReturn(Optional.of(product));
         when(productOptionRepository.findById(reviewDTO.optionId())).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> myPageService.postReview(reviewDTO, principal));
+        assertThrows(IllegalArgumentException.class, () -> myPageService.postReview(reviewDTO, principal));
 
         verify(productOrderDetailRepository, never()).findById(reviewDTO.detailId());
         verify(productReviewRepository, never()).save(any(ProductReview.class));
@@ -871,7 +873,7 @@ public class MyPageServiceUnitTest {
         when(productOptionRepository.findById(reviewDTO.optionId())).thenReturn(Optional.of(productOption));
         when(productOrderDetailRepository.findById(reviewDTO.detailId())).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> myPageService.postReview(reviewDTO, principal));
+        assertThrows(IllegalArgumentException.class, () -> myPageService.postReview(reviewDTO, principal));
 
         verify(productReviewRepository, never()).save(any(ProductReview.class));
         verify(productOrderDetailRepository, never()).save(any(ProductOrderDetail.class));
@@ -887,7 +889,7 @@ public class MyPageServiceUnitTest {
 
         when(productReviewRepository.findById(reviewDTO.reviewId())).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> myPageService.patchReview(reviewDTO, principal));
+        assertThrows(IllegalArgumentException.class, () -> myPageService.patchReview(reviewDTO, principal));
 
         verify(productReviewRepository, never()).save(any(ProductReview.class));
     }
@@ -907,7 +909,7 @@ public class MyPageServiceUnitTest {
         when(productReviewRepository.findById(reviewDTO.reviewId())).thenReturn(Optional.of(entity));
 
 
-        Assertions.assertThrows(CustomAccessDeniedException.class, () -> myPageService.patchReview(reviewDTO, principal));
+        assertThrows(CustomAccessDeniedException.class, () -> myPageService.patchReview(reviewDTO, principal));
 
         verify(productReviewRepository, never()).save(any(ProductReview.class));
     }
@@ -919,7 +921,7 @@ public class MyPageServiceUnitTest {
 
         when(productReviewRepository.findById(reviewId)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> myPageService.deleteReview(reviewId, principal));
+        assertThrows(IllegalArgumentException.class, () -> myPageService.deleteReview(reviewId, principal));
 
         verify(principalService, never()).getUserIdByPrincipal(principal);
         verify(productReviewRepository, never()).deleteById(reviewId);
@@ -936,7 +938,7 @@ public class MyPageServiceUnitTest {
         when(productReviewRepository.findById(entity.getId())).thenReturn(Optional.of(entity));
         when(principalService.getUserIdByPrincipal(principal)).thenReturn("Anonymous");
 
-        Assertions.assertThrows(CustomAccessDeniedException.class, () -> myPageService.deleteReview(entity.getId(), principal));
+        assertThrows(CustomAccessDeniedException.class, () -> myPageService.deleteReview(entity.getId(), principal));
 
         verify(productReviewRepository, never()).deleteById(entity.getId());
     }
@@ -955,14 +957,14 @@ public class MyPageServiceUnitTest {
         when(principal.getName()).thenReturn(member.getUserId());
         when(memberRepository.findById(member.getUserId())).thenReturn(Optional.of(member));
 
-        MyPageInfoDTO result = Assertions.assertDoesNotThrow(() -> myPageService.getInfo(principal));
+        MyPageInfoDTO result = assertDoesNotThrow(() -> myPageService.getInfo(principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(member.getNickname(), result.nickname());
-        Assertions.assertEquals(phone, result.phone());
-        Assertions.assertEquals(splitMail[0], result.mailPrefix());
-        Assertions.assertEquals(splitMail[1], result.mailSuffix());
-        Assertions.assertEquals("none", result.mailType());
+        assertNotNull(result);
+        assertEquals(member.getNickname(), result.nickname());
+        assertEquals(phone, result.phone());
+        assertEquals(splitMail[0], result.mailPrefix());
+        assertEquals(splitMail[1], result.mailSuffix());
+        assertEquals("none", result.mailType());
     }
 
     @Test
@@ -972,7 +974,7 @@ public class MyPageServiceUnitTest {
         when(principal.getName()).thenReturn("testUser");
         when(memberRepository.findById("testUser")).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> myPageService.getInfo(principal));
+        assertThrows(IllegalArgumentException.class, () -> myPageService.getInfo(principal));
     }
 
     @Test
@@ -982,7 +984,7 @@ public class MyPageServiceUnitTest {
         when(principal.getName()).thenReturn("testUser");
         when(memberRepository.findById("testUser")).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> myPageService.getInfo(principal));
+        assertThrows(IllegalArgumentException.class, () -> myPageService.getInfo(principal));
 
         verify(memberRepository, never()).save(any(Member.class));
     }

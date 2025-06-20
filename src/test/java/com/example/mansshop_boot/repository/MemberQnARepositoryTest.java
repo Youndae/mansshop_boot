@@ -29,6 +29,8 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
@@ -87,9 +89,9 @@ public class MemberQnARepositoryTest {
 
         Page<MemberQnAListDTO> result = memberQnARepository.findAllByUserId(member.getUserId(), pageable);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(6, result.getTotalElements());
-        Assertions.assertEquals(6, result.getContent().size());
+        assertNotNull(result);
+        assertEquals(6, result.getTotalElements());
+        assertEquals(6, result.getContent().size());
     }
 
     @Test
@@ -97,11 +99,11 @@ public class MemberQnARepositoryTest {
     void findByQnAId() {
         MemberQnADTO result = memberQnARepository.findByQnAId(memberQnA.getId());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(memberQnA.getId(), result.memberQnAId());
-        Assertions.assertEquals(memberQnA.getQnAClassification().getQnaClassificationName(), result.qnaClassification());
-        Assertions.assertEquals(memberQnA.getMemberQnATitle(), result.qnaTitle());
-        Assertions.assertEquals(memberQnA.getMemberQnAContent(), result.qnaContent());
+        assertNotNull(result);
+        assertEquals(memberQnA.getId(), result.memberQnAId());
+        assertEquals(memberQnA.getQnAClassification().getQnaClassificationName(), result.qnaClassification());
+        assertEquals(memberQnA.getMemberQnATitle(), result.qnaTitle());
+        assertEquals(memberQnA.getMemberQnAContent(), result.qnaContent());
     }
 
     @Test
@@ -109,11 +111,11 @@ public class MemberQnARepositoryTest {
     void findModifyDataByIdAndUserId() {
         MemberQnA result = memberQnARepository.findModifyDataByIdAndUserId(memberQnA.getId(), memberQnA.getMember().getUserId());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(memberQnA.getId(), result.getId());
-        Assertions.assertEquals(memberQnA.getMemberQnAContent(), result.getMemberQnAContent());
-        Assertions.assertEquals(memberQnA.getMemberQnATitle(), result.getMemberQnATitle());
-        Assertions.assertEquals(memberQnA.getQnAClassification().getId(), result.getQnAClassification().getId());
+        assertNotNull(result);
+        assertEquals(memberQnA.getId(), result.getId());
+        assertEquals(memberQnA.getMemberQnAContent(), result.getMemberQnAContent());
+        assertEquals(memberQnA.getMemberQnATitle(), result.getMemberQnATitle());
+        assertEquals(memberQnA.getQnAClassification().getId(), result.getQnAClassification().getId());
     }
 
     @Test
@@ -121,7 +123,7 @@ public class MemberQnARepositoryTest {
     void findModifyDataByIdAndUserIdFail() {
         MemberQnA result = memberQnARepository.findModifyDataByIdAndUserId(memberQnA.getId(), "FakeUser");
 
-        Assertions.assertNull(result);
+        assertNull(result);
     }
 
     @Test
@@ -131,8 +133,8 @@ public class MemberQnARepositoryTest {
 
         List<AdminQnAListResponseDTO> result = memberQnARepository.findAllByAdminMemberQnA(pageDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(pageDTO.amount(), result.size());
+        assertNotNull(result);
+        assertEquals(pageDTO.amount(), result.size());
     }
 
     @Test
@@ -142,8 +144,8 @@ public class MemberQnARepositoryTest {
 
         List<AdminQnAListResponseDTO> result = memberQnARepository.findAllByAdminMemberQnA(pageDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.isEmpty());
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
     }
 
     @Test
@@ -153,8 +155,8 @@ public class MemberQnARepositoryTest {
 
         List<AdminQnAListResponseDTO> result = memberQnARepository.findAllByAdminMemberQnA(pageDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(newDataCount, result.size());
+        assertNotNull(result);
+        assertEquals(newDataCount, result.size());
     }
 
     @Test
@@ -164,8 +166,8 @@ public class MemberQnARepositoryTest {
 
         List<AdminQnAListResponseDTO> result = memberQnARepository.findAllByAdminMemberQnA(pageDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.isEmpty());
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
     }
 
     @Test
@@ -174,8 +176,8 @@ public class MemberQnARepositoryTest {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(null, "all", 1);
         Long result = memberQnARepository.findAllByAdminMemberQnACount(pageDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(dataTotalCount, result);
+        assertNotNull(result);
+        assertEquals(dataTotalCount, result);
     }
 
     @Test
@@ -185,7 +187,7 @@ public class MemberQnARepositoryTest {
 
         Long result = memberQnARepository.findAllByAdminMemberQnACount(pageDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(newDataCount, result);
+        assertNotNull(result);
+        assertEquals(newDataCount, result);
     }
 }

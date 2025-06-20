@@ -24,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest(classes = MansShopBootApplication.class)
 @EnableJpaRepositories(basePackages = "com.example")
 @ActiveProfiles("test")
@@ -65,15 +67,15 @@ public class AdminMemberServiceIT {
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createDefaultAdminOrderPageDTO();
         int totalPages = PaginationUtils.getTotalPages(memberList.size(), pageDTO.amount());
 
-        Page<AdminMemberDTO> result = Assertions.assertDoesNotThrow(() -> adminMemberService.getMemberList(pageDTO));
+        Page<AdminMemberDTO> result = assertDoesNotThrow(() -> adminMemberService.getMemberList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.getContent().isEmpty());
-        Assertions.assertFalse(result.getTotalElements() < 1);
-        Assertions.assertEquals(memberList.size(), result.getTotalElements());
-        Assertions.assertEquals(pageDTO.amount(), result.getContent().size());
-        Assertions.assertEquals(totalPages, result.getTotalPages());
-        Assertions.assertEquals(pageDTO.page() - 1, result.getNumber());
+        assertNotNull(result);
+        assertFalse(result.getContent().isEmpty());
+        assertFalse(result.getTotalElements() < 1);
+        assertEquals(memberList.size(), result.getTotalElements());
+        assertEquals(pageDTO.amount(), result.getContent().size());
+        assertEquals(totalPages, result.getTotalPages());
+        assertEquals(pageDTO.page() - 1, result.getNumber());
     }
 
     @Test
@@ -82,23 +84,23 @@ public class AdminMemberServiceIT {
         Member searchMember = memberList.get(0);
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createSearchAdminOrderPageDTO(searchMember.getUserId(), "userId", 1);
 
-        Page<AdminMemberDTO> result = Assertions.assertDoesNotThrow(() -> adminMemberService.getMemberList(pageDTO));
+        Page<AdminMemberDTO> result = assertDoesNotThrow(() -> adminMemberService.getMemberList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.getContent().isEmpty());
-        Assertions.assertFalse(result.getTotalElements() < 1);
-        Assertions.assertEquals(1, result.getTotalElements());
-        Assertions.assertEquals(1, result.getContent().size());
-        Assertions.assertEquals(1, result.getTotalPages());
-        Assertions.assertEquals(pageDTO.page() - 1, result.getNumber());
+        assertNotNull(result);
+        assertFalse(result.getContent().isEmpty());
+        assertFalse(result.getTotalElements() < 1);
+        assertEquals(1, result.getTotalElements());
+        assertEquals(1, result.getContent().size());
+        assertEquals(1, result.getTotalPages());
+        assertEquals(pageDTO.page() - 1, result.getNumber());
 
         AdminMemberDTO resultContent = result.getContent().get(0);
 
-        Assertions.assertEquals(searchMember.getUserId(), resultContent.userId());
-        Assertions.assertEquals(searchMember.getUserName(), resultContent.userName());
-        Assertions.assertEquals(searchMember.getNickname(), resultContent.nickname());
-        Assertions.assertEquals(searchMember.getUserEmail(), resultContent.email());
-        Assertions.assertEquals(searchMember.getBirth(), resultContent.birth());
+        assertEquals(searchMember.getUserId(), resultContent.userId());
+        assertEquals(searchMember.getUserName(), resultContent.userName());
+        assertEquals(searchMember.getNickname(), resultContent.nickname());
+        assertEquals(searchMember.getUserEmail(), resultContent.email());
+        assertEquals(searchMember.getBirth(), resultContent.birth());
     }
 
     @Test
@@ -107,23 +109,23 @@ public class AdminMemberServiceIT {
         Member searchMember = memberList.get(0);
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createSearchAdminOrderPageDTO(searchMember.getUserName(), "userName", 1);
 
-        Page<AdminMemberDTO> result = Assertions.assertDoesNotThrow(() -> adminMemberService.getMemberList(pageDTO));
+        Page<AdminMemberDTO> result = assertDoesNotThrow(() -> adminMemberService.getMemberList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.getContent().isEmpty());
-        Assertions.assertFalse(result.getTotalElements() < 1);
-        Assertions.assertEquals(1, result.getTotalElements());
-        Assertions.assertEquals(1, result.getContent().size());
-        Assertions.assertEquals(1, result.getTotalPages());
-        Assertions.assertEquals(pageDTO.page() - 1, result.getNumber());
+        assertNotNull(result);
+        assertFalse(result.getContent().isEmpty());
+        assertFalse(result.getTotalElements() < 1);
+        assertEquals(1, result.getTotalElements());
+        assertEquals(1, result.getContent().size());
+        assertEquals(1, result.getTotalPages());
+        assertEquals(pageDTO.page() - 1, result.getNumber());
 
         AdminMemberDTO resultContent = result.getContent().get(0);
 
-        Assertions.assertEquals(searchMember.getUserId(), resultContent.userId());
-        Assertions.assertEquals(searchMember.getUserName(), resultContent.userName());
-        Assertions.assertEquals(searchMember.getNickname(), resultContent.nickname());
-        Assertions.assertEquals(searchMember.getUserEmail(), resultContent.email());
-        Assertions.assertEquals(searchMember.getBirth(), resultContent.birth());
+        assertEquals(searchMember.getUserId(), resultContent.userId());
+        assertEquals(searchMember.getUserName(), resultContent.userName());
+        assertEquals(searchMember.getNickname(), resultContent.nickname());
+        assertEquals(searchMember.getUserEmail(), resultContent.email());
+        assertEquals(searchMember.getBirth(), resultContent.birth());
     }
 
     @Test
@@ -132,23 +134,23 @@ public class AdminMemberServiceIT {
         Member searchMember = memberList.get(0);
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createSearchAdminOrderPageDTO(searchMember.getNickname(), "nickname", 1);
 
-        Page<AdminMemberDTO> result = Assertions.assertDoesNotThrow(() -> adminMemberService.getMemberList(pageDTO));
+        Page<AdminMemberDTO> result = assertDoesNotThrow(() -> adminMemberService.getMemberList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.getContent().isEmpty());
-        Assertions.assertFalse(result.getTotalElements() < 1);
-        Assertions.assertEquals(1, result.getTotalElements());
-        Assertions.assertEquals(1, result.getContent().size());
-        Assertions.assertEquals(1, result.getTotalPages());
-        Assertions.assertEquals(pageDTO.page() - 1, result.getNumber());
+        assertNotNull(result);
+        assertFalse(result.getContent().isEmpty());
+        assertFalse(result.getTotalElements() < 1);
+        assertEquals(1, result.getTotalElements());
+        assertEquals(1, result.getContent().size());
+        assertEquals(1, result.getTotalPages());
+        assertEquals(pageDTO.page() - 1, result.getNumber());
 
         AdminMemberDTO resultContent = result.getContent().get(0);
 
-        Assertions.assertEquals(searchMember.getUserId(), resultContent.userId());
-        Assertions.assertEquals(searchMember.getUserName(), resultContent.userName());
-        Assertions.assertEquals(searchMember.getNickname(), resultContent.nickname());
-        Assertions.assertEquals(searchMember.getUserEmail(), resultContent.email());
-        Assertions.assertEquals(searchMember.getBirth(), resultContent.birth());
+        assertEquals(searchMember.getUserId(), resultContent.userId());
+        assertEquals(searchMember.getUserName(), resultContent.userName());
+        assertEquals(searchMember.getNickname(), resultContent.nickname());
+        assertEquals(searchMember.getUserEmail(), resultContent.email());
+        assertEquals(searchMember.getBirth(), resultContent.birth());
     }
 
     @Test
@@ -156,11 +158,11 @@ public class AdminMemberServiceIT {
     void getMemberListEmpty() {
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createSearchAdminOrderPageDTO("noneMember", "nickname", 1);
 
-        Page<AdminMemberDTO> result = Assertions.assertDoesNotThrow(() -> adminMemberService.getMemberList(pageDTO));
+        Page<AdminMemberDTO> result = assertDoesNotThrow(() -> adminMemberService.getMemberList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.getContent().isEmpty());
-        Assertions.assertEquals(0, result.getTotalElements());
+        assertNotNull(result);
+        assertTrue(result.getContent().isEmpty());
+        assertEquals(0, result.getTotalElements());
     }
 
     @Test
@@ -169,15 +171,15 @@ public class AdminMemberServiceIT {
         Member member = memberList.get(0);
         AdminPostPointDTO pointDTO = new AdminPostPointDTO(member.getUserId(), 100);
 
-        String result = Assertions.assertDoesNotThrow(() -> adminMemberService.postPoint(pointDTO));
+        String result = assertDoesNotThrow(() -> adminMemberService.postPoint(pointDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         Member resultMember = memberRepository.findById(member.getUserId()).orElse(null);
 
-        Assertions.assertNotNull(resultMember);
-        Assertions.assertEquals(100, resultMember.getMemberPoint());
+        assertNotNull(resultMember);
+        assertEquals(100, resultMember.getMemberPoint());
     }
 
     @Test
@@ -185,6 +187,6 @@ public class AdminMemberServiceIT {
     void postPointMemberNotFound() {
         AdminPostPointDTO pointDTO = new AdminPostPointDTO("noneMember", 100);
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> adminMemberService.postPoint(pointDTO));
+        assertThrows(IllegalArgumentException.class, () -> adminMemberService.postPoint(pointDTO));
     }
 }

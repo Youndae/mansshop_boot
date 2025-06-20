@@ -37,6 +37,8 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @ExtendWith(SpringExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class AdminReviewServiceUnitTest {
@@ -99,13 +101,13 @@ public class AdminReviewServiceUnitTest {
         when(adminCacheService.getFullScanCountCache(any(), any(CacheRequest.class)))
                 .thenReturn((long) reviewAndReplyList.size());
 
-        PagingListDTO<AdminReviewDTO> result = Assertions.assertDoesNotThrow(() -> adminReviewService.getReviewList(adminOrderPageDTO, AdminListType.ALL));
+        PagingListDTO<AdminReviewDTO> result = assertDoesNotThrow(() -> adminReviewService.getReviewList(adminOrderPageDTO, AdminListType.ALL));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertEquals(listResponse.size(), result.content().size());
-        Assertions.assertEquals(reviewAndReplyList.size(), result.pagingData().getTotalElements());
-        Assertions.assertEquals(2, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertEquals(listResponse.size(), result.content().size());
+        assertEquals(reviewAndReplyList.size(), result.pagingData().getTotalElements());
+        assertEquals(2, result.pagingData().getTotalPages());
     }
 
     @Test
@@ -117,12 +119,12 @@ public class AdminReviewServiceUnitTest {
         when(adminCacheService.getFullScanCountCache(any(), any(CacheRequest.class)))
                 .thenReturn(0L);
 
-        PagingListDTO<AdminReviewDTO> result = Assertions.assertDoesNotThrow(() -> adminReviewService.getReviewList(adminOrderPageDTO, AdminListType.ALL));
+        PagingListDTO<AdminReviewDTO> result = assertDoesNotThrow(() -> adminReviewService.getReviewList(adminOrderPageDTO, AdminListType.ALL));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.content().isEmpty());
-        Assertions.assertEquals(0, result.pagingData().getTotalElements());
-        Assertions.assertEquals(0, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertTrue(result.content().isEmpty());
+        assertEquals(0, result.pagingData().getTotalElements());
+        assertEquals(0, result.pagingData().getTotalPages());
     }
 
     @Test
@@ -135,13 +137,13 @@ public class AdminReviewServiceUnitTest {
         when(productReviewRepository.countByAdminReviewList(adminOrderPageDTO, AdminListType.NEW.name()))
                 .thenReturn((long) reviewAndReplyList.size());
 
-        PagingListDTO<AdminReviewDTO> result = Assertions.assertDoesNotThrow(() -> adminReviewService.getReviewList(adminOrderPageDTO, AdminListType.NEW));
+        PagingListDTO<AdminReviewDTO> result = assertDoesNotThrow(() -> adminReviewService.getReviewList(adminOrderPageDTO, AdminListType.NEW));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertEquals(listResponse.size(), result.content().size());
-        Assertions.assertEquals(reviewAndReplyList.size(), result.pagingData().getTotalElements());
-        Assertions.assertEquals(2, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertEquals(listResponse.size(), result.content().size());
+        assertEquals(reviewAndReplyList.size(), result.pagingData().getTotalElements());
+        assertEquals(2, result.pagingData().getTotalPages());
     }
 
     @Test
@@ -153,12 +155,12 @@ public class AdminReviewServiceUnitTest {
         when(productReviewRepository.countByAdminReviewList(adminOrderPageDTO, AdminListType.NEW.name()))
                 .thenReturn(0L);
 
-        PagingListDTO<AdminReviewDTO> result = Assertions.assertDoesNotThrow(() -> adminReviewService.getReviewList(adminOrderPageDTO, AdminListType.NEW));
+        PagingListDTO<AdminReviewDTO> result = assertDoesNotThrow(() -> adminReviewService.getReviewList(adminOrderPageDTO, AdminListType.NEW));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.content().isEmpty());
-        Assertions.assertEquals(0, result.pagingData().getTotalElements());
-        Assertions.assertEquals(0, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertTrue(result.content().isEmpty());
+        assertEquals(0, result.pagingData().getTotalElements());
+        assertEquals(0, result.pagingData().getTotalPages());
     }
 
     @Test
@@ -171,7 +173,7 @@ public class AdminReviewServiceUnitTest {
         when(memberRepository.findById("admin")).thenReturn(Optional.of(admin));
         when(productReviewRepository.findById(1L)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> adminReviewService.postReviewReply(postDTO, principal)
         );

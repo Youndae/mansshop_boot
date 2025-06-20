@@ -20,10 +20,7 @@ import com.example.mansshop_boot.repository.product.ProductRepository;
 import com.example.mansshop_boot.repository.productReview.ProductReviewReplyRepository;
 import com.example.mansshop_boot.repository.productReview.ProductReviewRepository;
 import com.example.mansshop_boot.service.admin.AdminReviewService;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -34,6 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = MansShopBootApplication.class)
 @EnableJpaRepositories(basePackages = "com.example")
@@ -122,19 +121,19 @@ public class AdminReviewServiceIT {
         AdminListType listType = AdminListType.ALL;
         int totalPages = PaginationUtils.getTotalPages(allProductReviewList.size(), pageDTO.amount());
         int resultContentSize = Math.min(allProductReviewList.size(), pageDTO.amount());
-        PagingListDTO<AdminReviewDTO> result = Assertions.assertDoesNotThrow(() -> adminReviewService.getReviewList(pageDTO, listType));
+        PagingListDTO<AdminReviewDTO> result = assertDoesNotThrow(() -> adminReviewService.getReviewList(pageDTO, listType));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertFalse(result.pagingData().isEmpty());
-        Assertions.assertEquals(resultContentSize, result.content().size());
-        Assertions.assertEquals(allProductReviewList.size(), result.pagingData().getTotalElements());
-        Assertions.assertEquals(totalPages, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertFalse(result.pagingData().isEmpty());
+        assertEquals(resultContentSize, result.content().size());
+        assertEquals(allProductReviewList.size(), result.pagingData().getTotalElements());
+        assertEquals(totalPages, result.pagingData().getTotalPages());
 
         Long cachingResult = redisTemplate.opsForValue().get(REVIEW_CACHING_KEY);
 
-        Assertions.assertNotNull(cachingResult);
-        Assertions.assertEquals(allProductReviewList.size(), cachingResult);
+        assertNotNull(cachingResult);
+        assertEquals(allProductReviewList.size(), cachingResult);
 
         redisTemplate.delete(REVIEW_CACHING_KEY);
     }
@@ -147,17 +146,17 @@ public class AdminReviewServiceIT {
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createDefaultAdminOrderPageDTO();
         AdminListType listType = AdminListType.ALL;
 
-        PagingListDTO<AdminReviewDTO> result = Assertions.assertDoesNotThrow(() -> adminReviewService.getReviewList(pageDTO, listType));
+        PagingListDTO<AdminReviewDTO> result = assertDoesNotThrow(() -> adminReviewService.getReviewList(pageDTO, listType));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.content().isEmpty());
-        Assertions.assertTrue(result.pagingData().isEmpty());
-        Assertions.assertEquals(0, result.pagingData().getTotalElements());
-        Assertions.assertEquals(0, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertTrue(result.content().isEmpty());
+        assertTrue(result.pagingData().isEmpty());
+        assertEquals(0, result.pagingData().getTotalElements());
+        assertEquals(0, result.pagingData().getTotalPages());
 
         Long cachingResult = redisTemplate.opsForValue().get(REVIEW_CACHING_KEY);
 
-        Assertions.assertNull(cachingResult);
+        assertNull(cachingResult);
     }
 
     @Test
@@ -178,18 +177,18 @@ public class AdminReviewServiceIT {
         int totalPages = PaginationUtils.getTotalPages(reviewFixtureList.size(), pageDTO.amount());
         int resultContentSize = Math.min(reviewFixtureList.size(), pageDTO.amount());
 
-        PagingListDTO<AdminReviewDTO> result = Assertions.assertDoesNotThrow(() -> adminReviewService.getReviewList(pageDTO, listType));
+        PagingListDTO<AdminReviewDTO> result = assertDoesNotThrow(() -> adminReviewService.getReviewList(pageDTO, listType));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertFalse(result.pagingData().isEmpty());
-        Assertions.assertEquals(resultContentSize, result.content().size());
-        Assertions.assertEquals(reviewFixtureList.size(), result.pagingData().getTotalElements());
-        Assertions.assertEquals(totalPages, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertFalse(result.pagingData().isEmpty());
+        assertEquals(resultContentSize, result.content().size());
+        assertEquals(reviewFixtureList.size(), result.pagingData().getTotalElements());
+        assertEquals(totalPages, result.pagingData().getTotalPages());
 
         Long cachingResult = redisTemplate.opsForValue().get(REVIEW_CACHING_KEY);
 
-        Assertions.assertNull(cachingResult);
+        assertNull(cachingResult);
     }
 
     @Test
@@ -210,18 +209,18 @@ public class AdminReviewServiceIT {
         int totalPages = PaginationUtils.getTotalPages(reviewFixtureList.size(), pageDTO.amount());
         int resultContentSize = Math.min(reviewFixtureList.size(), pageDTO.amount());
 
-        PagingListDTO<AdminReviewDTO> result = Assertions.assertDoesNotThrow(() -> adminReviewService.getReviewList(pageDTO, listType));
+        PagingListDTO<AdminReviewDTO> result = assertDoesNotThrow(() -> adminReviewService.getReviewList(pageDTO, listType));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertFalse(result.pagingData().isEmpty());
-        Assertions.assertEquals(resultContentSize, result.content().size());
-        Assertions.assertEquals(reviewFixtureList.size(), result.pagingData().getTotalElements());
-        Assertions.assertEquals(totalPages, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertFalse(result.pagingData().isEmpty());
+        assertEquals(resultContentSize, result.content().size());
+        assertEquals(reviewFixtureList.size(), result.pagingData().getTotalElements());
+        assertEquals(totalPages, result.pagingData().getTotalPages());
 
         Long cachingResult = redisTemplate.opsForValue().get(REVIEW_CACHING_KEY);
 
-        Assertions.assertNull(cachingResult);
+        assertNull(cachingResult);
     }
 
     @Test
@@ -231,18 +230,18 @@ public class AdminReviewServiceIT {
         AdminListType listType = AdminListType.NEW;
         int totalPages = PaginationUtils.getTotalPages(newProductReviewList.size(), pageDTO.amount());
         int resultContentSize = Math.min(newProductReviewList.size(), pageDTO.amount());
-        PagingListDTO<AdminReviewDTO> result = Assertions.assertDoesNotThrow(() -> adminReviewService.getReviewList(pageDTO, listType));
+        PagingListDTO<AdminReviewDTO> result = assertDoesNotThrow(() -> adminReviewService.getReviewList(pageDTO, listType));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertFalse(result.pagingData().isEmpty());
-        Assertions.assertEquals(resultContentSize, result.content().size());
-        Assertions.assertEquals(newProductReviewList.size(), result.pagingData().getTotalElements());
-        Assertions.assertEquals(totalPages, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertFalse(result.pagingData().isEmpty());
+        assertEquals(resultContentSize, result.content().size());
+        assertEquals(newProductReviewList.size(), result.pagingData().getTotalElements());
+        assertEquals(totalPages, result.pagingData().getTotalPages());
 
         Long cachingResult = redisTemplate.opsForValue().get(REVIEW_CACHING_KEY);
 
-        Assertions.assertNull(cachingResult);
+        assertNull(cachingResult);
     }
 
     @Test
@@ -253,17 +252,17 @@ public class AdminReviewServiceIT {
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createDefaultAdminOrderPageDTO();
         AdminListType listType = AdminListType.NEW;
 
-        PagingListDTO<AdminReviewDTO> result = Assertions.assertDoesNotThrow(() -> adminReviewService.getReviewList(pageDTO, listType));
+        PagingListDTO<AdminReviewDTO> result = assertDoesNotThrow(() -> adminReviewService.getReviewList(pageDTO, listType));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.content().isEmpty());
-        Assertions.assertTrue(result.pagingData().isEmpty());
-        Assertions.assertEquals(0, result.pagingData().getTotalElements());
-        Assertions.assertEquals(0, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertTrue(result.content().isEmpty());
+        assertTrue(result.pagingData().isEmpty());
+        assertEquals(0, result.pagingData().getTotalElements());
+        assertEquals(0, result.pagingData().getTotalPages());
 
         Long cachingResult = redisTemplate.opsForValue().get(REVIEW_CACHING_KEY);
 
-        Assertions.assertNull(cachingResult);
+        assertNull(cachingResult);
     }
 
     @Test
@@ -276,22 +275,22 @@ public class AdminReviewServiceIT {
                 )
                 .findFirst()
                 .get();
-        AdminReviewDetailDTO result = Assertions.assertDoesNotThrow(() -> adminReviewService.getReviewDetail(reviewFixture.getId()));
+        AdminReviewDetailDTO result = assertDoesNotThrow(() -> adminReviewService.getReviewDetail(reviewFixture.getId()));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(reviewFixture.getId(), result.reviewId());
-        Assertions.assertEquals(reviewFixture.getProduct().getProductName(), result.productName());
-        Assertions.assertEquals(reviewFixture.getProductOption().getSize(), result.size());
-        Assertions.assertEquals(reviewFixture.getProductOption().getColor(), result.color());
-        Assertions.assertEquals(reviewFixture.getMember().getNickname(), result.writer());
-        Assertions.assertEquals(reviewFixture.getReviewContent(), result.content());
-        Assertions.assertEquals(reviewReply.getReplyContent(), result.replyContent());
+        assertNotNull(result);
+        assertEquals(reviewFixture.getId(), result.reviewId());
+        assertEquals(reviewFixture.getProduct().getProductName(), result.productName());
+        assertEquals(reviewFixture.getProductOption().getSize(), result.size());
+        assertEquals(reviewFixture.getProductOption().getColor(), result.color());
+        assertEquals(reviewFixture.getMember().getNickname(), result.writer());
+        assertEquals(reviewFixture.getReviewContent(), result.content());
+        assertEquals(reviewReply.getReplyContent(), result.replyContent());
     }
 
     @Test
     @DisplayName(value = "리뷰 상세 조회. 데이터가 없는 경우")
     void getReviewDetailNotFound() {
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> adminReviewService.getReviewDetail(0L)
         );
@@ -303,20 +302,20 @@ public class AdminReviewServiceIT {
         ProductReview reviewFixture = allProductReviewList.stream().filter(v -> !v.isStatus()).findFirst().get();
         String content = "test Review Reply";
         AdminReviewRequestDTO postDTO = new AdminReviewRequestDTO(reviewFixture.getId(), content);
-        String result = Assertions.assertDoesNotThrow(() -> adminReviewService.postReviewReply(postDTO, principal));
+        String result = assertDoesNotThrow(() -> adminReviewService.postReviewReply(postDTO, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         ProductReview reviewEntity = productReviewRepository.findById(reviewFixture.getId()).orElse(null);
 
-        Assertions.assertNotNull(reviewEntity);
-        Assertions.assertTrue(reviewEntity.isStatus());
+        assertNotNull(reviewEntity);
+        assertTrue(reviewEntity.isStatus());
 
         AdminReviewDetailDTO checkDTO = adminReviewService.getReviewDetail(reviewFixture.getId());
 
-        Assertions.assertNotNull(checkDTO);
-        Assertions.assertEquals(content, checkDTO.replyContent());
+        assertNotNull(checkDTO);
+        assertEquals(content, checkDTO.replyContent());
     }
 
     @Test
@@ -324,7 +323,7 @@ public class AdminReviewServiceIT {
     void postReviewReplyReviewNotFound() {
         String content = "test Review Reply";
         AdminReviewRequestDTO postDTO = new AdminReviewRequestDTO(0L, content);
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> adminReviewService.postReviewReply(postDTO, principal)
         );

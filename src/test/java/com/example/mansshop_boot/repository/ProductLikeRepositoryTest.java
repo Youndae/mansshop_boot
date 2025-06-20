@@ -27,6 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
@@ -83,7 +85,7 @@ public class ProductLikeRepositoryTest {
     void countByUserIdAndProductId() {
         int result = productLikeRepository.countByUserIdAndProductId(productLike.getMember().getUserId(), productLike.getProduct().getId());
 
-        Assertions.assertEquals(1, result);
+        assertEquals(1, result);
     }
 
     @Test
@@ -91,17 +93,17 @@ public class ProductLikeRepositoryTest {
     void countByUserIdAndProductIdEmpty() {
         int result = productLikeRepository.countByUserIdAndProductId("fakeUser", "fakeProductId");
 
-        Assertions.assertEquals(0, result);
+        assertEquals(0, result);
     }
 
     @Test
     @DisplayName(value = "관심상품 데이터 제거")
     @Transactional
     void deleteByUserIdAndProductId() {
-        Assertions.assertDoesNotThrow(() -> productLikeRepository.deleteByUserIdAndProductId(productLike));
+        assertDoesNotThrow(() -> productLikeRepository.deleteByUserIdAndProductId(productLike));
 
         ProductLike deleteEntity = productLikeRepository.findById(productLike.getId()).orElse(null);
-        Assertions.assertNull(deleteEntity);
+        assertNull(deleteEntity);
     }
 
     @Test
@@ -123,20 +125,20 @@ public class ProductLikeRepositoryTest {
                                                                 )
                                                                 .toList();
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(pageDTO.likeAmount(), result.getContent().size());
-        Assertions.assertEquals(memberProductLikeList.size(), result.getTotalElements());
+        assertNotNull(result);
+        assertEquals(pageDTO.likeAmount(), result.getContent().size());
+        assertEquals(memberProductLikeList.size(), result.getTotalElements());
 
         for(ProductLikeDTO resultData : result) {
             boolean flag = false;
             for(ProductLike data : memberProductLikeList) {
                 if(resultData.likeId() == data.getId()){
-                    Assertions.assertEquals(resultData.productId(), data.getProduct().getId());
+                    assertEquals(resultData.productId(), data.getProduct().getId());
                     flag = true;
                     break;
                 }
             }
-            Assertions.assertTrue(flag);
+            assertTrue(flag);
         }
     }
 }

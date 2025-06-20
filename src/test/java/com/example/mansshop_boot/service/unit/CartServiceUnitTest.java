@@ -32,6 +32,8 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @ExtendWith(MockitoExtension.class)
 public class CartServiceUnitTest {
 
@@ -78,10 +80,10 @@ public class CartServiceUnitTest {
         when(cartRepository.findIdByUserId(cartMemberDTO)).thenReturn(1L);
         when(cartDetailRepository.findAllByCartId(1L)).thenReturn(detailFixture);
 
-        List<CartDetailDTO> result = Assertions.assertDoesNotThrow(() -> cartService.getCartList(cartMemberDTO));
+        List<CartDetailDTO> result = assertDoesNotThrow(() -> cartService.getCartList(cartMemberDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.isEmpty());
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
     }
 
     @Test
@@ -89,9 +91,9 @@ public class CartServiceUnitTest {
     void getCartListEmpty() {
         when(cartRepository.findIdByUserId(cartMemberDTO)).thenReturn(1L);
 
-        List<CartDetailDTO> result = Assertions.assertDoesNotThrow(() -> cartService.getCartList(cartMemberDTO));
+        List<CartDetailDTO> result = assertDoesNotThrow(() -> cartService.getCartList(cartMemberDTO));
 
-        Assertions.assertTrue(result.isEmpty());
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -111,9 +113,9 @@ public class CartServiceUnitTest {
         when(productOptionRepository.findById(1L)).thenReturn(Optional.of(productOption));
         when(cartRepository.save(any(Cart.class))).thenReturn(cart);
 
-        String result = Assertions.assertDoesNotThrow(() -> cartService.addCart(addList, cartMemberDTO, response, principal));
+        String result = assertDoesNotThrow(() -> cartService.addCart(addList, cartMemberDTO, response, principal));
 
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertEquals(Result.OK.getResultKey(), result);
         verify(cartRepository).save(any(Cart.class));
     }
 
@@ -135,9 +137,9 @@ public class CartServiceUnitTest {
         when(productOptionRepository.findById(1L)).thenReturn(Optional.of(productOption));
         when(cartRepository.save(any(Cart.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        String result = Assertions.assertDoesNotThrow(() -> cartService.addCart(addList, cartMemberDTO, response, principal));
+        String result = assertDoesNotThrow(() -> cartService.addCart(addList, cartMemberDTO, response, principal));
 
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertEquals(Result.OK.getResultKey(), result);
         verify(cartRepository).save(any(Cart.class));
     }
 
@@ -147,9 +149,9 @@ public class CartServiceUnitTest {
         HttpServletResponse response = new MockHttpServletResponse();
         when(cartRepository.findIdByUserId(cartMemberDTO)).thenReturn(1L);
 
-        String result = Assertions.assertDoesNotThrow(() -> cartService.deleteAllCart(cartMemberDTO, response));
+        String result = assertDoesNotThrow(() -> cartService.deleteAllCart(cartMemberDTO, response));
 
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertEquals(Result.OK.getResultKey(), result);
         verify(cartRepository).deleteById(1L);
     }
 
@@ -159,11 +161,11 @@ public class CartServiceUnitTest {
         HttpServletResponse response = new MockHttpServletResponse();
         when(cartRepository.findIdByUserId(cartMemberDTO)).thenReturn(null);
 
-        CustomNotFoundException e = Assertions.assertThrows(CustomNotFoundException.class,
+        CustomNotFoundException e = assertThrows(CustomNotFoundException.class,
                 () -> cartService.deleteAllCart(cartMemberDTO, response)
         );
 
-        Assertions.assertEquals(ErrorCode.NOT_FOUND.getMessage(), e.getMessage());
+        assertEquals(ErrorCode.NOT_FOUND.getMessage(), e.getMessage());
     }
 
     @Test
@@ -176,10 +178,10 @@ public class CartServiceUnitTest {
         when(cartDetailRepository.findById(cartDetail.getId())).thenReturn(Optional.of(cartDetail));
         when(cartDetailRepository.save(any(CartDetail.class))).thenReturn(cartDetail);
 
-        String result = Assertions.assertDoesNotThrow(() -> cartService.countUp(cartMemberDTO, cartDetail.getId()));
+        String result = assertDoesNotThrow(() -> cartService.countUp(cartMemberDTO, cartDetail.getId()));
 
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
-        Assertions.assertEquals(2, cartDetail.getCartCount());
+        assertEquals(Result.OK.getResultKey(), result);
+        assertEquals(2, cartDetail.getCartCount());
         verify(cartDetailRepository).save(cartDetail);
     }
 
@@ -188,7 +190,7 @@ public class CartServiceUnitTest {
     void countUpEmpty() {
         when(cartRepository.findByUserIdAndCookieValue(cartMemberDTO)).thenReturn(null);
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomNotFoundException.class,
                 () -> cartService.countUp(cartMemberDTO, 1L)
         );
@@ -202,7 +204,7 @@ public class CartServiceUnitTest {
         when(cartRepository.findByUserIdAndCookieValue(cartMemberDTO)).thenReturn(cart);
         when(cartDetailRepository.findById(1L)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(IllegalArgumentException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> cartService.countUp(cartMemberDTO, 1L)
         );
     }
@@ -218,10 +220,10 @@ public class CartServiceUnitTest {
         when(cartDetailRepository.findById(cartDetail.getId())).thenReturn(Optional.of(cartDetail));
         when(cartDetailRepository.save(any(CartDetail.class))).thenReturn(cartDetail);
 
-        String result = Assertions.assertDoesNotThrow(() -> cartService.countDown(cartMemberDTO, cartDetail.getId()));
+        String result = assertDoesNotThrow(() -> cartService.countDown(cartMemberDTO, cartDetail.getId()));
 
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
-        Assertions.assertEquals(1, cartDetail.getCartCount());
+        assertEquals(Result.OK.getResultKey(), result);
+        assertEquals(1, cartDetail.getCartCount());
         verify(cartDetailRepository).save(cartDetail);
     }
 
@@ -235,10 +237,10 @@ public class CartServiceUnitTest {
         when(cartDetailRepository.findById(cartDetail.getId())).thenReturn(Optional.of(cartDetail));
         when(cartDetailRepository.save(any(CartDetail.class))).thenReturn(cartDetail);
 
-        String result = Assertions.assertDoesNotThrow(() -> cartService.countDown(cartMemberDTO, cartDetail.getId()));
+        String result = assertDoesNotThrow(() -> cartService.countDown(cartMemberDTO, cartDetail.getId()));
 
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
-        Assertions.assertEquals(1, cartDetail.getCartCount());
+        assertEquals(Result.OK.getResultKey(), result);
+        assertEquals(1, cartDetail.getCartCount());
         verify(cartDetailRepository).save(cartDetail);
     }
 
@@ -247,7 +249,7 @@ public class CartServiceUnitTest {
     void countDownEmpty() {
         when(cartRepository.findByUserIdAndCookieValue(cartMemberDTO)).thenReturn(null);
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomNotFoundException.class,
                 () -> cartService.countDown(cartMemberDTO, 1L)
         );
@@ -261,7 +263,7 @@ public class CartServiceUnitTest {
         when(cartRepository.findByUserIdAndCookieValue(cartMemberDTO)).thenReturn(cart);
         when(cartDetailRepository.findById(1L)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(IllegalArgumentException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> cartService.countDown(cartMemberDTO, 1L)
         );
     }
@@ -276,9 +278,9 @@ public class CartServiceUnitTest {
         when(cartDetailRepository.findAllIdByCartId(cart.getId())).thenReturn(deleteCartDetailIds);
         doNothing().when(cartRepository).deleteById(cart.getId());
 
-        String result = Assertions.assertDoesNotThrow(() -> cartService.deleteCartSelect(cartMemberDTO, deleteCartDetailIds));
+        String result = assertDoesNotThrow(() -> cartService.deleteCartSelect(cartMemberDTO, deleteCartDetailIds));
 
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertEquals(Result.OK.getResultKey(), result);
         verify(cartRepository).deleteById(cart.getId());
         verify(cartDetailRepository, never()).deleteAllById(deleteCartDetailIds);
     }
@@ -293,9 +295,9 @@ public class CartServiceUnitTest {
         when(cartDetailRepository.findAllIdByCartId(cart.getId())).thenReturn(List.of(1L, 2L));
         doNothing().when(cartDetailRepository).deleteAllById(deleteCartDetailIds);
 
-        String result = Assertions.assertDoesNotThrow(() -> cartService.deleteCartSelect(cartMemberDTO, deleteCartDetailIds));
+        String result = assertDoesNotThrow(() -> cartService.deleteCartSelect(cartMemberDTO, deleteCartDetailIds));
 
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertEquals(Result.OK.getResultKey(), result);
         verify(cartRepository, never()).deleteById(cart.getId());
         verify(cartDetailRepository).deleteAllById(deleteCartDetailIds);
     }
@@ -309,7 +311,7 @@ public class CartServiceUnitTest {
         when(cartRepository.findIdByUserId(cartMemberDTO)).thenReturn(cart.getId());
         when(cartDetailRepository.findAllIdByCartId(cart.getId())).thenReturn(List.of(1L));
 
-        Assertions.assertThrows(IllegalArgumentException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> cartService.deleteCartSelect(cartMemberDTO, deleteCartDetailIds)
         );
 
@@ -323,7 +325,7 @@ public class CartServiceUnitTest {
         List<Long> deleteCartDetailIds = List.of(1L);
         when(cartRepository.findIdByUserId(cartMemberDTO)).thenReturn(null);
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomNotFoundException.class,
                 () -> cartService.deleteCartSelect(cartMemberDTO, deleteCartDetailIds)
         );

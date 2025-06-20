@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
@@ -67,9 +69,9 @@ public class ProductOptionRepositoryTest {
                                         .mapToLong(ProductOption::getId)
                                         .boxed()
                                         .toList();
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(optionIds.size(), result.size());
-        result.forEach(v -> Assertions.assertTrue(optionIds.contains(v.optionId())));
+        assertNotNull(result);
+        assertEquals(optionIds.size(), result.size());
+        result.forEach(v -> assertTrue(optionIds.contains(v.optionId())));
     }
 
     @Test
@@ -81,9 +83,9 @@ public class ProductOptionRepositoryTest {
                                         .mapToLong(ProductOption::getId)
                                         .boxed()
                                         .toList();
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(product.getProductOptions().size(), result.size());
-        result.forEach(v -> Assertions.assertTrue(optionIds.contains(v.optionId())));
+        assertNotNull(result);
+        assertEquals(product.getProductOptions().size(), result.size());
+        result.forEach(v -> assertTrue(optionIds.contains(v.optionId())));
     }
 
     @Test
@@ -100,9 +102,9 @@ public class ProductOptionRepositoryTest {
                                             .toList();
         List<AdminOptionStockDTO> result = productOptionRepository.findAllOptionByProductIdList(productIds);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(optionIds.size(), result.size());
-        result.forEach(v -> Assertions.assertTrue(productIds.contains(v.productId())));
+        assertNotNull(result);
+        assertEquals(optionIds.size(), result.size());
+        result.forEach(v -> assertTrue(productIds.contains(v.productId())));
     }
 
 
@@ -112,9 +114,9 @@ public class ProductOptionRepositoryTest {
     void findAllOptionByProductId() {
         List<ProductOption> result = productOptionRepository.findAllOptionByProductId(product.getId());
         List<Long> optionIds = product.getProductOptions().stream().mapToLong(ProductOption::getId).boxed().toList();
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(product.getProductOptions().size(), result.size());
-        result.forEach(v -> Assertions.assertTrue(optionIds.contains(v.getId())));
+        assertNotNull(result);
+        assertEquals(product.getProductOptions().size(), result.size());
+        result.forEach(v -> assertTrue(optionIds.contains(v.getId())));
     }
 
     @Test
@@ -123,12 +125,12 @@ public class ProductOptionRepositoryTest {
         List<Long> optionIds = product.getProductOptions().stream().mapToLong(ProductOption::getId).boxed().toList();
         List<OrderProductInfoDTO> result = productOptionRepository.findOrderData(optionIds);
         int productDiscountPrice = product.getProductPrice() - (product.getProductPrice() * product.getProductDiscount() / 100);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(optionIds.size(), result.size());
+        assertNotNull(result);
+        assertEquals(optionIds.size(), result.size());
         for(OrderProductInfoDTO data : result) {
-            Assertions.assertEquals(product.getId(), data.productId());
-            Assertions.assertEquals(productDiscountPrice, data.price());
-            Assertions.assertTrue(optionIds.contains(data.optionId()));
+            assertEquals(product.getId(), data.productId());
+            assertEquals(productDiscountPrice, data.price());
+            assertTrue(optionIds.contains(data.optionId()));
         }
     }
 
@@ -153,14 +155,14 @@ public class ProductOptionRepositoryTest {
             );
         }
 
-        Assertions.assertDoesNotThrow(() -> productOptionRepository.patchOrderStock(orderProductList));
+        assertDoesNotThrow(() -> productOptionRepository.patchOrderStock(orderProductList));
 
         List<ProductOption> patchOptionList = productOptionRepository.findAllOptionByProductId(product.getId());
 
         for(ProductOption patchData : patchOptionList) {
             for(ProductOption data : product.getProductOptions()) {
                 if(data.getId() == patchData.getId()) {
-                    Assertions.assertEquals(data.getStock(), patchData.getStock());
+                    assertEquals(data.getStock(), patchData.getStock());
                     break;
                 }
             }

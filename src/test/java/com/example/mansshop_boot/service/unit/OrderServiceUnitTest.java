@@ -46,6 +46,8 @@ import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @ExtendWith(SpringExtension.class)
 public class OrderServiceUnitTest {
 
@@ -82,7 +84,7 @@ public class OrderServiceUnitTest {
                 .thenReturn(orderDataDTO);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
-        OrderDataResponseDTO result = Assertions.assertDoesNotThrow(
+        OrderDataResponseDTO result = assertDoesNotThrow(
                 () -> orderService.getProductOrderData(optionIdAndCountDTO, request, response, null)
         );
 
@@ -91,21 +93,21 @@ public class OrderServiceUnitTest {
 
         Map<String, String> cookieAttributes = CookieHeaderParser.parseSetCookieHeader(cookieCaptor.getValue());
 
-        Assertions.assertTrue(cookieAttributes.containsKey("order"));
-        Assertions.assertNotNull(cookieAttributes.get("order"));
-        Assertions.assertTrue(cookieAttributes.containsKey("Path"));
-        Assertions.assertEquals("/", cookieAttributes.get("Path"));
-        Assertions.assertTrue(cookieAttributes.containsKey("Max-Age"));
-        Assertions.assertEquals(String.valueOf(Duration.ofMinutes(10).getSeconds()), cookieAttributes.get("Max-Age"));
-        Assertions.assertTrue(cookieAttributes.containsKey("Secure"));
-        Assertions.assertTrue(cookieAttributes.containsKey("HttpOnly"));
-        Assertions.assertTrue(cookieAttributes.containsKey("SameSite"));
-        Assertions.assertEquals("Strict", cookieAttributes.get("SameSite"));
+        assertTrue(cookieAttributes.containsKey("order"));
+        assertNotNull(cookieAttributes.get("order"));
+        assertTrue(cookieAttributes.containsKey("Path"));
+        assertEquals("/", cookieAttributes.get("Path"));
+        assertTrue(cookieAttributes.containsKey("Max-Age"));
+        assertEquals(String.valueOf(Duration.ofMinutes(10).getSeconds()), cookieAttributes.get("Max-Age"));
+        assertTrue(cookieAttributes.containsKey("Secure"));
+        assertTrue(cookieAttributes.containsKey("HttpOnly"));
+        assertTrue(cookieAttributes.containsKey("SameSite"));
+        assertEquals("Strict", cookieAttributes.get("SameSite"));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.orderData().isEmpty());
-        Assertions.assertEquals(110000, result.totalPrice());
-        Assertions.assertEquals(optionIdAndCountDTO.size(), result.orderData().size());
+        assertNotNull(result);
+        assertFalse(result.orderData().isEmpty());
+        assertEquals(110000, result.totalPrice());
+        assertEquals(optionIdAndCountDTO.size(), result.orderData().size());
     }
 
     @Test
@@ -121,7 +123,7 @@ public class OrderServiceUnitTest {
         when(productOptionRepository.findOrderData(optionIds))
                 .thenReturn(Collections.emptyList());
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> orderService.getProductOrderData(optionIdAndCountDTO, request, response, null)
         );
@@ -144,27 +146,27 @@ public class OrderServiceUnitTest {
                 .thenReturn(orderDataDTO);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
-        OrderDataResponseDTO result = Assertions.assertDoesNotThrow(() -> orderService.getCartOrderData(cartDetailIds, cartMemberDTO, request, response));
+        OrderDataResponseDTO result = assertDoesNotThrow(() -> orderService.getCartOrderData(cartDetailIds, cartMemberDTO, request, response));
 
         ArgumentCaptor<String> cookieCaptor = ArgumentCaptor.forClass(String.class);
         verify(response).addHeader(eq("Set-Cookie"), cookieCaptor.capture());
 
         Map<String, String> cookieAttributes = CookieHeaderParser.parseSetCookieHeader(cookieCaptor.getValue());
 
-        Assertions.assertTrue(cookieAttributes.containsKey("order"));
-        Assertions.assertNotNull(cookieAttributes.get("order"));
-        Assertions.assertTrue(cookieAttributes.containsKey("Path"));
-        Assertions.assertEquals("/", cookieAttributes.get("Path"));
-        Assertions.assertTrue(cookieAttributes.containsKey("Max-Age"));
-        Assertions.assertEquals(String.valueOf(Duration.ofMinutes(10).getSeconds()), cookieAttributes.get("Max-Age"));
-        Assertions.assertTrue(cookieAttributes.containsKey("Secure"));
-        Assertions.assertTrue(cookieAttributes.containsKey("HttpOnly"));
-        Assertions.assertTrue(cookieAttributes.containsKey("SameSite"));
-        Assertions.assertEquals("Strict", cookieAttributes.get("SameSite"));
+        assertTrue(cookieAttributes.containsKey("order"));
+        assertNotNull(cookieAttributes.get("order"));
+        assertTrue(cookieAttributes.containsKey("Path"));
+        assertEquals("/", cookieAttributes.get("Path"));
+        assertTrue(cookieAttributes.containsKey("Max-Age"));
+        assertEquals(String.valueOf(Duration.ofMinutes(10).getSeconds()), cookieAttributes.get("Max-Age"));
+        assertTrue(cookieAttributes.containsKey("Secure"));
+        assertTrue(cookieAttributes.containsKey("HttpOnly"));
+        assertTrue(cookieAttributes.containsKey("SameSite"));
+        assertEquals("Strict", cookieAttributes.get("SameSite"));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.orderData().isEmpty());
-        Assertions.assertEquals(110000, result.totalPrice());
+        assertNotNull(result);
+        assertFalse(result.orderData().isEmpty());
+        assertEquals(110000, result.totalPrice());
     }
 
     @Test
@@ -178,7 +180,7 @@ public class OrderServiceUnitTest {
         when(cartDetailRepository.findAllById(cartDetailIds))
                 .thenReturn(Collections.emptyList());
 
-        Assertions.assertThrows(CustomNotFoundException.class, () -> orderService.getCartOrderData(cartDetailIds, cartMemberDTO, request, response));
+        assertThrows(CustomNotFoundException.class, () -> orderService.getCartOrderData(cartDetailIds, cartMemberDTO, request, response));
 
         verify(cartRepository, never()).findById(anyLong());
         verify(productOptionRepository, never()).findOrderData(List.of(anyLong()));
@@ -216,7 +218,7 @@ public class OrderServiceUnitTest {
         when(cartDetailRepository.findAllById(cartDetailIds)).thenReturn(cartDetails);
         when(cartRepository.findById(cartEntity.getId())).thenReturn(Optional.of(cartEntity));
 
-        Assertions.assertThrows(CustomAccessDeniedException.class, () -> orderService.getCartOrderData(cartDetailIds, cartMemberDTO, request, response));
+        assertThrows(CustomAccessDeniedException.class, () -> orderService.getCartOrderData(cartDetailIds, cartMemberDTO, request, response));
 
         verify(productOptionRepository, never()).findOrderData(List.of(anyLong()));
     }
@@ -237,11 +239,11 @@ public class OrderServiceUnitTest {
         when(redisTemplate.opsForValue().get(orderToken.getValue())).thenReturn(validateData);
 
 
-        ResponseMessageDTO result = Assertions.assertDoesNotThrow(
+        ResponseMessageDTO result = assertDoesNotThrow(
                 () -> orderService.validateOrder(requestDTO, null, request, response)
         );
 
-        Assertions.assertEquals(Result.OK.getResultKey(), result.message());
+        assertEquals(Result.OK.getResultKey(), result.message());
     }
 
     @Test
@@ -253,7 +255,7 @@ public class OrderServiceUnitTest {
 
         when(request.getCookies()).thenReturn(null);
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomOrderSessionExpiredException.class,
                 () -> orderService.validateOrder(requestDTO, null, request, response)
         );
@@ -273,7 +275,7 @@ public class OrderServiceUnitTest {
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(redisTemplate.opsForValue().get(orderToken.getValue())).thenReturn(null);
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomOrderSessionExpiredException.class,
                 () -> orderService.validateOrder(requestDTO, null, request, response)
         );
@@ -283,12 +285,12 @@ public class OrderServiceUnitTest {
 
         Map<String, String> cookieAttributes = CookieHeaderParser.parseSetCookieHeader(cookieCaptor.getValue());
 
-        Assertions.assertTrue(cookieAttributes.containsKey("order"));
-        Assertions.assertEquals("", cookieAttributes.get("order"));
-        Assertions.assertTrue(cookieAttributes.containsKey("Path"));
-        Assertions.assertEquals("/", cookieAttributes.get("Path"));
-        Assertions.assertTrue(cookieAttributes.containsKey("Max-Age"));
-        Assertions.assertEquals("0", cookieAttributes.get("Max-Age"));
+        assertTrue(cookieAttributes.containsKey("order"));
+        assertEquals("", cookieAttributes.get("order"));
+        assertTrue(cookieAttributes.containsKey("Path"));
+        assertEquals("/", cookieAttributes.get("Path"));
+        assertTrue(cookieAttributes.containsKey("Max-Age"));
+        assertEquals("0", cookieAttributes.get("Max-Age"));
     }
 
     @Test
@@ -305,7 +307,7 @@ public class OrderServiceUnitTest {
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(redisTemplate.opsForValue().get(orderToken.getValue())).thenReturn(validateData);
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomOrderSessionExpiredException.class,
                 () -> orderService.validateOrder(requestDTO, null, request, response)
         );
@@ -315,11 +317,11 @@ public class OrderServiceUnitTest {
 
         Map<String, String> cookieAttributes = CookieHeaderParser.parseSetCookieHeader(cookieCaptor.getValue());
 
-        Assertions.assertTrue(cookieAttributes.containsKey("order"));
-        Assertions.assertEquals("", cookieAttributes.get("order"));
-        Assertions.assertTrue(cookieAttributes.containsKey("Path"));
-        Assertions.assertEquals("/", cookieAttributes.get("Path"));
-        Assertions.assertTrue(cookieAttributes.containsKey("Max-Age"));
-        Assertions.assertEquals("0", cookieAttributes.get("Max-Age"));
+        assertTrue(cookieAttributes.containsKey("order"));
+        assertEquals("", cookieAttributes.get("order"));
+        assertTrue(cookieAttributes.containsKey("Path"));
+        assertEquals("/", cookieAttributes.get("Path"));
+        assertTrue(cookieAttributes.containsKey("Max-Age"));
+        assertEquals("0", cookieAttributes.get("Max-Age"));
     }
 }

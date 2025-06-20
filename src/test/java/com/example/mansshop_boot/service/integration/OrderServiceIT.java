@@ -51,6 +51,8 @@ import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * OrderService.retryFailedOrder()의 경우
  * AdminFailedDataService에서 재시도를 위해 호출하는 메서드이기 때문에
@@ -214,17 +216,17 @@ public class OrderServiceIT {
         );
         CartMemberDTO cartMemberDTO = new CartMemberDTO(anonymous.getUserId(), ANONYMOUS_COOKIE_VALUE);
 
-        String result = Assertions.assertDoesNotThrow(() -> orderService.payment(paymentDTO, cartMemberDTO));
+        String result = assertDoesNotThrow(() -> orderService.payment(paymentDTO, cartMemberDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         List<ProductOrder> saveOrder = productOrderRepository.findAll();
-        Assertions.assertFalse(saveOrder.isEmpty());
-        Assertions.assertEquals(1, saveOrder.size());
+        assertFalse(saveOrder.isEmpty());
+        assertEquals(1, saveOrder.size());
 
         List<ProductOrderDetail> saveOrderDetail = productOrderDetailRepository.findAll();
-        Assertions.assertEquals(productOptionList.size(), saveOrderDetail.size());
+        assertEquals(productOptionList.size(), saveOrderDetail.size());
 
         await()
                 .atMost(10, TimeUnit.SECONDS)
@@ -232,15 +234,15 @@ public class OrderServiceIT {
                 .untilAsserted(() -> {
                     List<PeriodSalesSummary> savePeriodSummary = periodSalesSummaryRepository.findAll();
 
-                    Assertions.assertFalse(savePeriodSummary.isEmpty());
-                    Assertions.assertEquals(1, savePeriodSummary.size());
-                    Assertions.assertEquals(totalPrice, savePeriodSummary.get(0).getCardTotal());
-                    Assertions.assertEquals(0, savePeriodSummary.get(0).getCashTotal());
+                    assertFalse(savePeriodSummary.isEmpty());
+                    assertEquals(1, savePeriodSummary.size());
+                    assertEquals(totalPrice, savePeriodSummary.get(0).getCardTotal());
+                    assertEquals(0, savePeriodSummary.get(0).getCashTotal());
 
                     List<ProductSalesSummary> saveProductSummary = productSalesSummaryRepository.findAll();
 
-                    Assertions.assertFalse(saveProductSummary.isEmpty());
-                    Assertions.assertEquals(productOptionList.size(), saveProductSummary.size());
+                    assertFalse(saveProductSummary.isEmpty());
+                    assertEquals(productOptionList.size(), saveProductSummary.size());
                 });
     }
 
@@ -264,36 +266,36 @@ public class OrderServiceIT {
         );
         CartMemberDTO cartMemberDTO = new CartMemberDTO(member.getUserId(), null);
 
-        String result = Assertions.assertDoesNotThrow(() -> orderService.payment(paymentDTO, cartMemberDTO));
+        String result = assertDoesNotThrow(() -> orderService.payment(paymentDTO, cartMemberDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         List<ProductOrder> saveOrder = productOrderRepository.findAll();
-        Assertions.assertFalse(saveOrder.isEmpty());
-        Assertions.assertEquals(1, saveOrder.size());
+        assertFalse(saveOrder.isEmpty());
+        assertEquals(1, saveOrder.size());
 
         List<ProductOrderDetail> saveOrderDetail = productOrderDetailRepository.findAll();
-        Assertions.assertEquals(productOptionList.size(), saveOrderDetail.size());
+        assertEquals(productOptionList.size(), saveOrderDetail.size());
 
         await()
                 .atMost(10, TimeUnit.SECONDS)
                 .pollInterval(200, TimeUnit.MILLISECONDS)
                 .untilAsserted(() -> {
                     List<Cart> cart = cartRepository.findAll();
-                    Assertions.assertEquals(1, cart.size());
+                    assertEquals(1, cart.size());
 
                     List<PeriodSalesSummary> savePeriodSummary = periodSalesSummaryRepository.findAll();
 
-                    Assertions.assertFalse(savePeriodSummary.isEmpty());
-                    Assertions.assertEquals(1, savePeriodSummary.size());
-                    Assertions.assertEquals(0, savePeriodSummary.get(0).getCardTotal());
-                    Assertions.assertEquals(totalPrice, savePeriodSummary.get(0).getCashTotal());
+                    assertFalse(savePeriodSummary.isEmpty());
+                    assertEquals(1, savePeriodSummary.size());
+                    assertEquals(0, savePeriodSummary.get(0).getCardTotal());
+                    assertEquals(totalPrice, savePeriodSummary.get(0).getCashTotal());
 
                     List<ProductSalesSummary> saveProductSummary = productSalesSummaryRepository.findAll();
 
-                    Assertions.assertFalse(saveProductSummary.isEmpty());
-                    Assertions.assertEquals(productOptionList.size(), saveProductSummary.size());
+                    assertFalse(saveProductSummary.isEmpty());
+                    assertEquals(productOptionList.size(), saveProductSummary.size());
                 });
     }
 
@@ -337,24 +339,24 @@ public class OrderServiceIT {
                     )
             );
         }
-        OrderDataResponseDTO result = Assertions.assertDoesNotThrow(() -> orderService.getProductOrderData(optionIdAndCountDTO, request, response, principal));
+        OrderDataResponseDTO result = assertDoesNotThrow(() -> orderService.getProductOrderData(optionIdAndCountDTO, request, response, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.orderData().isEmpty());
-        Assertions.assertEquals(orderDataDTOList.size(), result.orderData().size());
-        Assertions.assertEquals(totalPrice, result.totalPrice());
+        assertNotNull(result);
+        assertFalse(result.orderData().isEmpty());
+        assertEquals(orderDataDTOList.size(), result.orderData().size());
+        assertEquals(totalPrice, result.totalPrice());
 
-        orderDataDTOList.forEach(v -> Assertions.assertTrue(result.orderData().contains(v)));
+        orderDataDTOList.forEach(v -> assertTrue(result.orderData().contains(v)));
 
         String orderToken = response.getHeader("Set-Cookie").split(";", 2)[0].split("=", 2)[1];
-        Assertions.assertNotNull(orderToken);
-        Assertions.assertNotEquals("", orderToken);
+        assertNotNull(orderToken);
+        assertNotEquals("", orderToken);
 
         PreOrderDataVO preOrderDataVO = orderRedisTemplate.opsForValue().get(orderToken);
-        Assertions.assertNotNull(preOrderDataVO);
-        Assertions.assertEquals(principal.getName(), preOrderDataVO.userId());
-        Assertions.assertEquals(totalPrice, preOrderDataVO.totalPrice());
-        orderItemVOList.forEach(v -> Assertions.assertTrue(preOrderDataVO.orderData().contains(v)));
+        assertNotNull(preOrderDataVO);
+        assertEquals(principal.getName(), preOrderDataVO.userId());
+        assertEquals(totalPrice, preOrderDataVO.totalPrice());
+        orderItemVOList.forEach(v -> assertTrue(preOrderDataVO.orderData().contains(v)));
 
         orderRedisTemplate.delete(orderToken);
     }
@@ -366,7 +368,7 @@ public class OrderServiceIT {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> orderService.getProductOrderData(optionIdAndCountDTO, request, response, principal));
+        assertThrows(IllegalArgumentException.class, () -> orderService.getProductOrderData(optionIdAndCountDTO, request, response, principal));
     }
 
     @Test
@@ -407,24 +409,24 @@ public class OrderServiceIT {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        OrderDataResponseDTO result = Assertions.assertDoesNotThrow(() -> orderService.getCartOrderData(cartDetailIds, cartMemberDTO, request, response));
+        OrderDataResponseDTO result = assertDoesNotThrow(() -> orderService.getCartOrderData(cartDetailIds, cartMemberDTO, request, response));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.orderData().isEmpty());
-        Assertions.assertEquals(orderDataDTOList.size(), result.orderData().size());
-        Assertions.assertEquals(totalPrice, result.totalPrice());
+        assertNotNull(result);
+        assertFalse(result.orderData().isEmpty());
+        assertEquals(orderDataDTOList.size(), result.orderData().size());
+        assertEquals(totalPrice, result.totalPrice());
 
-        orderDataDTOList.forEach(v -> Assertions.assertTrue(result.orderData().contains(v)));
+        orderDataDTOList.forEach(v -> assertTrue(result.orderData().contains(v)));
 
         String orderToken = response.getHeader("Set-Cookie").split(";", 2)[0].split("=", 2)[1];
-        Assertions.assertNotNull(orderToken);
-        Assertions.assertNotEquals("", orderToken);
+        assertNotNull(orderToken);
+        assertNotEquals("", orderToken);
 
         PreOrderDataVO preOrderDataVO = orderRedisTemplate.opsForValue().get(orderToken);
-        Assertions.assertNotNull(preOrderDataVO);
-        Assertions.assertEquals(principal.getName(), preOrderDataVO.userId());
-        Assertions.assertEquals(totalPrice, preOrderDataVO.totalPrice());
-        orderItemVOList.forEach(v -> Assertions.assertTrue(preOrderDataVO.orderData().contains(v)));
+        assertNotNull(preOrderDataVO);
+        assertEquals(principal.getName(), preOrderDataVO.userId());
+        assertEquals(totalPrice, preOrderDataVO.totalPrice());
+        orderItemVOList.forEach(v -> assertTrue(preOrderDataVO.orderData().contains(v)));
 
         orderRedisTemplate.delete(orderToken);
     }
@@ -437,7 +439,7 @@ public class OrderServiceIT {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomNotFoundException.class,
                 () -> orderService.getCartOrderData(cartDetailIds, cartMemberDTO, request, response)
         );
@@ -451,7 +453,7 @@ public class OrderServiceIT {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomAccessDeniedException.class,
                 () -> orderService.getCartOrderData(cartDetailIds, cartMemberDTO, request, response)
         );
@@ -465,7 +467,7 @@ public class OrderServiceIT {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomAccessDeniedException.class,
                 () -> orderService.getCartOrderData(cartDetailIds, cartMemberDTO, request, response)
         );
@@ -511,10 +513,10 @@ public class OrderServiceIT {
 
         orderRedisTemplate.opsForValue().set(ORDER_TOKEN, fixtureOrderDataVO);
 
-        ResponseMessageDTO result = Assertions.assertDoesNotThrow(() -> orderService.validateOrder(requestDTO, principal, request, response));
+        ResponseMessageDTO result = assertDoesNotThrow(() -> orderService.validateOrder(requestDTO, principal, request, response));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result.message());
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result.message());
 
         orderRedisTemplate.delete(ORDER_TOKEN);
     }
@@ -545,7 +547,7 @@ public class OrderServiceIT {
         }
         OrderDataResponseDTO  requestDTO = new OrderDataResponseDTO(orderDataDTOList, totalPrice);
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomOrderSessionExpiredException.class,
                 () -> orderService.validateOrder(requestDTO, principal, request, response)
         );
@@ -578,7 +580,7 @@ public class OrderServiceIT {
         }
         OrderDataResponseDTO  requestDTO = new OrderDataResponseDTO(orderDataDTOList, totalPrice);
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomOrderSessionExpiredException.class,
                 () -> orderService.validateOrder(requestDTO, principal, request, response)
         );
@@ -624,7 +626,7 @@ public class OrderServiceIT {
 
         orderRedisTemplate.opsForValue().set(ORDER_TOKEN, fixtureOrderDataVO);
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomOrderSessionExpiredException.class,
                 () -> orderService.validateOrder(requestDTO, principal, request, response)
         );

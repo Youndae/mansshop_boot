@@ -39,7 +39,7 @@ public class ProductOrderFixture {
             ProductOrder order = ProductOrder.builder()
                     .member(m)
                     .recipient(m.getUserName())
-                    .orderPhone("010-1234" + phoneSuffix++)
+                    .orderPhone("010-1234-" + phoneSuffix++)
                     .orderAddress(m.getUserName() + " address")
                     .orderMemo(m.getUserName() + " memo")
                     .orderTotalPrice(totalPrice)

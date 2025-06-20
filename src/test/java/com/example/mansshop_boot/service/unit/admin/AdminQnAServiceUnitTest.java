@@ -39,6 +39,8 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @ExtendWith(SpringExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class AdminQnAServiceUnitTest {
@@ -115,15 +117,15 @@ public class AdminQnAServiceUnitTest {
         when(adminCacheService.getFullScanCountCache(any(), any(CacheRequest.class)))
                 .thenReturn((long) productQnAList.size());
 
-        PagingListDTO<AdminQnAListResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getProductQnAList(adminOrderPageDTOAllType));
+        PagingListDTO<AdminQnAListResponseDTO> result = assertDoesNotThrow(() -> adminQnAService.getProductQnAList(adminOrderPageDTOAllType));
 
         verify(productQnARepository, never()).findAllByAdminProductQnACount(adminOrderPageDTOAllType);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertEquals(response.size(), result.content().size());
-        Assertions.assertEquals(2, result.pagingData().getTotalPages());
-        Assertions.assertEquals(productQnAList.size(), result.pagingData().getTotalElements());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertEquals(response.size(), result.content().size());
+        assertEquals(2, result.pagingData().getTotalPages());
+        assertEquals(productQnAList.size(), result.pagingData().getTotalElements());
     }
 
     @Test
@@ -134,14 +136,14 @@ public class AdminQnAServiceUnitTest {
         when(adminCacheService.getFullScanCountCache(any(), any(CacheRequest.class)))
                 .thenReturn(0L);
 
-        PagingListDTO<AdminQnAListResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getProductQnAList(adminOrderPageDTOAllType));
+        PagingListDTO<AdminQnAListResponseDTO> result = assertDoesNotThrow(() -> adminQnAService.getProductQnAList(adminOrderPageDTOAllType));
 
         verify(productQnARepository, never()).findAllByAdminProductQnACount(adminOrderPageDTOAllType);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.content().isEmpty());
-        Assertions.assertEquals(0, result.pagingData().getTotalPages());
-        Assertions.assertEquals(0, result.pagingData().getTotalElements());
+        assertNotNull(result);
+        assertTrue(result.content().isEmpty());
+        assertEquals(0, result.pagingData().getTotalPages());
+        assertEquals(0, result.pagingData().getTotalElements());
     }
 
     @Test
@@ -154,13 +156,13 @@ public class AdminQnAServiceUnitTest {
         when(productQnARepository.findAllByAdminProductQnACount(adminOrderPageDTONewType))
                 .thenReturn((long) productQnAList.size());
 
-        PagingListDTO<AdminQnAListResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getProductQnAList(adminOrderPageDTONewType));
+        PagingListDTO<AdminQnAListResponseDTO> result = assertDoesNotThrow(() -> adminQnAService.getProductQnAList(adminOrderPageDTONewType));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertEquals(response.size(), result.content().size());
-        Assertions.assertEquals(2, result.pagingData().getTotalPages());
-        Assertions.assertEquals(productQnAList.size(), result.pagingData().getTotalElements());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertEquals(response.size(), result.content().size());
+        assertEquals(2, result.pagingData().getTotalPages());
+        assertEquals(productQnAList.size(), result.pagingData().getTotalElements());
     }
 
     @Test
@@ -171,12 +173,12 @@ public class AdminQnAServiceUnitTest {
         when(productQnARepository.findAllByAdminProductQnACount(adminOrderPageDTONewType))
                 .thenReturn(0L);
 
-        PagingListDTO<AdminQnAListResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getProductQnAList(adminOrderPageDTONewType));
+        PagingListDTO<AdminQnAListResponseDTO> result = assertDoesNotThrow(() -> adminQnAService.getProductQnAList(adminOrderPageDTONewType));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.content().isEmpty());
-        Assertions.assertEquals(0, result.pagingData().getTotalPages());
-        Assertions.assertEquals(0, result.pagingData().getTotalElements());
+        assertNotNull(result);
+        assertTrue(result.content().isEmpty());
+        assertEquals(0, result.pagingData().getTotalPages());
+        assertEquals(0, result.pagingData().getTotalElements());
     }
 
     @Test
@@ -184,7 +186,7 @@ public class AdminQnAServiceUnitTest {
     void patchProductQnACompleteNotFound() {
         when(productQnARepository.findById(1L)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> adminQnAService.patchProductQnAComplete(1L)
         );
@@ -201,7 +203,7 @@ public class AdminQnAServiceUnitTest {
         when(memberRepository.findById(any())).thenReturn(Optional.of(admin));
         when(productQnARepository.findById(insertDTO.qnaId())).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> adminQnAService.postProductQnAReply(insertDTO, principal)
         );
@@ -216,7 +218,7 @@ public class AdminQnAServiceUnitTest {
 
         when(productQnAReplyRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> adminQnAService.patchProductQnAReply(QnADTOUnitFixture.getQnAReplyDTO(), principal)
         );
@@ -232,7 +234,7 @@ public class AdminQnAServiceUnitTest {
         when(productQnAReplyRepository.findById(replyDTO.replyId())).thenReturn(Optional.of(productQnAReply));
         when(principalService.getUserIdByPrincipal(principal)).thenReturn("admin1");
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> adminQnAService.patchProductQnAReply(replyDTO, principal)
         );
@@ -250,15 +252,15 @@ public class AdminQnAServiceUnitTest {
         when(adminCacheService.getFullScanCountCache(any(), any(CacheRequest.class)))
                 .thenReturn((long) memberQnAList.size());
 
-        PagingListDTO<AdminQnAListResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getMemberQnAList(adminOrderPageDTOAllType));
+        PagingListDTO<AdminQnAListResponseDTO> result = assertDoesNotThrow(() -> adminQnAService.getMemberQnAList(adminOrderPageDTOAllType));
 
         verify(memberQnARepository, never()).findAllByAdminMemberQnACount(adminOrderPageDTOAllType);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertEquals(response.size(), result.content().size());
-        Assertions.assertEquals(2, result.pagingData().getTotalPages());
-        Assertions.assertEquals(memberQnAList.size(), result.pagingData().getTotalElements());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertEquals(response.size(), result.content().size());
+        assertEquals(2, result.pagingData().getTotalPages());
+        assertEquals(memberQnAList.size(), result.pagingData().getTotalElements());
     }
 
     @Test
@@ -270,14 +272,14 @@ public class AdminQnAServiceUnitTest {
         when(adminCacheService.getFullScanCountCache(any(), any(CacheRequest.class)))
                 .thenReturn(0L);
 
-        PagingListDTO<AdminQnAListResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getMemberQnAList(adminOrderPageDTOAllType));
+        PagingListDTO<AdminQnAListResponseDTO> result = assertDoesNotThrow(() -> adminQnAService.getMemberQnAList(adminOrderPageDTOAllType));
 
         verify(memberQnARepository, never()).findAllByAdminMemberQnACount(adminOrderPageDTOAllType);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.content().isEmpty());
-        Assertions.assertEquals(0, result.pagingData().getTotalPages());
-        Assertions.assertEquals(0, result.pagingData().getTotalElements());
+        assertNotNull(result);
+        assertTrue(result.content().isEmpty());
+        assertEquals(0, result.pagingData().getTotalPages());
+        assertEquals(0, result.pagingData().getTotalElements());
     }
 
     @Test
@@ -290,13 +292,13 @@ public class AdminQnAServiceUnitTest {
         when(memberQnARepository.findAllByAdminMemberQnACount(adminOrderPageDTONewType))
                 .thenReturn((long) memberQnAList.size());
 
-        PagingListDTO<AdminQnAListResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getMemberQnAList(adminOrderPageDTONewType));
+        PagingListDTO<AdminQnAListResponseDTO> result = assertDoesNotThrow(() -> adminQnAService.getMemberQnAList(adminOrderPageDTONewType));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertEquals(response.size(), result.content().size());
-        Assertions.assertEquals(2, result.pagingData().getTotalPages());
-        Assertions.assertEquals(memberQnAList.size(), result.pagingData().getTotalElements());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertEquals(response.size(), result.content().size());
+        assertEquals(2, result.pagingData().getTotalPages());
+        assertEquals(memberQnAList.size(), result.pagingData().getTotalElements());
     }
 
     @Test
@@ -308,12 +310,12 @@ public class AdminQnAServiceUnitTest {
         when(memberQnARepository.findAllByAdminMemberQnACount(adminOrderPageDTONewType))
                 .thenReturn(0L);
 
-        PagingListDTO<AdminQnAListResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminQnAService.getMemberQnAList(adminOrderPageDTONewType));
+        PagingListDTO<AdminQnAListResponseDTO> result = assertDoesNotThrow(() -> adminQnAService.getMemberQnAList(adminOrderPageDTONewType));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.content().isEmpty());
-        Assertions.assertEquals(0, result.pagingData().getTotalPages());
-        Assertions.assertEquals(0, result.pagingData().getTotalElements());
+        assertNotNull(result);
+        assertTrue(result.content().isEmpty());
+        assertEquals(0, result.pagingData().getTotalPages());
+        assertEquals(0, result.pagingData().getTotalElements());
     }
 
     @Test
@@ -322,7 +324,7 @@ public class AdminQnAServiceUnitTest {
 
         when(memberQnARepository.findById(1L)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> adminQnAService.patchMemberQnAComplete(1L)
         );
@@ -337,7 +339,7 @@ public class AdminQnAServiceUnitTest {
         when(myPageService.postMemberQnAReply(insertDTO, principal))
                 .thenReturn(Result.FAIL.getResultKey());
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> adminQnAService.postMemberQnAReply(insertDTO, principal)
         );

@@ -5,12 +5,7 @@ import com.example.mansshop_boot.Fixture.MemberQnAFixture;
 import com.example.mansshop_boot.Fixture.QnAClassificationFixture;
 import com.example.mansshop_boot.Fixture.domain.member.MemberAndAuthFixtureDTO;
 import com.example.mansshop_boot.MansShopBootApplication;
-import com.example.mansshop_boot.domain.dto.admin.out.AdminQnAListResponseDTO;
-import com.example.mansshop_boot.domain.dto.mypage.business.MyPagePageDTO;
-import com.example.mansshop_boot.domain.dto.mypage.qna.business.MemberQnADTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.business.MyPageQnAReplyDTO;
-import com.example.mansshop_boot.domain.dto.mypage.qna.out.MemberQnAListDTO;
-import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.entity.*;
 import com.example.mansshop_boot.repository.auth.AuthRepository;
 import com.example.mansshop_boot.repository.member.MemberRepository;
@@ -20,13 +15,11 @@ import com.example.mansshop_boot.repository.qnaClassification.QnAClassificationR
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
@@ -86,7 +79,7 @@ public class MemberQnAReplyRepositoryTest {
 
         List<MyPageQnAReplyDTO> result = memberQnAReplyRepository.findAllByQnAId(qnaId);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(memberQnAReplies.size(), result.size());
+        assertNotNull(result);
+        assertEquals(memberQnAReplies.size(), result.size());
     }
 }

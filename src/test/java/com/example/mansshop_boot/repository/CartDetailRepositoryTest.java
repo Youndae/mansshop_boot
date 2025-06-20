@@ -23,6 +23,8 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
@@ -98,8 +100,8 @@ public class CartDetailRepositoryTest {
     void findCartByUserId() {
         List<CartDetailDTO> result = cartDetailRepository.findAllByCartId(memberCart.getId());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(memberCart.getCartDetailList().size(), result.size());
+        assertNotNull(result);
+        assertEquals(memberCart.getCartDetailList().size(), result.size());
     }
 
     @Test
@@ -107,8 +109,8 @@ public class CartDetailRepositoryTest {
     void countByCartId() {
         List<Long> result = cartDetailRepository.findAllIdByCartId(memberCart.getId());
 
-        Assertions.assertFalse(result.isEmpty());
-        Assertions.assertEquals(memberCart.getCartDetailList().size(), result.size());
+        assertFalse(result.isEmpty());
+        assertEquals(memberCart.getCartDetailList().size(), result.size());
     }
 
     @Test
@@ -116,9 +118,9 @@ public class CartDetailRepositoryTest {
     void findAllCartDetailByCartId() {
         List<CartDetail> result = cartDetailRepository.findAllCartDetailByCartId(memberCart.getId());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertNotEquals(0L, result.size());
-        Assertions.assertEquals(memberCart.getCartDetailList().size(), result.size());
+        assertNotNull(result);
+        assertNotEquals(0L, result.size());
+        assertEquals(memberCart.getCartDetailList().size(), result.size());
     }
 
     @Test
@@ -131,8 +133,8 @@ public class CartDetailRepositoryTest {
 
         List<CartDetail> result = cartDetailRepository.findAllCartDetailByCartIdAndOptionIds(memberCart.getId(), optionIds);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertNotEquals(0L, result.size());
-        Assertions.assertEquals(memberCart.getCartDetailList().size(), result.size());
+        assertNotNull(result);
+        assertNotEquals(0L, result.size());
+        assertEquals(memberCart.getCartDetailList().size(), result.size());
     }
 }

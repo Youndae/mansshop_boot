@@ -24,10 +24,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.internet.MimeUtility;
 import jakarta.servlet.http.Cookie;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -49,6 +46,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = MansShopBootApplication.class)
 @EnableJpaRepositories(basePackages = "com.example")
@@ -102,20 +101,20 @@ public class MemberServiceIT {
                 "joinTester@join.com"
         );
         LocalDate birth = LocalDate.of(2000, 1, 1);
-        String result = Assertions.assertDoesNotThrow(() -> memberService.joinProc(joinDTO));
+        String result = assertDoesNotThrow(() -> memberService.joinProc(joinDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         Member joinMember = memberRepository.findByLocalUserId(joinDTO.userId());
 
-        Assertions.assertNotNull(joinMember);
-        Assertions.assertEquals(joinDTO.userId(), joinMember.getUserId());
-        Assertions.assertEquals(joinDTO.userName(), joinMember.getUserName());
-        Assertions.assertEquals(joinDTO.nickname(), joinMember.getNickname());
-        Assertions.assertEquals(joinDTO.phone(), joinMember.getPhone().replaceAll("-", ""));
-        Assertions.assertEquals(birth, joinMember.getBirth());
-        Assertions.assertEquals(joinDTO.userEmail(), joinMember.getUserEmail());
+        assertNotNull(joinMember);
+        assertEquals(joinDTO.userId(), joinMember.getUserId());
+        assertEquals(joinDTO.userName(), joinMember.getUserName());
+        assertEquals(joinDTO.nickname(), joinMember.getNickname());
+        assertEquals(joinDTO.phone(), joinMember.getPhone().replaceAll("-", ""));
+        assertEquals(birth, joinMember.getBirth());
+        assertEquals(joinDTO.userEmail(), joinMember.getUserEmail());
     }
 
     @Test
@@ -126,9 +125,9 @@ public class MemberServiceIT {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        UserStatusResponseDTO result = Assertions.assertDoesNotThrow(() -> memberService.loginProc(loginDTO, request, response));
+        UserStatusResponseDTO result = assertDoesNotThrow(() -> memberService.loginProc(loginDTO, request, response));
 
-        Assertions.assertNotNull(result);
+        assertNotNull(result);
 
         String accessToken = response.getHeader("Authorization").substring(6);
         Map<String, String> cookieMap = response.getHeaders("Set-Cookie").stream()
@@ -146,10 +145,10 @@ public class MemberServiceIT {
         String redisAtValue = redisTemplate.opsForValue().get(redisAtKey);
         String redisRtValue = redisTemplate.opsForValue().get(redisRtKey);
 
-        Assertions.assertNotNull(redisAtValue);
-        Assertions.assertNotNull(redisRtValue);
-        Assertions.assertEquals(accessToken, redisAtValue);
-        Assertions.assertEquals(refreshToken, redisRtValue);
+        assertNotNull(redisAtValue);
+        assertNotNull(redisRtValue);
+        assertEquals(accessToken, redisAtValue);
+        assertEquals(refreshToken, redisRtValue);
 
         redisTemplate.delete(redisAtKey);
         redisTemplate.delete(redisRtKey);
@@ -162,7 +161,7 @@ public class MemberServiceIT {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomBadCredentialsException.class,
                 () -> memberService.loginProc(loginDTO, request, response)
         );
@@ -184,10 +183,10 @@ public class MemberServiceIT {
         LogoutDTO logoutDTO = new LogoutDTO(accessToken, ino, userId);
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        String result = Assertions.assertDoesNotThrow(() -> memberService.logoutProc(logoutDTO, response));
+        String result = assertDoesNotThrow(() -> memberService.logoutProc(logoutDTO, response));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         List<String> cookies = response.getHeaders("Set-Cookie");
 
@@ -203,14 +202,14 @@ public class MemberServiceIT {
                                 && v.contains("Max-Age=0")
                 );
 
-        Assertions.assertTrue(refreshCookie);
-        Assertions.assertTrue(inoCookie);
+        assertTrue(refreshCookie);
+        assertTrue(inoCookie);
 
         String accessRedisValue = redisTemplate.opsForValue().get(atKey);
         String refreshRedisValue = redisTemplate.opsForValue().get(rtKey);
 
-        Assertions.assertNull(accessRedisValue);
-        Assertions.assertNull(refreshRedisValue);
+        assertNull(accessRedisValue);
+        assertNull(refreshRedisValue);
     }
 
     @Test
@@ -226,10 +225,10 @@ public class MemberServiceIT {
         request.setCookies(new Cookie("temporary", temporaryToken));
         MockHttpServletResponse newResponse = new MockHttpServletResponse();
 
-        String result = Assertions.assertDoesNotThrow(() -> memberService.oAuthUserIssueToken(request, newResponse));
+        String result = assertDoesNotThrow(() -> memberService.oAuthUserIssueToken(request, newResponse));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         String accessToken = newResponse.getHeader("Authorization").substring(6);
         Map<String, String> cookieMap = newResponse.getHeaders("Set-Cookie").stream()
@@ -241,9 +240,9 @@ public class MemberServiceIT {
         String refreshToken = cookieMap.get("Authorization_Refresh").substring(6);
         String ino = cookieMap.get("Authorization_ino");
 
-        Assertions.assertNotNull(accessToken);
-        Assertions.assertNotNull(refreshToken);
-        Assertions.assertNotNull(ino);
+        assertNotNull(accessToken);
+        assertNotNull(refreshToken);
+        assertNotNull(ino);
 
         String redisAtKey = "at" + ino + member.getUserId();
         String redisRtKey = "rt" + ino + member.getUserId();
@@ -251,8 +250,8 @@ public class MemberServiceIT {
         String redisAtValue = redisTemplate.opsForValue().get(redisAtKey);
         String redisRtValue = redisTemplate.opsForValue().get(redisRtKey);
 
-        Assertions.assertEquals(accessToken, redisAtValue);
-        Assertions.assertEquals(refreshToken, redisRtValue);
+        assertEquals(accessToken, redisAtValue);
+        assertEquals(refreshToken, redisRtValue);
     }
 
     @Test
@@ -261,7 +260,7 @@ public class MemberServiceIT {
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockHttpServletRequest request = new MockHttpServletRequest();
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomBadCredentialsException.class,
                 () -> memberService.oAuthUserIssueToken(request, response)
         );
@@ -274,7 +273,7 @@ public class MemberServiceIT {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setCookies(new Cookie("temporary", "wrongToken"));
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomAccessDeniedException.class,
                 () -> memberService.oAuthUserIssueToken(request, response)
         );
@@ -283,29 +282,29 @@ public class MemberServiceIT {
     @Test
     @DisplayName(value = "아이디 중복 체크")
     void checkJoinUserId() {
-        String result = Assertions.assertDoesNotThrow(() -> memberService.checkJoinId("newUserId"));
+        String result = assertDoesNotThrow(() -> memberService.checkJoinId("newUserId"));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(checkNoDuplicatesResponseMessage, result);
+        assertNotNull(result);
+        assertEquals(checkNoDuplicatesResponseMessage, result);
     }
 
     @Test
     @DisplayName(value = "아이디 중복 체크. 중복인 경우")
     void checkJoinUserIdDuplicated() {
         Member member = memberList.get(0);
-        String result = Assertions.assertDoesNotThrow(() -> memberService.checkJoinId(member.getUserId()));
+        String result = assertDoesNotThrow(() -> memberService.checkJoinId(member.getUserId()));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(checkDuplicatedResponseMessage, result);
+        assertNotNull(result);
+        assertEquals(checkDuplicatedResponseMessage, result);
     }
 
     @Test
     @DisplayName(value = "닉네임 중복 체크")
     void checkNickname() {
-        String result = Assertions.assertDoesNotThrow(() -> memberService.checkNickname("newUserNickname", null));
+        String result = assertDoesNotThrow(() -> memberService.checkNickname("newUserNickname", null));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(checkNoDuplicatesResponseMessage, result);
+        assertNotNull(result);
+        assertEquals(checkNoDuplicatesResponseMessage, result);
     }
 
     @Test
@@ -313,20 +312,20 @@ public class MemberServiceIT {
     void checkNicknameOriginNicknameCheck() {
         Member member = memberList.get(0);
         Principal principal = member::getUserId;
-        String result = Assertions.assertDoesNotThrow(() -> memberService.checkNickname(member.getNickname(), principal));
+        String result = assertDoesNotThrow(() -> memberService.checkNickname(member.getNickname(), principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(checkNoDuplicatesResponseMessage, result);
+        assertNotNull(result);
+        assertEquals(checkNoDuplicatesResponseMessage, result);
     }
 
     @Test
     @DisplayName(value = "닉네임 중복 체크. 중복인 경우")
     void checkNicknameDuplicated() {
         Member member = memberList.get(0);
-        String result = Assertions.assertDoesNotThrow(() -> memberService.checkNickname(member.getNickname(), null));
+        String result = assertDoesNotThrow(() -> memberService.checkNickname(member.getNickname(), null));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(checkDuplicatedResponseMessage, result);
+        assertNotNull(result);
+        assertEquals(checkDuplicatedResponseMessage, result);
     }
 
     @Test
@@ -336,11 +335,11 @@ public class MemberServiceIT {
         String memberPhone = member.getPhone().replaceAll("-", "");
         UserSearchDTO searchDTO = new UserSearchDTO(member.getUserName(), memberPhone, null);
 
-        UserSearchIdResponseDTO result = Assertions.assertDoesNotThrow(() -> memberService.searchId(searchDTO));
+        UserSearchIdResponseDTO result = assertDoesNotThrow(() -> memberService.searchId(searchDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(member.getUserId(), result.userId());
-        Assertions.assertEquals(Result.OK.getResultKey(), result.message());
+        assertNotNull(result);
+        assertEquals(member.getUserId(), result.userId());
+        assertEquals(Result.OK.getResultKey(), result.message());
     }
 
     @Test
@@ -349,11 +348,11 @@ public class MemberServiceIT {
         Member member = memberList.get(0);
         UserSearchDTO searchDTO = new UserSearchDTO(member.getUserName(), null, member.getUserEmail());
 
-        UserSearchIdResponseDTO result = Assertions.assertDoesNotThrow(() -> memberService.searchId(searchDTO));
+        UserSearchIdResponseDTO result = assertDoesNotThrow(() -> memberService.searchId(searchDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(member.getUserId(), result.userId());
-        Assertions.assertEquals(Result.OK.getResultKey(), result.message());
+        assertNotNull(result);
+        assertEquals(member.getUserId(), result.userId());
+        assertEquals(Result.OK.getResultKey(), result.message());
     }
 
     @Test
@@ -361,11 +360,11 @@ public class MemberServiceIT {
     void searchIdByPhoneNotFound() {
         UserSearchDTO searchDTO = new UserSearchDTO("noneUser", "01011119999", null);
 
-        UserSearchIdResponseDTO result = Assertions.assertDoesNotThrow(() -> memberService.searchId(searchDTO));
+        UserSearchIdResponseDTO result = assertDoesNotThrow(() -> memberService.searchId(searchDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertNull(result.userId());
-        Assertions.assertEquals(Result.NOTFOUND.getResultKey(), result.message());
+        assertNotNull(result);
+        assertNull(result.userId());
+        assertEquals(Result.NOTFOUND.getResultKey(), result.message());
     }
 
     @Test
@@ -373,11 +372,11 @@ public class MemberServiceIT {
     void searchIdByEmailNotFound() {
         UserSearchDTO searchDTO = new UserSearchDTO("noneUser", null, "noneUser@none.com");
 
-        UserSearchIdResponseDTO result = Assertions.assertDoesNotThrow(() -> memberService.searchId(searchDTO));
+        UserSearchIdResponseDTO result = assertDoesNotThrow(() -> memberService.searchId(searchDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertNull(result.userId());
-        Assertions.assertEquals(Result.NOTFOUND.getResultKey(), result.message());
+        assertNotNull(result);
+        assertNull(result.userId());
+        assertEquals(Result.NOTFOUND.getResultKey(), result.message());
     }
 
     //메일전송은 mailhog로 처리
@@ -388,13 +387,13 @@ public class MemberServiceIT {
         UserSearchPwDTO searchPwDTO = new UserSearchPwDTO(member.getUserId(), member.getUserName(), member.getUserEmail());
 
         ObjectMapper om = new ObjectMapper();
-        String result = Assertions.assertDoesNotThrow(() -> memberService.searchPw(searchPwDTO));
+        String result = assertDoesNotThrow(() -> memberService.searchPw(searchPwDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         String redisCertificationValue = redisTemplate.opsForValue().get(member.getUserId());
-        Assertions.assertNotNull(redisCertificationValue);
+        assertNotNull(redisCertificationValue);
 
         String jsonResponse = mailHogWebClient.get()
                 .uri("/api/v2/messages")
@@ -435,7 +434,7 @@ public class MemberServiceIT {
 
                 if(matcher.find()){
                     String mailCertification = matcher.group(1);
-                    Assertions.assertEquals(redisCertificationValue, mailCertification);
+                    assertEquals(redisCertificationValue, mailCertification);
 
                     mailHogWebClient.delete()
                             .uri("/api/v1/messages")
@@ -446,10 +445,10 @@ public class MemberServiceIT {
                     redisTemplate.delete(member.getUserId());
                 }
             } else
-                Assertions.fail("mail not found");
+                fail("mail not found");
         }catch (Exception e) {
             e.printStackTrace();
-            Assertions.fail("get mail check is fail");
+            fail("get mail check is fail");
         }
     }
 
@@ -467,7 +466,7 @@ public class MemberServiceIT {
 
         } catch (Exception e) {
             e.printStackTrace();
-            Assertions.fail("mail decoding fail");
+            fail("mail decoding fail");
             return input;
         }
     }
@@ -477,10 +476,10 @@ public class MemberServiceIT {
     void searchPWUserNotFound() {
         UserSearchPwDTO searchPwDTO = new UserSearchPwDTO("noneUserId", "noneUserName", "noneUserEmail");
 
-        String result = Assertions.assertDoesNotThrow(() -> memberService.searchPw(searchPwDTO));
+        String result = assertDoesNotThrow(() -> memberService.searchPw(searchPwDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.NOTFOUND.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.NOTFOUND.getResultKey(), result);
     }
 
     @Test
@@ -491,10 +490,10 @@ public class MemberServiceIT {
         UserCertificationDTO certificationDTO = new UserCertificationDTO(member.getUserId(), certificationFixture);
         redisTemplate.opsForValue().set(member.getUserId(), certificationFixture);
 
-        String result = Assertions.assertDoesNotThrow(() -> memberService.checkCertificationNo(certificationDTO));
+        String result = assertDoesNotThrow(() -> memberService.checkCertificationNo(certificationDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         redisTemplate.delete(member.getUserId());
     }
@@ -507,10 +506,10 @@ public class MemberServiceIT {
         UserCertificationDTO certificationDTO = new UserCertificationDTO(member.getUserId(), "102031");
         redisTemplate.opsForValue().set(member.getUserId(), certificationFixture);
 
-        String result = Assertions.assertDoesNotThrow(() -> memberService.checkCertificationNo(certificationDTO));
+        String result = assertDoesNotThrow(() -> memberService.checkCertificationNo(certificationDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.FAIL.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.FAIL.getResultKey(), result);
 
         redisTemplate.delete(member.getUserId());
     }
@@ -524,19 +523,19 @@ public class MemberServiceIT {
         UserResetPwDTO resetPwDTO = new UserResetPwDTO(member.getUserId(), certificationFixture, newUserPw);
         redisTemplate.opsForValue().set(member.getUserId(), certificationFixture);
 
-        String result = Assertions.assertDoesNotThrow(() -> memberService.resetPw(resetPwDTO));
+        String result = assertDoesNotThrow(() -> memberService.resetPw(resetPwDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         Member patchMember = memberRepository.findByLocalUserId(member.getUserId());
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-        Assertions.assertTrue(encoder.matches(newUserPw, patchMember.getUserPw()));
+        assertTrue(encoder.matches(newUserPw, patchMember.getUserPw()));
 
         String redisCertificationValue = redisTemplate.opsForValue().get(member.getUserId());
 
-        Assertions.assertNull(redisCertificationValue);
+        assertNull(redisCertificationValue);
     }
 
     @Test
@@ -548,18 +547,18 @@ public class MemberServiceIT {
         UserResetPwDTO resetPwDTO = new UserResetPwDTO(member.getUserId(), "102031", newUserPw);
         redisTemplate.opsForValue().set(member.getUserId(), certificationFixture);
 
-        String result = Assertions.assertDoesNotThrow(() -> memberService.resetPw(resetPwDTO));
+        String result = assertDoesNotThrow(() -> memberService.resetPw(resetPwDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.FAIL.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.FAIL.getResultKey(), result);
 
         Member patchMember = memberRepository.findByLocalUserId(member.getUserId());
 
-        Assertions.assertEquals(member.getUserPw(), patchMember.getUserPw());
+        assertEquals(member.getUserPw(), patchMember.getUserPw());
 
         String redisCertificationValue = redisTemplate.opsForValue().get(member.getUserId());
 
-        Assertions.assertNull(redisCertificationValue);
+        assertNull(redisCertificationValue);
     }
 
     @Test
@@ -570,18 +569,18 @@ public class MemberServiceIT {
         String newUserPw = "5678";
         UserResetPwDTO resetPwDTO = new UserResetPwDTO(member.getUserId(), certificationFixture, newUserPw);
 
-        String result = Assertions.assertDoesNotThrow(() -> memberService.resetPw(resetPwDTO));
+        String result = assertDoesNotThrow(() -> memberService.resetPw(resetPwDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.FAIL.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.FAIL.getResultKey(), result);
 
         Member patchMember = memberRepository.findByLocalUserId(member.getUserId());
 
-        Assertions.assertEquals(member.getUserPw(), patchMember.getUserPw());
+        assertEquals(member.getUserPw(), patchMember.getUserPw());
 
         String redisCertificationValue = redisTemplate.opsForValue().get(member.getUserId());
 
-        Assertions.assertNull(redisCertificationValue);
+        assertNull(redisCertificationValue);
     }
 
     @Test
@@ -593,13 +592,13 @@ public class MemberServiceIT {
         UserResetPwDTO resetPwDTO = new UserResetPwDTO(noneUserId, certificationFixture, newUserPw);
         redisTemplate.opsForValue().set(noneUserId, certificationFixture);
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> memberService.resetPw(resetPwDTO)
         );
 
         String redisCertificationValue = redisTemplate.opsForValue().get(noneUserId);
 
-        Assertions.assertNull(redisCertificationValue);
+        assertNull(redisCertificationValue);
     }
 }

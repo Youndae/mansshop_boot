@@ -29,6 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Comparator;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest(classes = MansShopBootApplication.class)
 @EnableJpaRepositories(basePackages = "com.example")
 @ActiveProfiles("test")
@@ -76,11 +78,11 @@ public class MainServiceIT {
                 .limit(12)
                 .toList();
 
-        List<MainListResponseDTO> result = Assertions.assertDoesNotThrow(() -> mainService.getBestAndNewList(pageDTO));
+        List<MainListResponseDTO> result = assertDoesNotThrow(() -> mainService.getBestAndNewList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.isEmpty());
-        Assertions.assertEquals(fixtureList.size(), result.size());
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertEquals(fixtureList.size(), result.size());
 
         for(int i = 0; i < result.size(); i++) {
             Product fixture = fixtureList.get(i);
@@ -88,13 +90,13 @@ public class MainServiceIT {
             int discountPrice = (int) (fixture.getProductPrice() * (1 - ((double) fixture.getProductDiscount() / 100)));
             int stock = fixture.getProductOptions().stream().mapToInt(ProductOption::getStock).sum();
 
-            Assertions.assertEquals(fixture.getId(), resultDTO.productId());
-            Assertions.assertEquals(fixture.getProductName(), resultDTO.productName());
-            Assertions.assertEquals(fixture.getThumbnail(), resultDTO.thumbnail());
-            Assertions.assertEquals(fixture.getProductPrice(), resultDTO.originPrice());
-            Assertions.assertEquals(fixture.getProductDiscount(), resultDTO.discount());
-            Assertions.assertEquals(discountPrice, resultDTO.discountPrice());
-            Assertions.assertEquals(stock == 0, resultDTO.isSoldOut());
+            assertEquals(fixture.getId(), resultDTO.productId());
+            assertEquals(fixture.getProductName(), resultDTO.productName());
+            assertEquals(fixture.getThumbnail(), resultDTO.thumbnail());
+            assertEquals(fixture.getProductPrice(), resultDTO.originPrice());
+            assertEquals(fixture.getProductDiscount(), resultDTO.discount());
+            assertEquals(discountPrice, resultDTO.discountPrice());
+            assertEquals(stock == 0, resultDTO.isSoldOut());
         }
     }
 
@@ -103,11 +105,11 @@ public class MainServiceIT {
     void getNewList() {
         MainPageDTO pageDTO = PageDTOFixture.createDefaultMainPageDTO("NEW");
 
-        List<MainListResponseDTO> result = Assertions.assertDoesNotThrow(() -> mainService.getBestAndNewList(pageDTO));
+        List<MainListResponseDTO> result = assertDoesNotThrow(() -> mainService.getBestAndNewList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.isEmpty());
-        Assertions.assertEquals(12, result.size());
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertEquals(12, result.size());
     }
 
     @Test
@@ -116,10 +118,10 @@ public class MainServiceIT {
         productRepository.deleteAll();
         MainPageDTO pageDTO = PageDTOFixture.createDefaultMainPageDTO("BEST");
 
-        List<MainListResponseDTO> result = Assertions.assertDoesNotThrow(() -> mainService.getBestAndNewList(pageDTO));
+        List<MainListResponseDTO> result = assertDoesNotThrow(() -> mainService.getBestAndNewList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.isEmpty());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -133,14 +135,14 @@ public class MainServiceIT {
         int contentSize = Math.min(fixtureList.size(), pageDTO.mainProductAmount());
         int totalPages = PaginationUtils.getTotalPages(fixtureList.size(), pageDTO.mainProductAmount());
 
-        PagingListDTO<MainListResponseDTO> result = Assertions.assertDoesNotThrow(() -> mainService.getClassificationAndSearchList(pageDTO));
+        PagingListDTO<MainListResponseDTO> result = assertDoesNotThrow(() -> mainService.getClassificationAndSearchList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertEquals(contentSize, result.content().size());
-        Assertions.assertEquals(fixtureList.size(), result.pagingData().getTotalElements());
-        Assertions.assertEquals(totalPages, result.pagingData().getTotalPages());
-        Assertions.assertFalse(result.pagingData().isEmpty());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertEquals(contentSize, result.content().size());
+        assertEquals(fixtureList.size(), result.pagingData().getTotalElements());
+        assertEquals(totalPages, result.pagingData().getTotalPages());
+        assertFalse(result.pagingData().isEmpty());
     }
 
     @Test
@@ -149,12 +151,12 @@ public class MainServiceIT {
         String classificationId = "noneId";
         MainPageDTO pageDTO = PageDTOFixture.createDefaultMainPageDTO(classificationId);
 
-        PagingListDTO<MainListResponseDTO> result = Assertions.assertDoesNotThrow(() -> mainService.getClassificationAndSearchList(pageDTO));
+        PagingListDTO<MainListResponseDTO> result = assertDoesNotThrow(() -> mainService.getClassificationAndSearchList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.content().isEmpty());
-        Assertions.assertEquals(0, result.pagingData().getTotalElements());
-        Assertions.assertEquals(0, result.pagingData().getTotalPages());
-        Assertions.assertTrue(result.pagingData().isEmpty());
+        assertNotNull(result);
+        assertTrue(result.content().isEmpty());
+        assertEquals(0, result.pagingData().getTotalElements());
+        assertEquals(0, result.pagingData().getTotalPages());
+        assertTrue(result.pagingData().isEmpty());
     }
 }

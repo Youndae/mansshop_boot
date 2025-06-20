@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
@@ -116,27 +118,27 @@ public class ProductOrderDetailRepositoryTest {
                                                                 .toList();
         List<MyPageOrderDetailDTO> result = productOrderDetailRepository.findByDetailList(orderIds);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(orderDetailDataList.size(), result.size());
+        assertNotNull(result);
+        assertEquals(orderDetailDataList.size(), result.size());
 
         for(MyPageOrderDetailDTO resultData : result) {
             boolean flag = false;
             for(ProductOrderDetail detailData : orderDetailDataList) {
                 if(resultData.detailId() == detailData.getId()) {
-                    Assertions.assertEquals(resultData.orderId(), detailData.getProductOrder().getId());
-                    Assertions.assertEquals(resultData.productId(), detailData.getProduct().getId());
-                    Assertions.assertEquals(resultData.optionId(), detailData.getProductOption().getId());
-                    Assertions.assertEquals(resultData.productName(), detailData.getProduct().getProductName());
-                    Assertions.assertEquals(resultData.size(), detailData.getProductOption().getSize());
-                    Assertions.assertEquals(resultData.color(), detailData.getProductOption().getColor());
-                    Assertions.assertEquals(resultData.detailCount(), detailData.getOrderDetailCount());
-                    Assertions.assertEquals(resultData.detailPrice(), detailData.getOrderDetailPrice());
+                    assertEquals(resultData.orderId(), detailData.getProductOrder().getId());
+                    assertEquals(resultData.productId(), detailData.getProduct().getId());
+                    assertEquals(resultData.optionId(), detailData.getProductOption().getId());
+                    assertEquals(resultData.productName(), detailData.getProduct().getProductName());
+                    assertEquals(resultData.size(), detailData.getProductOption().getSize());
+                    assertEquals(resultData.color(), detailData.getProductOption().getColor());
+                    assertEquals(resultData.detailCount(), detailData.getOrderDetailCount());
+                    assertEquals(resultData.detailPrice(), detailData.getOrderDetailPrice());
 
                     flag = true;
                     break;
                 }
             }
-            Assertions.assertTrue(flag);
+            assertTrue(flag);
         }
     }
 
@@ -154,8 +156,8 @@ public class ProductOrderDetailRepositoryTest {
                 .toList();
         List<AdminOrderDetailListDTO> result = productOrderDetailRepository.findByOrderIds(orderIds);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(orderDetailDataList.size(), result.size());
+        assertNotNull(result);
+        assertEquals(orderDetailDataList.size(), result.size());
 
         for(ProductOrder order : orderDataList) {
             int count = 0;
@@ -164,7 +166,7 @@ public class ProductOrderDetailRepositoryTest {
                     count++;
             }
 
-            Assertions.assertEquals(order.getProductOrderDetailSet().size(), count);
+            assertEquals(order.getProductOrderDetailSet().size(), count);
         }
     }
 }

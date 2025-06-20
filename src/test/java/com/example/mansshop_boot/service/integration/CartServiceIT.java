@@ -42,6 +42,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest(classes = MansShopBootApplication.class)
 @EnableJpaRepositories(basePackages = "com.example")
 @ActiveProfiles("test")
@@ -147,10 +149,10 @@ public class CartServiceIT {
         List<CartDetail> memberCartDetailList = memberCart.getCartDetailList().stream().sorted(Comparator.comparingLong(CartDetail::getId).reversed()).toList();
         CartMemberDTO cartMemberDTO = createCartMemberDTO(member.getUserId(), null);
 
-        List<CartDetailDTO> result = Assertions.assertDoesNotThrow(() -> cartService.getCartList(cartMemberDTO));
+        List<CartDetailDTO> result = assertDoesNotThrow(() -> cartService.getCartList(cartMemberDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(memberCartDetailList.size(), result.size());
+        assertNotNull(result);
+        assertEquals(memberCartDetailList.size(), result.size());
 
         for(int i = 0; i < result.size(); i++) {
             CartDetailDTO resultDTO = result.get(i);
@@ -159,17 +161,17 @@ public class CartServiceIT {
             int originPrice = fixtureProduct.getProductPrice() * fixture.getCartCount();
             int price = (fixtureProduct.getProductPrice() - (fixtureProduct.getProductPrice() * fixtureProduct.getProductDiscount() / 100)) * fixture.getCartCount();
 
-            Assertions.assertEquals(fixture.getId(), resultDTO.cartDetailId());
-            Assertions.assertEquals(fixtureProduct.getId(), resultDTO.productId());
-            Assertions.assertEquals(fixture.getProductOption().getId(), resultDTO.optionId());
-            Assertions.assertEquals(fixtureProduct.getProductName(), resultDTO.productName());
-            Assertions.assertEquals(fixtureProduct.getThumbnail(), resultDTO.productThumbnail());
-            Assertions.assertEquals(fixture.getProductOption().getSize(), resultDTO.size());
-            Assertions.assertEquals(fixture.getProductOption().getColor(), resultDTO.color());
-            Assertions.assertEquals(fixture.getCartCount(), resultDTO.count());
-            Assertions.assertEquals(originPrice, resultDTO.originPrice());
-            Assertions.assertEquals(price, resultDTO.price());
-            Assertions.assertEquals(fixtureProduct.getProductDiscount(), resultDTO.discount());
+            assertEquals(fixture.getId(), resultDTO.cartDetailId());
+            assertEquals(fixtureProduct.getId(), resultDTO.productId());
+            assertEquals(fixture.getProductOption().getId(), resultDTO.optionId());
+            assertEquals(fixtureProduct.getProductName(), resultDTO.productName());
+            assertEquals(fixtureProduct.getThumbnail(), resultDTO.productThumbnail());
+            assertEquals(fixture.getProductOption().getSize(), resultDTO.size());
+            assertEquals(fixture.getProductOption().getColor(), resultDTO.color());
+            assertEquals(fixture.getCartCount(), resultDTO.count());
+            assertEquals(originPrice, resultDTO.originPrice());
+            assertEquals(price, resultDTO.price());
+            assertEquals(fixtureProduct.getProductDiscount(), resultDTO.discount());
         }
     }
 
@@ -179,10 +181,10 @@ public class CartServiceIT {
         List<CartDetail> memberCartDetailList  = anonymousCart.getCartDetailList().stream().sorted(Comparator.comparingLong(CartDetail::getId).reversed()).toList();
         CartMemberDTO cartMemberDTO = createCartMemberDTO(anonymous.getUserId(), ANONYMOUS_CART_COOKIE);
 
-        List<CartDetailDTO> result = Assertions.assertDoesNotThrow(() -> cartService.getCartList(cartMemberDTO));
+        List<CartDetailDTO> result = assertDoesNotThrow(() -> cartService.getCartList(cartMemberDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(memberCartDetailList.size(), result.size());
+        assertNotNull(result);
+        assertEquals(memberCartDetailList.size(), result.size());
 
         for(int i = 0; i < result.size(); i++) {
             CartDetailDTO resultDTO = result.get(i);
@@ -191,17 +193,17 @@ public class CartServiceIT {
             int originPrice = fixtureProduct.getProductPrice() * fixture.getCartCount();
             int price = (fixtureProduct.getProductPrice() - (fixtureProduct.getProductPrice() * fixtureProduct.getProductDiscount() / 100)) * fixture.getCartCount();
 
-            Assertions.assertEquals(fixture.getId(), resultDTO.cartDetailId());
-            Assertions.assertEquals(fixtureProduct.getId(), resultDTO.productId());
-            Assertions.assertEquals(fixture.getProductOption().getId(), resultDTO.optionId());
-            Assertions.assertEquals(fixtureProduct.getProductName(), resultDTO.productName());
-            Assertions.assertEquals(fixtureProduct.getThumbnail(), resultDTO.productThumbnail());
-            Assertions.assertEquals(fixture.getProductOption().getSize(), resultDTO.size());
-            Assertions.assertEquals(fixture.getProductOption().getColor(), resultDTO.color());
-            Assertions.assertEquals(fixture.getCartCount(), resultDTO.count());
-            Assertions.assertEquals(originPrice, resultDTO.originPrice());
-            Assertions.assertEquals(price, resultDTO.price());
-            Assertions.assertEquals(fixtureProduct.getProductDiscount(), resultDTO.discount());
+            assertEquals(fixture.getId(), resultDTO.cartDetailId());
+            assertEquals(fixtureProduct.getId(), resultDTO.productId());
+            assertEquals(fixture.getProductOption().getId(), resultDTO.optionId());
+            assertEquals(fixtureProduct.getProductName(), resultDTO.productName());
+            assertEquals(fixtureProduct.getThumbnail(), resultDTO.productThumbnail());
+            assertEquals(fixture.getProductOption().getSize(), resultDTO.size());
+            assertEquals(fixture.getProductOption().getColor(), resultDTO.color());
+            assertEquals(fixture.getCartCount(), resultDTO.count());
+            assertEquals(originPrice, resultDTO.originPrice());
+            assertEquals(price, resultDTO.price());
+            assertEquals(fixtureProduct.getProductDiscount(), resultDTO.discount());
         }
     }
 
@@ -213,9 +215,9 @@ public class CartServiceIT {
         cartRepository.deleteAll();
         CartMemberDTO cartMemberDTO = createCartMemberDTO(member.getUserId(), null);
 
-        List<CartDetailDTO> result = Assertions.assertDoesNotThrow(() -> cartService.getCartList(cartMemberDTO));
+        List<CartDetailDTO> result = assertDoesNotThrow(() -> cartService.getCartList(cartMemberDTO));
 
-        Assertions.assertNull(result);
+        assertNull(result);
     }
 
     @Test
@@ -239,16 +241,16 @@ public class CartServiceIT {
         MockHttpServletResponse response = new MockHttpServletResponse();
         Principal principal = getPrincipal(member);
 
-        String result = Assertions.assertDoesNotThrow(() -> cartService.addCart(addList, cartMemberDTO, response, principal));
+        String result = assertDoesNotThrow(() -> cartService.addCart(addList, cartMemberDTO, response, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         Long saveCartId = cartRepository.findIdByUserId(cartMemberDTO);
-        Assertions.assertNotNull(saveCartId);
+        assertNotNull(saveCartId);
 
         List<CartDetailDTO> detailList = cartDetailRepository.findAllByCartId(saveCartId);
-        Assertions.assertEquals(addList.size(), detailList.size());
+        assertEquals(addList.size(), detailList.size());
     }
 
     @Test
@@ -276,14 +278,14 @@ public class CartServiceIT {
                 .get()
                 .getId();
 
-        String result = Assertions.assertDoesNotThrow(() -> cartService.addCart(addList, cartMemberDTO, response, principal));
+        String result = assertDoesNotThrow(() -> cartService.addCart(addList, cartMemberDTO, response, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         List<CartDetailDTO> detailList = cartDetailRepository.findAllByCartId(memberCartId);
-        Assertions.assertFalse(detailList.isEmpty());
-        Assertions.assertEquals(addList.size(), detailList.size());
+        assertFalse(detailList.isEmpty());
+        assertEquals(addList.size(), detailList.size());
     }
 
     @Test
@@ -305,18 +307,18 @@ public class CartServiceIT {
         }
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        String result = Assertions.assertDoesNotThrow(() -> cartService.addCart(addList, cartMemberDTO, response, null));
+        String result = assertDoesNotThrow(() -> cartService.addCart(addList, cartMemberDTO, response, null));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
         String cookie = response.getHeader("Set-Cookie").toString();
-        Assertions.assertNotNull(cookie);
+        assertNotNull(cookie);
 
         Long saveCartId = cartRepository.findIdByUserId(cartMemberDTO);
-        Assertions.assertNotNull(saveCartId);
+        assertNotNull(saveCartId);
 
         List<CartDetailDTO> detailList = cartDetailRepository.findAllByCartId(saveCartId);
-        Assertions.assertEquals(addList.size(), detailList.size());
+        assertEquals(addList.size(), detailList.size());
     }
 
     @Test
@@ -328,7 +330,7 @@ public class CartServiceIT {
         MockHttpServletResponse response = new MockHttpServletResponse();
         Principal principal = getPrincipal(member);
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> cartService.addCart(addList, cartMemberDTO, response, principal)
         );
@@ -341,13 +343,13 @@ public class CartServiceIT {
         MockHttpServletResponse response = new MockHttpServletResponse();
         CartMemberDTO cartMemberDTO = createCartMemberDTO(member.getUserId(), null);
 
-        String result = Assertions.assertDoesNotThrow(() -> cartService.deleteAllCart(cartMemberDTO, response));
+        String result = assertDoesNotThrow(() -> cartService.deleteAllCart(cartMemberDTO, response));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         Long cartId = cartRepository.findIdByUserId(cartMemberDTO);
-        Assertions.assertNull(cartId);
+        assertNull(cartId);
     }
 
     @Test
@@ -356,7 +358,7 @@ public class CartServiceIT {
         MockHttpServletResponse response = new MockHttpServletResponse();
         CartMemberDTO cartMemberDTO = createCartMemberDTO("noneMember", null);
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomNotFoundException.class,
                 () -> cartService.deleteAllCart(cartMemberDTO, response)
         );
@@ -371,14 +373,14 @@ public class CartServiceIT {
         long detailId = memberCart.getCartDetailList().get(0).getId();
         int detailCount = memberCart.getCartDetailList().get(0).getCartCount();
 
-        String result = Assertions.assertDoesNotThrow(() -> cartService.countUp(cartMemberDTO, detailId));
+        String result = assertDoesNotThrow(() -> cartService.countUp(cartMemberDTO, detailId));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         CartDetail patchDetail = cartDetailRepository.findById(detailId).orElse(null);
-        Assertions.assertNotNull(patchDetail);
-        Assertions.assertEquals(detailCount + 1, patchDetail.getCartCount());
+        assertNotNull(patchDetail);
+        assertEquals(detailCount + 1, patchDetail.getCartCount());
     }
 
     @Test
@@ -386,7 +388,7 @@ public class CartServiceIT {
     void countUpCartNotFound() {
         CartMemberDTO cartMemberDTO = createCartMemberDTO("noneMember", null);
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomNotFoundException.class,
                 () -> cartService.countUp(cartMemberDTO, 1L)
         );
@@ -398,7 +400,7 @@ public class CartServiceIT {
         Member member = memberList.get(0);
         CartMemberDTO cartMemberDTO = createCartMemberDTO(member.getUserId(), null);
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> cartService.countUp(cartMemberDTO, 0L)
         );
@@ -414,14 +416,14 @@ public class CartServiceIT {
         int detailCount = memberCart.getCartDetailList().get(0).getCartCount();
         int detailCountResult = detailCount == 1 ? 1 : detailCount - 1;
 
-        String result = Assertions.assertDoesNotThrow(() -> cartService.countDown(cartMemberDTO, detailId));
+        String result = assertDoesNotThrow(() -> cartService.countDown(cartMemberDTO, detailId));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         CartDetail patchDetail = cartDetailRepository.findById(detailId).orElse(null);
-        Assertions.assertNotNull(patchDetail);
-        Assertions.assertEquals(detailCountResult, patchDetail.getCartCount());
+        assertNotNull(patchDetail);
+        assertEquals(detailCountResult, patchDetail.getCartCount());
     }
 
     @Test
@@ -429,7 +431,7 @@ public class CartServiceIT {
     void countDownCartNotFound() {
         CartMemberDTO cartMemberDTO = createCartMemberDTO("noneMember", null);
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomNotFoundException.class,
                 () -> cartService.countDown(cartMemberDTO, 1L)
         );
@@ -441,7 +443,7 @@ public class CartServiceIT {
         Member member = memberList.get(0);
         CartMemberDTO cartMemberDTO = createCartMemberDTO(member.getUserId(), null);
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> cartService.countDown(cartMemberDTO, 0L)
         );
@@ -460,14 +462,14 @@ public class CartServiceIT {
                 .toList();
         CartMemberDTO cartMemberDTO = createCartMemberDTO(member.getUserId(), null);
 
-        String result = Assertions.assertDoesNotThrow(() -> cartService.deleteCartSelect(cartMemberDTO, detailIds));
+        String result = assertDoesNotThrow(() -> cartService.deleteCartSelect(cartMemberDTO, detailIds));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         List<Long> memberCartDetailIds = cartDetailRepository.findAllIdByCartId(memberCart.getId());
-        Assertions.assertFalse(memberCartDetailIds.isEmpty());
-        Assertions.assertEquals(1, memberCartDetailIds.size());
+        assertFalse(memberCartDetailIds.isEmpty());
+        assertEquals(1, memberCartDetailIds.size());
     }
 
     @Test
@@ -475,7 +477,7 @@ public class CartServiceIT {
     void deleteCartSelectCartNotFound() {
         CartMemberDTO cartMemberDTO = createCartMemberDTO("noneMember", null);
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomNotFoundException.class,
                 () -> cartService.deleteCartSelect(cartMemberDTO, List.of(1L))
         );
@@ -487,7 +489,7 @@ public class CartServiceIT {
         Member member = memberList.get(0);
         CartMemberDTO cartMemberDTO = createCartMemberDTO(member.getUserId(), null);
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> cartService.deleteCartSelect(cartMemberDTO, List.of(0L))
         );
@@ -500,11 +502,11 @@ public class CartServiceIT {
         MockHttpServletRequest request = new MockHttpServletRequest();
         Principal principal = getPrincipal(member);
 
-        CartMemberDTO result = Assertions.assertDoesNotThrow(() -> cartService.getCartMemberDTO(request, principal));
+        CartMemberDTO result = assertDoesNotThrow(() -> cartService.getCartMemberDTO(request, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(member.getUserId(), result.uid());
-        Assertions.assertNull(result.cartCookieValue());
+        assertNotNull(result);
+        assertEquals(member.getUserId(), result.uid());
+        assertNull(result.cartCookieValue());
     }
 
     @Test
@@ -512,11 +514,11 @@ public class CartServiceIT {
     void getCartMemberDTOAnonymousEmptyCookie() {
         MockHttpServletRequest request = new MockHttpServletRequest();
 
-        CartMemberDTO result = Assertions.assertDoesNotThrow(() -> cartService.getCartMemberDTO(request, null));
+        CartMemberDTO result = assertDoesNotThrow(() -> cartService.getCartMemberDTO(request, null));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(anonymous.getUserId(), result.uid());
-        Assertions.assertNull(result.cartCookieValue());
+        assertNotNull(result);
+        assertEquals(anonymous.getUserId(), result.uid());
+        assertNull(result.cartCookieValue());
     }
 
     @Test
@@ -526,10 +528,10 @@ public class CartServiceIT {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setCookies(new Cookie(cookieHeader, ANONYMOUS_CART_COOKIE));
 
-        CartMemberDTO result = Assertions.assertDoesNotThrow(() -> cartService.getCartMemberDTO(request, null));
+        CartMemberDTO result = assertDoesNotThrow(() -> cartService.getCartMemberDTO(request, null));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(anonymous.getUserId(), result.uid());
-        Assertions.assertEquals(ANONYMOUS_CART_COOKIE, result.cartCookieValue());
+        assertNotNull(result);
+        assertEquals(anonymous.getUserId(), result.uid());
+        assertEquals(ANONYMOUS_CART_COOKIE, result.cartCookieValue());
     }
 }

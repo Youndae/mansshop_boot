@@ -15,6 +15,8 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
@@ -55,8 +57,8 @@ public class ProductInfoImageRepositoryTest {
     void findByProductId() {
         List<String> result = productInfoImageRepository.findByProductId(product.getId());
         List<String> infoImageList = product.getProductInfoImages().stream().map(ProductInfoImage::getImageName).toList();
-        Assertions.assertNotNull(result);
-        result.forEach(v -> Assertions.assertTrue(infoImageList.contains(v)));
+        assertNotNull(result);
+        result.forEach(v -> assertTrue(infoImageList.contains(v)));
     }
 
     @Test
@@ -64,10 +66,10 @@ public class ProductInfoImageRepositoryTest {
     void deleteByImageName() {
         List<String> infoImageNameList = product.getProductInfoImages().stream().map(ProductInfoImage::getImageName).toList();
 
-        Assertions.assertDoesNotThrow(() -> productInfoImageRepository.deleteByImageName(infoImageNameList));
+        assertDoesNotThrow(() -> productInfoImageRepository.deleteByImageName(infoImageNameList));
         List<String> result = productInfoImageRepository.findByProductId(product.getId());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.isEmpty());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 }

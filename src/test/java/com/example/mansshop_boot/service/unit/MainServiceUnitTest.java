@@ -22,6 +22,8 @@ import java.util.List;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @ExtendWith(MockitoExtension.class)
 public class MainServiceUnitTest {
 
@@ -52,9 +54,9 @@ public class MainServiceUnitTest {
 
         when(productRepository.findListDefault(pageDTO)).thenReturn(resultList);
 
-        List<MainListResponseDTO> result = Assertions.assertDoesNotThrow(() -> mainService.getBestAndNewList(pageDTO));
+        List<MainListResponseDTO> result = assertDoesNotThrow(() -> mainService.getBestAndNewList(pageDTO));
 
-        Assertions.assertEquals(resultList.size(), result.size());
+        assertEquals(resultList.size(), result.size());
     }
 
     @Test
@@ -78,9 +80,9 @@ public class MainServiceUnitTest {
 
         when(productRepository.findListDefault(pageDTO)).thenReturn(resultList);
 
-        List<MainListResponseDTO> result = Assertions.assertDoesNotThrow(() -> mainService.getBestAndNewList(pageDTO));
+        List<MainListResponseDTO> result = assertDoesNotThrow(() -> mainService.getBestAndNewList(pageDTO));
 
-        Assertions.assertEquals(resultList.size(), result.size());
+        assertEquals(resultList.size(), result.size());
     }
 
     @Test
@@ -95,10 +97,10 @@ public class MainServiceUnitTest {
 
         when(productRepository.findListDefault(pageDTO)).thenReturn(resultList);
 
-        List<MainListResponseDTO> result = Assertions.assertDoesNotThrow(() -> mainService.getBestAndNewList(pageDTO));
+        List<MainListResponseDTO> result = assertDoesNotThrow(() -> mainService.getBestAndNewList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.isEmpty());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -127,12 +129,12 @@ public class MainServiceUnitTest {
 
         when(productRepository.findListPageable(pageDTO, pageable)).thenReturn(resultPages);
 
-        PagingListDTO<MainListResponseDTO> result = Assertions.assertDoesNotThrow(() ->mainService.getClassificationAndSearchList(pageDTO));
+        PagingListDTO<MainListResponseDTO> result = assertDoesNotThrow(() ->mainService.getClassificationAndSearchList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(resultList.size(), result.pagingData().getTotalElements());
-        Assertions.assertFalse(result.pagingData().isEmpty());
-        Assertions.assertEquals(1, result.pagingData().getTotalPages());
-        Assertions.assertEquals(resultList.size(), result.content().size());
+        assertNotNull(result);
+        assertEquals(resultList.size(), result.pagingData().getTotalElements());
+        assertFalse(result.pagingData().isEmpty());
+        assertEquals(1, result.pagingData().getTotalPages());
+        assertEquals(resultList.size(), result.content().size());
     }
 }

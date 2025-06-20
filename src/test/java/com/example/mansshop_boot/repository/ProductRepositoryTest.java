@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
@@ -79,8 +81,8 @@ public class ProductRepositoryTest {
         MainPageDTO pageDTO = new MainPageDTO(1, null, "BEST");
         List<MainListDTO> result = productRepository.findListDefault(pageDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(pageDTO.mainProductAmount(), result.size());
+        assertNotNull(result);
+        assertEquals(pageDTO.mainProductAmount(), result.size());
     }
 
     @Test
@@ -89,8 +91,8 @@ public class ProductRepositoryTest {
         MainPageDTO pageDTO = new MainPageDTO(1, null, "NEW");
         List<MainListDTO> result = productRepository.findListDefault(pageDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(pageDTO.mainProductAmount(), result.size());
+        assertNotNull(result);
+        assertEquals(pageDTO.mainProductAmount(), result.size());
     }
 
     @Test
@@ -103,9 +105,9 @@ public class ProductRepositoryTest {
                                             );
         Page<MainListDTO> result = productRepository.findListPageable(pageDTO, pageable);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(PRODUCT_SIZE, result.getTotalElements());
-        Assertions.assertEquals(pageDTO.mainProductAmount(), result.getContent().size());
+        assertNotNull(result);
+        assertEquals(PRODUCT_SIZE, result.getTotalElements());
+        assertEquals(pageDTO.mainProductAmount(), result.getContent().size());
     }
 
     @Test
@@ -118,9 +120,9 @@ public class ProductRepositoryTest {
         );
         Page<MainListDTO> result = productRepository.findListPageable(pageDTO, pageable);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(0, result.getTotalElements());
-        Assertions.assertTrue(result.getContent().isEmpty());
+        assertNotNull(result);
+        assertEquals(0, result.getTotalElements());
+        assertTrue(result.getContent().isEmpty());
     }
 
     @Test
@@ -128,10 +130,10 @@ public class ProductRepositoryTest {
     void findAllByIdList() {
         List<Product> result = productRepository.findAllByIdList(productIds);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(productIds.size(), result.size());
+        assertNotNull(result);
+        assertEquals(productIds.size(), result.size());
         for(int i = 0; i < productIds.size(); i++)
-            Assertions.assertEquals(productIds.get(i), result.get(i).getId());
+            assertEquals(productIds.get(i), result.get(i).getId());
     }
 
     @Test
@@ -140,8 +142,8 @@ public class ProductRepositoryTest {
         AdminPageDTO pageDTO = new AdminPageDTO(null, 1);
         List<AdminProductListDTO> result = productRepository.findAdminProductList(pageDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(pageDTO.amount(), result.size());
+        assertNotNull(result);
+        assertEquals(pageDTO.amount(), result.size());
     }
 
     @Test
@@ -150,8 +152,8 @@ public class ProductRepositoryTest {
         AdminPageDTO pageDTO = new AdminPageDTO(String.valueOf(PRODUCT_SIZE - 1), 1);
         List<AdminProductListDTO> result = productRepository.findAdminProductList(pageDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(1, result.size());
+        assertNotNull(result);
+        assertEquals(1, result.size());
     }
 
     @Test
@@ -160,8 +162,8 @@ public class ProductRepositoryTest {
         AdminPageDTO pageDTO = new AdminPageDTO("FAIL", 1);
         List<AdminProductListDTO> result = productRepository.findAdminProductList(pageDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.isEmpty());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -170,8 +172,8 @@ public class ProductRepositoryTest {
         AdminPageDTO pageDTO = new AdminPageDTO(null, 1);
         Long result = productRepository.findAdminProductListCount(pageDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(PRODUCT_SIZE, result);
+        assertNotNull(result);
+        assertEquals(PRODUCT_SIZE, result);
     }
 
     @Test
@@ -180,8 +182,8 @@ public class ProductRepositoryTest {
         AdminPageDTO pageDTO = new AdminPageDTO(String.valueOf(PRODUCT_SIZE - 1), 1);
         Long result = productRepository.findAdminProductListCount(pageDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(1L, result);
+        assertNotNull(result);
+        assertEquals(1L, result);
     }
 
     @Test
@@ -190,8 +192,8 @@ public class ProductRepositoryTest {
         AdminPageDTO pageDTO = new AdminPageDTO("FAIL", 1);
         Long result = productRepository.findAdminProductListCount(pageDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(0L, result);
+        assertNotNull(result);
+        assertEquals(0L, result);
     }
 
     @Test
@@ -200,8 +202,8 @@ public class ProductRepositoryTest {
         AdminPageDTO pageDTO = new AdminPageDTO(null, 1);
         List<AdminProductStockDataDTO> result = productRepository.findStockData(pageDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(pageDTO.amount(), result.size());
+        assertNotNull(result);
+        assertEquals(pageDTO.amount(), result.size());
     }
 
     @Test
@@ -216,12 +218,12 @@ public class ProductRepositoryTest {
                 product.getProductOptions().stream().mapToInt(ProductOption::getStock).sum(),
                 product.isOpen());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(1, result.size());
+        assertNotNull(result);
+        assertEquals(1, result.size());
         AdminProductStockDataDTO resultData = result.get(0);
 
-        Assertions.assertEquals(data.productId(), resultData.productId());
-        Assertions.assertEquals(data.totalStock(), resultData.totalStock());
+        assertEquals(data.productId(), resultData.productId());
+        assertEquals(data.totalStock(), resultData.totalStock());
     }
 
     @Test
@@ -230,8 +232,8 @@ public class ProductRepositoryTest {
         AdminPageDTO pageDTO = new AdminPageDTO("FAIL", 1);
         List<AdminProductStockDataDTO> result = productRepository.findStockData(pageDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.isEmpty());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     private List<AdminProductStockDataDTO> getProductListOrderByTotalStock() {
@@ -260,10 +262,10 @@ public class ProductRepositoryTest {
         List<Product> dataList = productList.stream().filter(v -> v.getProductDiscount() > 0).toList();
         Page<Product> result = productRepository.getDiscountProduct(pageDTO, pageable);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(dataList.size(), result.getTotalElements());
-        Assertions.assertTrue(result.getContent().size() <= pageDTO.amount());
-        result.getContent().forEach(v -> Assertions.assertTrue(v.getProductDiscount() > 0));
+        assertNotNull(result);
+        assertEquals(dataList.size(), result.getTotalElements());
+        assertTrue(result.getContent().size() <= pageDTO.amount());
+        result.getContent().forEach(v -> assertTrue(v.getProductDiscount() > 0));
     }
 
     @Test
@@ -277,10 +279,10 @@ public class ProductRepositoryTest {
 
         Page<Product> result = productRepository.getDiscountProduct(pageDTO, pageable);
         Product data = dataList.get(0);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(1, result.getTotalElements());
-        Assertions.assertTrue(result.getContent().get(0).getProductDiscount() > 0);
-        Assertions.assertEquals(data.getId(), result.getContent().get(0).getId());
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        assertTrue(result.getContent().get(0).getProductDiscount() > 0);
+        assertEquals(data.getId(), result.getContent().get(0).getId());
     }
 
     @Test
@@ -293,8 +295,8 @@ public class ProductRepositoryTest {
 
         Page<Product> result = productRepository.getDiscountProduct(pageDTO, pageable);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.getContent().isEmpty());
+        assertNotNull(result);
+        assertTrue(result.getContent().isEmpty());
     }
 
     @Test
@@ -302,8 +304,8 @@ public class ProductRepositoryTest {
     void getProductByClassification() {
         List<AdminDiscountProductDTO> result = productRepository.getProductByClassification("OUTER");
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(PRODUCT_SIZE, result.size());
+        assertNotNull(result);
+        assertEquals(PRODUCT_SIZE, result.size());
     }
 
 
@@ -312,8 +314,8 @@ public class ProductRepositoryTest {
     void getProductByClassificationEmpty() {
         List<AdminDiscountProductDTO> result = productRepository.getProductByClassification("TOP");
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.isEmpty());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -323,10 +325,10 @@ public class ProductRepositoryTest {
         List<String> productIdList = List.of(updateProduct.getId());
         AdminDiscountPatchDTO patchDTO = new AdminDiscountPatchDTO(productIdList, 10);
 
-        Assertions.assertDoesNotThrow(() -> productRepository.patchProductDiscount(patchDTO));
+        assertDoesNotThrow(() -> productRepository.patchProductDiscount(patchDTO));
         Product updateData = productRepository.findById(updateProduct.getId()).orElseThrow(IllegalArgumentException::new);
 
-        Assertions.assertEquals(10, updateData.getProductDiscount());
+        assertEquals(10, updateData.getProductDiscount());
     }
 
     @Test
@@ -334,8 +336,8 @@ public class ProductRepositoryTest {
     void findClassificationAllByProductIds() {
         List<ProductIdClassificationDTO> result = productRepository.findClassificationAllByProductIds(productIds);
 
-        Assertions.assertNotNull(result);
-        result.forEach(v -> Assertions.assertEquals("OUTER", v.classificationId()));
+        assertNotNull(result);
+        result.forEach(v -> assertEquals("OUTER", v.classificationId()));
     }
 
     @Test
@@ -345,8 +347,8 @@ public class ProductRepositoryTest {
         long updateSalesQuantity = updateProduct.getProductSalesQuantity() + 100L;
         productMap.put(updateProduct.getId(), 100);
 
-        Assertions.assertDoesNotThrow(() -> productRepository.patchProductSalesQuantity(productMap));
+        assertDoesNotThrow(() -> productRepository.patchProductSalesQuantity(productMap));
         Product updateData = productRepository.findById(updateProduct.getId()).orElseThrow(IllegalArgumentException::new);
-        Assertions.assertEquals(updateSalesQuantity, updateData.getProductSalesQuantity());
+        assertEquals(updateSalesQuantity, updateData.getProductSalesQuantity());
     }
 }

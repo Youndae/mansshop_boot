@@ -42,6 +42,8 @@ import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * DLQ에 메시지 적재 후 조회하는 테스트만 수행.
  * 나머지 기능의 경우 profile 분리, 예외 발생이 필요하고
@@ -250,20 +252,20 @@ public class AdminFailedDataServiceIT {
                 .atMost(10, TimeUnit.SECONDS)
                 .pollInterval(200, TimeUnit.MILLISECONDS)
                 .untilAsserted(() -> {
-                    List<FailedQueueDTO> result = Assertions.assertDoesNotThrow(() -> adminFailedDataService.getFailedMessageList());
+                    List<FailedQueueDTO> result = assertDoesNotThrow(() -> adminFailedDataService.getFailedMessageList());
 
-                    Assertions.assertNotNull(result);
-                    Assertions.assertFalse(result.isEmpty());
-                    fixtureFailedQueueDTO.forEach(v -> Assertions.assertTrue(result.contains(v)));
+                    assertNotNull(result);
+                    assertFalse(result.isEmpty());
+                    fixtureFailedQueueDTO.forEach(v -> assertTrue(result.contains(v)));
                 });
     }
 
     @Test
     @DisplayName(value = "DLQ 메시지 개수 조회. DLQ 메시지가 존재하지 않는 경우")
     void getFailedMessageListEmpty() {
-        List<FailedQueueDTO> result = Assertions.assertDoesNotThrow(() -> adminFailedDataService.getFailedMessageList());
+        List<FailedQueueDTO> result = assertDoesNotThrow(() -> adminFailedDataService.getFailedMessageList());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.isEmpty());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 }

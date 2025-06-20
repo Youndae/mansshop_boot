@@ -19,9 +19,7 @@ import com.example.mansshop_boot.repository.product.ProductThumbnailRepository;
 import com.example.mansshop_boot.service.FileServiceImpl;
 import com.example.mansshop_boot.service.admin.AdminProductServiceImpl;
 import com.example.mansshop_boot.service.unit.fixture.ProductUnitFixture;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -39,6 +37,8 @@ import java.util.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 public class AdminProductServiceUnitTest {
@@ -93,14 +93,14 @@ public class AdminProductServiceUnitTest {
                 .thenReturn(mockData);
         when(productRepository.findAdminProductListCount(pageDTO)).thenReturn((long) productFixtureList.size());
 
-        PagingListDTO<AdminProductListDTO> result = Assertions.assertDoesNotThrow(() -> adminProductService.getProductList(pageDTO));
+        PagingListDTO<AdminProductListDTO> result = assertDoesNotThrow(() -> adminProductService.getProductList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertEquals(2, result.pagingData().getTotalPages());
-        Assertions.assertEquals(productFixtureList.size(), result.pagingData().getTotalElements());
-        Assertions.assertFalse(result.pagingData().isEmpty());
-        Assertions.assertEquals(1, result.pagingData().getNumber());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertEquals(2, result.pagingData().getTotalPages());
+        assertEquals(productFixtureList.size(), result.pagingData().getTotalElements());
+        assertFalse(result.pagingData().isEmpty());
+        assertEquals(1, result.pagingData().getNumber());
     }
 
     @Test
@@ -112,14 +112,14 @@ public class AdminProductServiceUnitTest {
                 .thenReturn(List.of());
         when(productRepository.findAdminProductListCount(pageDTO)).thenReturn(0L);
 
-        PagingListDTO<AdminProductListDTO> result = Assertions.assertDoesNotThrow(() -> adminProductService.getProductList(pageDTO));
+        PagingListDTO<AdminProductListDTO> result = assertDoesNotThrow(() -> adminProductService.getProductList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.content().isEmpty());
-        Assertions.assertEquals(0, result.pagingData().getTotalPages());
-        Assertions.assertEquals(0, result.pagingData().getTotalElements());
-        Assertions.assertTrue(result.pagingData().isEmpty());
-        Assertions.assertEquals(1, result.pagingData().getNumber());
+        assertNotNull(result);
+        assertTrue(result.content().isEmpty());
+        assertEquals(0, result.pagingData().getTotalPages());
+        assertEquals(0, result.pagingData().getTotalElements());
+        assertTrue(result.pagingData().isEmpty());
+        assertEquals(1, result.pagingData().getNumber());
     }
 
     @Test
@@ -140,14 +140,14 @@ public class AdminProductServiceUnitTest {
                 .thenReturn(mockData);
         when(productRepository.findAdminProductListCount(pageDTO)).thenReturn((long) mockData.size());
 
-        PagingListDTO<AdminProductListDTO> result = Assertions.assertDoesNotThrow(() -> adminProductService.getProductList(pageDTO));
+        PagingListDTO<AdminProductListDTO> result = assertDoesNotThrow(() -> adminProductService.getProductList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertEquals(1, result.pagingData().getTotalPages());
-        Assertions.assertEquals(mockData.size(), result.pagingData().getTotalElements());
-        Assertions.assertFalse(result.pagingData().isEmpty());
-        Assertions.assertEquals(1, result.pagingData().getNumber());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertEquals(1, result.pagingData().getTotalPages());
+        assertEquals(mockData.size(), result.pagingData().getTotalElements());
+        assertFalse(result.pagingData().isEmpty());
+        assertEquals(1, result.pagingData().getNumber());
     }
 
     @Test
@@ -161,16 +161,16 @@ public class AdminProductServiceUnitTest {
         when(classificationRepository.findAll(Sort.by("classificationStep").ascending()))
                 .thenReturn(classificationFixtureList);
 
-        List<String> result = Assertions.assertDoesNotThrow(() -> adminProductService.getClassification());
+        List<String> result = assertDoesNotThrow(() -> adminProductService.getClassification());
 
-        Assertions.assertFalse(result.isEmpty());
-        Assertions.assertEquals(classificationFixtureList.size(), result.size());
+        assertFalse(result.isEmpty());
+        assertEquals(classificationFixtureList.size(), result.size());
 
         for(int i = 0; i < result.size(); i++) {
             Classification classification = classificationFixtureList.get(i);
             String resultData = result.get(i);
 
-            Assertions.assertEquals(classification.getId(), resultData);
+            assertEquals(classification.getId(), resultData);
         }
     }
 
@@ -206,22 +206,22 @@ public class AdminProductServiceUnitTest {
         when(productInfoImageRepository.findByProductId(productFixture.getId()))
                 .thenReturn(infoImageFixture);
 
-        AdminProductDetailDTO result = Assertions.assertDoesNotThrow(() -> adminProductService.getProductDetail(productFixture.getId()));
+        AdminProductDetailDTO result = assertDoesNotThrow(() -> adminProductService.getProductDetail(productFixture.getId()));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.optionList().isEmpty());
-        Assertions.assertFalse(result.thumbnailList().isEmpty());
-        Assertions.assertFalse(result.infoImageList().isEmpty());
-        Assertions.assertEquals(productFixture.getId(), result.productId());
-        Assertions.assertEquals(productFixture.getClassification().getId(), result.classification());
-        Assertions.assertEquals(productFixture.getThumbnail(), result.firstThumbnail());
-        Assertions.assertEquals(optionFixture.size(), result.optionList().size());
-        Assertions.assertEquals(thumbnailFixture.size(), result.thumbnailList().size());
-        Assertions.assertEquals(infoImageFixture.size(), result.infoImageList().size());
-        Assertions.assertEquals(productFixture.getProductPrice(), result.price());
-        Assertions.assertEquals(productFixture.isOpen(), result.isOpen());
-        Assertions.assertEquals(productFixture.getProductSalesQuantity(), result.sales());
-        Assertions.assertEquals(productFixture.getProductDiscount(), result.discount());
+        assertNotNull(result);
+        assertFalse(result.optionList().isEmpty());
+        assertFalse(result.thumbnailList().isEmpty());
+        assertFalse(result.infoImageList().isEmpty());
+        assertEquals(productFixture.getId(), result.productId());
+        assertEquals(productFixture.getClassification().getId(), result.classification());
+        assertEquals(productFixture.getThumbnail(), result.firstThumbnail());
+        assertEquals(optionFixture.size(), result.optionList().size());
+        assertEquals(thumbnailFixture.size(), result.thumbnailList().size());
+        assertEquals(infoImageFixture.size(), result.infoImageList().size());
+        assertEquals(productFixture.getProductPrice(), result.price());
+        assertEquals(productFixture.isOpen(), result.isOpen());
+        assertEquals(productFixture.getProductSalesQuantity(), result.sales());
+        assertEquals(productFixture.getProductDiscount(), result.discount());
     }
 
     @Test
@@ -231,7 +231,7 @@ public class AdminProductServiceUnitTest {
         when(productRepository.findById("fakeProductId"))
                 .thenThrow(IllegalArgumentException.class);
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> adminProductService.getProductDetail("fakeProductId"));
+        assertThrows(IllegalArgumentException.class, () -> adminProductService.getProductDetail("fakeProductId"));
     }
 
     @Test
@@ -274,7 +274,7 @@ public class AdminProductServiceUnitTest {
             when(fileServiceMock.imageInsert(any(MultipartFile.class)))
                     .thenReturn("mockFile.jpg");
         }catch (Exception e) {
-            Assertions.fail("Mocking imageInsert failed : " + e.getMessage());
+            fail("Mocking imageInsert failed : " + e.getMessage());
         }
 
         when(productRepository.save(any()))
@@ -286,9 +286,9 @@ public class AdminProductServiceUnitTest {
         when(productInfoImageRepository.saveAll(any()))
                 .thenReturn(product.getProductInfoImages());
 
-        String result = Assertions.assertDoesNotThrow(() -> adminProductService.postProduct(postDTO, imageDTO));
+        String result = assertDoesNotThrow(() -> adminProductService.postProduct(postDTO, imageDTO));
 
-        Assertions.assertEquals(product.getId(), result);
+        assertEquals(product.getId(), result);
     }
 
     @Test
@@ -326,7 +326,7 @@ public class AdminProductServiceUnitTest {
                 null
         );
 
-        Assertions.assertThrows(IllegalArgumentException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> adminProductService.postProduct(postDTO, imageDTO)
         );
 
@@ -376,24 +376,24 @@ public class AdminProductServiceUnitTest {
         when(productInfoImageRepository.findByProductId(productFixture.getId()))
                 .thenReturn(infoImageFixture);
 
-        AdminProductPatchDataDTO result = Assertions.assertDoesNotThrow(() -> adminProductService.getPatchProductData(productFixture.getId()));
+        AdminProductPatchDataDTO result = assertDoesNotThrow(() -> adminProductService.getPatchProductData(productFixture.getId()));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.optionList().isEmpty());
-        Assertions.assertFalse(result.thumbnailList().isEmpty());
-        Assertions.assertFalse(result.infoImageList().isEmpty());
-        Assertions.assertFalse(result.classificationList().isEmpty());
-        Assertions.assertEquals(productFixture.getId(), result.productId());
-        Assertions.assertEquals(productFixture.getProductName(), result.productName());
-        Assertions.assertEquals(productFixture.getClassification().getId(), result.classificationId());
-        Assertions.assertEquals(productFixture.getThumbnail(), result.firstThumbnail());
-        Assertions.assertEquals(productFixture.getProductPrice(), result.price());
-        Assertions.assertEquals(productFixture.isOpen(), result.isOpen());
-        Assertions.assertEquals(productFixture.getProductDiscount(), result.discount());
-        Assertions.assertEquals(optionFixture.size(), result.optionList().size());
-        Assertions.assertEquals(thumbnailFixture.size(), result.thumbnailList().size());
-        Assertions.assertEquals(infoImageFixture.size(), result.infoImageList().size());
-        Assertions.assertEquals(classificationFixture.size(), result.classificationList().size());
+        assertNotNull(result);
+        assertFalse(result.optionList().isEmpty());
+        assertFalse(result.thumbnailList().isEmpty());
+        assertFalse(result.infoImageList().isEmpty());
+        assertFalse(result.classificationList().isEmpty());
+        assertEquals(productFixture.getId(), result.productId());
+        assertEquals(productFixture.getProductName(), result.productName());
+        assertEquals(productFixture.getClassification().getId(), result.classificationId());
+        assertEquals(productFixture.getThumbnail(), result.firstThumbnail());
+        assertEquals(productFixture.getProductPrice(), result.price());
+        assertEquals(productFixture.isOpen(), result.isOpen());
+        assertEquals(productFixture.getProductDiscount(), result.discount());
+        assertEquals(optionFixture.size(), result.optionList().size());
+        assertEquals(thumbnailFixture.size(), result.thumbnailList().size());
+        assertEquals(infoImageFixture.size(), result.infoImageList().size());
+        assertEquals(classificationFixture.size(), result.classificationList().size());
     }
 
     @Test
@@ -432,18 +432,18 @@ public class AdminProductServiceUnitTest {
         when(productInfoImageRepository.saveAll(any()))
                 .thenReturn(product.getProductInfoImages());
 
-        String result = Assertions.assertDoesNotThrow(() -> adminProductService.patchProduct(product.getId(), null, patchDTO, imageDTO));
+        String result = assertDoesNotThrow(() -> adminProductService.patchProduct(product.getId(), null, patchDTO, imageDTO));
 
         try {
             verify(fileServiceMock, never()).imageInsert(any(MultipartFile.class));
         }catch (Exception e){
-            Assertions.fail("이미지 저장 메서드에 접근하면 안되는데 접근 후 오류 발생");
+            fail("이미지 저장 메서드에 접근하면 안되는데 접근 후 오류 발생");
         }
 
         verify(productOptionRepository, never()).deleteAllById(anyList());
         verify(fileServiceMock, never()).deleteImage(any());
 
-        Assertions.assertEquals(product.getId(), result);
+        assertEquals(product.getId(), result);
     }
 
     @Test
@@ -486,7 +486,7 @@ public class AdminProductServiceUnitTest {
             when(fileServiceMock.imageInsert(any(MultipartFile.class)))
                     .thenReturn("mockFile.jpg");
         }catch (Exception e) {
-            Assertions.fail("Mocking imageInsert failed : " + e.getMessage());
+            fail("Mocking imageInsert failed : " + e.getMessage());
         }
 
         doNothing().when(fileServiceMock).deleteImage(anyString());
@@ -506,9 +506,9 @@ public class AdminProductServiceUnitTest {
 
         List<Long> deleteOptionList = List.of(100L, 101L, 102L);
 
-        String result = Assertions.assertDoesNotThrow(() -> adminProductService.patchProduct(product.getId(), deleteOptionList, postDTO, imageDTO));
+        String result = assertDoesNotThrow(() -> adminProductService.patchProduct(product.getId(), deleteOptionList, postDTO, imageDTO));
 
-        Assertions.assertEquals(product.getId(), result);
+        assertEquals(product.getId(), result);
     }
 
     @Test
@@ -559,25 +559,25 @@ public class AdminProductServiceUnitTest {
         when(productOptionRepository.findAllOptionByProductIdList(productIds))
                 .thenReturn(optionStockList);
 
-        PagingListDTO<AdminProductStockDTO> result = Assertions.assertDoesNotThrow(() -> adminProductService.getProductStock(pageDTO));
+        PagingListDTO<AdminProductStockDTO> result = assertDoesNotThrow(() -> adminProductService.getProductStock(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertEquals(productStockList.size(), result.pagingData().getTotalElements());
-        Assertions.assertEquals(1, result.pagingData().getTotalPages());
-        Assertions.assertEquals(1, result.pagingData().getNumber());
-        Assertions.assertEquals(productStockList.size(), result.content().size());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertEquals(productStockList.size(), result.pagingData().getTotalElements());
+        assertEquals(1, result.pagingData().getTotalPages());
+        assertEquals(1, result.pagingData().getNumber());
+        assertEquals(productStockList.size(), result.content().size());
 
         for(int i = 0; i < result.content().size(); i++) {
             AdminProductStockDTO data = dataList.get(i);
             AdminProductStockDTO resultData = result.content().get(i);
 
-            Assertions.assertEquals(data.productId(), resultData.productId());
-            Assertions.assertEquals(data.classification(), resultData.classification());
-            Assertions.assertEquals(data.productName(), resultData.productName());
-            Assertions.assertEquals(data.totalStock(), resultData.totalStock());
-            Assertions.assertEquals(data.isOpen(), resultData.isOpen());
-            Assertions.assertEquals(data.optionList().size(), resultData.optionList().size());
+            assertEquals(data.productId(), resultData.productId());
+            assertEquals(data.classification(), resultData.classification());
+            assertEquals(data.productName(), resultData.productName());
+            assertEquals(data.totalStock(), resultData.totalStock());
+            assertEquals(data.isOpen(), resultData.isOpen());
+            assertEquals(data.optionList().size(), resultData.optionList().size());
         }
     }
 
@@ -594,12 +594,12 @@ public class AdminProductServiceUnitTest {
                 .thenReturn(new ArrayList<>());
 
 
-        PagingListDTO<AdminProductStockDTO> result = Assertions.assertDoesNotThrow(() -> adminProductService.getProductStock(pageDTO));
+        PagingListDTO<AdminProductStockDTO> result = assertDoesNotThrow(() -> adminProductService.getProductStock(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.content().isEmpty());
-        Assertions.assertEquals(0, result.pagingData().getTotalElements());
-        Assertions.assertTrue(result.pagingData().isEmpty());
+        assertNotNull(result);
+        assertTrue(result.content().isEmpty());
+        assertEquals(0, result.pagingData().getTotalElements());
+        assertTrue(result.pagingData().isEmpty());
     }
 
     @Test
@@ -617,11 +617,11 @@ public class AdminProductServiceUnitTest {
         when(productRepository.getDiscountProduct(pageDTO, pageable))
                 .thenReturn(new PageImpl<>(productDiscountList));
 
-        PagingListDTO<AdminDiscountResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminProductService.getDiscountProduct(pageDTO));
+        PagingListDTO<AdminDiscountResponseDTO> result = assertDoesNotThrow(() -> adminProductService.getDiscountProduct(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertEquals(productDiscountList.size(), result.pagingData().getTotalElements());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertEquals(productDiscountList.size(), result.pagingData().getTotalElements());
     }
 
     @Test
@@ -641,12 +641,12 @@ public class AdminProductServiceUnitTest {
         when(productRepository.getDiscountProduct(pageDTO, pageable))
                 .thenReturn(new PageImpl<>(List.of(discountProduct)));
 
-        PagingListDTO<AdminDiscountResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminProductService.getDiscountProduct(pageDTO));
+        PagingListDTO<AdminDiscountResponseDTO> result = assertDoesNotThrow(() -> adminProductService.getDiscountProduct(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertEquals(1, result.pagingData().getTotalElements());
-        Assertions.assertEquals(1, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertEquals(1, result.pagingData().getTotalElements());
+        assertEquals(1, result.pagingData().getTotalPages());
     }
 
     @Test
@@ -660,12 +660,12 @@ public class AdminProductServiceUnitTest {
         when(productRepository.getDiscountProduct(pageDTO, pageable))
                 .thenReturn(new PageImpl<>(Collections.emptyList()));
 
-        PagingListDTO<AdminDiscountResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminProductService.getDiscountProduct(pageDTO));
+        PagingListDTO<AdminDiscountResponseDTO> result = assertDoesNotThrow(() -> adminProductService.getDiscountProduct(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.content().isEmpty());
-        Assertions.assertEquals(0, result.pagingData().getTotalElements());
-        Assertions.assertEquals(0, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertTrue(result.content().isEmpty());
+        assertEquals(0, result.pagingData().getTotalElements());
+        assertEquals(0, result.pagingData().getTotalPages());
     }
 
     @Test
@@ -686,11 +686,11 @@ public class AdminProductServiceUnitTest {
         when(productRepository.getProductByClassification(classification))
                 .thenReturn(resultList);
 
-        List<AdminDiscountProductDTO> result = Assertions.assertDoesNotThrow(() -> adminProductService.getSelectDiscountProduct(classification));
+        List<AdminDiscountProductDTO> result = assertDoesNotThrow(() -> adminProductService.getSelectDiscountProduct(classification));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.isEmpty());
-        Assertions.assertEquals(resultList.size(), result.size());
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertEquals(resultList.size(), result.size());
     }
 
     @Test
@@ -700,10 +700,10 @@ public class AdminProductServiceUnitTest {
         when(productRepository.getProductByClassification(classification))
                 .thenReturn(new ArrayList<>());
 
-        List<AdminDiscountProductDTO> result = Assertions.assertDoesNotThrow(() -> adminProductService.getSelectDiscountProduct(classification));
+        List<AdminDiscountProductDTO> result = assertDoesNotThrow(() -> adminProductService.getSelectDiscountProduct(classification));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.isEmpty());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -714,8 +714,8 @@ public class AdminProductServiceUnitTest {
         AdminDiscountPatchDTO patchDTO = new AdminDiscountPatchDTO(productIds, discount);
         doNothing().when(productRepository).patchProductDiscount(patchDTO);
 
-        String result = Assertions.assertDoesNotThrow(() -> adminProductService.patchDiscountProduct(patchDTO));
+        String result = assertDoesNotThrow(() -> adminProductService.patchDiscountProduct(patchDTO));
 
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertEquals(Result.OK.getResultKey(), result);
     }
 }

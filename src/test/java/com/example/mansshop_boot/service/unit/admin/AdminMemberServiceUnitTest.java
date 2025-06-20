@@ -22,6 +22,8 @@ import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @ExtendWith(SpringExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class AdminMemberServiceUnitTest {
@@ -65,13 +67,13 @@ public class AdminMemberServiceUnitTest {
         when(memberRepository.findMember(pageDTO, pageable))
                 .thenReturn(new PageImpl<>(memberResponseList, pageable, memberList.size()));
 
-        Page<AdminMemberDTO> result = Assertions.assertDoesNotThrow(() -> adminMemberService.getMemberList(pageDTO));
+        Page<AdminMemberDTO> result = assertDoesNotThrow(() -> adminMemberService.getMemberList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.getContent().isEmpty());
-        Assertions.assertEquals(memberResponseList.size(), result.getContent().size());
-        Assertions.assertEquals(2, result.getTotalPages());
-        Assertions.assertEquals(memberList.size(), result.getTotalElements());
+        assertNotNull(result);
+        assertFalse(result.getContent().isEmpty());
+        assertEquals(memberResponseList.size(), result.getContent().size());
+        assertEquals(2, result.getTotalPages());
+        assertEquals(memberList.size(), result.getTotalElements());
     }
 
     @Test
@@ -85,12 +87,12 @@ public class AdminMemberServiceUnitTest {
         when(memberRepository.findMember(pageDTO, pageable))
                 .thenReturn(new PageImpl<>(Collections.emptyList(), pageable, 0));
 
-        Page<AdminMemberDTO> result = Assertions.assertDoesNotThrow(() -> adminMemberService.getMemberList(pageDTO));
+        Page<AdminMemberDTO> result = assertDoesNotThrow(() -> adminMemberService.getMemberList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.getContent().isEmpty());
-        Assertions.assertEquals(0, result.getTotalPages());
-        Assertions.assertEquals(0, result.getTotalElements());
+        assertNotNull(result);
+        assertTrue(result.getContent().isEmpty());
+        assertEquals(0, result.getTotalPages());
+        assertEquals(0, result.getTotalElements());
     }
 
     @Test
@@ -100,7 +102,7 @@ public class AdminMemberServiceUnitTest {
         when(memberRepository.findById(adminPostPointDTO.userId()))
                 .thenReturn(Optional.empty());
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> adminMemberService.postPoint(adminPostPointDTO)
         );

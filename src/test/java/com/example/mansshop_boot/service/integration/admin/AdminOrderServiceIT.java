@@ -18,10 +18,7 @@ import com.example.mansshop_boot.repository.product.ProductOptionRepository;
 import com.example.mansshop_boot.repository.product.ProductRepository;
 import com.example.mansshop_boot.repository.productOrder.ProductOrderRepository;
 import com.example.mansshop_boot.service.admin.AdminOrderService;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -30,6 +27,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = MansShopBootApplication.class)
 @EnableJpaRepositories(basePackages = "com.example")
@@ -93,18 +92,18 @@ public class AdminOrderServiceIT {
         int totalPages = PaginationUtils.getTotalPages(productOrderList.size(), pageDTO.amount());
         String cachingKey = RedisCaching.ADMIN_ORDER_COUNT.getKey();
 
-        PagingListDTO<AdminOrderResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminOrderService.getAllOrderList(pageDTO));
+        PagingListDTO<AdminOrderResponseDTO> result = assertDoesNotThrow(() -> adminOrderService.getAllOrderList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(productOrderList.size(), result.pagingData().getTotalElements());
-        Assertions.assertEquals(totalPages, result.pagingData().getTotalPages());
-        Assertions.assertEquals(pageDTO.amount(), result.content().size());
-        result.content().forEach(v -> Assertions.assertFalse(v.detailList().isEmpty()));
+        assertNotNull(result);
+        assertEquals(productOrderList.size(), result.pagingData().getTotalElements());
+        assertEquals(totalPages, result.pagingData().getTotalPages());
+        assertEquals(pageDTO.amount(), result.content().size());
+        result.content().forEach(v -> assertFalse(v.detailList().isEmpty()));
 
         Long cachingResult = redisTemplate.opsForValue().get(cachingKey);
 
-        Assertions.assertNotNull(cachingResult);
-        Assertions.assertEquals(productOrderList.size(), cachingResult);
+        assertNotNull(cachingResult);
+        assertEquals(productOrderList.size(), cachingResult);
 
         redisTemplate.delete(cachingKey);
     }
@@ -116,17 +115,17 @@ public class AdminOrderServiceIT {
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createDefaultAdminOrderPageDTO();
         String cachingKey = RedisCaching.ADMIN_ORDER_COUNT.getKey();
 
-        PagingListDTO<AdminOrderResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminOrderService.getAllOrderList(pageDTO));
+        PagingListDTO<AdminOrderResponseDTO> result = assertDoesNotThrow(() -> adminOrderService.getAllOrderList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.content().isEmpty());
-        Assertions.assertEquals(0, result.pagingData().getTotalElements());
-        Assertions.assertEquals(0, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertTrue(result.content().isEmpty());
+        assertEquals(0, result.pagingData().getTotalElements());
+        assertEquals(0, result.pagingData().getTotalPages());
 
         Long cachingResult = redisTemplate.opsForValue().get(cachingKey);
 
-        Assertions.assertNotNull(cachingResult);
-        Assertions.assertEquals(0, cachingResult);
+        assertNotNull(cachingResult);
+        assertEquals(0, cachingResult);
 
         redisTemplate.delete(cachingKey);
     }
@@ -138,22 +137,22 @@ public class AdminOrderServiceIT {
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createSearchAdminOrderPageDTO(order.getRecipient(), "recipient", 1);
         String cachingKey = RedisCaching.ADMIN_ORDER_COUNT.getKey();
 
-        PagingListDTO<AdminOrderResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminOrderService.getAllOrderList(pageDTO));
+        PagingListDTO<AdminOrderResponseDTO> result = assertDoesNotThrow(() -> adminOrderService.getAllOrderList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertEquals(1, result.pagingData().getTotalElements());
-        Assertions.assertEquals(1, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertEquals(1, result.pagingData().getTotalElements());
+        assertEquals(1, result.pagingData().getTotalPages());
 
         AdminOrderResponseDTO responseDTO = result.content().get(0);
 
-        Assertions.assertEquals(order.getId(), responseDTO.orderId());
-        Assertions.assertEquals(order.getRecipient(), responseDTO.recipient());
-        Assertions.assertEquals(order.getMember().getUserId(), responseDTO.userId());
+        assertEquals(order.getId(), responseDTO.orderId());
+        assertEquals(order.getRecipient(), responseDTO.recipient());
+        assertEquals(order.getMember().getUserId(), responseDTO.userId());
 
         Long cachingResult = redisTemplate.opsForValue().get(cachingKey);
 
-        Assertions.assertNull(cachingResult);
+        assertNull(cachingResult);
     }
 
     @Test
@@ -163,22 +162,22 @@ public class AdminOrderServiceIT {
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createSearchAdminOrderPageDTO(order.getMember().getUserId(), "userId", 1);
         String cachingKey = RedisCaching.ADMIN_ORDER_COUNT.getKey();
 
-        PagingListDTO<AdminOrderResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminOrderService.getAllOrderList(pageDTO));
+        PagingListDTO<AdminOrderResponseDTO> result = assertDoesNotThrow(() -> adminOrderService.getAllOrderList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertEquals(1, result.pagingData().getTotalElements());
-        Assertions.assertEquals(1, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertEquals(1, result.pagingData().getTotalElements());
+        assertEquals(1, result.pagingData().getTotalPages());
 
         AdminOrderResponseDTO responseDTO = result.content().get(0);
 
-        Assertions.assertEquals(order.getId(), responseDTO.orderId());
-        Assertions.assertEquals(order.getRecipient(), responseDTO.recipient());
-        Assertions.assertEquals(order.getMember().getUserId(), responseDTO.userId());
+        assertEquals(order.getId(), responseDTO.orderId());
+        assertEquals(order.getRecipient(), responseDTO.recipient());
+        assertEquals(order.getMember().getUserId(), responseDTO.userId());
 
         Long cachingResult = redisTemplate.opsForValue().get(cachingKey);
 
-        Assertions.assertNull(cachingResult);
+        assertNull(cachingResult);
     }
 
     @Test
@@ -187,15 +186,15 @@ public class AdminOrderServiceIT {
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createDefaultAdminOrderPageDTO();
         int totalPages = PaginationUtils.getTotalPages(productOrderList.size(), pageDTO.amount());
 
-        PagingListDTO<AdminOrderResponseDTO> result = Assertions.assertDoesNotThrow(
+        PagingListDTO<AdminOrderResponseDTO> result = assertDoesNotThrow(
                 () -> adminOrderService.getNewOrderList(pageDTO)
         );
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(productOrderList.size(), result.pagingData().getTotalElements());
-        Assertions.assertEquals(totalPages, result.pagingData().getTotalPages());
-        Assertions.assertEquals(pageDTO.amount(), result.content().size());
-        result.content().forEach(v -> Assertions.assertFalse(v.detailList().isEmpty()));
+        assertNotNull(result);
+        assertEquals(productOrderList.size(), result.pagingData().getTotalElements());
+        assertEquals(totalPages, result.pagingData().getTotalPages());
+        assertEquals(pageDTO.amount(), result.content().size());
+        result.content().forEach(v -> assertFalse(v.detailList().isEmpty()));
     }
 
     @Test
@@ -204,14 +203,14 @@ public class AdminOrderServiceIT {
         productOrderRepository.deleteAll();
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createDefaultAdminOrderPageDTO();
 
-        PagingListDTO<AdminOrderResponseDTO> result = Assertions.assertDoesNotThrow(
+        PagingListDTO<AdminOrderResponseDTO> result = assertDoesNotThrow(
                 () -> adminOrderService.getNewOrderList(pageDTO)
         );
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.content().isEmpty());
-        Assertions.assertEquals(0, result.pagingData().getTotalElements());
-        Assertions.assertEquals(0, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertTrue(result.content().isEmpty());
+        assertEquals(0, result.pagingData().getTotalElements());
+        assertEquals(0, result.pagingData().getTotalPages());
     }
 
     @Test
@@ -220,18 +219,18 @@ public class AdminOrderServiceIT {
         ProductOrder order = productOrderList.get(0);
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createSearchAdminOrderPageDTO(order.getRecipient(), "recipient", 1);
 
-        PagingListDTO<AdminOrderResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminOrderService.getAllOrderList(pageDTO));
+        PagingListDTO<AdminOrderResponseDTO> result = assertDoesNotThrow(() -> adminOrderService.getAllOrderList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertEquals(1, result.pagingData().getTotalElements());
-        Assertions.assertEquals(1, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertEquals(1, result.pagingData().getTotalElements());
+        assertEquals(1, result.pagingData().getTotalPages());
 
         AdminOrderResponseDTO responseDTO = result.content().get(0);
 
-        Assertions.assertEquals(order.getId(), responseDTO.orderId());
-        Assertions.assertEquals(order.getRecipient(), responseDTO.recipient());
-        Assertions.assertEquals(order.getMember().getUserId(), responseDTO.userId());
+        assertEquals(order.getId(), responseDTO.orderId());
+        assertEquals(order.getRecipient(), responseDTO.recipient());
+        assertEquals(order.getMember().getUserId(), responseDTO.userId());
     }
 
     @Test
@@ -240,18 +239,18 @@ public class AdminOrderServiceIT {
         ProductOrder order = productOrderList.get(0);
         AdminOrderPageDTO pageDTO = AdminPageDTOFixture.createSearchAdminOrderPageDTO(order.getMember().getUserId(), "userId", 1);
 
-        PagingListDTO<AdminOrderResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminOrderService.getAllOrderList(pageDTO));
+        PagingListDTO<AdminOrderResponseDTO> result = assertDoesNotThrow(() -> adminOrderService.getAllOrderList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertEquals(1, result.pagingData().getTotalElements());
-        Assertions.assertEquals(1, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertEquals(1, result.pagingData().getTotalElements());
+        assertEquals(1, result.pagingData().getTotalPages());
 
         AdminOrderResponseDTO responseDTO = result.content().get(0);
 
-        Assertions.assertEquals(order.getId(), responseDTO.orderId());
-        Assertions.assertEquals(order.getRecipient(), responseDTO.recipient());
-        Assertions.assertEquals(order.getMember().getUserId(), responseDTO.userId());
+        assertEquals(order.getId(), responseDTO.orderId());
+        assertEquals(order.getRecipient(), responseDTO.recipient());
+        assertEquals(order.getMember().getUserId(), responseDTO.userId());
     }
 
     @Test
@@ -259,18 +258,18 @@ public class AdminOrderServiceIT {
     void postOrderPreparation() {
         ProductOrder order = productOrderList.get(0);
 
-        String result = Assertions.assertDoesNotThrow(() -> adminOrderService.orderPreparation(order.getId()));
+        String result = assertDoesNotThrow(() -> adminOrderService.orderPreparation(order.getId()));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
-        Assertions.assertEquals(OrderStatus.PREPARATION.getStatusStr(), order.getOrderStat());
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
+        assertEquals(OrderStatus.PREPARATION.getStatusStr(), order.getOrderStat());
     }
 
     @Test
     @DisplayName(value = "주문 상태 상품 준비중으로 수정. 주문 데이터가 없는 경우")
     void postOrderPreparationNotFound() {
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> adminOrderService.orderPreparation(0L)
         );

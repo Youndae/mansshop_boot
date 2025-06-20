@@ -34,6 +34,8 @@ import java.util.stream.IntStream;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @ExtendWith(SpringExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class AdminSalesServiceUnitTest {
@@ -84,13 +86,13 @@ public class AdminSalesServiceUnitTest {
         when(periodSalesSummaryRepository.findPeriodList(term))
                 .thenReturn(adminPeriodSalesListDTOS);
 
-        AdminPeriodSalesResponseDTO result = Assertions.assertDoesNotThrow(() -> adminSalesService.getPeriodSales(term));
+        AdminPeriodSalesResponseDTO result = assertDoesNotThrow(() -> adminSalesService.getPeriodSales(term));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(adminPeriodSalesListDTOS, result.content());
-        Assertions.assertEquals(yearSales, result.sales());
-        Assertions.assertEquals(yearSalesQuantity, result.salesQuantity());
-        Assertions.assertEquals(yearOrderQuantity, result.orderQuantity());
+        assertNotNull(result);
+        assertEquals(adminPeriodSalesListDTOS, result.content());
+        assertEquals(yearSales, result.sales());
+        assertEquals(yearSalesQuantity, result.salesQuantity());
+        assertEquals(yearOrderQuantity, result.orderQuantity());
     }
 
     @Test
@@ -106,14 +108,14 @@ public class AdminSalesServiceUnitTest {
         when(periodSalesSummaryRepository.findPeriodList(term))
                 .thenReturn(Collections.emptyList());
 
-        AdminPeriodSalesResponseDTO result = Assertions.assertDoesNotThrow(() -> adminSalesService.getPeriodSales(term));
+        AdminPeriodSalesResponseDTO result = assertDoesNotThrow(() -> adminSalesService.getPeriodSales(term));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertEquals(adminPeriodSalesListEmptyDTOS, result.content());
-        Assertions.assertEquals(0, result.sales());
-        Assertions.assertEquals(0, result.salesQuantity());
-        Assertions.assertEquals(0, result.orderQuantity());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertEquals(adminPeriodSalesListEmptyDTOS, result.content());
+        assertEquals(0, result.sales());
+        assertEquals(0, result.salesQuantity());
+        assertEquals(0, result.orderQuantity());
     }
 
     @Test
@@ -157,22 +159,22 @@ public class AdminSalesServiceUnitTest {
         when(periodSalesSummaryRepository.findPeriodStatistics(lastYearStartDate, lastYearEndDate))
                 .thenReturn(lastYearStatistics);
 
-        AdminPeriodMonthDetailResponseDTO result = Assertions.assertDoesNotThrow(() -> adminSalesService.getPeriodSalesDetail(term));
+        AdminPeriodMonthDetailResponseDTO result = assertDoesNotThrow(() -> adminSalesService.getPeriodSalesDetail(term));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(statisticsDTO.monthSales(), result.monthSales());
-        Assertions.assertEquals(statisticsDTO.monthSalesQuantity(), result.monthSalesQuantity());
-        Assertions.assertEquals(statisticsDTO.monthOrderQuantity(), result.monthOrderQuantity());
-        Assertions.assertEquals((statisticsDTO.monthSales() - lastYearStatistics.monthSales()), result.lastYearComparison());
-        Assertions.assertEquals(lastYearStatistics.monthSales(), result.lastYearSales());
-        Assertions.assertEquals(lastYearStatistics.monthSalesQuantity(), result.lastYearSalesQuantity());
-        Assertions.assertEquals(lastYearStatistics.monthOrderQuantity(), result.lastYearOrderQuantity());
-        Assertions.assertFalse(result.bestProduct().isEmpty());
-        Assertions.assertEquals(best5ProductList, result.bestProduct());
-        Assertions.assertFalse(result.classificationSales().isEmpty());
-        Assertions.assertEquals(classificationDTOList, result.classificationSales());
-        Assertions.assertFalse(result.dailySales().isEmpty());
-        Assertions.assertEquals(dailySalesResponseList, result.dailySales());
+        assertNotNull(result);
+        assertEquals(statisticsDTO.monthSales(), result.monthSales());
+        assertEquals(statisticsDTO.monthSalesQuantity(), result.monthSalesQuantity());
+        assertEquals(statisticsDTO.monthOrderQuantity(), result.monthOrderQuantity());
+        assertEquals((statisticsDTO.monthSales() - lastYearStatistics.monthSales()), result.lastYearComparison());
+        assertEquals(lastYearStatistics.monthSales(), result.lastYearSales());
+        assertEquals(lastYearStatistics.monthSalesQuantity(), result.lastYearSalesQuantity());
+        assertEquals(lastYearStatistics.monthOrderQuantity(), result.lastYearOrderQuantity());
+        assertFalse(result.bestProduct().isEmpty());
+        assertEquals(best5ProductList, result.bestProduct());
+        assertFalse(result.classificationSales().isEmpty());
+        assertEquals(classificationDTOList, result.classificationSales());
+        assertFalse(result.dailySales().isEmpty());
+        assertEquals(dailySalesResponseList, result.dailySales());
     }
 
     @Test
@@ -204,19 +206,19 @@ public class AdminSalesServiceUnitTest {
         when(periodSalesSummaryRepository.findPeriodStatistics(eq(lastYearStartDate), eq(lastYearEndDate)))
                 .thenReturn(lastYearStatistics);
 
-        AdminPeriodMonthDetailResponseDTO result = Assertions.assertDoesNotThrow(() -> adminSalesService.getPeriodSalesDetail(term));
+        AdminPeriodMonthDetailResponseDTO result = assertDoesNotThrow(() -> adminSalesService.getPeriodSalesDetail(term));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(0, result.monthSales());
-        Assertions.assertEquals(0, result.monthSalesQuantity());
-        Assertions.assertEquals(0, result.monthOrderQuantity());
-        Assertions.assertEquals(lastYearStatistics.monthSales() * -1, result.lastYearComparison());
-        Assertions.assertEquals(lastYearStatistics.monthSales(), result.lastYearSales());
-        Assertions.assertEquals(lastYearStatistics.monthSalesQuantity(), result.lastYearSalesQuantity());
-        Assertions.assertEquals(lastYearStatistics.monthOrderQuantity(), result.lastYearOrderQuantity());
-        Assertions.assertTrue(result.bestProduct().isEmpty());
-        Assertions.assertTrue(result.classificationSales().isEmpty());
-        Assertions.assertTrue(result.dailySales().isEmpty());
+        assertNotNull(result);
+        assertEquals(0, result.monthSales());
+        assertEquals(0, result.monthSalesQuantity());
+        assertEquals(0, result.monthOrderQuantity());
+        assertEquals(lastYearStatistics.monthSales() * -1, result.lastYearComparison());
+        assertEquals(lastYearStatistics.monthSales(), result.lastYearSales());
+        assertEquals(lastYearStatistics.monthSalesQuantity(), result.lastYearSalesQuantity());
+        assertEquals(lastYearStatistics.monthOrderQuantity(), result.lastYearOrderQuantity());
+        assertTrue(result.bestProduct().isEmpty());
+        assertTrue(result.classificationSales().isEmpty());
+        assertTrue(result.dailySales().isEmpty());
     }
 
     @Test
@@ -252,22 +254,22 @@ public class AdminSalesServiceUnitTest {
         when(periodSalesSummaryRepository.findPeriodStatistics(lastYearStartDate, lastYearEndDate))
                 .thenReturn(null);
 
-        AdminPeriodMonthDetailResponseDTO result = Assertions.assertDoesNotThrow(() -> adminSalesService.getPeriodSalesDetail(term));
+        AdminPeriodMonthDetailResponseDTO result = assertDoesNotThrow(() -> adminSalesService.getPeriodSalesDetail(term));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(statisticsDTO.monthSales(), result.monthSales());
-        Assertions.assertEquals(statisticsDTO.monthSalesQuantity(), result.monthSalesQuantity());
-        Assertions.assertEquals(statisticsDTO.monthOrderQuantity(), result.monthOrderQuantity());
-        Assertions.assertEquals(statisticsDTO.monthSales(), result.lastYearComparison());
-        Assertions.assertEquals(0, result.lastYearSales());
-        Assertions.assertEquals(0, result.lastYearSalesQuantity());
-        Assertions.assertEquals(0, result.lastYearOrderQuantity());
-        Assertions.assertFalse(result.bestProduct().isEmpty());
-        Assertions.assertEquals(best5ProductList, result.bestProduct());
-        Assertions.assertFalse(result.classificationSales().isEmpty());
-        Assertions.assertEquals(classificationDTOList, result.classificationSales());
-        Assertions.assertFalse(result.dailySales().isEmpty());
-        Assertions.assertEquals(dailySalesResponseList, result.dailySales());
+        assertNotNull(result);
+        assertEquals(statisticsDTO.monthSales(), result.monthSales());
+        assertEquals(statisticsDTO.monthSalesQuantity(), result.monthSalesQuantity());
+        assertEquals(statisticsDTO.monthOrderQuantity(), result.monthOrderQuantity());
+        assertEquals(statisticsDTO.monthSales(), result.lastYearComparison());
+        assertEquals(0, result.lastYearSales());
+        assertEquals(0, result.lastYearSalesQuantity());
+        assertEquals(0, result.lastYearOrderQuantity());
+        assertFalse(result.bestProduct().isEmpty());
+        assertEquals(best5ProductList, result.bestProduct());
+        assertFalse(result.classificationSales().isEmpty());
+        assertEquals(classificationDTOList, result.classificationSales());
+        assertFalse(result.dailySales().isEmpty());
+        assertEquals(dailySalesResponseList, result.dailySales());
     }
 
     @Test
@@ -290,19 +292,19 @@ public class AdminSalesServiceUnitTest {
         when(periodSalesSummaryRepository.findPeriodStatistics(eq(lastYearStartDate), eq(lastYearEndDate)))
                 .thenReturn(null);
 
-        AdminPeriodMonthDetailResponseDTO result = Assertions.assertDoesNotThrow(() -> adminSalesService.getPeriodSalesDetail(term));
+        AdminPeriodMonthDetailResponseDTO result = assertDoesNotThrow(() -> adminSalesService.getPeriodSalesDetail(term));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(0, result.monthSales());
-        Assertions.assertEquals(0, result.monthSalesQuantity());
-        Assertions.assertEquals(0, result.monthOrderQuantity());
-        Assertions.assertEquals(0, result.lastYearComparison());
-        Assertions.assertEquals(0, result.lastYearSales());
-        Assertions.assertEquals(0, result.lastYearSalesQuantity());
-        Assertions.assertEquals(0, result.lastYearOrderQuantity());
-        Assertions.assertTrue(result.bestProduct().isEmpty());
-        Assertions.assertTrue(result.classificationSales().isEmpty());
-        Assertions.assertTrue(result.dailySales().isEmpty());
+        assertNotNull(result);
+        assertEquals(0, result.monthSales());
+        assertEquals(0, result.monthSalesQuantity());
+        assertEquals(0, result.monthOrderQuantity());
+        assertEquals(0, result.lastYearComparison());
+        assertEquals(0, result.lastYearSales());
+        assertEquals(0, result.lastYearSalesQuantity());
+        assertEquals(0, result.lastYearOrderQuantity());
+        assertTrue(result.bestProduct().isEmpty());
+        assertTrue(result.classificationSales().isEmpty());
+        assertTrue(result.dailySales().isEmpty());
     }
 
     @Test
@@ -336,14 +338,14 @@ public class AdminSalesServiceUnitTest {
         when(productSalesSummaryRepository.findPeriodClassificationProductSales(startDate, endDate, classification))
                 .thenReturn(productList);
 
-        AdminClassificationSalesResponseDTO result = Assertions.assertDoesNotThrow(() -> adminSalesService.getSalesByClassification(term, classification));
+        AdminClassificationSalesResponseDTO result = assertDoesNotThrow(() -> adminSalesService.getSalesByClassification(term, classification));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(classification, result.classification());
-        Assertions.assertEquals(classificationSalesDTO.sales(), result.totalSales());
-        Assertions.assertEquals(classificationSalesDTO.salesQuantity(), result.totalSalesQuantity());
-        Assertions.assertEquals(productList.size(), result.productList().size());
-        Assertions.assertEquals(productList, result.productList());
+        assertNotNull(result);
+        assertEquals(classification, result.classification());
+        assertEquals(classificationSalesDTO.sales(), result.totalSales());
+        assertEquals(classificationSalesDTO.salesQuantity(), result.totalSalesQuantity());
+        assertEquals(productList.size(), result.productList().size());
+        assertEquals(productList, result.productList());
     }
 
     @Test
@@ -357,14 +359,14 @@ public class AdminSalesServiceUnitTest {
         when(productSalesSummaryRepository.findPeriodClassificationSales(startDate, endDate, classification))
                 .thenReturn(null);
 
-        AdminClassificationSalesResponseDTO result = Assertions.assertDoesNotThrow(() -> adminSalesService.getSalesByClassification(term, classification));
+        AdminClassificationSalesResponseDTO result = assertDoesNotThrow(() -> adminSalesService.getSalesByClassification(term, classification));
 
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(classification, result.classification());
-        Assertions.assertEquals(0, result.totalSales());
-        Assertions.assertEquals(0, result.totalSalesQuantity());
-        Assertions.assertTrue(result.productList().isEmpty());
+        assertNotNull(result);
+        assertEquals(classification, result.classification());
+        assertEquals(0, result.totalSales());
+        assertEquals(0, result.totalSalesQuantity());
+        assertTrue(result.productList().isEmpty());
     }
 
     @Test
@@ -386,14 +388,14 @@ public class AdminSalesServiceUnitTest {
         when(productSalesSummaryRepository.findPeriodClassification(startDate, endDate))
                 .thenReturn(classificationDTOList);
 
-        AdminPeriodSalesResponseDTO result = Assertions.assertDoesNotThrow(() -> adminSalesService.getSalesByDay(term));
+        AdminPeriodSalesResponseDTO result = assertDoesNotThrow(() -> adminSalesService.getSalesByDay(term));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(salesDTO.sales(), result.sales());
-        Assertions.assertEquals(salesDTO.salesQuantity(), result.salesQuantity());
-        Assertions.assertEquals(salesDTO.orderQuantity(), result.orderQuantity());
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertEquals(classificationDTOList, result.content());
+        assertNotNull(result);
+        assertEquals(salesDTO.sales(), result.sales());
+        assertEquals(salesDTO.salesQuantity(), result.salesQuantity());
+        assertEquals(salesDTO.orderQuantity(), result.orderQuantity());
+        assertFalse(result.content().isEmpty());
+        assertEquals(classificationDTOList, result.content());
     }
 
     @Test
@@ -406,15 +408,15 @@ public class AdminSalesServiceUnitTest {
         when(periodSalesSummaryRepository.findDailySales(startDate))
                 .thenReturn(null);
 
-        AdminPeriodSalesResponseDTO result = Assertions.assertDoesNotThrow(() -> adminSalesService.getSalesByDay(term));
+        AdminPeriodSalesResponseDTO result = assertDoesNotThrow(() -> adminSalesService.getSalesByDay(term));
 
         verify(productSalesSummaryRepository, never()).findPeriodClassification(startDate, endDate);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(0, result.sales());
-        Assertions.assertEquals(0, result.salesQuantity());
-        Assertions.assertEquals(0, result.orderQuantity());
-        Assertions.assertTrue(result.content().isEmpty());
+        assertNotNull(result);
+        assertEquals(0, result.sales());
+        assertEquals(0, result.salesQuantity());
+        assertEquals(0, result.orderQuantity());
+        assertTrue(result.content().isEmpty());
     }
 
     @Test
@@ -458,30 +460,30 @@ public class AdminSalesServiceUnitTest {
         when(productOrderDetailRepository.findByOrderIds(anyList()))
                 .thenReturn(orderDetailList);
 
-        PagingListDTO<AdminDailySalesResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminSalesService.getOrderListByDay(term, page));
+        PagingListDTO<AdminDailySalesResponseDTO> result = assertDoesNotThrow(() -> adminSalesService.getOrderListByDay(term, page));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertEquals(productOrderList.size(), result.pagingData().getTotalElements());
-        Assertions.assertEquals(2, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertEquals(productOrderList.size(), result.pagingData().getTotalElements());
+        assertEquals(2, result.pagingData().getTotalPages());
 
         for(int i = 0; i < productOrderResponseList.size(); i++ ) {
             ProductOrder order = productOrderResponseList.get(i);
             AdminDailySalesResponseDTO resultContent = result.content().get(i);
-            Assertions.assertEquals(order.getOrderTotalPrice(), resultContent.totalPrice());
-            Assertions.assertEquals(order.getDeliveryFee(), resultContent.deliveryFee());
-            Assertions.assertEquals(order.getPaymentType(), resultContent.paymentType());
+            assertEquals(order.getOrderTotalPrice(), resultContent.totalPrice());
+            assertEquals(order.getDeliveryFee(), resultContent.deliveryFee());
+            assertEquals(order.getPaymentType(), resultContent.paymentType());
 
             List<ProductOrderDetail> detailList = order.getProductOrderDetailSet();
             for(int j = 0; j < detailList.size(); j++) {
                 ProductOrderDetail detail = detailList.get(j);
                 AdminDailySalesDetailDTO detailContent = resultContent.detailList().get(j);
 
-                Assertions.assertEquals(detail.getProduct().getProductName(), detailContent.productName());
-                Assertions.assertEquals(detail.getProductOption().getSize(), detailContent.size());
-                Assertions.assertEquals(detail.getProductOption().getColor(), detailContent.color());
-                Assertions.assertEquals(detail.getOrderDetailCount(), detailContent.count());
-                Assertions.assertEquals(detail.getOrderDetailPrice(), detailContent.price());
+                assertEquals(detail.getProduct().getProductName(), detailContent.productName());
+                assertEquals(detail.getProductOption().getSize(), detailContent.size());
+                assertEquals(detail.getProductOption().getColor(), detailContent.color());
+                assertEquals(detail.getOrderDetailCount(), detailContent.count());
+                assertEquals(detail.getOrderDetailPrice(), detailContent.price());
             }
         }
     }
@@ -504,13 +506,13 @@ public class AdminSalesServiceUnitTest {
         when(productOrderDetailRepository.findByOrderIds(anyList()))
                 .thenReturn(Collections.emptyList());
 
-        PagingListDTO<AdminDailySalesResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminSalesService.getOrderListByDay(term, page));
+        PagingListDTO<AdminDailySalesResponseDTO> result = assertDoesNotThrow(() -> adminSalesService.getOrderListByDay(term, page));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.content().isEmpty());
-        Assertions.assertEquals(0, result.pagingData().getTotalElements());
-        Assertions.assertEquals(0, result.pagingData().getTotalPages());
-        Assertions.assertTrue(result.pagingData().isEmpty());
+        assertNotNull(result);
+        assertTrue(result.content().isEmpty());
+        assertEquals(0, result.pagingData().getTotalElements());
+        assertEquals(0, result.pagingData().getTotalPages());
+        assertTrue(result.pagingData().isEmpty());
     }
 
     @Test
@@ -539,13 +541,13 @@ public class AdminSalesServiceUnitTest {
         when(productSalesSummaryRepository.findProductSalesList(pageDTO, pageable))
                 .thenReturn(new PageImpl<>(salesList, pageable, productSalesListDTOList.size()));
 
-        Page<AdminProductSalesListDTO> result = Assertions.assertDoesNotThrow(() -> adminSalesService.getProductSalesList(pageDTO));
+        Page<AdminProductSalesListDTO> result = assertDoesNotThrow(() -> adminSalesService.getProductSalesList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.getContent().isEmpty());
-        Assertions.assertEquals(salesList.size(), result.getContent().size());
-        Assertions.assertEquals(productSalesListDTOList.size(), result.getTotalElements());
-        Assertions.assertEquals(2, result.getTotalPages());
+        assertNotNull(result);
+        assertFalse(result.getContent().isEmpty());
+        assertEquals(salesList.size(), result.getContent().size());
+        assertEquals(productSalesListDTOList.size(), result.getTotalElements());
+        assertEquals(2, result.getTotalPages());
     }
 
     @Test
@@ -560,12 +562,12 @@ public class AdminSalesServiceUnitTest {
         when(productSalesSummaryRepository.findProductSalesList(pageDTO, pageable))
                 .thenReturn(new PageImpl<>(Collections.emptyList()));
 
-        Page<AdminProductSalesListDTO> result = Assertions.assertDoesNotThrow(() -> adminSalesService.getProductSalesList(pageDTO));
+        Page<AdminProductSalesListDTO> result = assertDoesNotThrow(() -> adminSalesService.getProductSalesList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.getContent().isEmpty());
-        Assertions.assertEquals(0, result.getTotalElements());
-        Assertions.assertEquals(1, result.getTotalPages());
+        assertNotNull(result);
+        assertTrue(result.getContent().isEmpty());
+        assertEquals(0, result.getTotalElements());
+        assertEquals(1, result.getTotalPages());
     }
 
     @Test
@@ -602,25 +604,25 @@ public class AdminSalesServiceUnitTest {
         when(productSalesSummaryRepository.getProductOptionSales(year - 1, productId))
                 .thenReturn(optionLastYearSalesList);
 
-        AdminProductSalesDetailDTO result = Assertions.assertDoesNotThrow(() -> adminSalesService.getProductSalesDetail(productId));
+        AdminProductSalesDetailDTO result = assertDoesNotThrow(() -> adminSalesService.getProductSalesDetail(productId));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals("productName", result.productName());
-        Assertions.assertEquals(totalSalesDTO.totalSales(), result.totalSales());
-        Assertions.assertEquals(totalSalesDTO.totalSalesQuantity(), result.totalSalesQuantity());
-        Assertions.assertEquals(yearSalesDTO.sales(), result.yearSales());
-        Assertions.assertEquals(yearSalesDTO.salesQuantity(), result.yearSalesQuantity());
-        Assertions.assertEquals(yearSalesDTO.sales() - lastYearSalesDTO.sales(), result.lastYearComparison());
-        Assertions.assertEquals(lastYearSalesDTO.sales(), result.lastYearSales());
-        Assertions.assertEquals(lastYearSalesDTO.salesQuantity(), result.lastYearSalesQuantity());
-        Assertions.assertFalse(result.monthSales().isEmpty());
-        Assertions.assertEquals(monthSalesDTO.size(), result.monthSales().size());
-        Assertions.assertFalse(result.optionTotalSales().isEmpty());
-        Assertions.assertEquals(optionTotalSalesList.size(), result.optionTotalSales().size());
-        Assertions.assertFalse(result.optionYearSales().isEmpty());
-        Assertions.assertEquals(optionYearSalesList.size(), result.optionYearSales().size());
-        Assertions.assertFalse(result.optionLastYearSales().isEmpty());
-        Assertions.assertEquals(optionLastYearSalesList.size(), result.optionLastYearSales().size());
+        assertNotNull(result);
+        assertEquals("productName", result.productName());
+        assertEquals(totalSalesDTO.totalSales(), result.totalSales());
+        assertEquals(totalSalesDTO.totalSalesQuantity(), result.totalSalesQuantity());
+        assertEquals(yearSalesDTO.sales(), result.yearSales());
+        assertEquals(yearSalesDTO.salesQuantity(), result.yearSalesQuantity());
+        assertEquals(yearSalesDTO.sales() - lastYearSalesDTO.sales(), result.lastYearComparison());
+        assertEquals(lastYearSalesDTO.sales(), result.lastYearSales());
+        assertEquals(lastYearSalesDTO.salesQuantity(), result.lastYearSalesQuantity());
+        assertFalse(result.monthSales().isEmpty());
+        assertEquals(monthSalesDTO.size(), result.monthSales().size());
+        assertFalse(result.optionTotalSales().isEmpty());
+        assertEquals(optionTotalSalesList.size(), result.optionTotalSales().size());
+        assertFalse(result.optionYearSales().isEmpty());
+        assertEquals(optionYearSalesList.size(), result.optionYearSales().size());
+        assertFalse(result.optionLastYearSales().isEmpty());
+        assertEquals(optionLastYearSalesList.size(), result.optionLastYearSales().size());
     }
 
     @Test
@@ -631,7 +633,7 @@ public class AdminSalesServiceUnitTest {
         when(productSalesSummaryRepository.getProductSales(productId))
                 .thenReturn(null);
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomNotFoundException.class,
                 () -> adminSalesService.getProductSalesDetail(productId)
         );

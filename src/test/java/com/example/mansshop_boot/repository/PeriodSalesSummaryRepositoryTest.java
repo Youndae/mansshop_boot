@@ -16,6 +16,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
@@ -61,16 +63,16 @@ public class PeriodSalesSummaryRepositoryTest {
 
         List<AdminPeriodSalesListDTO> result = periodSalesSummaryRepository.findPeriodList(year);
 
-        Assertions.assertNotNull(result);
+        assertNotNull(result);
 
         for(int i = 0; i < result.size(); i++) {
             AdminPeriodSalesListDTO dataPeriod = data.get(i);
             AdminPeriodSalesListDTO resultPeriod = result.get(i);
 
-            Assertions.assertEquals(dataPeriod.date(), resultPeriod.date());
-            Assertions.assertEquals(dataPeriod.sales(), resultPeriod.sales());
-            Assertions.assertEquals(dataPeriod.salesQuantity(), resultPeriod.salesQuantity());
-            Assertions.assertEquals(dataPeriod.orderQuantity(), resultPeriod.orderQuantity());
+            assertEquals(dataPeriod.date(), resultPeriod.date());
+            assertEquals(dataPeriod.sales(), resultPeriod.sales());
+            assertEquals(dataPeriod.salesQuantity(), resultPeriod.salesQuantity());
+            assertEquals(dataPeriod.orderQuantity(), resultPeriod.orderQuantity());
         }
     }
 
@@ -101,13 +103,13 @@ public class PeriodSalesSummaryRepositoryTest {
 
         AdminPeriodSalesStatisticsDTO result = periodSalesSummaryRepository.findPeriodStatistics(startDate, endDate);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(sales, result.monthSales());
-        Assertions.assertEquals(salesQuantity, result.monthSalesQuantity());
-        Assertions.assertEquals(orderQuantity, result.monthOrderQuantity());
-        Assertions.assertEquals(deliveryFee, result.monthDeliveryFee());
-        Assertions.assertEquals(cashTotal, result.cashTotalPrice());
-        Assertions.assertEquals(cardTotal, result.cardTotalPrice());
+        assertNotNull(result);
+        assertEquals(sales, result.monthSales());
+        assertEquals(salesQuantity, result.monthSalesQuantity());
+        assertEquals(orderQuantity, result.monthOrderQuantity());
+        assertEquals(deliveryFee, result.monthDeliveryFee());
+        assertEquals(cashTotal, result.cashTotalPrice());
+        assertEquals(cardTotal, result.cardTotalPrice());
     }
 
     @Test
@@ -130,17 +132,17 @@ public class PeriodSalesSummaryRepositoryTest {
         LocalDate endDate = startDate.plusMonths(1);
 
         List<AdminPeriodSalesListDTO> result = periodSalesSummaryRepository.findPeriodDailyList(startDate, endDate);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(dataList.size(), result.size());
+        assertNotNull(result);
+        assertEquals(dataList.size(), result.size());
 
         for(int i = 0; i < 31; i++) {
             AdminPeriodSalesListDTO data = dataList.get(i);
             AdminPeriodSalesListDTO resultData = result.get(i);
 
-            Assertions.assertEquals(data.date(), resultData.date());
-            Assertions.assertEquals(data.sales(), resultData.sales());
-            Assertions.assertEquals(data.salesQuantity(), resultData.salesQuantity());
-            Assertions.assertEquals(data.orderQuantity(), resultData.orderQuantity());
+            assertEquals(data.date(), resultData.date());
+            assertEquals(data.sales(), resultData.sales());
+            assertEquals(data.salesQuantity(), resultData.salesQuantity());
+            assertEquals(data.orderQuantity(), resultData.orderQuantity());
         }
     }
 
@@ -162,10 +164,10 @@ public class PeriodSalesSummaryRepositoryTest {
 
         AdminClassificationSalesDTO result = periodSalesSummaryRepository.findDailySales(LocalDate.of(year, month, day));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(data.sales(), result.sales());
-        Assertions.assertEquals(data.salesQuantity(), result.salesQuantity());
-        Assertions.assertEquals(data.orderQuantity(), result.orderQuantity());
+        assertNotNull(result);
+        assertEquals(data.sales(), result.sales());
+        assertEquals(data.salesQuantity(), result.salesQuantity());
+        assertEquals(data.orderQuantity(), result.orderQuantity());
     }
 
     @Test
@@ -173,10 +175,10 @@ public class PeriodSalesSummaryRepositoryTest {
         PeriodSalesSummary data = summaryListBy2023.get(0);
         PeriodSalesSummary result = periodSalesSummaryRepository.findByPeriod(data.getPeriod());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(data.getPeriod(), result.getPeriod());
-        Assertions.assertEquals(data.getSales(), result.getSales());
-        Assertions.assertEquals(data.getSalesQuantity(), result.getSalesQuantity());
-        Assertions.assertEquals(data.getOrderQuantity(), result.getOrderQuantity());
+        assertNotNull(result);
+        assertEquals(data.getPeriod(), result.getPeriod());
+        assertEquals(data.getSales(), result.getSales());
+        assertEquals(data.getSalesQuantity(), result.getSalesQuantity());
+        assertEquals(data.getOrderQuantity(), result.getOrderQuantity());
     }
 }

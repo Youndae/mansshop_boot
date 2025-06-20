@@ -39,10 +39,7 @@ import com.example.mansshop_boot.repository.productReview.ProductReviewReplyRepo
 import com.example.mansshop_boot.repository.productReview.ProductReviewRepository;
 import com.example.mansshop_boot.repository.qnaClassification.QnAClassificationRepository;
 import com.example.mansshop_boot.service.MyPageService;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -53,6 +50,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = MansShopBootApplication.class)
 @EnableJpaRepositories(basePackages = "com.example")
@@ -271,13 +270,13 @@ public class MyPageServiceIT {
         MemberOrderDTO memberOrderDTO = new MemberOrderDTO(member.getUserId(), null, null);
         List<ProductOrder> orderFixture = getMemberProductOrderList(member, 0);
         int totalPages = PaginationUtils.getTotalPages(orderFixture.size(), pageDTO.orderAmount());
-        PagingListDTO<MyPageOrderDTO> result = Assertions.assertDoesNotThrow(() -> myPageService.getOrderList(pageDTO, memberOrderDTO));
+        PagingListDTO<MyPageOrderDTO> result = assertDoesNotThrow(() -> myPageService.getOrderList(pageDTO, memberOrderDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertFalse(result.pagingData().isEmpty());
-        Assertions.assertEquals(orderFixture.size(), result.pagingData().getTotalElements());
-        Assertions.assertEquals(totalPages, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertFalse(result.pagingData().isEmpty());
+        assertEquals(orderFixture.size(), result.pagingData().getTotalElements());
+        assertEquals(totalPages, result.pagingData().getTotalPages());
     }
 
     @Test
@@ -287,13 +286,13 @@ public class MyPageServiceIT {
         MemberOrderDTO memberOrderDTO = new MemberOrderDTO(member.getUserId(), null, null);
         productOrderRepository.deleteAll();
 
-        PagingListDTO<MyPageOrderDTO> result = Assertions.assertDoesNotThrow(() -> myPageService.getOrderList(pageDTO, memberOrderDTO));
+        PagingListDTO<MyPageOrderDTO> result = assertDoesNotThrow(() -> myPageService.getOrderList(pageDTO, memberOrderDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.content().isEmpty());
-        Assertions.assertTrue(result.pagingData().isEmpty());
-        Assertions.assertEquals(0, result.pagingData().getTotalElements());
-        Assertions.assertEquals(0, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertTrue(result.content().isEmpty());
+        assertTrue(result.pagingData().isEmpty());
+        assertEquals(0, result.pagingData().getTotalElements());
+        assertEquals(0, result.pagingData().getTotalPages());
     }
 
     @Test
@@ -303,14 +302,14 @@ public class MyPageServiceIT {
         List<ProductLike> fixtureList = getMemberProductLikeList(member, 0);
         int totalPages = PaginationUtils.getTotalPages(fixtureList.size(), pageDTO.likeAmount());
         int pageElements = Math.min(fixtureList.size(), pageDTO.likeAmount());
-        Page<ProductLikeDTO> result = Assertions.assertDoesNotThrow(() -> myPageService.getLikeList(pageDTO, principal));
+        Page<ProductLikeDTO> result = assertDoesNotThrow(() -> myPageService.getLikeList(pageDTO, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.getContent().isEmpty());
-        Assertions.assertFalse(result.isEmpty());
-        Assertions.assertEquals(fixtureList.size(), result.getTotalElements());
-        Assertions.assertEquals(totalPages, result.getTotalPages());
-        Assertions.assertEquals(pageElements, result.getContent().size());
+        assertNotNull(result);
+        assertFalse(result.getContent().isEmpty());
+        assertFalse(result.isEmpty());
+        assertEquals(fixtureList.size(), result.getTotalElements());
+        assertEquals(totalPages, result.getTotalPages());
+        assertEquals(pageElements, result.getContent().size());
     }
 
     @Test
@@ -319,13 +318,13 @@ public class MyPageServiceIT {
         productLikeRepository.deleteAll();
         LikePageDTO pageDTO = PageDTOFixture.createDefaultLikePageDTO(1);
 
-        Page<ProductLikeDTO> result = Assertions.assertDoesNotThrow(() -> myPageService.getLikeList(pageDTO, principal));
+        Page<ProductLikeDTO> result = assertDoesNotThrow(() -> myPageService.getLikeList(pageDTO, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.getContent().isEmpty());
-        Assertions.assertTrue(result.isEmpty());
-        Assertions.assertEquals(0, result.getTotalElements());
-        Assertions.assertEquals(0, result.getTotalPages());
+        assertNotNull(result);
+        assertTrue(result.getContent().isEmpty());
+        assertTrue(result.isEmpty());
+        assertEquals(0, result.getTotalElements());
+        assertEquals(0, result.getTotalPages());
     }
 
     @Test
@@ -336,14 +335,14 @@ public class MyPageServiceIT {
         int totalPages = PaginationUtils.getTotalPages(fixtureList.size(), pageDTO.amount());
         int pageElements = Math.min(fixtureList.size(), pageDTO.amount());
 
-        Page<ProductQnAListDTO> result = Assertions.assertDoesNotThrow(() -> myPageService.getProductQnAList(pageDTO, principal));
+        Page<ProductQnAListDTO> result = assertDoesNotThrow(() -> myPageService.getProductQnAList(pageDTO, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.getContent().isEmpty());
-        Assertions.assertFalse(result.isEmpty());
-        Assertions.assertEquals(fixtureList.size(), result.getTotalElements());
-        Assertions.assertEquals(totalPages, result.getTotalPages());
-        Assertions.assertEquals(pageElements, result.getContent().size());
+        assertNotNull(result);
+        assertFalse(result.getContent().isEmpty());
+        assertFalse(result.isEmpty());
+        assertEquals(fixtureList.size(), result.getTotalElements());
+        assertEquals(totalPages, result.getTotalPages());
+        assertEquals(pageElements, result.getContent().size());
     }
 
     @Test
@@ -352,13 +351,13 @@ public class MyPageServiceIT {
         productQnARepository.deleteAll();
         MyPagePageDTO pageDTO = PageDTOFixture.createDefaultMyPagePageDTO(1);
 
-        Page<ProductQnAListDTO> result = Assertions.assertDoesNotThrow(() -> myPageService.getProductQnAList(pageDTO, principal));
+        Page<ProductQnAListDTO> result = assertDoesNotThrow(() -> myPageService.getProductQnAList(pageDTO, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.getContent().isEmpty());
-        Assertions.assertTrue(result.isEmpty());
-        Assertions.assertEquals(0, result.getTotalElements());
-        Assertions.assertEquals(0, result.getTotalPages());
+        assertNotNull(result);
+        assertTrue(result.getContent().isEmpty());
+        assertTrue(result.isEmpty());
+        assertEquals(0, result.getTotalElements());
+        assertEquals(0, result.getTotalPages());
     }
 
     @Test
@@ -369,23 +368,23 @@ public class MyPageServiceIT {
         Principal fixturePrincipal = () -> fixtureQnA.getMember().getUserId();
         long qnaId = fixture.getProductQnA().getId();
 
-        ProductQnADetailDTO result = Assertions.assertDoesNotThrow(() -> myPageService.getProductQnADetail(qnaId, fixturePrincipal));
+        ProductQnADetailDTO result = assertDoesNotThrow(() -> myPageService.getProductQnADetail(qnaId, fixturePrincipal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(qnaId, result.productQnAId());
-        Assertions.assertEquals(fixtureQnA.getProduct().getProductName(), result.productName());
-        Assertions.assertEquals(fixtureQnA.getMember().getNickname(), result.writer());
-        Assertions.assertEquals(fixtureQnA.getQnaContent(), result.qnaContent());
-        Assertions.assertEquals(fixtureQnA.getCreatedAt().toLocalDate(), result.createdAt());
-        Assertions.assertTrue(result.productQnAStat());
-        Assertions.assertEquals(1, result.replyList().size());
+        assertNotNull(result);
+        assertEquals(qnaId, result.productQnAId());
+        assertEquals(fixtureQnA.getProduct().getProductName(), result.productName());
+        assertEquals(fixtureQnA.getMember().getNickname(), result.writer());
+        assertEquals(fixtureQnA.getQnaContent(), result.qnaContent());
+        assertEquals(fixtureQnA.getCreatedAt().toLocalDate(), result.createdAt());
+        assertTrue(result.productQnAStat());
+        assertEquals(1, result.replyList().size());
 
         MyPageQnAReplyDTO resultReplyDTO = result.replyList().get(0);
 
-        Assertions.assertEquals(fixture.getId(), resultReplyDTO.replyId());
-        Assertions.assertEquals(fixture.getMember().getNickname(), resultReplyDTO.writer());
-        Assertions.assertEquals(fixture.getReplyContent(), resultReplyDTO.replyContent());
-        Assertions.assertEquals(fixture.getUpdatedAt().toLocalDate(), resultReplyDTO.updatedAt());
+        assertEquals(fixture.getId(), resultReplyDTO.replyId());
+        assertEquals(fixture.getMember().getNickname(), resultReplyDTO.writer());
+        assertEquals(fixture.getReplyContent(), resultReplyDTO.replyContent());
+        assertEquals(fixture.getUpdatedAt().toLocalDate(), resultReplyDTO.updatedAt());
     }
 
     @Test
@@ -394,16 +393,16 @@ public class MyPageServiceIT {
         ProductQnA fixture = newProductQnAList.get(0);
         Principal fixturePrincipal = () -> fixture.getMember().getUserId();
 
-        ProductQnADetailDTO result = Assertions.assertDoesNotThrow(() -> myPageService.getProductQnADetail(fixture.getId(), fixturePrincipal));
+        ProductQnADetailDTO result = assertDoesNotThrow(() -> myPageService.getProductQnADetail(fixture.getId(), fixturePrincipal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(fixture.getId(), result.productQnAId());
-        Assertions.assertEquals(fixture.getProduct().getProductName(), result.productName());
-        Assertions.assertEquals(fixture.getMember().getNickname(), result.writer());
-        Assertions.assertEquals(fixture.getQnaContent(), result.qnaContent());
-        Assertions.assertEquals(fixture.getCreatedAt().toLocalDate(), result.createdAt());
-        Assertions.assertFalse(result.productQnAStat());
-        Assertions.assertTrue(result.replyList().isEmpty());
+        assertNotNull(result);
+        assertEquals(fixture.getId(), result.productQnAId());
+        assertEquals(fixture.getProduct().getProductName(), result.productName());
+        assertEquals(fixture.getMember().getNickname(), result.writer());
+        assertEquals(fixture.getQnaContent(), result.qnaContent());
+        assertEquals(fixture.getCreatedAt().toLocalDate(), result.createdAt());
+        assertFalse(result.productQnAStat());
+        assertTrue(result.replyList().isEmpty());
     }
 
     @Test
@@ -412,7 +411,7 @@ public class MyPageServiceIT {
         ProductQnA fixture = newProductQnAList.get(0);
         Principal fixturePrincipal = () -> "noneUserId";
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomAccessDeniedException.class,
                 () -> myPageService.getProductQnADetail(fixture.getId(), fixturePrincipal)
         );
@@ -421,7 +420,7 @@ public class MyPageServiceIT {
     @Test
     @DisplayName(value = "상품 문의 상세 조회. 데이터가 없는 경우")
     void getProductQnADetailNotFound() {
-        Assertions.assertThrows(
+        assertThrows(
                 CustomNotFoundException.class,
                 () -> myPageService.getProductQnADetail(0L, principal)
         );
@@ -434,20 +433,20 @@ public class MyPageServiceIT {
         Principal fixturePrincipal = () -> fixture.getMember().getUserId();
         long qnaId = fixture.getId();
 
-        String result = Assertions.assertDoesNotThrow(() -> myPageService.deleteProductQnA(qnaId, fixturePrincipal));
+        String result = assertDoesNotThrow(() -> myPageService.deleteProductQnA(qnaId, fixturePrincipal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         ProductQnA deleteData = productQnARepository.findById(qnaId).orElse(null);
 
-        Assertions.assertNull(deleteData);
+        assertNull(deleteData);
     }
 
     @Test
     @DisplayName(value = "상품 문의 삭제. QnAId 가 잘못된 경우")
     void deleteProductQnAWrongId() {
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> myPageService.deleteProductQnA(0L, principal)
         );
@@ -460,14 +459,14 @@ public class MyPageServiceIT {
         Principal fixturePrincipal = () -> "noneUserId";
         long qnaId = fixture.getId();
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomAccessDeniedException.class,
                 () -> myPageService.deleteProductQnA(qnaId, fixturePrincipal)
         );
 
         ProductQnA deleteData = productQnARepository.findById(qnaId).orElse(null);
 
-        Assertions.assertNotNull(deleteData);
+        assertNotNull(deleteData);
     }
 
     @Test
@@ -478,14 +477,14 @@ public class MyPageServiceIT {
         int totalPages = PaginationUtils.getTotalPages(fixtureList.size(), pageDTO.amount());
         int contentElements = Math.min(fixtureList.size(), pageDTO.amount());
 
-        Page<MemberQnAListDTO> result = Assertions.assertDoesNotThrow(() -> myPageService.getMemberQnAList(pageDTO, principal));
+        Page<MemberQnAListDTO> result = assertDoesNotThrow(() -> myPageService.getMemberQnAList(pageDTO, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.getContent().isEmpty());
-        Assertions.assertFalse(result.isEmpty());
-        Assertions.assertEquals(contentElements, result.getContent().size());
-        Assertions.assertEquals(totalPages, result.getTotalPages());
-        Assertions.assertEquals(fixtureList.size(), result.getTotalElements());
+        assertNotNull(result);
+        assertFalse(result.getContent().isEmpty());
+        assertFalse(result.isEmpty());
+        assertEquals(contentElements, result.getContent().size());
+        assertEquals(totalPages, result.getTotalPages());
+        assertEquals(fixtureList.size(), result.getTotalElements());
     }
 
     @Test
@@ -494,13 +493,13 @@ public class MyPageServiceIT {
         memberQnARepository.deleteAll();
         MyPagePageDTO pageDTO = PageDTOFixture.createDefaultMyPagePageDTO(1);
 
-        Page<MemberQnAListDTO> result = Assertions.assertDoesNotThrow(() -> myPageService.getMemberQnAList(pageDTO, principal));
+        Page<MemberQnAListDTO> result = assertDoesNotThrow(() -> myPageService.getMemberQnAList(pageDTO, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.getContent().isEmpty());
-        Assertions.assertTrue(result.isEmpty());
-        Assertions.assertEquals(0, result.getTotalPages());
-        Assertions.assertEquals(0, result.getTotalElements());
+        assertNotNull(result);
+        assertTrue(result.getContent().isEmpty());
+        assertTrue(result.isEmpty());
+        assertEquals(0, result.getTotalPages());
+        assertEquals(0, result.getTotalElements());
     }
 
     @Test
@@ -513,17 +512,17 @@ public class MyPageServiceIT {
                 qnAClassification.getId()
         );
 
-        Long result = Assertions.assertDoesNotThrow(() -> myPageService.postMemberQnA(insertDTO, principal));
+        Long result = assertDoesNotThrow(() -> myPageService.postMemberQnA(insertDTO, principal));
 
-        Assertions.assertNotNull(result);
+        assertNotNull(result);
 
         MemberQnA saveData = memberQnARepository.findById(result).orElse(null);
 
-        Assertions.assertNotNull(saveData);
-        Assertions.assertEquals(principal.getName(), saveData.getMember().getUserId());
-        Assertions.assertEquals(insertDTO.title(), saveData.getMemberQnATitle());
-        Assertions.assertEquals(insertDTO.content(), saveData.getMemberQnAContent());
-        Assertions.assertEquals(qnAClassification.getId(), saveData.getQnAClassification().getId());
+        assertNotNull(saveData);
+        assertEquals(principal.getName(), saveData.getMember().getUserId());
+        assertEquals(insertDTO.title(), saveData.getMemberQnATitle());
+        assertEquals(insertDTO.content(), saveData.getMemberQnAContent());
+        assertEquals(qnAClassification.getId(), saveData.getQnAClassification().getId());
     }
 
     @Test
@@ -535,7 +534,7 @@ public class MyPageServiceIT {
                 0L
         );
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> myPageService.postMemberQnA(insertDTO, principal)
         );
@@ -550,17 +549,17 @@ public class MyPageServiceIT {
                 .toList();
         Principal fixturePrincipal = () -> fixture.getMember().getUserId();
 
-        MemberQnADetailDTO result = Assertions.assertDoesNotThrow(() -> myPageService.getMemberQnADetail(fixture.getId(), fixturePrincipal));
+        MemberQnADetailDTO result = assertDoesNotThrow(() -> myPageService.getMemberQnADetail(fixture.getId(), fixturePrincipal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(fixture.getId(), result.memberQnAId());
-        Assertions.assertEquals(fixture.getQnAClassification().getQnaClassificationName(), result.qnaClassification());
-        Assertions.assertEquals(fixture.getMemberQnATitle(), result.qnaTitle());
-        Assertions.assertEquals(fixture.getMember().getNickname(), result.writer());
-        Assertions.assertEquals(fixture.getMemberQnAContent(), result.qnaContent());
-        Assertions.assertEquals(fixture.getUpdatedAt().toLocalDate(), result.updatedAt());
-        Assertions.assertEquals(fixture.isMemberQnAStat(), result.memberQnAStat());
-        Assertions.assertEquals(replyFixtureList.size(), result.replyList().size());
+        assertNotNull(result);
+        assertEquals(fixture.getId(), result.memberQnAId());
+        assertEquals(fixture.getQnAClassification().getQnaClassificationName(), result.qnaClassification());
+        assertEquals(fixture.getMemberQnATitle(), result.qnaTitle());
+        assertEquals(fixture.getMember().getNickname(), result.writer());
+        assertEquals(fixture.getMemberQnAContent(), result.qnaContent());
+        assertEquals(fixture.getUpdatedAt().toLocalDate(), result.updatedAt());
+        assertEquals(fixture.isMemberQnAStat(), result.memberQnAStat());
+        assertEquals(replyFixtureList.size(), result.replyList().size());
     }
 
     @Test
@@ -569,7 +568,7 @@ public class MyPageServiceIT {
         MemberQnA fixture = answerMemberQnAList.get(0);
         Principal fixturePrincipal = () -> "noneUserId";
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomAccessDeniedException.class,
                 () -> myPageService.getMemberQnADetail(fixture.getId(), fixturePrincipal)
         );
@@ -578,7 +577,7 @@ public class MyPageServiceIT {
     @Test
     @DisplayName(value = "회원 문의 상세 조회. 회원 문의 아이디가 잘못된 경우")
     void getMemberQnADetailWrongId() {
-        Assertions.assertThrows(
+        assertThrows(
                 CustomNotFoundException.class,
                 () -> myPageService.getMemberQnADetail(0L, principal)
         );
@@ -592,20 +591,20 @@ public class MyPageServiceIT {
         Principal fixturePrincipal = () -> fixture.getMember().getUserId();
         QnAReplyInsertDTO replyInsertDTO = new QnAReplyInsertDTO(fixture.getId(), "test reply content");
 
-        String result = Assertions.assertDoesNotThrow(() -> myPageService.postMemberQnAReply(replyInsertDTO, fixturePrincipal));
+        String result = assertDoesNotThrow(() -> myPageService.postMemberQnAReply(replyInsertDTO, fixturePrincipal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         MemberQnA patchData = memberQnARepository.findById(fixture.getId()).orElse(null);
         List<MyPageQnAReplyDTO> replyList = memberQnAReplyRepository.findAllByQnAId(fixture.getId());
         MyPageQnAReplyDTO saveReply = replyList.get(replyList.size() - 1);
 
-        Assertions.assertNotNull(patchData);
-        Assertions.assertFalse(patchData.isMemberQnAStat());
-        Assertions.assertEquals(size + 1, replyList.size());
-        Assertions.assertEquals(fixture.getMember().getNickname(), saveReply.writer());
-        Assertions.assertEquals(replyInsertDTO.content(), saveReply.replyContent());
+        assertNotNull(patchData);
+        assertFalse(patchData.isMemberQnAStat());
+        assertEquals(size + 1, replyList.size());
+        assertEquals(fixture.getMember().getNickname(), saveReply.writer());
+        assertEquals(replyInsertDTO.content(), saveReply.replyContent());
     }
 
     @Test
@@ -620,15 +619,15 @@ public class MyPageServiceIT {
         Principal fixturePrincipal = () -> memberList.get(1).getUserId();
         QnAReplyInsertDTO replyInsertDTO = new QnAReplyInsertDTO(fixture.getId(), "test reply content");
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomAccessDeniedException.class,
                 () -> myPageService.postMemberQnAReply(replyInsertDTO, fixturePrincipal)
         );
 
         MemberQnA patchData = memberQnARepository.findById(fixture.getId()).orElse(null);
 
-        Assertions.assertNotNull(patchData);
-        Assertions.assertTrue(patchData.isMemberQnAStat());
+        assertNotNull(patchData);
+        assertTrue(patchData.isMemberQnAStat());
     }
 
     @Test
@@ -636,7 +635,7 @@ public class MyPageServiceIT {
     void postMemberQnAReplyWrongId() {
         QnAReplyInsertDTO replyInsertDTO = new QnAReplyInsertDTO(0L, "test reply content");
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> myPageService.postMemberQnAReply(replyInsertDTO, principal)
         );
@@ -649,15 +648,15 @@ public class MyPageServiceIT {
         Principal fixturePrincipal = () -> fixture.getMember().getUserId();
         QnAReplyDTO replyDTO = new QnAReplyDTO(fixture.getId(), "test patch reply Content");
 
-        String result = Assertions.assertDoesNotThrow(() -> myPageService.patchMemberQnAReply(replyDTO, fixturePrincipal));
+        String result = assertDoesNotThrow(() -> myPageService.patchMemberQnAReply(replyDTO, fixturePrincipal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         MemberQnAReply patchData = memberQnAReplyRepository.findById(fixture.getId()).orElse(null);
 
-        Assertions.assertNotNull(patchData);
-        Assertions.assertEquals(replyDTO.content(), patchData.getReplyContent());
+        assertNotNull(patchData);
+        assertEquals(replyDTO.content(), patchData.getReplyContent());
     }
 
     @Test
@@ -665,7 +664,7 @@ public class MyPageServiceIT {
     void patchMemberQnAReplyWrongId() {
         QnAReplyDTO replyDTO = new QnAReplyDTO(0L, "test patch reply Content");
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> myPageService.patchMemberQnAReply(replyDTO, principal)
         );
@@ -678,7 +677,7 @@ public class MyPageServiceIT {
         Principal fixturePrincipal = () -> "noneUser";
         QnAReplyDTO replyDTO = new QnAReplyDTO(fixture.getId(), "test patch reply Content");
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomAccessDeniedException.class,
                 () -> myPageService.patchMemberQnAReply(replyDTO, fixturePrincipal)
         );
@@ -690,20 +689,20 @@ public class MyPageServiceIT {
         MemberQnA fixture = allMemberQnAList.get(0);
         Principal fixturePrincipal = () -> fixture.getMember().getUserId();
 
-        MemberQnAModifyDataDTO result = Assertions.assertDoesNotThrow(() -> myPageService.getModifyData(fixture.getId(), fixturePrincipal));
+        MemberQnAModifyDataDTO result = assertDoesNotThrow(() -> myPageService.getModifyData(fixture.getId(), fixturePrincipal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(fixture.getId(), result.qnaId());
-        Assertions.assertEquals(fixture.getMemberQnATitle(), result.qnaTitle());
-        Assertions.assertEquals(fixture.getMemberQnAContent(), result.qnaContent());
-        Assertions.assertEquals(fixture.getQnAClassification().getId(), result.qnaClassificationId());
-        Assertions.assertEquals(qnAClassificationList.size(), result.classificationList().size());
+        assertNotNull(result);
+        assertEquals(fixture.getId(), result.qnaId());
+        assertEquals(fixture.getMemberQnATitle(), result.qnaTitle());
+        assertEquals(fixture.getMemberQnAContent(), result.qnaContent());
+        assertEquals(fixture.getQnAClassification().getId(), result.qnaClassificationId());
+        assertEquals(qnAClassificationList.size(), result.classificationList().size());
     }
 
     @Test
     @DisplayName(value = "회원 문의 수정을 위한 상세 조회. 회원 문의 아이디가 잘못 된 경우")
     void getModifyDataWrongId() {
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> myPageService.getModifyData(0L, principal)
         );
@@ -722,17 +721,17 @@ public class MyPageServiceIT {
                 classificationId
         );
 
-        String result = Assertions.assertDoesNotThrow(() -> myPageService.patchMemberQnA(modifyDTO, fixturePrincipal));
+        String result = assertDoesNotThrow(() -> myPageService.patchMemberQnA(modifyDTO, fixturePrincipal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         MemberQnA patchData = memberQnARepository.findById(fixture.getId()).orElse(null);
 
-        Assertions.assertNotNull(patchData);
-        Assertions.assertEquals(modifyDTO.title(), patchData.getMemberQnATitle());
-        Assertions.assertEquals(modifyDTO.content(), patchData.getMemberQnAContent());
-        Assertions.assertEquals(modifyDTO.classificationId(), patchData.getQnAClassification().getId());
+        assertNotNull(patchData);
+        assertEquals(modifyDTO.title(), patchData.getMemberQnATitle());
+        assertEquals(modifyDTO.content(), patchData.getMemberQnAContent());
+        assertEquals(modifyDTO.classificationId(), patchData.getQnAClassification().getId());
     }
 
     @Test
@@ -745,7 +744,7 @@ public class MyPageServiceIT {
                 "test modify content",
                 classificationId
         );
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> myPageService.patchMemberQnA(modifyDTO, principal)
         );
@@ -764,7 +763,7 @@ public class MyPageServiceIT {
                 classificationId
         );
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomAccessDeniedException.class,
                 () -> myPageService.patchMemberQnA(modifyDTO, fixturePrincipal)
         );
@@ -776,19 +775,19 @@ public class MyPageServiceIT {
         MemberQnA fixture = allMemberQnAList.get(0);
         Principal fixturePrincipal = () -> fixture.getMember().getUserId();
 
-        String result = Assertions.assertDoesNotThrow(() -> myPageService.deleteMemberQnA(fixture.getId(), fixturePrincipal));
+        String result = assertDoesNotThrow(() -> myPageService.deleteMemberQnA(fixture.getId(), fixturePrincipal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         MemberQnA deleteData = memberQnARepository.findById(fixture.getId()).orElse(null);
-        Assertions.assertNull(deleteData);
+        assertNull(deleteData);
     }
 
     @Test
     @DisplayName(value = "회원 문의 삭제. 잘못 된 아이디인 경우")
     void deleteMemberQnAWrongId() {
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> myPageService.deleteMemberQnA(0L, principal)
         );
@@ -800,30 +799,30 @@ public class MyPageServiceIT {
         MemberQnA fixture = allMemberQnAList.get(0);
         Principal fixturePrincipal = () -> memberList.get(1).getUserId();
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomAccessDeniedException.class,
                 () -> myPageService.deleteMemberQnA(fixture.getId(), fixturePrincipal)
         );
 
         MemberQnA deleteData = memberQnARepository.findById(fixture.getId()).orElse(null);
 
-        Assertions.assertNotNull(deleteData);
+        assertNotNull(deleteData);
     }
 
     @Test
     @DisplayName(value = "회원 문의 분류 목록 조회")
     void getQnAClassification() {
-        List<QnAClassificationDTO> result = Assertions.assertDoesNotThrow(() -> myPageService.getQnAClassification(principal));
+        List<QnAClassificationDTO> result = assertDoesNotThrow(() -> myPageService.getQnAClassification(principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.isEmpty());
-        Assertions.assertEquals(qnAClassificationList.size(), result.size());
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertEquals(qnAClassificationList.size(), result.size());
         for(int i = 0; i < qnAClassificationList.size(); i++) {
             QnAClassification classification = qnAClassificationList.get(i);
             QnAClassificationDTO resultDTO = result.get(i);
 
-            Assertions.assertEquals(classification.getId(), resultDTO.id());
-            Assertions.assertEquals(classification.getQnaClassificationName(), resultDTO.name());
+            assertEquals(classification.getId(), resultDTO.id());
+            assertEquals(classification.getQnaClassificationName(), resultDTO.name());
         }
     }
 
@@ -832,10 +831,10 @@ public class MyPageServiceIT {
     void getQnAClassificationEmpty() {
         qnAClassificationRepository.deleteAll();
 
-        List<QnAClassificationDTO> result = Assertions.assertDoesNotThrow(() -> myPageService.getQnAClassification(principal));
+        List<QnAClassificationDTO> result = assertDoesNotThrow(() -> myPageService.getQnAClassification(principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.isEmpty());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -846,14 +845,14 @@ public class MyPageServiceIT {
         int totalPages = PaginationUtils.getTotalPages(fixtureList.size(), pageDTO.amount());
         int contentSize = Math.min(fixtureList.size(), pageDTO.amount());
 
-        Page<MyPageReviewDTO> result = Assertions.assertDoesNotThrow(() -> myPageService.getReview(pageDTO, principal));
+        Page<MyPageReviewDTO> result = assertDoesNotThrow(() -> myPageService.getReview(pageDTO, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.isEmpty());
-        Assertions.assertFalse(result.getContent().isEmpty());
-        Assertions.assertEquals(fixtureList.size(), result.getTotalElements());
-        Assertions.assertEquals(totalPages, result.getTotalPages());
-        Assertions.assertEquals(contentSize, result.getContent().size());
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertFalse(result.getContent().isEmpty());
+        assertEquals(fixtureList.size(), result.getTotalElements());
+        assertEquals(totalPages, result.getTotalPages());
+        assertEquals(contentSize, result.getContent().size());
     }
 
     @Test
@@ -862,13 +861,13 @@ public class MyPageServiceIT {
         productReviewRepository.deleteAll();
         MyPagePageDTO pageDTO = PageDTOFixture.createDefaultMyPagePageDTO(1);
 
-        Page<MyPageReviewDTO> result = Assertions.assertDoesNotThrow(() -> myPageService.getReview(pageDTO, principal));
+        Page<MyPageReviewDTO> result = assertDoesNotThrow(() -> myPageService.getReview(pageDTO, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.isEmpty());
-        Assertions.assertTrue(result.getContent().isEmpty());
-        Assertions.assertEquals(0, result.getTotalElements());
-        Assertions.assertEquals(0, result.getTotalPages());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        assertTrue(result.getContent().isEmpty());
+        assertEquals(0, result.getTotalElements());
+        assertEquals(0, result.getTotalPages());
     }
 
     @Test
@@ -877,18 +876,18 @@ public class MyPageServiceIT {
         ProductReview fixture = allProductReviewList.get(0);
         Principal fixturePrincipal = () -> fixture.getMember().getUserId();
 
-        MyPagePatchReviewDataDTO result = Assertions.assertDoesNotThrow(() -> myPageService.getPatchReview(fixture.getId(), fixturePrincipal));
+        MyPagePatchReviewDataDTO result = assertDoesNotThrow(() -> myPageService.getPatchReview(fixture.getId(), fixturePrincipal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(fixture.getId(), result.reviewId());
-        Assertions.assertEquals(fixture.getReviewContent(), result.content());
-        Assertions.assertEquals(fixture.getProduct().getProductName(), result.productName());
+        assertNotNull(result);
+        assertEquals(fixture.getId(), result.reviewId());
+        assertEquals(fixture.getReviewContent(), result.content());
+        assertEquals(fixture.getProduct().getProductName(), result.productName());
     }
 
     @Test
     @DisplayName(value = "리뷰 수정을 위한 조회. 리뷰 아이디가 잘못 된 경우")
     void getPatchReviewWrongId() {
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> myPageService.getPatchReview(0L, principal)
         );
@@ -900,7 +899,7 @@ public class MyPageServiceIT {
         ProductReview fixture = allProductReviewList.get(0);
         Principal fixturePrincipal = () -> "noneUser";
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomAccessDeniedException.class,
                 () -> myPageService.getPatchReview(fixture.getId(), fixturePrincipal)
         );
@@ -922,23 +921,23 @@ public class MyPageServiceIT {
                 fixture.getId()
         );
 
-        String result = Assertions.assertDoesNotThrow(() -> myPageService.postReview(postReviewDTO, fixturePrincipal));
+        String result = assertDoesNotThrow(() -> myPageService.postReview(postReviewDTO, fixturePrincipal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         ProductReview postReview = productReviewRepository.findFirstByMember_UserIdOrderByIdDesc(principal.getName());
 
-        Assertions.assertNotNull(postReview);
-        Assertions.assertEquals(postReviewDTO.productId(), postReview.getProduct().getId());
-        Assertions.assertEquals(postReviewDTO.content(), postReview.getReviewContent());
-        Assertions.assertEquals(postReviewDTO.optionId(), postReview.getProductOption().getId());
-        Assertions.assertEquals(principal.getName(), postReview.getMember().getUserId());
+        assertNotNull(postReview);
+        assertEquals(postReviewDTO.productId(), postReview.getProduct().getId());
+        assertEquals(postReviewDTO.content(), postReview.getReviewContent());
+        assertEquals(postReviewDTO.optionId(), postReview.getProductOption().getId());
+        assertEquals(principal.getName(), postReview.getMember().getUserId());
 
         ProductOrderDetail patchDetail = productOrderDetailRepository.findById(fixture.getId()).orElse(null);
 
-        Assertions.assertNotNull(patchDetail);
-        Assertions.assertTrue(patchDetail.isOrderReviewStatus());
+        assertNotNull(patchDetail);
+        assertTrue(patchDetail.isOrderReviewStatus());
     }
 
     @Test
@@ -951,14 +950,14 @@ public class MyPageServiceIT {
                 productOrderList.get(0).getProductOrderDetailSet().get(0).getId()
         );
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> myPageService.postReview(postReviewDTO, principal)
         );
 
         int allReviewSize = productReviewRepository.findAll().size();
 
-        Assertions.assertEquals(allProductReviewList.size(), allReviewSize);
+        assertEquals(allProductReviewList.size(), allReviewSize);
     }
 
     @Test
@@ -971,14 +970,14 @@ public class MyPageServiceIT {
                 productOrderList.get(0).getProductOrderDetailSet().get(0).getId()
         );
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> myPageService.postReview(postReviewDTO, principal)
         );
 
         int allReviewSize = productReviewRepository.findAll().size();
 
-        Assertions.assertEquals(allProductReviewList.size(), allReviewSize);
+        assertEquals(allProductReviewList.size(), allReviewSize);
     }
 
     @Test
@@ -991,14 +990,14 @@ public class MyPageServiceIT {
                 0L
         );
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> myPageService.postReview(postReviewDTO, principal)
         );
 
         int allReviewSize = productReviewRepository.findAll().size();
 
-        Assertions.assertEquals(allProductReviewList.size(), allReviewSize);
+        assertEquals(allProductReviewList.size(), allReviewSize);
     }
 
     @Test
@@ -1011,15 +1010,15 @@ public class MyPageServiceIT {
                 "test patch review content"
         );
 
-        String result = Assertions.assertDoesNotThrow(() -> myPageService.patchReview(reviewDTO, fixturePrincipal));
+        String result = assertDoesNotThrow(() -> myPageService.patchReview(reviewDTO, fixturePrincipal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         ProductReview patchReview = productReviewRepository.findById(fixture.getId()).orElse(null);
 
-        Assertions.assertNotNull(patchReview);
-        Assertions.assertEquals(reviewDTO.content(), patchReview.getReviewContent());
+        assertNotNull(patchReview);
+        assertEquals(reviewDTO.content(), patchReview.getReviewContent());
     }
 
     @Test
@@ -1030,7 +1029,7 @@ public class MyPageServiceIT {
                 "test patch review content"
         );
 
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> myPageService.patchReview(reviewDTO, principal)
         );
@@ -1046,7 +1045,7 @@ public class MyPageServiceIT {
                 "test patch review content"
         );
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomAccessDeniedException.class,
                 () -> myPageService.patchReview(reviewDTO, fixturePrincipal)
         );
@@ -1059,20 +1058,20 @@ public class MyPageServiceIT {
         long reviewId = fixture.getId();
         Principal fixturePrincipal = () -> fixture.getMember().getUserId();
 
-        String result = Assertions.assertDoesNotThrow(() -> myPageService.deleteReview(reviewId, fixturePrincipal));
+        String result = assertDoesNotThrow(() -> myPageService.deleteReview(reviewId, fixturePrincipal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         ProductReview deleteReview = productReviewRepository.findById(reviewId).orElse(null);
 
-        Assertions.assertNull(deleteReview);
+        assertNull(deleteReview);
     }
 
     @Test
     @DisplayName(value = "리뷰 삭제. 리뷰 아이디가 잘못 된 경우")
     void deleteReviewWrongId() {
-        Assertions.assertThrows(
+        assertThrows(
                 IllegalArgumentException.class,
                 () -> myPageService.deleteReview(0L, principal)
         );
@@ -1085,30 +1084,30 @@ public class MyPageServiceIT {
         long reviewId = fixture.getId();
         Principal fixturePrincipal = () -> "noneUser";
 
-        Assertions.assertThrows(
+        assertThrows(
                 CustomAccessDeniedException.class,
                 () -> myPageService.deleteReview(reviewId, fixturePrincipal)
         );
 
         ProductReview deleteReview = productReviewRepository.findById(reviewId).orElse(null);
 
-        Assertions.assertNotNull(deleteReview);
+        assertNotNull(deleteReview);
     }
 
     @Test
     @DisplayName(value = "사용자 정보 조회")
     void getInfo() {
-        MyPageInfoDTO result = Assertions.assertDoesNotThrow(() -> myPageService.getInfo(principal));
+        MyPageInfoDTO result = assertDoesNotThrow(() -> myPageService.getInfo(principal));
         String[] splitMail = member.getUserEmail().split("@");
         String mailSuffix = splitMail[1].substring(0, splitMail[1].indexOf('.'));
         String type = MailSuffix.findSuffixType(mailSuffix);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(member.getNickname(), result.nickname());
-        Assertions.assertEquals(member.getPhone().replaceAll("-", ""), result.phone());
-        Assertions.assertEquals(splitMail[0], result.mailPrefix());
-        Assertions.assertEquals(splitMail[1], result.mailSuffix());
-        Assertions.assertEquals(type, result.mailType());
+        assertNotNull(result);
+        assertEquals(member.getNickname(), result.nickname());
+        assertEquals(member.getPhone().replaceAll("-", ""), result.phone());
+        assertEquals(splitMail[0], result.mailPrefix());
+        assertEquals(splitMail[1], result.mailSuffix());
+        assertEquals(type, result.mailType());
     }
 
     @Test
@@ -1120,15 +1119,15 @@ public class MyPageServiceIT {
                 "modify@modify.com"
         );
 
-        String result = Assertions.assertDoesNotThrow(() -> myPageService.patchInfo(infoDTO, principal));
+        String result = assertDoesNotThrow(() -> myPageService.patchInfo(infoDTO, principal));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(Result.OK.getResultKey(), result);
+        assertNotNull(result);
+        assertEquals(Result.OK.getResultKey(), result);
 
         Member patchMember = memberRepository.findByUserId(member.getUserId());
 
-        Assertions.assertEquals(infoDTO.nickname(), patchMember.getNickname());
-        Assertions.assertEquals(infoDTO.phone(), patchMember.getPhone().replaceAll("-", ""));
-        Assertions.assertEquals(infoDTO.mail(), patchMember.getUserEmail());
+        assertEquals(infoDTO.nickname(), patchMember.getNickname());
+        assertEquals(infoDTO.phone(), patchMember.getPhone().replaceAll("-", ""));
+        assertEquals(infoDTO.mail(), patchMember.getUserEmail());
     }
 }

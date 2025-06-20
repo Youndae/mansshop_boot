@@ -59,7 +59,7 @@ public class ProductOrderDSLRepositoryImpl implements ProductOrderDSLRepository{
         else
             term = term.minusMonths(Long.parseLong(pageDTO.term()));
 
-        if(memberOrderDTO.userId() == null) {
+        if(memberOrderDTO.userId() == null || memberOrderDTO.userId().equals("Anonymous")) {
             return productOrder.recipient
                     .eq(memberOrderDTO.recipient())
                     .and(productOrder.orderPhone.eq(memberOrderDTO.phone()))

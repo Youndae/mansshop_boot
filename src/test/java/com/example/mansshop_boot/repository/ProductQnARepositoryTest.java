@@ -31,6 +31,8 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
@@ -105,9 +107,9 @@ public class ProductQnARepositoryTest {
                                         .toList();
         Page<ProductQnADTO> result = productQnARepository.findByProductId(product.getId(), qnaPageable);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(dataList.size(), result.getTotalElements());
-        result.getContent().forEach(v -> Assertions.assertTrue(dataList.contains(v.qnaId())));
+        assertNotNull(result);
+        assertEquals(dataList.size(), result.getTotalElements());
+        result.getContent().forEach(v -> assertTrue(dataList.contains(v.qnaId())));
     }
 
     @Test
@@ -129,9 +131,9 @@ public class ProductQnARepositoryTest {
                                         .toList();
         Page<ProductQnAListDTO> result = productQnARepository.findByUserId(member.getUserId(), pageable);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(dataList.size(), result.getTotalElements());
-        result.forEach(v -> Assertions.assertTrue(dataQnAIds.contains(v.productQnAId())));
+        assertNotNull(result);
+        assertEquals(dataList.size(), result.getTotalElements());
+        result.forEach(v -> assertTrue(dataQnAIds.contains(v.productQnAId())));
     }
 
     @Test
@@ -144,9 +146,9 @@ public class ProductQnARepositoryTest {
 
         Page<ProductQnAListDTO> result = productQnARepository.findByUserId("fakeUser", pageable);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(0L, result.getTotalElements());
-        Assertions.assertTrue(result.getContent().isEmpty());
+        assertNotNull(result);
+        assertEquals(0L, result.getTotalElements());
+        assertTrue(result.getContent().isEmpty());
     }
 
     @Test
@@ -155,10 +157,10 @@ public class ProductQnARepositoryTest {
         ProductQnA productQnA = qnaList.get(0);
         MyPageProductQnADTO result = productQnARepository.findByQnAId(productQnA.getId());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(productQnA.getId(), result.productQnAId());
-        Assertions.assertEquals(productQnA.getProduct().getProductName(), result.productName());
-        Assertions.assertEquals(productQnA.getQnaContent(), result.qnaContent());
+        assertNotNull(result);
+        assertEquals(productQnA.getId(), result.productQnAId());
+        assertEquals(productQnA.getProduct().getProductName(), result.productName());
+        assertEquals(productQnA.getQnaContent(), result.qnaContent());
     }
 
     @Test
@@ -167,8 +169,8 @@ public class ProductQnARepositoryTest {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(null, "all", 1);
         List<AdminQnAListResponseDTO> result = productQnARepository.findAllByAdminProductQnA(pageDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(pageDTO.amount(), result.size());
+        assertNotNull(result);
+        assertEquals(pageDTO.amount(), result.size());
     }
 
     @Test
@@ -178,8 +180,8 @@ public class ProductQnARepositoryTest {
         List<AdminQnAListResponseDTO> result = productQnARepository.findAllByAdminProductQnA(pageDTO);
 
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(pageDTO.amount(), result.size());
+        assertNotNull(result);
+        assertEquals(pageDTO.amount(), result.size());
     }
 
     @Test
@@ -188,8 +190,8 @@ public class ProductQnARepositoryTest {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(null, "all", 1);
         Long result = productQnARepository.findAllByAdminProductQnACount(pageDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(qnaList.size(), result);
+        assertNotNull(result);
+        assertEquals(qnaList.size(), result);
     }
 
     @Test
@@ -204,7 +206,7 @@ public class ProductQnARepositoryTest {
         Long result = productQnARepository.findAllByAdminProductQnACount(pageDTO);
 
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(memberData.size(), result);
+        assertNotNull(result);
+        assertEquals(memberData.size(), result);
     }
 }

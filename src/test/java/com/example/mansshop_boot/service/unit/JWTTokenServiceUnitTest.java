@@ -19,6 +19,8 @@ import org.springframework.http.MediaType;
 
 import static org.mockito.Mockito.*;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @ExtendWith(MockitoExtension.class)
 public class JWTTokenServiceUnitTest {
 
@@ -92,7 +94,7 @@ public class JWTTokenServiceUnitTest {
 
         doNothing().when(jwtTokenService).deleteCookieAndThrowException(response);
 
-        Assertions.assertThrows(CustomTokenStealingException.class,
+        assertThrows(CustomTokenStealingException.class,
                 () -> jwtTokenService.reIssueToken(tokenDTO, response));
 
         verify(jwtTokenService).deleteCookieAndThrowException(response);
@@ -112,7 +114,7 @@ public class JWTTokenServiceUnitTest {
         when(tokenProvider.decodeToken(tokenDTO.refreshTokenValue())).thenReturn(USER_ID);
         doNothing().when(jwtTokenService).deleteTokenAndCookieAndThrowException(USER_ID, tokenDTO.inoValue(), response);
 
-        Assertions.assertThrows(CustomTokenStealingException.class,
+        assertThrows(CustomTokenStealingException.class,
                 () -> jwtTokenService.reIssueToken(tokenDTO, response));
 
         verify(jwtTokenService).deleteTokenAndCookieAndThrowException(USER_ID, tokenDTO.inoValue(), response);
@@ -131,7 +133,7 @@ public class JWTTokenServiceUnitTest {
         when(tokenProvider.decodeToken(tokenDTO.accessTokenValue())).thenReturn(Result.WRONG_TOKEN.getResultKey());
         when(tokenProvider.decodeToken(tokenDTO.refreshTokenValue())).thenReturn(Result.WRONG_TOKEN.getResultKey());
 
-        Assertions.assertThrows(CustomTokenStealingException.class,
+        assertThrows(CustomTokenStealingException.class,
                 () -> jwtTokenService.reIssueToken(tokenDTO, response));
 
         verify(tokenProvider).deleteCookie(response);
@@ -151,7 +153,7 @@ public class JWTTokenServiceUnitTest {
         when(tokenProvider.verifyRefreshToken(tokenDTO.refreshTokenValue(), tokenDTO.inoValue(), USER_ID)).thenReturn(Result.WRONG_TOKEN.getResultKey());
         doNothing().when(jwtTokenService).deleteTokenAndCookieAndThrowException(USER_ID, tokenDTO.inoValue(), response);
 
-        Assertions.assertThrows(CustomTokenStealingException.class,
+        assertThrows(CustomTokenStealingException.class,
                 () -> jwtTokenService.reIssueToken(tokenDTO, response));
 
         verify(jwtTokenService).deleteTokenAndCookieAndThrowException(USER_ID, tokenDTO.inoValue(), response);
@@ -170,7 +172,7 @@ public class JWTTokenServiceUnitTest {
         when(tokenProvider.decodeToken(tokenDTO.accessTokenValue())).thenReturn(USER_ID);
         when(tokenProvider.verifyRefreshToken(tokenDTO.refreshTokenValue(), tokenDTO.inoValue(), USER_ID)).thenReturn(Result.TOKEN_STEALING.getResultKey());
         doNothing().when(jwtTokenService).deleteTokenAndCookieAndThrowException(USER_ID, tokenDTO.inoValue(), response);
-        Assertions.assertThrows(CustomTokenStealingException.class,
+        assertThrows(CustomTokenStealingException.class,
                 () -> jwtTokenService.reIssueToken(tokenDTO, response));
 
         verify(jwtTokenService).deleteTokenAndCookieAndThrowException(USER_ID, tokenDTO.inoValue(), response);

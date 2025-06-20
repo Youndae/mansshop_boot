@@ -17,14 +17,10 @@ import com.example.mansshop_boot.repository.productOrder.ProductOrderDetailRepos
 import com.example.mansshop_boot.repository.productOrder.ProductOrderRepository;
 import com.example.mansshop_boot.service.admin.AdminCacheServiceImpl;
 import com.example.mansshop_boot.service.admin.AdminOrderServiceImpl;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
@@ -34,6 +30,8 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 public class AdminOrderServiceUnitTest {
@@ -49,12 +47,6 @@ public class AdminOrderServiceUnitTest {
 
     @Mock
     private ProductOrderDetailRepository productOrderDetailRepository;
-
-    @Mock
-    private RedisTemplate<String, Long> redisTemplate;
-
-    @Mock
-    private ValueOperations<String, Long> valueOperation;
 
     @Test
     @DisplayName(value = "모든 주문 목록 조회")
@@ -105,14 +97,14 @@ public class AdminOrderServiceUnitTest {
         when(productOrderDetailRepository.findByOrderIds(orderIds))
                 .thenReturn(resultOrderDetailList);
 
-        PagingListDTO<AdminOrderResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminService.getAllOrderList(pageDTO));
+        PagingListDTO<AdminOrderResponseDTO> result = assertDoesNotThrow(() -> adminService.getAllOrderList(pageDTO));
 
         verify(adminCacheService).getFullScanCountCache(any(), any(CacheRequest.class));
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertEquals(orderFixtureList.size(), result.pagingData().getTotalElements());
-        Assertions.assertEquals(2, result.pagingData().getTotalPages());
-        Assertions.assertEquals(pageDTO.amount(), result.content().size());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertEquals(orderFixtureList.size(), result.pagingData().getTotalElements());
+        assertEquals(2, result.pagingData().getTotalPages());
+        assertEquals(pageDTO.amount(), result.content().size());
     }
 
     @Test
@@ -125,12 +117,12 @@ public class AdminOrderServiceUnitTest {
         when(adminCacheService.getFullScanCountCache(RedisCaching.ADMIN_ORDER_COUNT, new CacheRequest(pageDTO)))
                 .thenReturn(0L);
 
-        PagingListDTO<AdminOrderResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminService.getAllOrderList(pageDTO));
+        PagingListDTO<AdminOrderResponseDTO> result = assertDoesNotThrow(() -> adminService.getAllOrderList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.content().isEmpty());
-        Assertions.assertEquals(0, result.pagingData().getTotalElements());
-        Assertions.assertEquals(0, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertTrue(result.content().isEmpty());
+        assertEquals(0, result.pagingData().getTotalElements());
+        assertEquals(0, result.pagingData().getTotalPages());
     }
 
     @Test
@@ -188,14 +180,14 @@ public class AdminOrderServiceUnitTest {
         when(productOrderDetailRepository.findByOrderIds(orderIds))
                 .thenReturn(resultOrderDetailList);
 
-        PagingListDTO<AdminOrderResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminService.getNewOrderList(pageDTO));
+        PagingListDTO<AdminOrderResponseDTO> result = assertDoesNotThrow(() -> adminService.getNewOrderList(pageDTO));
 
         System.out.println("result : " + result);
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.content().isEmpty());
-        Assertions.assertEquals(orderFixtureList.size(), result.pagingData().getTotalElements());
-        Assertions.assertEquals(2, result.pagingData().getTotalPages());
-        Assertions.assertEquals(pageDTO.amount(), result.content().size());
+        assertNotNull(result);
+        assertFalse(result.content().isEmpty());
+        assertEquals(orderFixtureList.size(), result.pagingData().getTotalElements());
+        assertEquals(2, result.pagingData().getTotalPages());
+        assertEquals(pageDTO.amount(), result.content().size());
     }
 
     @Test
@@ -213,11 +205,11 @@ public class AdminOrderServiceUnitTest {
         when(productOrderRepository.findAllNewOrderListCount(pageDTO, todayLastOrderTime))
                 .thenReturn(0L);
 
-        PagingListDTO<AdminOrderResponseDTO> result = Assertions.assertDoesNotThrow(() -> adminService.getAllOrderList(pageDTO));
+        PagingListDTO<AdminOrderResponseDTO> result = assertDoesNotThrow(() -> adminService.getAllOrderList(pageDTO));
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.content().isEmpty());
-        Assertions.assertEquals(0, result.pagingData().getTotalElements());
-        Assertions.assertEquals(0, result.pagingData().getTotalPages());
+        assertNotNull(result);
+        assertTrue(result.content().isEmpty());
+        assertEquals(0, result.pagingData().getTotalElements());
+        assertEquals(0, result.pagingData().getTotalPages());
     }
 }

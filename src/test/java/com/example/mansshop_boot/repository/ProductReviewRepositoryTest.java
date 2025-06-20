@@ -36,6 +36,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
@@ -154,16 +156,16 @@ public class ProductReviewRepositoryTest {
                                             );
         Page<ProductReviewDTO> result = productReviewRepository.findByProductId(productId, pageable);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(dataList.size(), result.getTotalElements());
+        assertNotNull(result);
+        assertEquals(dataList.size(), result.getTotalElements());
 
         for(int i = 0; i < result.getContent().size(); i++) {
             ProductReviewDTO data = dataList.get(i);
             ProductReviewDTO resultData = result.getContent().get(i);
 
-            Assertions.assertEquals(data.reviewContent(), resultData.reviewContent());
-            Assertions.assertEquals(data.answerContent(), resultData.answerContent());
-            Assertions.assertEquals(data.answerCreatedAt(), resultData.answerCreatedAt());
+            assertEquals(data.reviewContent(), resultData.reviewContent());
+            assertEquals(data.answerContent(), resultData.answerContent());
+            assertEquals(data.answerCreatedAt(), resultData.answerCreatedAt());
         }
     }
 
@@ -177,8 +179,8 @@ public class ProductReviewRepositoryTest {
         );
         Page<ProductReviewDTO> result = productReviewRepository.findByProductId("fackProductId", pageable);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.getContent().isEmpty());
+        assertNotNull(result);
+        assertTrue(result.getContent().isEmpty());
     }
 
     @Test
@@ -219,18 +221,18 @@ public class ProductReviewRepositoryTest {
 
         Page<MyPageReviewDTO> result = productReviewRepository.findAllByUserId(member.getUserId(), pageable);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(dataList.size(), result.getTotalElements());
+        assertNotNull(result);
+        assertEquals(dataList.size(), result.getTotalElements());
 
         for(int i = 0; i < result.getContent().size(); i++) {
             MyPageReviewDTO data = dataList.get(i);
             MyPageReviewDTO resultData = result.getContent().get(i);
 
-            Assertions.assertEquals(data.reviewId(), resultData.reviewId());
-            Assertions.assertEquals(data.productName(), resultData.productName());
-            Assertions.assertEquals(data.content(), resultData.content());
-            Assertions.assertEquals(data.replyContent(), resultData.replyContent());
-            Assertions.assertEquals(data.replyUpdatedAt(), resultData.replyUpdatedAt());
+            assertEquals(data.reviewId(), resultData.reviewId());
+            assertEquals(data.productName(), resultData.productName());
+            assertEquals(data.content(), resultData.content());
+            assertEquals(data.replyContent(), resultData.replyContent());
+            assertEquals(data.replyUpdatedAt(), resultData.replyUpdatedAt());
         }
     }
 
@@ -244,9 +246,9 @@ public class ProductReviewRepositoryTest {
 
         Page<MyPageReviewDTO> result = productReviewRepository.findAllByUserId("fakeUser", pageable);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(0L, result.getTotalElements());
-        Assertions.assertTrue(result.getContent().isEmpty());
+        assertNotNull(result);
+        assertEquals(0L, result.getTotalElements());
+        assertTrue(result.getContent().isEmpty());
     }
 
     @Test
@@ -255,9 +257,9 @@ public class ProductReviewRepositoryTest {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(null, null, 1);
         List<AdminReviewDTO> result = productReviewRepository.findAllByAdminReviewList(pageDTO, AdminListType.ALL.name());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.isEmpty());
-        Assertions.assertEquals(pageDTO.amount(), result.size());
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertEquals(pageDTO.amount(), result.size());
     }
 
     @Test
@@ -266,10 +268,10 @@ public class ProductReviewRepositoryTest {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(member.getNickname(), "user", 1);
         List<AdminReviewDTO> result = productReviewRepository.findAllByAdminReviewList(pageDTO, AdminListType.ALL.name());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.isEmpty());
-        Assertions.assertEquals(pageDTO.amount(), result.size());
-        result.forEach(v -> Assertions.assertEquals(member.getNickname(), v.writer()));
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertEquals(pageDTO.amount(), result.size());
+        result.forEach(v -> assertEquals(member.getNickname(), v.writer()));
     }
 
     @Test
@@ -279,10 +281,10 @@ public class ProductReviewRepositoryTest {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(productName, "product", 1);
         List<AdminReviewDTO> result = productReviewRepository.findAllByAdminReviewList(pageDTO, AdminListType.ALL.name());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.isEmpty());
-        Assertions.assertEquals(pageDTO.amount(), result.size());
-        result.forEach(v -> Assertions.assertTrue(v.productName().contains(productName)));
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertEquals(pageDTO.amount(), result.size());
+        result.forEach(v -> assertTrue(v.productName().contains(productName)));
     }
 
     @Test
@@ -291,8 +293,8 @@ public class ProductReviewRepositoryTest {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO("fakeUser", "user", 1);
         List<AdminReviewDTO> result = productReviewRepository.findAllByAdminReviewList(pageDTO, AdminListType.ALL.name());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.isEmpty());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -301,8 +303,8 @@ public class ProductReviewRepositoryTest {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO("fakeProduct", "user", 1);
         List<AdminReviewDTO> result = productReviewRepository.findAllByAdminReviewList(pageDTO, AdminListType.ALL.name());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.isEmpty());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -311,9 +313,9 @@ public class ProductReviewRepositoryTest {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(null, null, 1);
         List<AdminReviewDTO> result = productReviewRepository.findAllByAdminReviewList(pageDTO, AdminListType.NEW.name());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.isEmpty());
-        result.forEach(v -> Assertions.assertFalse(v.status()));
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        result.forEach(v -> assertFalse(v.status()));
     }
 
     @Test
@@ -322,11 +324,11 @@ public class ProductReviewRepositoryTest {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(member.getNickname(), "user", 1);
         List<AdminReviewDTO> result = productReviewRepository.findAllByAdminReviewList(pageDTO, AdminListType.NEW.name());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.isEmpty());
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
         result.forEach(v -> {
-            Assertions.assertEquals(member.getNickname(), v.writer());
-            Assertions.assertFalse(v.status());
+            assertEquals(member.getNickname(), v.writer());
+            assertFalse(v.status());
         });
     }
 
@@ -337,11 +339,11 @@ public class ProductReviewRepositoryTest {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(productName, "product", 1);
         List<AdminReviewDTO> result = productReviewRepository.findAllByAdminReviewList(pageDTO, AdminListType.NEW.name());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.isEmpty());
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
         result.forEach(v -> {
-            Assertions.assertTrue(v.productName().contains(productName));
-            Assertions.assertFalse(v.status());
+            assertTrue(v.productName().contains(productName));
+            assertFalse(v.status());
         });
     }
 
@@ -351,8 +353,8 @@ public class ProductReviewRepositoryTest {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO("fakeUser", "user", 1);
         List<AdminReviewDTO> result = productReviewRepository.findAllByAdminReviewList(pageDTO, AdminListType.NEW.name());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.isEmpty());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -361,8 +363,8 @@ public class ProductReviewRepositoryTest {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO("fakeProduct", "user", 1);
         List<AdminReviewDTO> result = productReviewRepository.findAllByAdminReviewList(pageDTO, AdminListType.NEW.name());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.isEmpty());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -371,8 +373,8 @@ public class ProductReviewRepositoryTest {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(null, null, 1);
         Long result = productReviewRepository.countByAdminReviewList(pageDTO, AdminListType.ALL.name());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(allProductReviewList.size(), result);
+        assertNotNull(result);
+        assertEquals(allProductReviewList.size(), result);
     }
 
     @Test
@@ -382,8 +384,8 @@ public class ProductReviewRepositoryTest {
         Long result = productReviewRepository.countByAdminReviewList(pageDTO, AdminListType.ALL.name());
         Long count = allProductReviewList.stream().filter(v -> v.getMember().getNickname().equals(member.getNickname())).count();
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(result, count);
+        assertNotNull(result);
+        assertEquals(result, count);
     }
 
     @Test
@@ -392,8 +394,8 @@ public class ProductReviewRepositoryTest {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO("fakeUser", "user", 1);
         Long result = productReviewRepository.countByAdminReviewList(pageDTO, AdminListType.ALL.name());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(0L, result);
+        assertNotNull(result);
+        assertEquals(0L, result);
     }
 
     @Test
@@ -404,8 +406,8 @@ public class ProductReviewRepositoryTest {
         Long result = productReviewRepository.countByAdminReviewList(pageDTO, AdminListType.ALL.name());
         Long count = allProductReviewList.stream().filter(v -> v.getProduct().getProductName().contains(productName)).count();
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(count, result);
+        assertNotNull(result);
+        assertEquals(count, result);
     }
 
     @Test
@@ -414,8 +416,8 @@ public class ProductReviewRepositoryTest {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO("fakeProductId", "product", 1);
         Long result = productReviewRepository.countByAdminReviewList(pageDTO, AdminListType.ALL.name());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(0L, result);
+        assertNotNull(result);
+        assertEquals(0L, result);
     }
 
     @Test
@@ -424,8 +426,8 @@ public class ProductReviewRepositoryTest {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO(null, null, 1);
         Long result = productReviewRepository.countByAdminReviewList(pageDTO, AdminListType.NEW.name());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(newProductReviewList.size(), result);
+        assertNotNull(result);
+        assertEquals(newProductReviewList.size(), result);
     }
 
     @Test
@@ -435,8 +437,8 @@ public class ProductReviewRepositoryTest {
         Long result = productReviewRepository.countByAdminReviewList(pageDTO, AdminListType.NEW.name());
         Long count = newProductReviewList.stream().filter(v -> v.getMember().getNickname().equals(member.getNickname())).count();
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(count, result);
+        assertNotNull(result);
+        assertEquals(count, result);
     }
 
     @Test
@@ -445,8 +447,8 @@ public class ProductReviewRepositoryTest {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO("fakeUser", "user", 1);
         Long result = productReviewRepository.countByAdminReviewList(pageDTO, AdminListType.NEW.name());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(0L, result);
+        assertNotNull(result);
+        assertEquals(0L, result);
     }
 
     @Test
@@ -457,8 +459,8 @@ public class ProductReviewRepositoryTest {
         Long result = productReviewRepository.countByAdminReviewList(pageDTO, AdminListType.NEW.name());
         Long count = newProductReviewList.stream().filter(v -> v.getProduct().getProductName().contains(productName)).count();
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(count, result);
+        assertNotNull(result);
+        assertEquals(count, result);
     }
 
     @Test
@@ -467,8 +469,8 @@ public class ProductReviewRepositoryTest {
         AdminOrderPageDTO pageDTO = new AdminOrderPageDTO("fakeProduct", "product", 1);
         Long result = productReviewRepository.countByAdminReviewList(pageDTO, AdminListType.NEW.name());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(0L, result);
+        assertNotNull(result);
+        assertEquals(0L, result);
     }
 
     @Test
@@ -484,14 +486,14 @@ public class ProductReviewRepositoryTest {
 
         AdminReviewDetailDTO result = productReviewRepository.findByAdminReviewDetail(productReview.getId());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(productReview.getId(), result.reviewId());
-        Assertions.assertEquals(productReview.getProduct().getProductName(), result.productName());
-        Assertions.assertEquals(productReview.getProductOption().getSize(), result.size());
-        Assertions.assertEquals(productReview.getProductOption().getColor(), result.color());
-        Assertions.assertEquals(productReview.getMember().getNickname(), result.writer());
-        Assertions.assertEquals(productReview.getReviewContent(), result.content());
-        Assertions.assertEquals(productReviewReply.getReplyContent(), result.replyContent());
+        assertNotNull(result);
+        assertEquals(productReview.getId(), result.reviewId());
+        assertEquals(productReview.getProduct().getProductName(), result.productName());
+        assertEquals(productReview.getProductOption().getSize(), result.size());
+        assertEquals(productReview.getProductOption().getColor(), result.color());
+        assertEquals(productReview.getMember().getNickname(), result.writer());
+        assertEquals(productReview.getReviewContent(), result.content());
+        assertEquals(productReviewReply.getReplyContent(), result.replyContent());
     }
 
     @Test
@@ -499,6 +501,6 @@ public class ProductReviewRepositoryTest {
     void findByAdminReviewDetailEmpty() {
         AdminReviewDetailDTO result = productReviewRepository.findByAdminReviewDetail(Long.MAX_VALUE);
 
-        Assertions.assertNull(result);
+        assertNull(result);
     }
 }

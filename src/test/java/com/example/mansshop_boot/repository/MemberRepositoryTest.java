@@ -7,7 +7,6 @@ import com.example.mansshop_boot.domain.dto.admin.out.AdminMemberDTO;
 import com.example.mansshop_boot.domain.dto.member.business.UserSearchDTO;
 import com.example.mansshop_boot.domain.dto.member.business.UserSearchPwDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
-import com.example.mansshop_boot.domain.entity.Auth;
 import com.example.mansshop_boot.domain.entity.Member;
 import com.example.mansshop_boot.repository.auth.AuthRepository;
 import com.example.mansshop_boot.repository.member.MemberRepository;
@@ -19,10 +18,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
@@ -61,8 +61,8 @@ public class MemberRepositoryTest {
 
         Member result = memberRepository.findByNickname(member.getNickname());
         System.out.println("test createdAt : " + result.getCreatedAt());
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(member.getNickname(), result.getNickname());
+        assertNotNull(result);
+        assertEquals(member.getNickname(), result.getNickname());
     }
 
     @Test
@@ -72,11 +72,11 @@ public class MemberRepositoryTest {
 
         Member result = memberRepository.findByLocalUserId(member.getUserId());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(member.getUserId(), result.getUserId());
-        Assertions.assertEquals(member.getUserName(), result.getUserName());
-        Assertions.assertNotNull(result.getAuths());
-        Assertions.assertEquals(1, result.getAuths().size());
+        assertNotNull(result);
+        assertEquals(member.getUserId(), result.getUserId());
+        assertEquals(member.getUserName(), result.getUserName());
+        assertNotNull(result.getAuths());
+        assertEquals(1, result.getAuths().size());
     }
 
     @Test
@@ -84,10 +84,10 @@ public class MemberRepositoryTest {
     void findByLocalUserIdToAdmin() {
         Member result = memberRepository.findByLocalUserId(admin.getUserId());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(admin.getUserId(), result.getUserId());
-        Assertions.assertEquals(admin.getUserName(), result.getUserName());
-        Assertions.assertEquals(3, result.getAuths().size());
+        assertNotNull(result);
+        assertEquals(admin.getUserId(), result.getUserId());
+        assertEquals(admin.getUserName(), result.getUserName());
+        assertEquals(3, result.getAuths().size());
     }
 
     @Test
@@ -100,9 +100,9 @@ public class MemberRepositoryTest {
 
         Page<AdminMemberDTO> result = memberRepository.findMember(pageDTO, pageable);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(memberList.size() + 1, result.getTotalElements());
-        Assertions.assertEquals(memberList.size() + 1, result.getContent().size());
+        assertNotNull(result);
+        assertEquals(memberList.size() + 1, result.getTotalElements());
+        assertEquals(memberList.size() + 1, result.getContent().size());
     }
 
     @Test
@@ -112,8 +112,8 @@ public class MemberRepositoryTest {
         UserSearchDTO searchDTO = new UserSearchDTO(member.getUserName(), member.getPhone(), null);
         String result = memberRepository.searchId(searchDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(member.getUserId(), result);
+        assertNotNull(result);
+        assertEquals(member.getUserId(), result);
     }
 
     @Test
@@ -123,8 +123,8 @@ public class MemberRepositoryTest {
         UserSearchDTO searchDTO = new UserSearchDTO(member.getUserName(), null, member.getUserEmail());
         String result = memberRepository.searchId(searchDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(member.getUserId(), result);
+        assertNotNull(result);
+        assertEquals(member.getUserId(), result);
     }
 
     @Test
@@ -134,7 +134,7 @@ public class MemberRepositoryTest {
         UserSearchDTO searchDTO = new UserSearchDTO(member.getUserName(), "010-0000-0000", null);
         String result = memberRepository.searchId(searchDTO);
 
-        Assertions.assertNull(result);
+        assertNull(result);
     }
 
     @Test
@@ -144,7 +144,7 @@ public class MemberRepositoryTest {
         UserSearchDTO searchDTO = new UserSearchDTO(member.getUserName(), null, "fail@fail.com");
         String result = memberRepository.searchId(searchDTO);
 
-        Assertions.assertNull(result);
+        assertNull(result);
     }
 
     @Test
@@ -154,7 +154,7 @@ public class MemberRepositoryTest {
         UserSearchPwDTO searchPwDTO = new UserSearchPwDTO(member.getUserId(), member.getUserName(), member.getUserEmail());
         Long result = memberRepository.findByPassword(searchPwDTO);
 
-        Assertions.assertEquals(1L, result);
+        assertEquals(1L, result);
     }
 
     @Test
@@ -164,8 +164,8 @@ public class MemberRepositoryTest {
         UserSearchPwDTO searchPwDTO = new UserSearchPwDTO(member.getUserId(), member.getUserName(), "fail@fail.com");
         Long result = memberRepository.findByPassword(searchPwDTO);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(0L, result);
+        assertNotNull(result);
+        assertEquals(0L, result);
     }
 
 

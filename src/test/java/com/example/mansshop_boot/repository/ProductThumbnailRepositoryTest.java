@@ -18,6 +18,8 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
@@ -58,8 +60,8 @@ public class ProductThumbnailRepositoryTest {
     void findByProductId() {
         List<String> result = productThumbnailRepository.findByProductId(product.getId());
         List<String> thumbnailNameList = product.getProductThumbnails().stream().map(ProductThumbnail::getImageName).toList();
-        Assertions.assertNotNull(result);
-        result.forEach(v -> Assertions.assertTrue(thumbnailNameList.contains(v)));
+        assertNotNull(result);
+        result.forEach(v -> assertTrue(thumbnailNameList.contains(v)));
     }
 
     @Test
@@ -67,10 +69,10 @@ public class ProductThumbnailRepositoryTest {
     void deleteByImageName() {
         List<String> thumbnailNameList = product.getProductThumbnails().stream().map(ProductThumbnail::getImageName).toList();
 
-        Assertions.assertDoesNotThrow(() -> productThumbnailRepository.deleteByImageName(thumbnailNameList));
+        assertDoesNotThrow(() -> productThumbnailRepository.deleteByImageName(thumbnailNameList));
         List<String> result = productThumbnailRepository.findByProductId(product.getId());
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.isEmpty());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 }
