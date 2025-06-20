@@ -51,6 +51,13 @@ import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
 
+/**
+ * OrderService.retryFailedOrder()의 경우
+ * AdminFailedDataService에서 재시도를 위해 호출하는 메서드이기 때문에
+ * 이 테스트 클래스에서는 제외.
+ * DLQ 메시지를 재시도하는 처리이기도 하고,
+ * DLQ 재처리 테스트 자체를 수동으로 수행하는 것이 더 효율적이라고 판단해 테스트 클래스를 작성하지 않음.
+ */
 @SpringBootTest(classes = MansShopBootApplication.class)
 @EnableJpaRepositories(basePackages = "com.example")
 @ActiveProfiles("test")
