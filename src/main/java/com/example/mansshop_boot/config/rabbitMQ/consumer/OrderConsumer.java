@@ -5,6 +5,7 @@ import com.example.mansshop_boot.domain.dto.order.in.OrderProductDTO;
 import com.example.mansshop_boot.domain.entity.*;
 import com.example.mansshop_boot.repository.cart.CartDetailRepository;
 import com.example.mansshop_boot.repository.cart.CartRepository;
+import com.example.mansshop_boot.repository.classification.ClassificationRepository;
 import com.example.mansshop_boot.repository.periodSales.PeriodSalesSummaryRepository;
 import com.example.mansshop_boot.repository.product.ProductOptionRepository;
 import com.example.mansshop_boot.repository.product.ProductRepository;
@@ -91,7 +92,6 @@ public class OrderConsumer {
      */
     @RabbitListener(queues = "${rabbitmq.queue.orderProductOption.name}", concurrency = "1")
     public void consumeOrderProductOption(OrderProductMessageDTO messageDTO) {
-
         productOptionRepository.patchOrderStock(messageDTO.getOrderProductList());
     }
 
@@ -108,7 +108,6 @@ public class OrderConsumer {
      */
     @RabbitListener(queues = "${rabbitmq.queue.periodSalesSummary.name}", concurrency = "1")
     public void consumePeriodSalesSummary(PeriodSummaryQueueDTO dto) {
-
         PeriodSalesSummary entity = periodSalesSummaryRepository.findByPeriod(dto.getPeriod());
 
         if(entity != null)
@@ -137,11 +136,10 @@ public class OrderConsumer {
     @RabbitListener(queues = "${rabbitmq.queue.productSalesSummary.name}", concurrency = "1")
     public void consumeProductSalesSummary(OrderProductSummaryDTO productSummaryDTO) {
         List<ProductSalesSummary> summaryEntities = productSalesSummaryRepository.findAllByProductOptionIds(productSummaryDTO.getPeriodMonth(), productSummaryDTO.getProductOptionIds());
-
         if(summaryEntities.size() == productSummaryDTO.getOrderProductDTOList().size()) {
             //둘의 사이즈가 같다는 것은 해당 상품에 대한 데이터가 이미 들어가 있다는 말이 되므로 기존 엔티티 수정만 처리.
             patchProductSalesSummaryList(summaryEntities, productSummaryDTO.getOrderProductDTOList());
-        }else if (summaryEntities.size() == 0){
+        }else if (summaryEntities.isEmpty()){
             createProductSummaryList(summaryEntities, productSummaryDTO.getOrderProductDTOList(), productSummaryDTO.getProductIds(), productSummaryDTO.getPeriodMonth());
         }else {
             //기존 엔티티 수정 처리 후 새로운 데이터에 대한 삽입을 처리하기 위해 productIds를 만든다.
@@ -186,7 +184,6 @@ public class OrderConsumer {
             if(!productIds.isEmpty())
                 createProductSummaryList(summaryEntities, remainDTO, productIds, productSummaryDTO.getPeriodMonth());
         }
-
         productSalesSummaryRepository.saveAll(summaryEntities);
     }
 
@@ -226,7 +223,6 @@ public class OrderConsumer {
                                            List<String> productIds,
                                            LocalDate periodMonth) {
         List<ProductIdClassificationDTO> searchDTO = productRepository.findClassificationAllByProductIds(productIds);
-
         for(OrderProductDTO dto : requestDTO) {
             String productId = dto.getProductId();
 

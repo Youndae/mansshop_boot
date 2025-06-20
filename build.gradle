@@ -72,6 +72,9 @@ dependencies {
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
 
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+    // https://mvnrepository.com/artifact/org.awaitility/awaitility
+    testImplementation("org.awaitility:awaitility:4.2.0")
 }
 
 tasks.named('test') {

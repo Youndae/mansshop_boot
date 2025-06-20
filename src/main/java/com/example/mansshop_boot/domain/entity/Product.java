@@ -113,21 +113,4 @@ public class Product {
         this.isOpen = patchDTO.getIsOpen();
         this.productDiscount = patchDTO.getDiscount();
     }
-
-    @Override
-    public String toString() {
-        return "Product{" +
-                "id='" + id + '\'' +
-                ", classification=" + classification +
-                ", productName='" + productName + '\'' +
-                ", productPrice=" + productPrice +
-                ", thumbnail='" + thumbnail + '\'' +
-                ", isOpen=" + isOpen +
-                ", productSalesQuantity=" + productSalesQuantity +
-                ", productDiscount=" + productDiscount +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                ", totalStock=" + productOptions.stream().mapToInt(ProductOption::getStock).sum() +
-                '}';
-    }
 }

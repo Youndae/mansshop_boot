@@ -2,10 +2,7 @@ package com.example.mansshop_boot.domain.entity;
 
 import com.example.mansshop_boot.domain.dto.order.business.PeriodSummaryQueueDTO;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
@@ -16,6 +13,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "periodSalesSummary")
+@ToString
 public class PeriodSalesSummary {
 
     @Id

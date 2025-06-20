@@ -231,6 +231,16 @@ public class OrderServiceImpl implements OrderService{
         return new ProductOrderDataDTO(productOrder, orderProductList, orderProductIds, orderOptionIds);
     }
 
+	/**
+	 *
+	 * @param optionIdAndCountDTO
+	 * @param request
+	 * @param response
+	 * @param principal
+	 *
+	 * 상품 상세 페이지에서 주문 요청 시 상품 정보 조회.
+	 * 상품 정보 및 가격, 주문 토큰 생성 및 반환
+	 */
     @Override
     public OrderDataResponseDTO getProductOrderData(List<OrderProductRequestDTO> optionIdAndCountDTO, 
 													HttpServletRequest request, 
@@ -249,6 +259,16 @@ public class OrderServiceImpl implements OrderService{
         return responseDTO;
     }
 
+	/**
+	 *
+	 * @param cartDetailIds
+	 * @param cartMemberDTO
+	 * @param request
+	 * @param response
+	 *
+	 * 장바구니에서 주문 요청시 상품 정보 조회.
+	 * 상품 정보 및 가격, 주문 토큰 생성 및 반환
+	 */
     @Override
     public OrderDataResponseDTO getCartOrderData(List<Long> cartDetailIds, 
 												CartMemberDTO cartMemberDTO, 
@@ -327,7 +347,15 @@ public class OrderServiceImpl implements OrderService{
 		orderRedisTemplate.delete(token);
 	}
 
-	// 결제 API 호출 전 데이터 검증
+	/**
+	 *
+	 * @param requestDTO
+	 * @param principal
+	 * @param request
+	 * @param response
+	 *
+	 * 결제 API 호출 직전 데이터 검증
+	 */
 	@Override
 	public ResponseMessageDTO validateOrder(OrderDataResponseDTO requestDTO, 
 											Principal principal, 
