@@ -27,6 +27,7 @@ import org.springframework.web.util.WebUtils;
 import java.security.Principal;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -67,7 +68,7 @@ public class CartServiceImpl implements CartService{
         Long userCartId = cartRepository.findIdByUserId(cartMemberDTO);
 
         if(userCartId == null)
-            return null;
+            return Collections.emptyList();
 
         return cartDetailRepository.findAllByCartId(userCartId);
     }
@@ -188,6 +189,10 @@ public class CartServiceImpl implements CartService{
             throw new CustomNotFoundException(ErrorCode.NOT_FOUND, ErrorCode.NOT_FOUND.getMessage());
 
         CartDetail cartDetail = cartDetailRepository.findById(cartDetailId).orElseThrow(IllegalArgumentException::new);
+
+        if(!cart.getId().equals(cartDetail.getCart().getId()))
+            throw new IllegalArgumentException("cart and cartDetail ids do not match");
+
         cartDetail.countUpDown("up");
 
         cartDetailRepository.save(cartDetail);
@@ -211,6 +216,11 @@ public class CartServiceImpl implements CartService{
             throw new CustomNotFoundException(ErrorCode.NOT_FOUND, ErrorCode.NOT_FOUND.getMessage());
 
         CartDetail cartDetail = cartDetailRepository.findById(cartDetailId).orElseThrow(IllegalArgumentException::new);
+
+        if(!cart.getId().equals(cartDetail.getCart().getId())) {
+            throw new IllegalArgumentException("cart and cartDetail ids do not match");
+        }
+
         cartDetail.countUpDown("down");
 
         cartDetailRepository.save(cartDetail);
@@ -245,7 +255,8 @@ public class CartServiceImpl implements CartService{
         if(detailIds.size() == deleteCartDetailId.size())
             cartRepository.deleteById(cartId);
         else
-            cartDetailRepository.deleteAllById(deleteCartDetailId);
+            cartDetailRepository.deleteAllByIdInBatch(deleteCartDetailId);
+
 
         return Result.OK.getResultKey();
     }

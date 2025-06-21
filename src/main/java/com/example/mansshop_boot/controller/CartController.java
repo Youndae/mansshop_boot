@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -49,8 +50,10 @@ public class CartController {
                                                                       Principal principal) {
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
 
-        if(cartMemberDTO.uid().equals("Anonymous") && cartMemberDTO.cartCookieValue() == null)
-            return ResponseEntity.status(HttpStatus.OK).body(null);
+        if(cartMemberDTO.uid().equals("Anonymous") && cartMemberDTO.cartCookieValue() == null) {
+            System.out.println("return null");
+            return ResponseEntity.status(HttpStatus.OK).body(Collections.emptyList());
+        }
 
         List<CartDetailDTO> responseDTO = cartService.getCartList(cartMemberDTO);
 

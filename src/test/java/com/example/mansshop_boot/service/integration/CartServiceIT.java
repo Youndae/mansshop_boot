@@ -66,9 +66,6 @@ public class CartServiceIT {
     private ProductOptionRepository productOptionRepository;
 
     @Autowired
-    private ProductThumbnailRepository productThumbnailRepository;
-
-    @Autowired
     private CartRepository cartRepository;
 
     @Autowired
@@ -115,11 +112,9 @@ public class CartServiceIT {
 
         productList = ProductFixture.createSaveProductList(10, classificationList.get(0));
         optionList = productList.stream().flatMap(v -> v.getProductOptions().stream()).toList();
-        List<ProductThumbnail> thumbnailList = productList.stream().flatMap(v -> v.getProductThumbnails().stream()).toList();
 
         productRepository.saveAll(productList);
         productOptionRepository.saveAll(optionList);
-        productThumbnailRepository.saveAll(thumbnailList);
 
         cartList = CartFixture.createDefaultMemberCart(memberList, optionList);
         anonymousCart = CartFixture.createSaveAnonymousCart(optionList.get(0), anonymous, ANONYMOUS_CART_COOKIE);
@@ -217,7 +212,8 @@ public class CartServiceIT {
 
         List<CartDetailDTO> result = assertDoesNotThrow(() -> cartService.getCartList(cartMemberDTO));
 
-        assertNull(result);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test

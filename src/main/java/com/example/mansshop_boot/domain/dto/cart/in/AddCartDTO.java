@@ -11,7 +11,5 @@ public record AddCartDTO(
         Long optionId,
         @Schema(name = "count", description = "상품 개수")
         int count
-        /*, int price
-        , List<AddCartDTO> addList*/
 ) {
 }

@@ -108,7 +108,7 @@ public class MainControllerIT {
 
         List<MainListResponseDTO> response = om.readValue(
                 content,
-                new TypeReference<List<MainListResponseDTO>>() {}
+                new TypeReference<>() {}
         );
 
         assertFalse(response.isEmpty());
@@ -143,7 +143,7 @@ public class MainControllerIT {
 
         List<MainListResponseDTO> response = om.readValue(
                 content,
-                new TypeReference<List<MainListResponseDTO>>() {}
+                new TypeReference<>() {}
         );
 
         assertTrue(response.isEmpty());
@@ -160,7 +160,7 @@ public class MainControllerIT {
 
         List<MainListResponseDTO> response = om.readValue(
                 content,
-                new TypeReference<List<MainListResponseDTO>>() {}
+                new TypeReference<>() {}
         );
 
         assertFalse(response.isEmpty());
@@ -179,7 +179,7 @@ public class MainControllerIT {
 
         List<MainListResponseDTO> response = om.readValue(
                 content,
-                new TypeReference<List<MainListResponseDTO>>() {}
+                new TypeReference<>() {}
         );
 
         assertTrue(response.isEmpty());
@@ -202,7 +202,7 @@ public class MainControllerIT {
 
         PagingResponseDTO<MainListResponseDTO> response = om.readValue(
                 content,
-                new TypeReference<PagingResponseDTO<MainListResponseDTO>>() {}
+                new TypeReference<>() {}
         );
 
         assertFalse(response.content().isEmpty());
@@ -225,7 +225,7 @@ public class MainControllerIT {
 
         PagingResponseDTO<MainListResponseDTO> response = om.readValue(
                 content,
-                new TypeReference<PagingResponseDTO<MainListResponseDTO>>() {}
+                new TypeReference<>() {}
         );
 
         assertTrue(response.content().isEmpty());
@@ -247,13 +247,20 @@ public class MainControllerIT {
 
         PagingResponseDTO<MainListResponseDTO> response = om.readValue(
                 content,
-                new TypeReference<PagingResponseDTO<MainListResponseDTO>>() {}
+                new TypeReference<>() {}
         );
 
         assertFalse(response.content().isEmpty());
         assertFalse(response.empty());
         assertEquals(1, response.content().size());
         assertEquals(1, response.totalPages());
+
+        MainListResponseDTO responseDTO = response.content().get(0);
+        assertEquals(fixture.getId(), responseDTO.productId());
+        assertEquals(fixture.getProductName(), responseDTO.productName());
+        assertEquals(fixture.getThumbnail(), responseDTO.thumbnail());
+        assertEquals(fixture.getProductPrice(), responseDTO.originPrice());
+        assertEquals(fixture.getProductDiscount(), responseDTO.discount());
     }
 
     @Test
@@ -269,7 +276,7 @@ public class MainControllerIT {
 
         PagingResponseDTO<MainListResponseDTO> response = om.readValue(
                 content,
-                new TypeReference<PagingResponseDTO<MainListResponseDTO>>() {}
+                new TypeReference<>() {}
         );
 
         assertTrue(response.content().isEmpty());
@@ -305,7 +312,7 @@ public class MainControllerIT {
 
         PagingResponseDTO<MainListResponseDTO> response = om.readValue(
                 content,
-                new TypeReference<PagingResponseDTO<MainListResponseDTO>>() {}
+                new TypeReference<>() {}
         );
 
         assertFalse(response.content().isEmpty());
@@ -329,7 +336,7 @@ public class MainControllerIT {
 
         PagingResponseDTO<MainListResponseDTO> response = om.readValue(
                 content,
-                new TypeReference<PagingResponseDTO<MainListResponseDTO>>() {}
+                new TypeReference<>() {}
         );
 
         assertTrue(response.content().isEmpty());
