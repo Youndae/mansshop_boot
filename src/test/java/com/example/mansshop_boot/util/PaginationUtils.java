@@ -1,6 +1,4 @@
-package com.example.mansshop_boot.Fixture.util;
-
-import java.util.List;
+package com.example.mansshop_boot.util;
 
 public class PaginationUtils {
 

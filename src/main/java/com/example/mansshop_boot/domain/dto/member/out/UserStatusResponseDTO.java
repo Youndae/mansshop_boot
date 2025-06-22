@@ -2,13 +2,16 @@ package com.example.mansshop_boot.domain.dto.member.out;
 
 import com.example.mansshop_boot.auth.user.CustomUser;
 import com.example.mansshop_boot.domain.enumeration.Role;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
 
 @Getter
+@AllArgsConstructor
 public class UserStatusResponseDTO {
 
     private final String userId;

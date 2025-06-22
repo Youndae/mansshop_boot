@@ -3,9 +3,8 @@ package com.example.mansshop_boot.service.integration;
 import com.example.mansshop_boot.Fixture.ClassificationFixture;
 import com.example.mansshop_boot.Fixture.PageDTOFixture;
 import com.example.mansshop_boot.Fixture.ProductFixture;
-import com.example.mansshop_boot.Fixture.util.PaginationUtils;
+import com.example.mansshop_boot.util.PaginationUtils;
 import com.example.mansshop_boot.MansShopBootApplication;
-import com.example.mansshop_boot.domain.dto.main.business.MainListDTO;
 import com.example.mansshop_boot.domain.dto.main.out.MainListResponseDTO;
 import com.example.mansshop_boot.domain.dto.pageable.MainPageDTO;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
@@ -16,7 +15,6 @@ import com.example.mansshop_boot.repository.classification.ClassificationReposit
 import com.example.mansshop_boot.repository.product.ProductOptionRepository;
 import com.example.mansshop_boot.repository.product.ProductRepository;
 import com.example.mansshop_boot.service.MainService;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

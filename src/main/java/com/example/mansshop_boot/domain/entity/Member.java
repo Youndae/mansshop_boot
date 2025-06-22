@@ -19,6 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @EqualsAndHashCode
 @Table(name = "member")
+@ToString
 public class Member {
 
     @Id

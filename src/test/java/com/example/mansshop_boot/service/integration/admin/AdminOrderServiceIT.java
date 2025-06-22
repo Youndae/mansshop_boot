@@ -2,7 +2,7 @@ package com.example.mansshop_boot.service.integration.admin;
 
 import com.example.mansshop_boot.Fixture.*;
 import com.example.mansshop_boot.Fixture.domain.member.MemberAndAuthFixtureDTO;
-import com.example.mansshop_boot.Fixture.util.PaginationUtils;
+import com.example.mansshop_boot.util.PaginationUtils;
 import com.example.mansshop_boot.MansShopBootApplication;
 import com.example.mansshop_boot.domain.dto.admin.out.AdminOrderResponseDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;

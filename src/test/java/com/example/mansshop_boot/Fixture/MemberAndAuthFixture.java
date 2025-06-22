@@ -21,29 +21,49 @@ public class MemberAndAuthFixture {
         List<Auth> authList = new ArrayList<>();
         for(int i = 0; i < count; i++) {
             String userId = "tester" + i;
-            memberList.add(createMember(userId));
-            authList.add(createAuthByAuth(userId, MEMBER_AUTH));
+            Member member = createMember(userId);
+            Auth auth = createAuthByAuth(userId, MEMBER_AUTH);
+            member.addMemberAuth(auth);
+
+            memberList.add(member);
+            authList.add(auth);
         }
 
         return new MemberAndAuthFixtureDTO(memberList, authList);
     }
 
+    public static MemberAndAuthFixtureDTO createGoogleOAuth() {
+        String userId = "googleOAuthUser";
+        Member member = createMember(userId, "google");
+        Auth auth = createAuthByAuth(userId, MEMBER_AUTH);
+        member.addMemberAuth(auth);
+        List<Member> memberList = List.of(member);
+        List<Auth> auths = List.of(auth);
+
+        return new MemberAndAuthFixtureDTO(memberList, auths);
+    }
+
     public static MemberAndAuthFixtureDTO createAdmin() {
         String userId = "admin";
-        List<Member> admin = List.of(createMember(userId));
+        Member member = createMember(userId);
         List<Auth> auths = List.of(
                 createAuthByAuth(userId, MEMBER_AUTH),
                 createAuthByAuth(userId, MANAGER_AUTH),
                 createAuthByAuth(userId, ADMIN_AUTH)
         );
+        auths.forEach(member::addMemberAuth);
+        List<Member> admin = List.of(member);
 
         return new MemberAndAuthFixtureDTO(admin, auths);
     }
 
     public static MemberAndAuthFixtureDTO createAnonymous() {
         String userId = "Anonymous";
-        List<Member> anonymous = List.of(createMember(userId));
-        List<Auth> auths = List.of(createAuthByAuth(userId, MEMBER_AUTH));
+        Member member = createMember(userId);
+        Auth auth = createAuthByAuth(userId, MEMBER_AUTH);
+        member.addMemberAuth(auth);
+        List<Member> anonymous = List.of(member);
+        List<Auth> auths = List.of(auth);
 
         return new MemberAndAuthFixtureDTO(anonymous, auths);
     }
@@ -57,6 +77,19 @@ public class MemberAndAuthFixture {
                 .nickname(userId + "nickname")
                 .userEmail(userId + "@" + userId + ".com")
                 .provider("local")
+                .phone("01012341234")
+                .birth(LocalDate.now())
+                .build();
+    }
+
+    private static Member createMember(String userId, String provider) {
+        return Member.builder()
+                .userId(userId)
+                .userPw("1234")
+                .userName(userId + "Name")
+                .nickname(userId + "nickname")
+                .userEmail(userId + "@" + userId + ".com")
+                .provider(provider)
                 .phone("01012341234")
                 .birth(LocalDate.now())
                 .build();

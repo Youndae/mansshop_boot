@@ -102,9 +102,6 @@ public class CartControllerIT {
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
-    @Autowired
-    private EntityManager em;
-
     private String accessTokenValue;
 
     private String refreshTokenValue;

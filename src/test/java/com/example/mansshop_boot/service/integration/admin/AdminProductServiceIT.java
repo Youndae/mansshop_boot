@@ -3,7 +3,7 @@ package com.example.mansshop_boot.service.integration.admin;
 import com.example.mansshop_boot.Fixture.AdminPageDTOFixture;
 import com.example.mansshop_boot.Fixture.ClassificationFixture;
 import com.example.mansshop_boot.Fixture.ProductFixture;
-import com.example.mansshop_boot.Fixture.util.PaginationUtils;
+import com.example.mansshop_boot.util.PaginationUtils;
 import com.example.mansshop_boot.MansShopBootApplication;
 import com.example.mansshop_boot.domain.dto.admin.business.PatchOptionDTO;
 import com.example.mansshop_boot.domain.dto.admin.in.AdminDiscountPatchDTO;

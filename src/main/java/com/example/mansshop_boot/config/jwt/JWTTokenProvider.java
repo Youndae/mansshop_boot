@@ -441,7 +441,6 @@ public class JWTTokenProvider {
 
         saveTokenToRedis(userId, temporaryToken, Duration.ofMinutes(temporaryRedisExpiration));
         setTokenCookie(temporaryHeader, temporaryToken, Duration.ofMinutes(temporaryRedisExpiration), response);
-
     }
 
     /**

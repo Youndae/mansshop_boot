@@ -169,7 +169,7 @@ public class MemberController {
     @Operation(summary = "회원가입 과정 중 아이디 중복 체크 요청")
     @ApiResponse(responseCode = "200", description = "사용 가능한 경우 No Duplicated, 중복인 경우 Duplicated 반환")
     @Parameter(name = "userId",
-            example = "testerrr1",
+            example = "tester1",
             required = true,
             in = ParameterIn.QUERY
     )
@@ -187,9 +187,10 @@ public class MemberController {
      * @param nickname
      * @param principal
      *
-     * 회원가입 중 닉네임 중복 체크
+     * 닉네임 중복 체크
+     * 회원 가입 시 또는 회원 정보 수정 시.
      */
-    @Operation(summary = "회원가입 과정 중 아이디 중복 체크 요청")
+    @Operation(summary = "닉네임 중복 체크 요청")
     @ApiResponse(responseCode = "200", description = "사용 가능한 경우 No Duplicated, 중복인 경우 Duplicated 반환")
     @Parameter(name = "nickname",
             example = "테스터1",

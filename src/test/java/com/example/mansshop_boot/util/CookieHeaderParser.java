@@ -1,4 +1,4 @@
-package com.example.mansshop_boot.service.util;
+package com.example.mansshop_boot.util;
 
 import java.util.HashMap;
 import java.util.Map;

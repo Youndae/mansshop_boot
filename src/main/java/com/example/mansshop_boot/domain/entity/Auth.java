@@ -42,4 +42,13 @@ public class Auth {
         this.member = member;
         this.auth = auth;
     }
+
+    @Override
+    public String toString() {
+        return "Auth{" +
+                "id=" + id +
+                ", userId=" + member.getUserId() +
+                ", auth='" + auth + '\'' +
+                '}';
+    }
 }
