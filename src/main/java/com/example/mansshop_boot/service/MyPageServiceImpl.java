@@ -24,6 +24,7 @@ import com.example.mansshop_boot.domain.dto.pageable.PagingMappingDTO;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
 import com.example.mansshop_boot.domain.entity.*;
 import com.example.mansshop_boot.domain.enumeration.MailSuffix;
+import com.example.mansshop_boot.domain.enumeration.OrderStatus;
 import com.example.mansshop_boot.domain.enumeration.Result;
 import com.example.mansshop_boot.repository.member.MemberRepository;
 import com.example.mansshop_boot.repository.memberQnA.MemberQnAReplyRepository;
@@ -494,6 +495,11 @@ public class MyPageServiceImpl implements MyPageService{
         Product product = productRepository.findById(reviewDTO.productId()).orElseThrow(IllegalArgumentException::new);
         ProductOption productOption = productOptionRepository.findById(reviewDTO.optionId()).orElseThrow(IllegalArgumentException::new);
         ProductOrderDetail productOrderDetail = productOrderDetailRepository.findById(reviewDTO.detailId()).orElseThrow(IllegalArgumentException::new);
+
+        if(!productOrderDetail.getProductOrder().getOrderStat().equals(OrderStatus.COMPLETE.getStatusStr())
+                || productOrderDetail.isOrderReviewStatus())
+            throw new IllegalArgumentException("OrderStatus Not complete or reviewStatus is true");
+
         ProductReview productReview = ProductReview.builder()
                                                     .member(member)
                                                     .product(product)

@@ -331,7 +331,7 @@ public class MyPageController {
     @DefaultApiResponse
     @SwaggerAuthentication
     @PatchMapping("/qna/member")
-    public ResponseEntity<ResponseMessageDTO> patchModifyData(@RequestBody MemberQnAModifyDTO modifyDTO, Principal principal) {
+    public ResponseEntity<ResponseMessageDTO> patchMemberQnA(@RequestBody MemberQnAModifyDTO modifyDTO, Principal principal) {
 
         String responseMessage = myPageService.patchMemberQnA(modifyDTO, principal);
 
