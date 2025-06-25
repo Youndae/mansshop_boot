@@ -23,9 +23,7 @@ import com.example.mansshop_boot.domain.vo.order.PreOrderDataVO;
 import com.example.mansshop_boot.repository.cart.CartDetailRepository;
 import com.example.mansshop_boot.repository.cart.CartRepository;
 import com.example.mansshop_boot.repository.product.ProductOptionRepository;
-import com.example.mansshop_boot.repository.product.ProductRepository;
 import com.example.mansshop_boot.repository.productOrder.ProductOrderRepository;
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -36,9 +34,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
@@ -67,8 +63,6 @@ public class OrderServiceImpl implements OrderService{
     private final CartRepository cartRepository;
 
     private final ProductOptionRepository productOptionRepository;
-
-    private final ProductRepository productRepository;
 
     private final RabbitTemplate rabbitTemplate;
 
@@ -104,11 +98,49 @@ public class OrderServiceImpl implements OrderService{
      */
     @Override
     @Transactional(rollbackFor = RuntimeException.class)
-    public String payment(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO) {
+    public String payment(PaymentDTO paymentDTO,
+						  CartMemberDTO cartMemberDTO,
+						  Principal principal,
+						  HttpServletRequest request,
+						  HttpServletResponse response) {
 		boolean successFlag = false;
+		ProductOrderDataDTO productOrderDataDTO = createOrderDataDTO(paymentDTO, cartMemberDTO, LocalDateTime.now());
 
 		try {
-			ProductOrderDataDTO productOrderDataDTO = createOrderDataDTO(paymentDTO, cartMemberDTO, LocalDateTime.now());
+			List<ProductOption> validateOptions = productOptionRepository.findAllById(productOrderDataDTO.orderOptionIds());
+			List<OrderDataDTO> validateDTOFieldList = new ArrayList<>();
+			for(OrderProductDTO dto : paymentDTO.orderProduct()) {
+				for(ProductOption option : validateOptions) {
+					if(dto.getOptionId() == option.getId()) {
+						validateDTOFieldList.add(
+								new OrderDataDTO(
+										dto.getProductId(),
+										dto.getOptionId(),
+										dto.getProductName(),
+										option.getSize(),
+										option.getColor(),
+										dto.getDetailCount(),
+										dto.getDetailPrice()
+								)
+						);
+
+						break;
+					}
+				}
+			}
+
+			OrderDataResponseDTO validateDTO = new OrderDataResponseDTO(validateDTOFieldList, paymentDTO.totalPrice());
+			validateOrder(validateDTO, principal, request, response);
+		}catch (Exception e) {
+			log.error("OrderService.payment :: payment Order validation Failed. cartMemberDTO : {}, submittedPaymentDTO : {}",
+					cartMemberDTO, paymentDTO);
+			throw new CustomOrderSessionExpiredException(
+					ErrorCode.ORDER_SESSION_EXPIRED,
+					ErrorCode.ORDER_SESSION_EXPIRED.getMessage()
+			);
+		}
+
+		try {
 			ProductOrder order = productOrderDataDTO.productOrder();
 
 			productOrderRepository.save(order);
@@ -249,12 +281,13 @@ public class OrderServiceImpl implements OrderService{
 
         List<OrderProductInfoDTO> orderProductInfoDTO = getOrderDataDTOList(optionIdAndCountDTO);
 
-        if(orderProductInfoDTO.isEmpty())
+        if(orderProductInfoDTO.isEmpty() || optionIdAndCountDTO.size() != orderProductInfoDTO.size())
             throw new IllegalArgumentException("product Order Data is empty");
 
         OrderDataResponseDTO responseDTO = mappingOrderResponseDTO(optionIdAndCountDTO, orderProductInfoDTO);
 		String userId = principal != null ? principal.getName() : ANONYMOUS;
-        saveOrderValidateData(responseDTO, request, response, userId);
+
+		saveOrderValidateData(responseDTO, request, response, userId);
 
         return responseDTO;
     }
@@ -274,6 +307,9 @@ public class OrderServiceImpl implements OrderService{
 												CartMemberDTO cartMemberDTO, 
 												HttpServletRequest request, 
 												HttpServletResponse response) {
+		if(cartMemberDTO.uid().equals(ANONYMOUS) && cartMemberDTO.cartCookieValue() == null)
+			throw new CustomAccessDeniedException(ErrorCode.NOT_FOUND, ErrorCode.NOT_FOUND.getMessage());
+
         List<CartDetail> cartDetails = cartDetailRepository.findAllById(cartDetailIds);
 
         if(cartDetails.isEmpty())
@@ -298,13 +334,16 @@ public class OrderServiceImpl implements OrderService{
         List<OrderProductInfoDTO> orderProductInfoDTO = getOrderDataDTOList(optionIdAndCountDTO);
 
         OrderDataResponseDTO responseDTO = mappingOrderResponseDTO(optionIdAndCountDTO, orderProductInfoDTO);
-        saveOrderValidateData(responseDTO, request, response, cartMemberDTO.uid());
+
+		String userId = cartMemberDTO.uid();
+
+        saveOrderValidateData(responseDTO, request, response, userId);
 
         return responseDTO;
     }
 
     public List<OrderProductInfoDTO> getOrderDataDTOList(List<OrderProductRequestDTO> optionIdAndCountDTO) {
-        List<Long> optionIds = optionIdAndCountDTO.stream().map(OrderProductRequestDTO::optionId).toList();
+        List<Long> optionIds = optionIdAndCountDTO.stream().mapToLong(OrderProductRequestDTO::optionId).boxed().toList();
 
         return productOptionRepository.findOrderData(optionIds);
     }
@@ -337,7 +376,7 @@ public class OrderServiceImpl implements OrderService{
 			deleteTokenData(originToken);
 
 		String orderToken = createOrderToken();
-		setOrderToken(response, orderToken);
+		setOrderTokenCookie(response, orderToken);
 		List<OrderItemVO> orderItemVOList = requestDTO.orderData().stream().map(OrderDataDTO::toOrderItemVO).toList();
 		PreOrderDataVO preOrderDataVO = new PreOrderDataVO(userId, orderItemVOList, requestDTO.totalPrice());
 		orderRedisTemplate.opsForValue().set(orderToken, preOrderDataVO, Duration.ofMinutes(10));
@@ -387,6 +426,7 @@ public class OrderServiceImpl implements OrderService{
 		if(!validateOrderData(preOrderDataVO, requestDTO, uid)){
 			try {
 				deleteOrderToken(response);
+				deleteTokenData(orderToken);
 				log.error("Order Data Validation Failed - token: {}, userId: {}, submittedData: {}, redisData: {}",
 						orderToken, uid, om.writeValueAsString(requestDTO), om.writeValueAsString(preOrderDataVO));
 			} catch (JsonProcessingException e) {
@@ -439,7 +479,7 @@ public class OrderServiceImpl implements OrderService{
 
 	//Order Token 쿠키에 저장
 	//유효기간 10분, secure, httpOnly, sameSite Strict 설정
-	private void setOrderToken(HttpServletResponse response, String orderToken) {
+	private void setOrderTokenCookie(HttpServletResponse response, String orderToken) {
 		response.addHeader(
 			"Set-Cookie",
 			createOrderTokenCookie(orderToken, Duration.ofMinutes(10))

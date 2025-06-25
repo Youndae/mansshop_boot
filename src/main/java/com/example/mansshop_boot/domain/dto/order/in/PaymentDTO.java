@@ -33,10 +33,7 @@ public record PaymentDTO(
         String paymentType,
         @Schema(name = "orderType", description = "주문 요청 방식(cart, direct)")
         @NotNull(message = "주문 요청 방식은 필수 데이터입니다.")
-        String orderType,
-        @Schema(name = "productCount", description = "상품 개수")
-        @NotNull(message = "상품 수량은 필수 데이터입니다.")
-        int productCount
+        String orderType
 ) {
 
     public ProductOrder toOrderEntity(String uid, LocalDateTime createdAt) {

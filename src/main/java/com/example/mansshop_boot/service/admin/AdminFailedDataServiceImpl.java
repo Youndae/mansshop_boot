@@ -108,32 +108,17 @@ public class AdminFailedDataServiceImpl implements AdminFailedDataService {
      * 해당 DLQ 메시지를 재시도
      */
     private void retryMessages(FailedQueueDTO dto) {
-        System.out.println("======================================================");
-        System.out.println("message dto : " + dto);
-        System.out.println("======================================================");
         for(int i = 0; i < dto.messageCount(); i++) {
             Message message = rabbitTemplate.receive(dto.queueName());
-            System.out.println("======================================================");
-            System.out.println("message : " + message);
-            System.out.println("======================================================");
             if(message != null) {
                 Object data = converter.fromMessage(message);
                 Map<String, Object> headers = message.getMessageProperties().getHeaders();
                 List<Map<String, Object>> xDeathList = (List<Map<String, Object>>) headers.get("x-death");
-                System.out.println("======================================================");
-                System.out.println("xDeathList : " + xDeathList);
-                System.out.println("======================================================");
                 if(xDeathList != null && !xDeathList.isEmpty()) {
                     Map<String, Object> xDeath = xDeathList.get(0);
                     String exchange = (String) xDeath.get("exchange");
                     List<String> routingKeyList = (List<String>) xDeath.get("routing-keys");
                     String routingKey = routingKeyList.get(0);
-
-                    System.out.println("======================================================");
-                    System.out.println("exchange : " + exchange);
-                    System.out.println("routingKey : " + routingKey);
-                    System.out.println("data : " + data);
-                    System.out.println("======================================================");
                     rabbitTemplate.convertAndSend(exchange, routingKey, data);
                 }
             }

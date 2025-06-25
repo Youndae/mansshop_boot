@@ -18,7 +18,7 @@ import java.util.List;
 
 public interface OrderService {
 
-    String payment(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO);
+    String payment(PaymentDTO paymentDTO, CartMemberDTO cartMemberDTO, Principal principal, HttpServletRequest request, HttpServletResponse response);
 
     OrderDataResponseDTO getProductOrderData(List<OrderProductRequestDTO> requestDTO, HttpServletRequest request, HttpServletResponse response, Principal principal);
 

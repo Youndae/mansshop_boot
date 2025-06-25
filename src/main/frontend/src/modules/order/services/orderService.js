@@ -17,6 +17,8 @@ export const postOrderData = async ({
 	for(let i = 0; i < orderProduct.length; i++) {
 		productArr.push({
 			optionId: orderProduct[i].optionId,
+			size: orderProduct[i].size,
+			color: orderProduct[i].color,
 			productName: orderProduct[i].productName,
 			productId: orderProduct[i].productId,
 			detailCount: orderProduct[i].count,

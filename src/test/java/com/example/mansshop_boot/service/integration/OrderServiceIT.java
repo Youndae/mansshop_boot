@@ -116,6 +116,8 @@ public class OrderServiceIT {
 
     private static final String ANONYMOUS_COOKIE_VALUE = "testCookieValue";
 
+    private static final String ORDER_TOKEN_HEADER = "order";
+
     private static final String ORDER_TOKEN = "testOrderTokenValue";
 
     @BeforeEach
@@ -156,6 +158,8 @@ public class OrderServiceIT {
         productRepository.deleteAll();
         classificationRepository.deleteAll();
         periodSalesSummaryRepository.deleteAll();
+
+        orderRedisTemplate.delete(ORDER_TOKEN);
     }
 
     private List<OrderProductDTO> createDirectOrderProductDTOFixtureList() {
@@ -211,12 +215,24 @@ public class OrderServiceIT {
                 deliveryFee,
                 totalPrice,
                 "card",
-                "direct",
-                productOptionList.size()
+                "direct"
         );
+        List<OrderItemVO> orderItemVOList = orderProductList.stream()
+                .map(v -> new OrderItemVO(
+                        v.getProductId(),
+                        v.getOptionId(),
+                        v.getDetailCount(),
+                        v.getDetailPrice()
+                ))
+                .toList();
+        PreOrderDataVO cachingOrderDataVO = new PreOrderDataVO(anonymous.getUserId(), orderItemVOList, totalPrice);
+        orderRedisTemplate.opsForValue().set(ORDER_TOKEN, cachingOrderDataVO);
         CartMemberDTO cartMemberDTO = new CartMemberDTO(anonymous.getUserId(), ANONYMOUS_COOKIE_VALUE);
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setCookies(new Cookie(ORDER_TOKEN_HEADER, ORDER_TOKEN));
+        MockHttpServletResponse response = new MockHttpServletResponse();
 
-        String result = assertDoesNotThrow(() -> orderService.payment(paymentDTO, cartMemberDTO));
+        String result = assertDoesNotThrow(() -> orderService.payment(paymentDTO, cartMemberDTO, null, request, response));
 
         assertNotNull(result);
         assertEquals(Result.OK.getResultKey(), result);
@@ -261,12 +277,24 @@ public class OrderServiceIT {
                 deliveryFee,
                 totalPrice,
                 "cash",
-                "cart",
-                productOptionList.size()
+                "cart"
         );
+        List<OrderItemVO> orderItemVOList = orderProductList.stream()
+                .map(v -> new OrderItemVO(
+                        v.getProductId(),
+                        v.getOptionId(),
+                        v.getDetailCount(),
+                        v.getDetailPrice()
+                ))
+                .toList();
+        PreOrderDataVO cachingOrderDataVO = new PreOrderDataVO(member.getUserId(), orderItemVOList, totalPrice);
+        orderRedisTemplate.opsForValue().set(ORDER_TOKEN, cachingOrderDataVO);
         CartMemberDTO cartMemberDTO = new CartMemberDTO(member.getUserId(), null);
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setCookies(new Cookie(ORDER_TOKEN_HEADER, ORDER_TOKEN));
+        MockHttpServletResponse response = new MockHttpServletResponse();
 
-        String result = assertDoesNotThrow(() -> orderService.payment(paymentDTO, cartMemberDTO));
+        String result = assertDoesNotThrow(() -> orderService.payment(paymentDTO, cartMemberDTO, principal, request, response));
 
         assertNotNull(result);
         assertEquals(Result.OK.getResultKey(), result);

@@ -51,13 +51,14 @@ public class OrderController {
             in = ParameterIn.COOKIE
     )
     @PostMapping("/")
-    public ResponseEntity<?> payment(@RequestBody PaymentDTO paymentDTO,
+    public ResponseEntity<ResponseMessageDTO> payment(@RequestBody PaymentDTO paymentDTO,
                                     HttpServletRequest request,
+                                    HttpServletResponse response,
                                     Principal principal) {
 
         CartMemberDTO cartMemberDTO = cartService.getCartMemberDTO(request, principal);
 
-        String responseMessage = orderService.payment(paymentDTO, cartMemberDTO);
+        String responseMessage = orderService.payment(paymentDTO, cartMemberDTO, principal, request, response);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ResponseMessageDTO(responseMessage));
@@ -83,7 +84,7 @@ public class OrderController {
         return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
 
-    @Operation(summary = "상품 상세 페이지에서 결제 요청 시 상품 결제 정보 반환")
+    @Operation(summary = "장바구니 페이지에서 결제 요청 시 상품 결제 정보 반환")
     @DefaultApiResponse
     @SwaggerAuthentication
     @Parameter(

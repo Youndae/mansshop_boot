@@ -220,8 +220,7 @@ public class AdminFailedDataServiceIT {
                 deliveryFee,
                 totalPrice,
                 "cash",
-                "cart",
-                productOptionList.size()
+                "cart"
         );
         CartMemberDTO cartMemberDTO = new CartMemberDTO(member.getUserId(), null);
         ProductOrderDataDTO productOrderDataDTO = createOrderDataDTO(paymentDTO, cartMemberDTO, LocalDateTime.now());

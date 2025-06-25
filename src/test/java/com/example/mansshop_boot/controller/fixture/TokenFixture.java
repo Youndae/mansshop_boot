@@ -123,7 +123,7 @@ public class TokenFixture {
         return result.getResponse().getHeader(accessHeader).substring(6);
     }
 
-    public Map<String, String> getRefreshAndInoCookieMap(MvcResult result) {
+    public Map<String, String> getCookieMap(MvcResult result) {
 
         return result.getResponse()
                     .getHeaders("Set-Cookie")

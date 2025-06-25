@@ -186,7 +186,7 @@ public class MemberControllerIT {
         assertEquals(Role.MEMBER.getRole(), response.getRole());
 
         String accessToken = tokenFixture.getResponseAuthorization(result);
-        Map<String, String> cookieMap = tokenFixture.getRefreshAndInoCookieMap(result);
+        Map<String, String> cookieMap = tokenFixture.getCookieMap(result);
 
         String refreshToken = cookieMap.get(refreshHeader).substring(6);
         String ino = cookieMap.get(inoHeader);
@@ -341,7 +341,7 @@ public class MemberControllerIT {
         assertEquals(Result.OK.getResultKey(), response.message());
 
         String accessToken = tokenFixture.getResponseAuthorization(result);
-        Map<String, String> tokenMap = tokenFixture.getRefreshAndInoCookieMap(result);
+        Map<String, String> tokenMap = tokenFixture.getCookieMap(result);
 
         String refreshToken = tokenMap.get(refreshHeader).substring(6);
         String ino = tokenMap.get(inoHeader);
