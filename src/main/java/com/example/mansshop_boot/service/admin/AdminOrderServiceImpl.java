@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -47,6 +48,12 @@ public class AdminOrderServiceImpl implements AdminOrderService{
     @Override
     public PagingListDTO<AdminOrderResponseDTO> getAllOrderList(AdminOrderPageDTO pageDTO) {
         List<AdminOrderDTO> orderDTOList = productOrderRepository.findAllOrderList(pageDTO);
+
+        if(orderDTOList.isEmpty()) {
+            PagingMappingDTO pagingMappingDTO = new PagingMappingDTO(0L, pageDTO.page(), pageDTO.amount());
+            return new PagingListDTO<AdminOrderResponseDTO>(Collections.emptyList(), pagingMappingDTO);
+        }
+
         Long totalElements;
         if(pageDTO.keyword() == null)
             totalElements = adminCacheService.getFullScanCountCache(RedisCaching.ADMIN_ORDER_COUNT, new CacheRequest(pageDTO));
@@ -75,7 +82,10 @@ public class AdminOrderServiceImpl implements AdminOrderService{
                 .withNano(0);
 
         List<AdminOrderDTO> orderDTOList = productOrderRepository.findAllNewOrderList(pageDTO, todayLastOrderTime);
-        Long totalElements = productOrderRepository.findAllNewOrderListCount(pageDTO, todayLastOrderTime);
+        Long totalElements = 0L;
+
+        if(!orderDTOList.isEmpty())
+            totalElements = productOrderRepository.findAllNewOrderListCount(pageDTO, todayLastOrderTime);
 
         return mappingOrderDataAndPagingData(orderDTOList, totalElements, pageDTO);
     }

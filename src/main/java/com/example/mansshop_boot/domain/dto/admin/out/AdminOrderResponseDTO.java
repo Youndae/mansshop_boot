@@ -8,13 +8,13 @@ import java.util.List;
 
 @Builder
 public record AdminOrderResponseDTO(
-        long orderId
-        , String recipient
-        , String userId
-        , String phone
-        , LocalDateTime createdAt
-        , String address
-        , String orderStatus
-        , List<AdminOrderDetailDTO> detailList
+        long orderId,
+        String recipient,
+        String userId,
+        String phone,
+        LocalDateTime createdAt,
+        String address,
+        String orderStatus,
+        List<AdminOrderDetailDTO> detailList
 ) {
 }
