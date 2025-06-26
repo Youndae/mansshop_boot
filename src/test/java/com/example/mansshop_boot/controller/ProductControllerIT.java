@@ -125,8 +125,6 @@ public class ProductControllerIT {
 
     private Member member;
 
-    private Member anonymous;
-
     private Product product;
 
     private List<ProductReview> allProductReview;
@@ -147,7 +145,6 @@ public class ProductControllerIT {
         memberRepository.saveAll(saveMemberList);
         authRepository.saveAll(saveAuthList);
         member = memberList.get(0);
-        anonymous = anonymousFixtureDTO.memberList().get(0);
 
         tokenMap = tokenFixture.createAndSaveAllToken(member);
         accessTokenValue = tokenMap.get(accessHeader);

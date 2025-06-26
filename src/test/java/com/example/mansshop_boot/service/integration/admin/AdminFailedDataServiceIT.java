@@ -38,6 +38,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
@@ -84,9 +85,6 @@ public class AdminFailedDataServiceIT {
 
     @Autowired
     private CartRepository cartRepository;
-
-    @Autowired
-    private RedisTemplate<String, PreOrderDataVO> orderRedisTemplate;
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
@@ -137,9 +135,27 @@ public class AdminFailedDataServiceIT {
         productRepository.deleteAll();
         classificationRepository.deleteAll();
         periodSalesSummaryRepository.deleteAll();
-        System.out.println("after each");
+
         List<String> dlqNames = getDLQNames();
         dlqNames.forEach(v -> rabbitAdmin.purgeQueue(v, false));
+
+        await()
+                .atMost(5, TimeUnit.SECONDS)
+                .pollInterval(200, TimeUnit.MILLISECONDS)
+                .untilAsserted(() -> {
+                    for(String dlq : dlqNames) {
+                        Properties queueProperties = rabbitAdmin.getQueueProperties(dlq);
+                        Integer messageCount = (Integer) queueProperties.get("QUEUE_MESSAGE_COUNT");
+                        assertEquals(0, messageCount);
+                    }
+                });
+
+        try {
+            Thread.sleep(5000);
+        }catch (Exception e) {
+            e.printStackTrace();
+            fail("thread sleep exception");
+        }
     }
 
     private <T> void sendMessage(String exchange, RabbitMQPrefix rabbitMQPrefix, T data) {
@@ -262,9 +278,14 @@ public class AdminFailedDataServiceIT {
     @Test
     @DisplayName(value = "DLQ 메시지 개수 조회. DLQ 메시지가 존재하지 않는 경우")
     void getFailedMessageListEmpty() {
-        List<FailedQueueDTO> result = assertDoesNotThrow(() -> adminFailedDataService.getFailedMessageList());
+        await()
+                .atMost(10, TimeUnit.SECONDS)
+                .pollInterval(200, TimeUnit.MILLISECONDS)
+                .untilAsserted(() -> {
+                    List<FailedQueueDTO> result = assertDoesNotThrow(() -> adminFailedDataService.getFailedMessageList());
 
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+                    assertNotNull(result);
+                    assertTrue(result.isEmpty());
+                });
     }
 }
