@@ -5,11 +5,11 @@ import java.time.LocalDateTime;
 import java.util.Date;
 
 public record ProductReviewDTO(
-        String reviewWriter
-        , String reviewContent
-        , LocalDate reviewCreatedAt
-        , String answerContent
-        , LocalDate answerCreatedAt
+        String reviewWriter,
+        String reviewContent,
+        LocalDate reviewCreatedAt,
+        String answerContent,
+        LocalDate answerCreatedAt
 ) {
 
     public ProductReviewDTO(String reviewWriter,

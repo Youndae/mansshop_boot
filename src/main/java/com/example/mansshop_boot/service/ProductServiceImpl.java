@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -154,6 +155,14 @@ public class ProductServiceImpl implements ProductService{
                                             );
 
         Page<ProductQnADTO> productQnA = productQnARepository.findByProductId(productId, qnaPageable);
+
+        if(productQnA.getContent().isEmpty())
+            return new PageImpl<>(
+                    Collections.emptyList(),
+                    qnaPageable,
+                    0
+            );
+
         List<Long> qnaIdList = productQnA.getContent().stream().map(ProductQnADTO::qnaId).toList();
         List<ProductQnAResponseDTO> productQnADTOList = new ArrayList<>();
         List<ProductQnAReplyListDTO> qnaReplyList = productQnAReplyRepository.getQnAReply(qnaIdList);
@@ -173,9 +182,9 @@ public class ProductServiceImpl implements ProductService{
         }
 
         return new PageImpl<>(
-                            productQnADTOList
-                            , qnaPageable
-                            , productQnA.getTotalElements()
+                            productQnADTOList,
+                            qnaPageable,
+                            productQnA.getTotalElements()
                     );
     }
 

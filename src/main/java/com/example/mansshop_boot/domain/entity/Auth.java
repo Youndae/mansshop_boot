@@ -47,7 +47,7 @@ public class Auth {
     public String toString() {
         return "Auth{" +
                 "id=" + id +
-                ", userId=" + member.getUserId() +
+//                ", userId=" + member.getUserId() +
                 ", auth='" + auth + '\'' +
                 '}';
     }

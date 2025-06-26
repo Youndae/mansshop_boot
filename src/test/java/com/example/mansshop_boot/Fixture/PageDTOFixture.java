@@ -4,6 +4,7 @@ import com.example.mansshop_boot.domain.dto.mypage.business.MyPagePageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.LikePageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.MainPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;
+import com.example.mansshop_boot.domain.dto.pageable.ProductDetailPageDTO;
 
 public class PageDTOFixture {
 
@@ -25,5 +26,9 @@ public class PageDTOFixture {
 
     public static MyPagePageDTO createDefaultMyPagePageDTO(int page) {
         return new MyPagePageDTO(page);
+    }
+
+    public static ProductDetailPageDTO createDefaultProductDetailPageDTO(int page) {
+        return new ProductDetailPageDTO(page);
     }
 }
