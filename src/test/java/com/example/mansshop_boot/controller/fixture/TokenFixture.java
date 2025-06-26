@@ -79,7 +79,7 @@ public class TokenFixture {
         String refreshKey = keyMap.get(REFRESH_KEY_NAME);
 
         tokenProvider.saveTokenToRedis(accessKey, accessToken, Duration.ofHours(redisAtExpiration));
-        tokenProvider.saveTokenToRedis(refreshKey, accessToken, Duration.ofDays(redisRtExpiration));
+        tokenProvider.saveTokenToRedis(refreshKey, refreshToken, Duration.ofDays(redisRtExpiration));
 
         tokenMap.put(inoHeader, ino);
         tokenMap.put(accessHeader, tokenPrefix + accessToken);

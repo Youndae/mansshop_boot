@@ -98,7 +98,6 @@ public class JWTTokenServiceImpl implements JWTTokenService{
      */
     @Override
     public String reIssueToken(TokenDTO tokenDTO, HttpServletResponse response) {
-
         // ino가 존재하지 않는다면 무조건 탈취로 판단.
         if(tokenDTO.inoValue() == null) {
             deleteCookieAndThrowException(response);
@@ -116,9 +115,9 @@ public class JWTTokenServiceImpl implements JWTTokenService{
                 throw new CustomTokenStealingException(ErrorCode.TOKEN_STEALING, ErrorCode.TOKEN_STEALING.getMessage());
             }else {
                 String claimByRefreshToken = jwtTokenProvider.verifyRefreshToken(
-                        tokenDTO.refreshTokenValue()
-                        , tokenDTO.inoValue()
-                        , accessTokenClaim
+                        tokenDTO.refreshTokenValue(),
+                        tokenDTO.inoValue(),
+                        accessTokenClaim
                 );
 
                 if(accessTokenClaim.equals(claimByRefreshToken)) {
@@ -130,6 +129,6 @@ public class JWTTokenServiceImpl implements JWTTokenService{
             }
         }
 
-        throw new CustomTokenStealingException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
+        throw new CustomTokenStealingException(ErrorCode.TOKEN_STEALING, ErrorCode.TOKEN_STEALING.getMessage());
     }
 }
