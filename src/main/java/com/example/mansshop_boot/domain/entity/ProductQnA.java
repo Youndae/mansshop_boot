@@ -50,4 +50,17 @@ public class ProductQnA {
     public void setProductQnAStat(boolean productQnAStat) {
         this.productQnAStat = productQnAStat;
     }
+
+    @Override
+    public String toString() {
+        return "ProductQnA{" +
+                "id=" + id +
+                ", member=" + member +
+                ", qnaContent='" + qnaContent + '\'' +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", productQnAStat=" + productQnAStat +
+                ", productName=" + product.getProductName() +
+                '}';
+    }
 }

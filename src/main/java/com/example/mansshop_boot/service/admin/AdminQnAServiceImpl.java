@@ -238,6 +238,7 @@ public class AdminQnAServiceImpl implements AdminQnAService {
      */
     @Override
     public String deleteQnAClassification(long classificationId) {
+        qnAClassificationRepository.findById(classificationId).orElseThrow(IllegalArgumentException::new);
         qnAClassificationRepository.deleteById(classificationId);
 
         return Result.OK.getResultKey();
