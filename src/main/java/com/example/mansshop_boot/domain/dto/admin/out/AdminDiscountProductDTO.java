@@ -4,8 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record AdminDiscountProductDTO(
-        String productId
-        , String productName
-        , int productPrice
+        String productId,
+        String productName,
+        int productPrice
 ) {
 }

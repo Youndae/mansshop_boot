@@ -36,4 +36,8 @@ public class PageDTOFixture {
     public static AdminOrderPageDTO createSearchAdminOrderPageDTO(String keyword, String searchType, int page) {
         return new AdminOrderPageDTO(keyword, searchType, page);
     }
+
+    public static AdminPageDTO createDefaultAdminPageDTO(int page) {
+        return new AdminPageDTO(null, page);
+    }
 }

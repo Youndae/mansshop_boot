@@ -6,17 +6,17 @@ import com.example.mansshop_boot.domain.entity.Product;
 import java.util.List;
 
 public record AdminProductDetailDTO(
-        String productId
-        , String classification
-        , String productName
-        , String firstThumbnail
-        , List<String> thumbnailList
-        , List<String> infoImageList
-        , List<AdminProductOptionDTO> optionList
-        , int price
-        , boolean isOpen
-        , long sales
-        , int discount
+        String productId,
+        String classification,
+        String productName,
+        String firstThumbnail,
+        List<String> thumbnailList,
+        List<String> infoImageList,
+        List<AdminProductOptionDTO> optionList,
+        int price,
+        boolean isOpen,
+        long sales,
+        int discount
 ) {
 
     /*@Builder

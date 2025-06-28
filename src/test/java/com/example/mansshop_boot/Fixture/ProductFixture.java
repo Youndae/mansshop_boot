@@ -88,6 +88,18 @@ public class ProductFixture {
         return infoImages;
     }
 
+    public static List<Product> createAdditionalProduct (int startIdx, int endIdx, Classification classification) {
+        List<Product> result = new ArrayList<>();
+        for(int i = startIdx; i < startIdx + endIdx; i++) {
+            Product product = createProduct(i, classification);
+            createSaveOptionThumbnailAndInfoImage(product, (i - (startIdx - 1)) * 3);
+
+            result.add(product);
+        }
+
+        return result;
+    }
+
     public static List<Product> createProductByClassificationName (int startIdx, int endIdx, String classificationId) {
         List<Product> result = new ArrayList<>();
         for(int i = startIdx; i <= startIdx + endIdx; i++) {

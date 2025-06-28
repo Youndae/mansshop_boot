@@ -184,7 +184,6 @@ public class AdminProductController {
                                                               @RequestPart(value = "deleteOptionList", required = false) List<Long> deleteOptionList,
                                                               @ModelAttribute AdminProductPatchDTO patchDTO,
                                                               @ModelAttribute AdminProductImageDTO imageDTO) {
-
         ResponseIdDTO<String> responseDTO = new ResponseIdDTO<>(
                 adminProductService.patchProduct(productId, deleteOptionList, patchDTO, imageDTO)
         );

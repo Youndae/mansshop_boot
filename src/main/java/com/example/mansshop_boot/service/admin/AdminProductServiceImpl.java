@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -57,7 +58,9 @@ public class AdminProductServiceImpl implements AdminProductService {
     public PagingListDTO<AdminProductListDTO> getProductList(AdminPageDTO pageDTO) {
 
         List<AdminProductListDTO> dto = productRepository.findAdminProductList(pageDTO);
-        Long totalElements = productRepository.findAdminProductListCount(pageDTO);
+        Long totalElements = 0L;
+        if(!dto.isEmpty())
+            totalElements = productRepository.findAdminProductListCount(pageDTO);
 
         //PagingMapping 하나 만들어서 서비스로.
         // totalElements가 필요한 매핑과 필요없는 매핑으로 구분. 특정 DTO로 반환.
@@ -193,6 +196,14 @@ public class AdminProductServiceImpl implements AdminProductService {
         List<String> saveImages = new ArrayList<>();
 
         try{
+            //option 제거를 먼저 하지 않는다면, setProductOptionData에서 getProductOptions()로 인해
+            //ProductOption이 영속성 컨텍스트에 의해 관리된다.
+            //그렇게 되면 운영 환경이나 서비스 통합 테스트에서는 문제가 발생하지 않지만,
+            //컨트롤러 통합 테스트에서는 영속성 컨텍스트에서 관리하는 productOption에 의해 DB에 다시 올라가게 된다.
+            //서비스 통합 테스트의 경우 테스트 클래스의 @Transactional이 Service, Repository 전체를 감싸고 있지만,
+            //컨트롤러 통합 테스트에서는 MockMvc 기반이기 때문에 내부적으로 별도의 트랜잭션이 나뉠 수 있기 때문이다.
+            //또한 flush, clear가 자동으로 일어나지 않기 때문에 운영 또는 서비스 테스트 환경과 다른 결과를 볼 수 있게 된다.
+
             setProductOptionData(product, patchDTO);
             saveImages = saveProductImage(product, imageDTO);
 
@@ -212,7 +223,6 @@ public class AdminProductServiceImpl implements AdminProductService {
 
             if(deleteOptionList != null)
                 productOptionRepository.deleteAllById(deleteOptionList);
-
         }catch (Exception e) {
             log.warn("Failed admin patchProduct");
             e.printStackTrace();
@@ -266,7 +276,7 @@ public class AdminProductServiceImpl implements AdminProductService {
             for(int j = 0; j < optionEntities.size(); j++) {
                 ProductOption option = optionEntities.get(j);
 
-                if(dtoOptionId == option.getId()){
+                if(option.getId() != null && dtoOptionId == option.getId()){
                     option.patchOptionData(dto);
                     patchStatus = false;
                     break;
@@ -415,7 +425,13 @@ public class AdminProductServiceImpl implements AdminProductService {
     @Override
     public PagingListDTO<AdminProductStockDTO> getProductStock(AdminPageDTO pageDTO) {
         List<AdminProductStockDataDTO> dataList = productRepository.findStockData(pageDTO);
-        Long totalElements = productRepository.findStockCount(pageDTO);
+        Long totalElements = 0L;
+        if(dataList.isEmpty()){
+            PagingMappingDTO pagingMappingDTO = new PagingMappingDTO(totalElements, pageDTO.page(), pageDTO.amount());
+            return new PagingListDTO<>(Collections.emptyList(), pagingMappingDTO);
+        }
+
+        totalElements = productRepository.findStockCount(pageDTO);
         PagingMappingDTO pagingMappingDTO = new PagingMappingDTO(totalElements, pageDTO.page(), pageDTO.amount());
         List<String> productIdList = dataList.stream().map(AdminProductStockDataDTO::productId).toList();
         List<AdminOptionStockDTO> optionList = productOptionRepository.findAllOptionByProductIdList(productIdList);
@@ -434,6 +450,7 @@ public class AdminProductServiceImpl implements AdminProductService {
 
             responseContent.add(new AdminProductStockDTO(productId, stockDTO, responseOptionList));
         }
+
 
         return new PagingListDTO<>(responseContent, pagingMappingDTO);
     }
@@ -485,6 +502,11 @@ public class AdminProductServiceImpl implements AdminProductService {
      */
     @Override
     public String patchDiscountProduct(AdminDiscountPatchDTO patchDTO) {
+        List<Product> productList = productRepository.findAllById(patchDTO.productIdList());
+
+        if(productList.isEmpty() || productList.size() != patchDTO.productIdList().size())
+            throw new IllegalArgumentException("patchDiscountProduct IllegalArgumentException");
+
         productRepository.patchProductDiscount(patchDTO);
 
         return Result.OK.getResultKey();

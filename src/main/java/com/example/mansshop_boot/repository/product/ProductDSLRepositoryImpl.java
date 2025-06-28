@@ -287,6 +287,7 @@ public class ProductDSLRepositoryImpl implements ProductDSLRepository{
                 )
                 .from(product)
                 .where(product.classification.id.eq(classification))
+                .orderBy(product.productName.asc())
                 .fetch();
     }
 

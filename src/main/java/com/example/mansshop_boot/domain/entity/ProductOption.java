@@ -50,4 +50,15 @@ public class ProductOption {
         this.stock = dto.getOptionStock();
         this.isOpen = dto.isOptionIsOpen();
     }
+
+    @Override
+    public String toString() {
+        return "ProductOption{" +
+                "id=" + id +
+                ", size='" + size + '\'' +
+                ", color='" + color + '\'' +
+                ", stock=" + stock +
+                ", isOpen=" + isOpen +
+                '}';
+    }
 }
