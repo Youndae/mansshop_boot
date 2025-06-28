@@ -67,6 +67,18 @@ public class TokenFixture {
 
     private static final String REFRESH_KEY_NAME = "refreshKey";
 
+    public String createAccessToken(Member member) {
+        String token = tokenProvider.createToken(member.getUserId(), accessSecret, accessExpiration);
+
+        return tokenPrefix + token;
+    }
+
+    public String createExpirationToken(Member member) {
+        String token = tokenProvider.createToken(member.getUserId(), accessSecret, 1);
+
+        return tokenPrefix + token;
+    }
+
     public Map<String, String> createAndSaveAllToken(Member member) {
         Map<String, String> tokenMap = new HashMap<>();
         String ino = tokenProvider.createIno();
