@@ -264,7 +264,7 @@ public class AdminSalesServiceImpl implements AdminSalesService {
                 .stream()
                 .map(v -> {
                     List<AdminDailySalesDetailDTO> detailContent = orderDetailList.stream()
-                            .filter(orderDetail -> v.getId() == orderDetail.orderId())
+                            .filter(orderDetail -> v.getId().equals(orderDetail.orderId()))
                             .map(AdminDailySalesDetailDTO::new)
                             .toList();
 

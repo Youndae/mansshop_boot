@@ -2,6 +2,8 @@ package com.example.mansshop_boot.controller.admin;
 
 import com.example.mansshop_boot.annotation.swagger.DefaultApiResponse;
 import com.example.mansshop_boot.annotation.swagger.SwaggerAuthentication;
+import com.example.mansshop_boot.domain.dto.admin.business.AdminPeriodClassificationDTO;
+import com.example.mansshop_boot.domain.dto.admin.business.AdminPeriodSalesListDTO;
 import com.example.mansshop_boot.domain.dto.admin.out.*;
 import com.example.mansshop_boot.domain.dto.pageable.AdminPageDTO;
 import com.example.mansshop_boot.domain.dto.response.PagingElementsResponseDTO;
@@ -51,9 +53,9 @@ public class AdminSalesController {
             in = ParameterIn.PATH
     )
     @GetMapping("/sales/period/{term}")
-    public ResponseEntity<AdminPeriodSalesResponseDTO> getPeriodSales(@PathVariable(name = "term") int term) {
+    public ResponseEntity<AdminPeriodSalesResponseDTO<AdminPeriodSalesListDTO>> getPeriodSales(@PathVariable(name = "term") int term) {
 
-        AdminPeriodSalesResponseDTO responseDTO = adminSalesService.getPeriodSales(term);
+        AdminPeriodSalesResponseDTO<AdminPeriodSalesListDTO> responseDTO = adminSalesService.getPeriodSales(term);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDTO);
@@ -139,9 +141,9 @@ public class AdminSalesController {
             in = ParameterIn.QUERY
     )
     @GetMapping("/sales/period/detail/day")
-    public ResponseEntity<AdminPeriodSalesResponseDTO> getSalesByDay(@RequestParam(value = "term") String term) {
+    public ResponseEntity<AdminPeriodSalesResponseDTO<AdminPeriodClassificationDTO>> getSalesByDay(@RequestParam(value = "term") String term) {
 
-        AdminPeriodSalesResponseDTO responseDTO = adminSalesService.getSalesByDay(term);
+        AdminPeriodSalesResponseDTO<AdminPeriodClassificationDTO> responseDTO = adminSalesService.getSalesByDay(term);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(responseDTO);

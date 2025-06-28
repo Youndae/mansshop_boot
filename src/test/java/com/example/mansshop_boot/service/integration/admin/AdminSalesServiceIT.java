@@ -263,7 +263,7 @@ public class AdminSalesServiceIT {
         assertEquals(lastYearMonthSalesQuantity, result.lastYearSalesQuantity());
         assertEquals(lastYearMonthOrderQuantity, result.lastYearOrderQuantity());
         assertFalse(result.bestProduct().isEmpty());
-        assertEquals(classificationList.size(), result.bestProduct().size());
+        assertEquals(best5List.size(), result.bestProduct().size());
         assertFalse(result.classificationSales().isEmpty());
         assertEquals(classificationList.size(), result.classificationSales().size());
         assertFalse(result.dailySales().isEmpty());
