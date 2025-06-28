@@ -91,13 +91,18 @@ public class AdminReviewServiceImpl implements AdminReviewService  {
      * 리뷰 답변 작성
      */
     @Override
-    public String postReviewReply(AdminReviewRequestDTO postDTO
-            , Principal principal) {
+    public String postReviewReply(AdminReviewRequestDTO postDTO,
+                                Principal principal) {
         Member member = memberRepository.findById(principal.getName())
                 .orElseThrow(IllegalArgumentException::new);
 
         ProductReview reviewEntity = productReviewRepository.findById(postDTO.reviewId())
                 .orElseThrow(IllegalArgumentException::new);
+
+        ProductReviewReply reviewReply = productReviewReplyRepository.findByReviewId(postDTO.reviewId());
+
+        if(reviewReply != null)
+            throw new IllegalArgumentException("review Reply already exist");
 
         ProductReviewReply entity = ProductReviewReply.builder()
                 .member(member)
