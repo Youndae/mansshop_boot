@@ -53,12 +53,13 @@
 <br />
 
 # 개발 환경
-|Category|Tech Stack|
-|---|---|
-|Backend| - Spring Boot 3.2.5 <br/> - JDK 17 <br/> - Gradle <br/> - Spring Data JPA <br/> - QueryDSL <br/> - RabbitMQ 3.12 Management <br/> - SpringSecurity <br/> - JWT <br/> - OAuth2(Google, Kakao, Naver) <br/> - Swagger( springdoc-openapi 2.6.0 ) <br/> - Java Mail <br/> - I'mport 결제 API ( iamport-rest-client ) |
-|Frontend| - React 18.3.1 <br/> - Axios <br/> - reduxjs/toolkit <br/> - react-redus <br/> - redux-persist <br/> - react-dom <br/> - http-proxy-middleware <br/> - styled-components <br/> - dayjs <br/> - Kakao 우편번호 서비스 API ( react-daum-postcode ) |
+|Category| Tech Stack|
+|---|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|Backend| - Spring Boot 3.2.5 <br/> - JDK 17 <br/> - Gradle <br/> - Spring Data JPA <br/> - QueryDSL <br/> - RabbitMQ 3.12 Management <br/> - SpringSecurity <br/> - JWT <br/> - OAuth2(Google, Kakao, Naver) <br/> - Swagger( springdoc-openapi 2.6.0 ) <br/> - Java Mail <br/> - I'mport 결제 API ( iamport-rest-client )|
+|Frontend| - React 18.3.1 <br/> - Axios <br/> - reduxjs/toolkit <br/> - react-redus <br/> - redux-persist <br/> - react-dom <br/> - http-proxy-middleware <br/> - styled-components <br/> - dayjs <br/> - Kakao 우편번호 서비스 API ( react-daum-postcode )|
 |Database| - MySQL <br/> - Redis|
 |Environment| - IntelliJ <br/> - GitHub <br/> - Docker ( MySQL, Redis, RabbitMQ )|
+|test| - mailhog <br/> - awaitility 4.2.0|
 
 <br />
 
