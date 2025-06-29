@@ -181,6 +181,7 @@ public class ProductOrderFixture {
                     .paymentType("card")
                     .orderStat(OrderStatus.COMPLETE.getStatusStr())
                     .productCount(productCount)
+                    .createdAt(LocalDateTime.now().minusDays(1))
                     .build();
 
             phoneSuffix++;

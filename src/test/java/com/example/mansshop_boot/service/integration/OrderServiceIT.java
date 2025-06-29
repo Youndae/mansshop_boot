@@ -15,10 +15,8 @@ import com.example.mansshop_boot.domain.dto.order.in.OrderProductDTO;
 import com.example.mansshop_boot.domain.dto.order.in.OrderProductRequestDTO;
 import com.example.mansshop_boot.domain.dto.order.in.PaymentDTO;
 import com.example.mansshop_boot.domain.dto.order.out.OrderDataResponseDTO;
-import com.example.mansshop_boot.domain.dto.rabbitMQ.RabbitMQProperties;
 import com.example.mansshop_boot.domain.dto.response.ResponseMessageDTO;
 import com.example.mansshop_boot.domain.entity.*;
-import com.example.mansshop_boot.domain.enumeration.RabbitMQPrefix;
 import com.example.mansshop_boot.domain.enumeration.Result;
 import com.example.mansshop_boot.domain.vo.order.OrderItemVO;
 import com.example.mansshop_boot.domain.vo.order.PreOrderDataVO;
@@ -34,7 +32,6 @@ import com.example.mansshop_boot.repository.productSales.ProductSalesSummaryRepo
 import com.example.mansshop_boot.service.OrderService;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.*;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -44,7 +41,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.security.Principal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -149,7 +145,7 @@ public class OrderServiceIT {
     }
 
     @AfterEach
-    void set() {
+    void cleanUp() {
         cartRepository.deleteAll();
         productOrderRepository.deleteAll();
         memberRepository.deleteAll();
@@ -248,6 +244,7 @@ public class OrderServiceIT {
                 .atMost(10, TimeUnit.SECONDS)
                 .pollInterval(200, TimeUnit.MILLISECONDS)
                 .untilAsserted(() -> {
+
                     List<PeriodSalesSummary> savePeriodSummary = periodSalesSummaryRepository.findAll();
 
                     assertFalse(savePeriodSummary.isEmpty());

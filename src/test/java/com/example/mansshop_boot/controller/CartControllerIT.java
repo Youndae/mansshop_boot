@@ -63,6 +63,9 @@ public class CartControllerIT {
     @Autowired
     private ObjectMapper om;
 
+    @Autowired
+    private EntityManager em;
+
     @Value("#{jwt['token.access.header']}")
     private String accessHeader;
 
@@ -163,6 +166,9 @@ public class CartControllerIT {
         saveCartList.add(anonymousCart);
 
         cartRepository.saveAll(saveCartList);
+
+        em.flush();
+        em.clear();
     }
 
     @AfterEach

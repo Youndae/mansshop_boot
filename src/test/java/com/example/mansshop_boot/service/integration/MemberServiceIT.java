@@ -22,6 +22,7 @@ import com.example.mansshop_boot.repository.member.MemberRepository;
 import com.example.mansshop_boot.service.MemberService;
 import com.example.mansshop_boot.util.MailHogUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,9 @@ public class MemberServiceIT {
     private MemberService memberService;
 
     @Autowired
+    private EntityManager em;
+
+    @Autowired
     private MemberRepository memberRepository;
 
     @Autowired
@@ -80,6 +84,9 @@ public class MemberServiceIT {
         memberList = memberAndAuthFixture.memberList();
         memberRepository.saveAll(memberList);
         authRepository.saveAll(memberAndAuthFixture.authList());
+
+        em.flush();
+        em.clear();
     }
 
     @Test
@@ -246,6 +253,9 @@ public class MemberServiceIT {
 
         assertEquals(accessToken, redisAtValue);
         assertEquals(refreshToken, redisRtValue);
+
+        redisTemplate.delete(redisAtKey);
+        redisTemplate.delete(redisRtKey);
     }
 
     @Test

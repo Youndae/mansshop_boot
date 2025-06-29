@@ -25,6 +25,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -34,9 +35,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
+@Transactional
 public class ProductOrderRepositoryTest {
 
     @Autowired
@@ -70,7 +71,7 @@ public class ProductOrderRepositoryTest {
 
     private List<ProductOrder> newOrderList;
 
-    @BeforeAll
+    @BeforeEach
     void init(){
         MemberAndAuthFixtureDTO memberAndAuthFixture = MemberAndAuthFixture.createDefaultMember(5);
         List<Classification> classificationList = ClassificationFixture.createClassification();
@@ -368,7 +369,7 @@ public class ProductOrderRepositoryTest {
         Pageable pageable = PageRequest.of(0
                 , PageAmount.ADMIN_DAILY_ORDER_AMOUNT.getAmount()
                 , Sort.by("createdAt").descending());
-        LocalDate start = LocalDate.now();
+        LocalDate start = LocalDate.now().minusDays(1);
         LocalDateTime startDate = LocalDateTime.of(start, LocalTime.MIN);
         LocalDateTime endDate = LocalDateTime.of(start, LocalTime.MAX);
 

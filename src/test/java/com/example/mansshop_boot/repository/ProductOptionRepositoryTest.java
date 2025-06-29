@@ -18,6 +18,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,9 +26,9 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
+@Transactional
 public class ProductOptionRepositoryTest {
 
     @Autowired
@@ -45,7 +46,7 @@ public class ProductOptionRepositoryTest {
 
     private List<Product> productList;
 
-    @BeforeAll
+    @BeforeEach
     void init(){
         List<Classification> classificationList = ClassificationFixture.createClassification();
         List<Product> productFixtureList = ProductFixture.createDefaultProductByOUTER(PRODUCT_SIZE);

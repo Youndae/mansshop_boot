@@ -80,7 +80,6 @@ public class AdminProductServiceIT {
     private List<Classification> classificationList;
 
     @BeforeEach
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     void init() {
         classificationList = ClassificationFixture.createClassification();
         classificationRepository.saveAll(classificationList);
@@ -746,6 +745,9 @@ public class AdminProductServiceIT {
 
         String result = assertDoesNotThrow(() -> adminProductService.patchDiscountProduct(patchDTO));
 
+        entityManager.flush();
+        entityManager.clear();
+
         assertNotNull(result);
         assertEquals(Result.OK.getResultKey(), result);
 
@@ -766,6 +768,9 @@ public class AdminProductServiceIT {
 
         assertNotNull(result);
         assertEquals(Result.OK.getResultKey(), result);
+
+        entityManager.flush();
+        entityManager.clear();
 
         Product resultEntity1 = productRepository.findById(fixtureList.get(0).getId()).orElseThrow(IllegalArgumentException::new);
         Product resultEntity2 = productRepository.findById(fixtureList.get(1).getId()).orElseThrow(IllegalArgumentException::new);

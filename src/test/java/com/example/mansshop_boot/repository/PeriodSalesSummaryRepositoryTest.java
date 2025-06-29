@@ -7,6 +7,7 @@ import com.example.mansshop_boot.domain.dto.admin.business.AdminPeriodSalesListD
 import com.example.mansshop_boot.domain.dto.admin.business.AdminPeriodSalesStatisticsDTO;
 import com.example.mansshop_boot.domain.entity.PeriodSalesSummary;
 import com.example.mansshop_boot.repository.periodSales.PeriodSalesSummaryRepository;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,9 +19,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
+@Transactional
 public class PeriodSalesSummaryRepositoryTest {
 
     @Autowired
@@ -28,7 +29,7 @@ public class PeriodSalesSummaryRepositoryTest {
 
     private List<PeriodSalesSummary> summaryListBy2023;
 
-    @BeforeAll
+    @BeforeEach
     void init() {
         List<PeriodSalesSummary> fixture = SalesSummaryFixture.createPeriodSalesSummary();
 

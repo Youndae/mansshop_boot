@@ -30,6 +30,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -38,9 +39,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
+@Transactional
 public class ProductReviewRepositoryTest {
 
     @Autowired
@@ -78,7 +79,7 @@ public class ProductReviewRepositoryTest {
 
     private Member member;
 
-    @BeforeAll
+    @BeforeEach
     void init() {
         MemberAndAuthFixtureDTO memberAndAuthFixture = MemberAndAuthFixture.createDefaultMember(MEMBER_SIZE);
         MemberAndAuthFixtureDTO adminFixture = MemberAndAuthFixture.createAdmin();

@@ -709,9 +709,12 @@ public class AdminProductServiceUnitTest {
     @Test
     @DisplayName(value = "상품 할인율 수정 요청")
     void patchDiscountProduct() {
-        List<String> productIds = ProductFixture.createDefaultProductByOUTER(5).stream().map(Product::getId).toList();
+        List<Product> productFixture = ProductFixture.createDefaultProductByOUTER(5);
+        List<String> productIds = productFixture.stream().map(Product::getId).toList();
         int discount = 10;
         AdminDiscountPatchDTO patchDTO = new AdminDiscountPatchDTO(productIds, discount);
+        when(productRepository.findAllById(productIds))
+                .thenReturn(productFixture);
         doNothing().when(productRepository).patchProductDiscount(patchDTO);
 
         String result = assertDoesNotThrow(() -> adminProductService.patchDiscountProduct(patchDTO));

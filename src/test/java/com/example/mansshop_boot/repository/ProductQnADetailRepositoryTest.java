@@ -20,15 +20,16 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
+@Transactional
 public class ProductQnADetailRepositoryTest {
 
     @Autowired
@@ -64,7 +65,7 @@ public class ProductQnADetailRepositoryTest {
 
     private List<ProductQnAReply> completedQnAReplyList;
 
-    @BeforeAll
+    @BeforeEach
     void init() {
         List<Classification> classificationList = ClassificationFixture.createClassification();
         MemberAndAuthFixtureDTO memberAndAuthFixtureDTO = MemberAndAuthFixture.createDefaultMember(MEMBER_SIZE);

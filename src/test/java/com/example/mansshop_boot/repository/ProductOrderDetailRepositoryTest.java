@@ -21,6 +21,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,9 +29,9 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
+@Transactional
 public class ProductOrderDetailRepositoryTest {
 
     @Autowired
@@ -64,7 +65,7 @@ public class ProductOrderDetailRepositoryTest {
 
     private List<ProductOrder> newOrderList;
 
-    @BeforeAll
+    @BeforeEach
     void init(){
         MemberAndAuthFixtureDTO memberAndAuthFixture = MemberAndAuthFixture.createDefaultMember(5);
         List<Classification> classificationList = ClassificationFixture.createClassification();
@@ -162,7 +163,7 @@ public class ProductOrderDetailRepositoryTest {
         for(ProductOrder order : orderDataList) {
             int count = 0;
             for(AdminOrderDetailListDTO resultData : result) {
-                if(order.getId() == resultData.orderId())
+                if(order.getId().equals(resultData.orderId()))
                     count++;
             }
 

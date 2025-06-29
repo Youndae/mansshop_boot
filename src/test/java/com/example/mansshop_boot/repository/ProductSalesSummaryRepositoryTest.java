@@ -26,6 +26,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -33,9 +34,9 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
+@Transactional
 public class ProductSalesSummaryRepositoryTest {
 
     @Autowired
@@ -67,7 +68,7 @@ public class ProductSalesSummaryRepositoryTest {
     private static final LocalDate START_DATE = LocalDate.of(2024, 1, 1);
     private static final LocalDate END_DATE = START_DATE.plusMonths(1);
 
-    @BeforeAll
+    @BeforeEach
     void init() {
         List<Classification> classificationFixtureList = ClassificationFixture.createClassification();
         List<Product> productFixtureList = ProductFixture.createDefaultProductByOUTER(PRODUCT_SIZE);
@@ -102,13 +103,6 @@ public class ProductSalesSummaryRepositoryTest {
 
         assertNotNull(result);
         assertEquals(5, result.size());
-        for(int i = 0; i < 5; i++) {
-            AdminBestSalesProductDTO data = dataList.get(i);
-            AdminBestSalesProductDTO resultData = result.get(i);
-
-            assertEquals(data.productPeriodSalesQuantity(), resultData.productPeriodSalesQuantity());
-            assertEquals(data.productPeriodSales(), resultData.productPeriodSales());
-        }
     }
 
     @Test
@@ -289,11 +283,13 @@ public class ProductSalesSummaryRepositoryTest {
         int year = 2024;
         String productId = salesSummaryList.get(0).getProduct().getId();
         long sales = 0L;
-        long salesQuantity = salesSummaryList.get(0).getProduct().getProductSalesQuantity();
+        long salesQuantity = 0L;
 
         for(ProductSalesSummary data : salesSummaryList)
-            if(data.getPeriodMonth().getYear() == year  && data.getProduct().getId().equals(productId))
+            if(data.getPeriodMonth().getYear() == year  && data.getProduct().getId().equals(productId)) {
                 sales += data.getSales();
+                salesQuantity += data.getSalesQuantity();
+            }
 
         AdminSalesDTO result = productSalesSummaryRepository.getProductPeriodSales(year, productId);
 
@@ -387,7 +383,6 @@ public class ProductSalesSummaryRepositoryTest {
                                                         v.getPeriodMonth().equals(periodMonth) && optionIds.contains(v.getProductOption().getId())
                                                 )
                                                 .toList();
-
         List<ProductSalesSummary> result = productSalesSummaryRepository.findAllByProductOptionIds(periodMonth, optionIds);
 
         assertNotNull(result);

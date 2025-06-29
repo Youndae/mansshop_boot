@@ -12,6 +12,7 @@ import com.example.mansshop_boot.repository.member.MemberRepository;
 import com.example.mansshop_boot.repository.memberQnA.MemberQnAReplyRepository;
 import com.example.mansshop_boot.repository.memberQnA.MemberQnARepository;
 import com.example.mansshop_boot.repository.qnaClassification.QnAClassificationRepository;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,9 +22,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
+@Transactional
 public class MemberQnAReplyRepositoryTest {
 
     @Autowired
@@ -41,9 +42,11 @@ public class MemberQnAReplyRepositoryTest {
     @Autowired
     private MemberQnAReplyRepository memberQnAReplyRepository;
 
-    private List<MemberQnAReply> memberQnAReplies;
+    private List<MemberQnA> completedAnswerMemberQnAList;
 
-    @BeforeAll
+    private List<MemberQnAReply> memberQnAReplyList;
+
+    @BeforeEach
     void init() {
         MemberAndAuthFixtureDTO memberFixtureDTO = MemberAndAuthFixture.createDefaultMember(5);
         List<Member> memberList = memberFixtureDTO.memberList();
@@ -58,28 +61,28 @@ public class MemberQnAReplyRepositoryTest {
         authRepository.saveAll(authList);
         qnAClassificationRepository.saveAll(qnAClassifications);
 
-        List<MemberQnA> completedAnswerMemberQnAList = MemberQnAFixture.createMemberQnACompletedAnswer(qnAClassifications, memberList);
-        List<MemberQnAReply> memberQnAReplyList = MemberQnAFixture.createMemberQnAReply(completedAnswerMemberQnAList, admin);
+        completedAnswerMemberQnAList = MemberQnAFixture.createMemberQnACompletedAnswer(qnAClassifications, memberList);
+        memberQnAReplyList = MemberQnAFixture.createMemberQnAReply(completedAnswerMemberQnAList, admin);
         List<MemberQnA> newMemberQnAList = MemberQnAFixture.createDefaultMemberQnA(qnAClassifications, memberList);
         completedAnswerMemberQnAList.addAll(newMemberQnAList);
 
         memberQnARepository.saveAll(completedAnswerMemberQnAList);
         memberQnAReplyRepository.saveAll(memberQnAReplyList);
-        Long memberQnAId = completedAnswerMemberQnAList.get(0).getId();
-
-        memberQnAReplies = memberQnAReplyList.stream()
-                                            .filter(v -> v.getMemberQnA().getId() == memberQnAId)
-                                            .toList();
     }
 
     @Test
     @DisplayName(value = "해당 문의의 모든 Reply 조회")
     void findAllByQnAId() {
-        Long qnaId = memberQnAReplies.get(0).getId();
+        Long qnaId = completedAnswerMemberQnAList.get(0).getId();
+        List<MemberQnAReply> resultFixture = memberQnAReplyList.stream()
+                                                .filter(v ->
+                                                        v.getMemberQnA().getId().equals(qnaId)
+                                                )
+                                                .toList();
 
         List<MyPageQnAReplyDTO> result = memberQnAReplyRepository.findAllByQnAId(qnaId);
 
         assertNotNull(result);
-        assertEquals(memberQnAReplies.size(), result.size());
+        assertEquals(resultFixture.size(), result.size());
     }
 }

@@ -293,13 +293,13 @@ public class CartServiceUnitTest {
 
         when(cartRepository.findIdByUserId(cartMemberDTO)).thenReturn(cart.getId());
         when(cartDetailRepository.findAllIdByCartId(cart.getId())).thenReturn(List.of(1L, 2L));
-        doNothing().when(cartDetailRepository).deleteAllById(deleteCartDetailIds);
+        doNothing().when(cartDetailRepository).deleteAllByIdInBatch(deleteCartDetailIds);
 
         String result = assertDoesNotThrow(() -> cartService.deleteCartSelect(cartMemberDTO, deleteCartDetailIds));
 
         assertEquals(Result.OK.getResultKey(), result);
         verify(cartRepository, never()).deleteById(cart.getId());
-        verify(cartDetailRepository).deleteAllById(deleteCartDetailIds);
+        verify(cartDetailRepository).deleteAllByIdInBatch(deleteCartDetailIds);
     }
 
     @Test

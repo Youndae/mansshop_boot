@@ -631,7 +631,7 @@ public class AdminSalesServiceUnitTest {
         String productId = "productId";
 
         when(productSalesSummaryRepository.getProductSales(productId))
-                .thenReturn(null);
+                .thenReturn(new AdminProductSalesDTO(null, 0, 0));
 
         assertThrows(
                 CustomNotFoundException.class,

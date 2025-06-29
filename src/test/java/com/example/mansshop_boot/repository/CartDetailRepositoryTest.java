@@ -15,6 +15,7 @@ import com.example.mansshop_boot.repository.classification.ClassificationReposit
 import com.example.mansshop_boot.repository.member.MemberRepository;
 import com.example.mansshop_boot.repository.product.ProductOptionRepository;
 import com.example.mansshop_boot.repository.product.ProductRepository;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,9 +26,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
+@Transactional
 public class CartDetailRepositoryTest {
 
     @Autowired
@@ -55,7 +56,7 @@ public class CartDetailRepositoryTest {
 
     private Cart memberCart;
 
-    @BeforeAll
+    @BeforeEach
     void init() {
         List<Classification> classifications = ClassificationFixture.createClassification();
         List<Product> productList = ProductFixture.createDefaultProductByOUTER(3);

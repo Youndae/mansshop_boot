@@ -28,14 +28,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
+@Transactional
 public class ProductQnARepositoryTest {
 
     @Autowired
@@ -66,7 +67,7 @@ public class ProductQnARepositoryTest {
 
     private List<ProductQnA> qnaList;
 
-    @BeforeAll
+    @BeforeEach
     void init() {
         List<Classification> classificationList = ClassificationFixture.createClassification();
         MemberAndAuthFixtureDTO memberAndAuthFixtureDTO = MemberAndAuthFixture.createDefaultMember(MEMBER_SIZE);

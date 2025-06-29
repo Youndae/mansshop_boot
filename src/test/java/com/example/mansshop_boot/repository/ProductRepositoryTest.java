@@ -17,6 +17,7 @@ import com.example.mansshop_boot.domain.entity.ProductOption;
 import com.example.mansshop_boot.repository.classification.ClassificationRepository;
 import com.example.mansshop_boot.repository.product.ProductOptionRepository;
 import com.example.mansshop_boot.repository.product.ProductRepository;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,7 +36,6 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
 @Transactional
@@ -50,6 +50,9 @@ public class ProductRepositoryTest {
     @Autowired
     private ProductOptionRepository productOptionRepository;
 
+    @Autowired
+    private EntityManager em;
+
     private Product updateProduct;
 
     private final int PRODUCT_SIZE = 30;
@@ -58,7 +61,7 @@ public class ProductRepositoryTest {
 
     private List<Product> productList;
 
-    @BeforeAll
+    @BeforeEach
     void init() {
         List<Classification> classificationList = ClassificationFixture.createClassification();
         List<Product> productFixtureList = ProductFixture.createDefaultProductByOUTER(PRODUCT_SIZE);
@@ -326,6 +329,10 @@ public class ProductRepositoryTest {
         AdminDiscountPatchDTO patchDTO = new AdminDiscountPatchDTO(productIdList, 10);
 
         assertDoesNotThrow(() -> productRepository.patchProductDiscount(patchDTO));
+
+        em.flush();
+        em.clear();
+
         Product updateData = productRepository.findById(updateProduct.getId()).orElseThrow(IllegalArgumentException::new);
 
         assertEquals(10, updateData.getProductDiscount());
@@ -348,6 +355,10 @@ public class ProductRepositoryTest {
         productMap.put(updateProduct.getId(), 100);
 
         assertDoesNotThrow(() -> productRepository.patchProductSalesQuantity(productMap));
+
+        em.flush();
+        em.clear();
+
         Product updateData = productRepository.findById(updateProduct.getId()).orElseThrow(IllegalArgumentException::new);
         assertEquals(updateSalesQuantity, updateData.getProductSalesQuantity());
     }

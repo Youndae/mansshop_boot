@@ -15,6 +15,7 @@ import com.example.mansshop_boot.repository.member.MemberRepository;
 import com.example.mansshop_boot.repository.product.ProductOptionRepository;
 import com.example.mansshop_boot.repository.product.ProductRepository;
 import com.example.mansshop_boot.repository.productLike.ProductLikeRepository;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,10 +30,13 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
+@Transactional
 public class ProductLikeRepositoryTest {
+
+    @Autowired
+    private EntityManager em;
 
     @Autowired
     private MemberRepository memberRepository;
@@ -58,7 +62,7 @@ public class ProductLikeRepositoryTest {
 
     private List<ProductLike> productLikeList;
 
-    @BeforeAll
+    @BeforeEach
     void init(){
         MemberAndAuthFixtureDTO memberAndAuthFixture = MemberAndAuthFixture.createDefaultMember(5);
         List<Classification> classificationList = ClassificationFixture.createClassification();
@@ -100,9 +104,13 @@ public class ProductLikeRepositoryTest {
     @DisplayName(value = "관심상품 데이터 제거")
     @Transactional
     void deleteByUserIdAndProductId() {
+        long deleteId = productLike.getId();
         assertDoesNotThrow(() -> productLikeRepository.deleteByUserIdAndProductId(productLike));
 
-        ProductLike deleteEntity = productLikeRepository.findById(productLike.getId()).orElse(null);
+        em.flush();
+        em.clear();
+
+        ProductLike deleteEntity = productLikeRepository.findById(deleteId).orElse(null);
         assertNull(deleteEntity);
     }
 
@@ -132,7 +140,7 @@ public class ProductLikeRepositoryTest {
         for(ProductLikeDTO resultData : result) {
             boolean flag = false;
             for(ProductLike data : memberProductLikeList) {
-                if(resultData.likeId() == data.getId()){
+                if(resultData.likeId().equals(data.getId())){
                     assertEquals(resultData.productId(), data.getProduct().getId());
                     flag = true;
                     break;

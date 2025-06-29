@@ -15,7 +15,8 @@ import java.util.*;
 public class SalesSummaryFixture {
 
     public static List<ProductSalesSummary> createProductSalesSummary(List<Product> products) {
-        LocalDate date = LocalDate.now().minusMonths(24);
+        LocalDate startDateYearMonth = LocalDate.now().minusMonths(24);
+        LocalDate date = LocalDate.of(startDateYearMonth.getYear(), startDateYearMonth.getMonth(), 1);
         List<ProductSalesSummary> result = new ArrayList<>();
         for(int i = 0; i < 24; i++) {
 
@@ -188,8 +189,8 @@ public class SalesSummaryFixture {
                 int key = summary.getPeriodMonth().getMonthValue();
                 TestSalesSummaryDTO value = salesMap.getOrDefault(key, new TestSalesSummaryDTO());
 
-                value.setSalesQuantity(summary.getProduct().getProductSalesQuantity());
-                value.addFieldsValue(summary.getSales(), 0, summary.getOrderQuantity());
+//                value.setSalesQuantity(summary.getProduct().getProductSalesQuantity());
+                value.addFieldsValue(summary.getSales(), summary.getSalesQuantity(), summary.getOrderQuantity());
 
                 salesMap.put(key, value);
             }

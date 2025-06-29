@@ -2,6 +2,7 @@ package com.example.mansshop_boot.service.integration;
 
 import com.example.mansshop_boot.Fixture.*;
 import com.example.mansshop_boot.Fixture.domain.member.MemberAndAuthFixtureDTO;
+import com.example.mansshop_boot.domain.enumeration.OrderStatus;
 import com.example.mansshop_boot.util.PaginationUtils;
 import com.example.mansshop_boot.MansShopBootApplication;
 import com.example.mansshop_boot.config.customException.exception.CustomAccessDeniedException;
@@ -913,6 +914,11 @@ public class MyPageServiceIT {
                 .filter(v -> !v.isOrderReviewStatus())
                 .toList()
                 .get(0);
+
+        ProductOrder orderFixture = fixture.getProductOrder();
+        orderFixture.setOrderStat(OrderStatus.COMPLETE.getStatusStr());
+        productOrderRepository.save(orderFixture);
+
         Principal fixturePrincipal = () -> fixture.getProductOrder().getMember().getUserId();
         MyPagePostReviewDTO postReviewDTO = new MyPagePostReviewDTO(
                 fixture.getProduct().getId(),

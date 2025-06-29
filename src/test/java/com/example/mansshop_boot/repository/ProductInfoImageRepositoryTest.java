@@ -8,6 +8,7 @@ import com.example.mansshop_boot.repository.classification.ClassificationReposit
 import com.example.mansshop_boot.repository.product.ProductInfoImageRepository;
 import com.example.mansshop_boot.repository.product.ProductOptionRepository;
 import com.example.mansshop_boot.repository.product.ProductRepository;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,9 +18,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
+@Transactional
 public class ProductInfoImageRepositoryTest {
 
     @Autowired
@@ -38,7 +39,7 @@ public class ProductInfoImageRepositoryTest {
 
     private Product product;
 
-    @BeforeAll
+    @BeforeEach
     void init(){
         List<Classification> classificationList = ClassificationFixture.createClassification();
         List<Product> productFixtureList = ProductFixture.createDefaultProductByOUTER(PRODUCT_SIZE);

@@ -27,17 +27,6 @@ public class ProductLikeDSLRepositoryImpl implements ProductLikeDSLRepository{
 
     @Override
     public int countByUserIdAndProductId(String userId, String productId) {
-        /*List<Long> count =  jpaQueryFactory
-                                .select(productLike.count())
-                                .from(productLike)
-                                .where(
-                                        productLike.member.userId.eq(userId)
-                                                .and(
-                                                        productLike.product.id.eq(productId)
-                                                )
-                                )
-                                .fetch();*/
-
         return jpaQueryFactory.select(productLike.count())
                 .from(productLike)
                 .where(
@@ -48,8 +37,6 @@ public class ProductLikeDSLRepositoryImpl implements ProductLikeDSLRepository{
                 )
                 .fetchOne()
                 .intValue();
-
-//        return count.get(0).intValue();
     }
 
     @Override

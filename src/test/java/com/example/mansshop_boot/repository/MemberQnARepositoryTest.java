@@ -18,6 +18,7 @@ import com.example.mansshop_boot.repository.auth.AuthRepository;
 import com.example.mansshop_boot.repository.member.MemberRepository;
 import com.example.mansshop_boot.repository.memberQnA.MemberQnARepository;
 import com.example.mansshop_boot.repository.qnaClassification.QnAClassificationRepository;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,9 +32,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @ActiveProfiles("test")
+@Transactional
 public class MemberQnARepositoryTest {
 
     @Autowired
@@ -56,7 +57,7 @@ public class MemberQnARepositoryTest {
 
     private int newDataCount;
 
-    @BeforeAll
+    @BeforeEach
     void init() {
         MemberAndAuthFixtureDTO memberFixtureDTO = MemberAndAuthFixture.createDefaultMember(5);
         List<Member> memberList = memberFixtureDTO.memberList();

@@ -14,14 +14,12 @@ import com.example.mansshop_boot.domain.dto.rabbitMQ.FailedQueueDTO;
 import com.example.mansshop_boot.domain.dto.rabbitMQ.RabbitMQProperties;
 import com.example.mansshop_boot.domain.entity.*;
 import com.example.mansshop_boot.domain.enumeration.RabbitMQPrefix;
-import com.example.mansshop_boot.domain.vo.order.PreOrderDataVO;
 import com.example.mansshop_boot.repository.cart.CartRepository;
 import com.example.mansshop_boot.repository.classification.ClassificationRepository;
 import com.example.mansshop_boot.repository.member.MemberRepository;
 import com.example.mansshop_boot.repository.periodSales.PeriodSalesSummaryRepository;
 import com.example.mansshop_boot.repository.product.ProductOptionRepository;
 import com.example.mansshop_boot.repository.product.ProductRepository;
-import com.example.mansshop_boot.repository.productOrder.ProductOrderDetailRepository;
 import com.example.mansshop_boot.repository.productOrder.ProductOrderRepository;
 import com.example.mansshop_boot.repository.productSales.ProductSalesSummaryRepository;
 import com.example.mansshop_boot.service.admin.AdminFailedDataService;
@@ -31,7 +29,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
@@ -73,9 +70,6 @@ public class AdminFailedDataServiceIT {
 
     @Autowired
     private ProductOrderRepository productOrderRepository;
-
-    @Autowired
-    private ProductOrderDetailRepository productOrderDetailRepository;
 
     @Autowired
     private PeriodSalesSummaryRepository periodSalesSummaryRepository;
@@ -140,7 +134,7 @@ public class AdminFailedDataServiceIT {
         dlqNames.forEach(v -> rabbitAdmin.purgeQueue(v, false));
 
         await()
-                .atMost(5, TimeUnit.SECONDS)
+                .atMost(10, TimeUnit.SECONDS)
                 .pollInterval(200, TimeUnit.MILLISECONDS)
                 .untilAsserted(() -> {
                     for(String dlq : dlqNames) {

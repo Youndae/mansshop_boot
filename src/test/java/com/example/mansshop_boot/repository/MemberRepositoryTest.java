@@ -10,6 +10,7 @@ import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.entity.Member;
 import com.example.mansshop_boot.repository.auth.AuthRepository;
 import com.example.mansshop_boot.repository.member.MemberRepository;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -24,10 +25,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = MansShopBootApplication.class)
 @EntityScan(basePackages = "com.example")
 @ActiveProfiles("test")
+@Transactional
 public class MemberRepositoryTest {
 
     @Autowired
@@ -40,7 +41,7 @@ public class MemberRepositoryTest {
 
     private Member admin;
 
-    @BeforeAll
+    @BeforeEach
     void init() {
         MemberAndAuthFixtureDTO fixtureDTO = MemberAndAuthFixture.createDefaultMember(10);
         memberRepository.saveAll(fixtureDTO.memberList());
@@ -60,7 +61,7 @@ public class MemberRepositoryTest {
         Member member = memberList.get(0);
 
         Member result = memberRepository.findByNickname(member.getNickname());
-        System.out.println("test createdAt : " + result.getCreatedAt());
+
         assertNotNull(result);
         assertEquals(member.getNickname(), result.getNickname());
     }

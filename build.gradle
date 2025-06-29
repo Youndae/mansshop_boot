@@ -79,6 +79,7 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+    maxParallelForks = 1
 }
 
 def frontendDir = "$projectDir/src/main/frontend"

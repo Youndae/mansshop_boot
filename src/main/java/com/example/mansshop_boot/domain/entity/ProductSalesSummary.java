@@ -13,7 +13,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "productSalesSummary")
-@ToString
 public class ProductSalesSummary {
 
     @Id
@@ -49,5 +48,19 @@ public class ProductSalesSummary {
         this.sales += orderProductDTO.getDetailPrice();
         this.salesQuantity += orderProductDTO.getDetailCount();
         this.orderQuantity += 1;
+    }
+
+    @Override
+    public String toString() {
+        return "ProductSalesSummary{" +
+                "id=" + id +
+                ", periodMonth=" + periodMonth +
+                ", classification=" + classification.getId() +
+                ", productName=" + product.getProductName() +
+                ", productOptionId=" + productOption.getId() +
+                ", sales=" + sales +
+                ", salesQuantity=" + salesQuantity +
+                ", orderQuantity=" + orderQuantity +
+                '}';
     }
 }

@@ -124,10 +124,7 @@ public class AdminOrderServiceIT {
 
         Long cachingResult = redisTemplate.opsForValue().get(cachingKey);
 
-        assertNotNull(cachingResult);
-        assertEquals(0, cachingResult);
-
-        redisTemplate.delete(cachingKey);
+        assertNull(cachingResult);
     }
 
     @Test

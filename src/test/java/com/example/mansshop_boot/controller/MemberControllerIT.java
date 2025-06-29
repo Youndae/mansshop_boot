@@ -429,26 +429,23 @@ public class MemberControllerIT {
     @DisplayName(value = "oAuth 사용자의 정식 토큰 발급 요청. 임시 토큰이 탈취된 것으로 판단 된 경우")
     void oAuthIssueTokenStealingTemporaryToken() throws Exception {
         tokenFixture.createAndRedisSaveTemporaryToken(oAuthMember);
+        Thread.sleep(3000);
+
         String notSaveTemporaryToken = tokenFixture.createTemporaryToken(oAuthMember);
 
-        await()
-                .atMost(3, TimeUnit.SECONDS)
-                .pollInterval(20, TimeUnit.MILLISECONDS)
-                .untilAsserted(() -> {
-                    MvcResult result = mockMvc.perform(get(URL_PREFIX + "oAuth/token")
-                                    .cookie(new Cookie(temporaryHeader, notSaveTemporaryToken)))
-                            .andExpect(status().is(800))
-                            .andReturn();
+        MvcResult result = mockMvc.perform(get(URL_PREFIX + "oAuth/token")
+                        .cookie(new Cookie(temporaryHeader, notSaveTemporaryToken)))
+                .andExpect(status().is(800))
+                .andReturn();
 
-                    String content = result.getResponse().getContentAsString();
-                    ExceptionEntity response = om.readValue(
-                            content,
-                            new TypeReference<>() {}
-                    );
+        String content = result.getResponse().getContentAsString();
+        ExceptionEntity response = om.readValue(
+                content,
+                new TypeReference<>() {}
+        );
 
-                    assertNotNull(response);
-                    assertEquals(ErrorCode.TOKEN_STEALING.getMessage(), response.errorMessage());
-                });
+        assertNotNull(response);
+        assertEquals(ErrorCode.TOKEN_STEALING.getMessage(), response.errorMessage());
 
         redisTemplate.delete(oAuthMember.getUserId());
     }
