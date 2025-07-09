@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../modules/member/memberSlice';
+import { toast } from 'react-toastify';
 
 import { postLogout } from '../../modules/member/services/memberService';
+import { connect, disconnect } from '../services/webSocketService';
 
 import { handleLocationPathToLogin } from '../utils/locationPathUtils';
 import { RESPONSE_MESSAGE } from '../constants/responseMessageType';
@@ -15,6 +17,7 @@ function Navbar() {
 	const status = useSelector((state) => state.member);
 	const loginStatus = status.loginStatus;
 	const adminStatus = status.role === 'admin';
+	const userId = status.id;
 	const { pathname } = useLocation();
 
 	const [keyword, setKeyword] = useState('');
@@ -25,6 +28,36 @@ function Navbar() {
 	useEffect(() => {
 		setKeyword('');
 	}, [pathname]);
+
+	const handleNewNotification = useCallback((notification) => {
+		toast.info(notification.title, {
+			position: 'top-right',
+			autoClose: 5000,
+			hideProgressBar: false,
+			closeOnClick: true,
+			pauseOnHover: true,
+			draggable: true,
+			onClick: () => {
+				navigate(`/my-page/notification`);
+			}
+		})
+	}, [navigate]);
+
+	useEffect(() => {
+		if(loginStatus && userId) {
+			connect(userId, handleNewNotification);
+		} else {
+			disconnect();
+			console.log('WebSocket disconnected');
+		}
+
+		return () => {
+			if(loginStatus && userId)
+				disconnect();
+		}
+	}, [loginStatus, userId, handleNewNotification]);
+
+	
 
 	const handleKeywordOnchange = (e) => {
 		setKeyword(e.target.value);

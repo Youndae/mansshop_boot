@@ -40,6 +40,7 @@ function MyPageSideNav(props) {
                         {qnaChild}
                     </li>
                     <li><Link to={'/my-page/review'}>리뷰 내역</Link></li>
+					<li><Link to={'/my-page/notification'}>알림 목록</Link></li>
                     <li><Link to={'/my-page/info'}>정보 수정</Link></li>
                 </ul>
             </div>

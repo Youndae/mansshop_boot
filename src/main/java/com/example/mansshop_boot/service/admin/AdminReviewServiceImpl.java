@@ -4,13 +4,17 @@ import com.example.mansshop_boot.domain.dto.admin.business.AdminReviewDTO;
 import com.example.mansshop_boot.domain.dto.admin.in.AdminReviewRequestDTO;
 import com.example.mansshop_boot.domain.dto.admin.out.AdminReviewDetailDTO;
 import com.example.mansshop_boot.domain.dto.cache.CacheRequest;
+import com.example.mansshop_boot.domain.dto.notification.business.NotificationSendDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.PagingMappingDTO;
+import com.example.mansshop_boot.domain.dto.rabbitMQ.RabbitMQProperties;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
 import com.example.mansshop_boot.domain.entity.Member;
 import com.example.mansshop_boot.domain.entity.ProductReview;
 import com.example.mansshop_boot.domain.entity.ProductReviewReply;
 import com.example.mansshop_boot.domain.enumeration.AdminListType;
+import com.example.mansshop_boot.domain.enumeration.NotificationType;
+import com.example.mansshop_boot.domain.enumeration.RabbitMQPrefix;
 import com.example.mansshop_boot.domain.enumeration.RedisCaching;
 import com.example.mansshop_boot.domain.enumeration.Result;
 import com.example.mansshop_boot.repository.member.MemberRepository;
@@ -18,6 +22,8 @@ import com.example.mansshop_boot.repository.productReview.ProductReviewReplyRepo
 import com.example.mansshop_boot.repository.productReview.ProductReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -35,6 +41,10 @@ public class AdminReviewServiceImpl implements AdminReviewService  {
     private final ProductReviewReplyRepository productReviewReplyRepository;
 
     private final MemberRepository memberRepository;
+
+	private final RabbitTemplate rabbitTemplate;
+
+	private final RabbitMQProperties rabbitMQProperties;
 
     /**
      *
@@ -114,6 +124,17 @@ public class AdminReviewServiceImpl implements AdminReviewService  {
         reviewEntity.setStatus(true);
         productReviewRepository.save(reviewEntity);
         productReviewReplyRepository.save(entity);
+
+		rabbitTemplate.convertAndSend(
+				rabbitMQProperties.getExchange().get(RabbitMQPrefix.EXCHANGE_NOTIFICATION.getKey()).getName(),
+				rabbitMQProperties.getQueue().get(RabbitMQPrefix.QUEUE_NOTIFICATION.getKey()).getRouting(),
+				new NotificationSendDTO(
+					reviewEntity.getMember().getUserId(), 
+					NotificationType.REVIEW_REPLY, 
+					NotificationType.REVIEW_REPLY.getTitle(), 
+					null
+				)
+			);
 
         return Result.OK.getResultKey();
     }

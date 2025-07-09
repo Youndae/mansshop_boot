@@ -9,6 +9,8 @@ import {
     Routes,
     Route
 } from "react-router-dom";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 
@@ -54,6 +56,7 @@ import MyPageMemberQnAModify from './modules/mypage/pages/qna/MyPageMemberQnAMod
 import MyPageReview from './modules/mypage/pages/review/MyPageReview';
 import MyPageReviewWrite from './modules/mypage/pages/review/MyPageReviewWrite';
 import MyPageReviewModify from './modules/mypage/pages/review/MyPageReviewModify';
+import MyPageNotification from './modules/mypage/pages/notification/MyPageNotification';
 import MyPageUpdateInfo from './modules/mypage/pages/info/MyPageUpdateInfo';
 
 // admin
@@ -149,8 +152,8 @@ function App() {
 				<Route path='my-page/review' element={<MyPageReview />} />
 				<Route path='my-page/review/write' element={<MyPageReviewWrite />} />
 				<Route path='my-page/review/modify/:reviewId' element={<MyPageReviewModify />} />
+				<Route path='my-page/notification' element={<MyPageNotification />} />
 				<Route path='my-page/info' element={<MyPageUpdateInfo />} />
-
 
 				<Route path='admin/product' element={<AdminProductList />} />
 				<Route path='admin/product/:productId' element={<AdminProductDetail />}/>
@@ -187,6 +190,18 @@ function App() {
 				<Route path='error' element={<Error />} />
 				<Route path='/*' element={<Error />} />
 			</Routes>
+			<ToastContainer
+				position="top-right"
+				autoClose={5000}
+				hideProgressBar={false}
+				newestOnTop={false}
+				closeOnClick
+				rtl={false}
+				pauseOnFocusLoss
+				draggable
+				pauseOnHover
+				theme="light"
+			/>
 		</div>
 	</BrowserRouter>
   )

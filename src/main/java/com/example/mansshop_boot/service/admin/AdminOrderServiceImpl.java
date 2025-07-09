@@ -5,17 +5,23 @@ import com.example.mansshop_boot.domain.dto.admin.business.AdminOrderDetailDTO;
 import com.example.mansshop_boot.domain.dto.admin.business.AdminOrderDetailListDTO;
 import com.example.mansshop_boot.domain.dto.admin.out.AdminOrderResponseDTO;
 import com.example.mansshop_boot.domain.dto.cache.CacheRequest;
+import com.example.mansshop_boot.domain.dto.notification.business.NotificationSendDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.PagingMappingDTO;
+import com.example.mansshop_boot.domain.dto.rabbitMQ.RabbitMQProperties;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
 import com.example.mansshop_boot.domain.entity.ProductOrder;
+import com.example.mansshop_boot.domain.enumeration.NotificationType;
 import com.example.mansshop_boot.domain.enumeration.OrderStatus;
+import com.example.mansshop_boot.domain.enumeration.RabbitMQPrefix;
 import com.example.mansshop_boot.domain.enumeration.RedisCaching;
 import com.example.mansshop_boot.domain.enumeration.Result;
 import com.example.mansshop_boot.repository.productOrder.ProductOrderDetailRepository;
 import com.example.mansshop_boot.repository.productOrder.ProductOrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -32,6 +38,10 @@ public class AdminOrderServiceImpl implements AdminOrderService{
     private final ProductOrderRepository productOrderRepository;
 
     private final ProductOrderDetailRepository productOrderDetailRepository;
+
+	private final RabbitTemplate rabbitTemplate;
+
+	private final RabbitMQProperties rabbitMQProperties;
 
     /**
      *
@@ -131,6 +141,17 @@ public class AdminOrderServiceImpl implements AdminOrderService{
         ProductOrder productOrder = productOrderRepository.findById(orderId).orElseThrow(IllegalArgumentException::new);
         productOrder.setOrderStat(OrderStatus.PREPARATION.getStatusStr());
         productOrderRepository.save(productOrder);
+
+		rabbitTemplate.convertAndSend(
+			rabbitMQProperties.getExchange().get(RabbitMQPrefix.EXCHANGE_NOTIFICATION.getKey()).getName(),
+			rabbitMQProperties.getQueue().get(RabbitMQPrefix.QUEUE_NOTIFICATION.getKey()).getRouting(),
+			new NotificationSendDTO(
+				productOrder.getMember().getUserId(), 
+				NotificationType.ORDER_STATUS, 
+				NotificationType.ORDER_STATUS.getTitle(), 
+				null
+			)
+		);
 
         return Result.OK.getResultKey();
     }

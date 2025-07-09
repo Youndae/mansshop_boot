@@ -5,10 +5,14 @@ import com.example.mansshop_boot.domain.dto.admin.out.AdminQnAListResponseDTO;
 import com.example.mansshop_boot.domain.dto.cache.CacheRequest;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyInsertDTO;
+import com.example.mansshop_boot.domain.dto.notification.business.NotificationSendDTO;
 import com.example.mansshop_boot.domain.dto.pageable.AdminOrderPageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.PagingMappingDTO;
+import com.example.mansshop_boot.domain.dto.rabbitMQ.RabbitMQProperties;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
 import com.example.mansshop_boot.domain.entity.*;
+import com.example.mansshop_boot.domain.enumeration.NotificationType;
+import com.example.mansshop_boot.domain.enumeration.RabbitMQPrefix;
 import com.example.mansshop_boot.domain.enumeration.RedisCaching;
 import com.example.mansshop_boot.domain.enumeration.Result;
 import com.example.mansshop_boot.repository.member.MemberRepository;
@@ -20,6 +24,8 @@ import com.example.mansshop_boot.service.MyPageService;
 import com.example.mansshop_boot.service.PrincipalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -46,6 +52,10 @@ public class AdminQnAServiceImpl implements AdminQnAService {
     private final MemberQnARepository memberQnARepository;
 
     private final QnAClassificationRepository qnAClassificationRepository;
+
+	private final RabbitTemplate rabbitTemplate;
+
+	private final RabbitMQProperties rabbitMQProperties;
 
     /**
      *
@@ -113,7 +123,20 @@ public class AdminQnAServiceImpl implements AdminQnAService {
                 .build();
 
         productQnAReplyRepository.save(productQnAReply);
-        patchProductQnAStatus(productQnA);;
+        patchProductQnAStatus(productQnA);
+
+		String notifictionTitle = productQnA.getProduct().getProductName() + NotificationType.PRODUCT_QNA_REPLY.getTitle();
+
+		rabbitTemplate.convertAndSend(
+			rabbitMQProperties.getExchange().get(RabbitMQPrefix.EXCHANGE_NOTIFICATION.getKey()).getName(),
+			rabbitMQProperties.getQueue().get(RabbitMQPrefix.QUEUE_NOTIFICATION.getKey()).getRouting(),
+			new NotificationSendDTO(
+				productQnA.getMember().getUserId(), 
+				NotificationType.PRODUCT_QNA_REPLY, 
+				notifictionTitle, 
+				productQnA.getId()
+			)
+		);
 
         return Result.OK.getResultKey();
     }
@@ -174,11 +197,16 @@ public class AdminQnAServiceImpl implements AdminQnAService {
     @Override
     public String patchMemberQnAComplete(long qnaId) {
         MemberQnA memberQnA = memberQnARepository.findById(qnaId).orElseThrow(IllegalArgumentException::new);
-        memberQnA.setMemberQnAStat(true);
-        memberQnARepository.save(memberQnA);
-
-        return Result.OK.getResultKey();
+        
+        return patchMemberQnAStatus(memberQnA);
     }
+
+	private String patchMemberQnAStatus(MemberQnA memberQnA) {
+		memberQnA.setMemberQnAStat(true);
+		memberQnARepository.save(memberQnA);
+
+		return Result.OK.getResultKey();
+	}
 
     /**
      *
@@ -192,7 +220,21 @@ public class AdminQnAServiceImpl implements AdminQnAService {
         String postReplyResult = myPageService.postMemberQnAReply(insertDTO, principal);
 
         if(postReplyResult.equals(Result.OK.getResultKey())){
-            return patchMemberQnAComplete(insertDTO.qnaId());
+			MemberQnA memberQnA = memberQnARepository.findById(insertDTO.qnaId()).orElseThrow(IllegalArgumentException::new);
+			String response = patchMemberQnAStatus(memberQnA);
+			String notifictionTitle = memberQnA.getMemberQnATitle() + NotificationType.MEMBER_QNA_REPLY.getTitle();
+			rabbitTemplate.convertAndSend(
+				rabbitMQProperties.getExchange().get(RabbitMQPrefix.EXCHANGE_NOTIFICATION.getKey()).getName(),
+				rabbitMQProperties.getQueue().get(RabbitMQPrefix.QUEUE_NOTIFICATION.getKey()).getRouting(),
+				new NotificationSendDTO(
+					memberQnA.getMember().getUserId(), 
+					NotificationType.MEMBER_QNA_REPLY, 
+					notifictionTitle, 
+					insertDTO.qnaId()
+				)
+			);
+
+            return response;
         }else {
             throw new IllegalArgumentException();
         }

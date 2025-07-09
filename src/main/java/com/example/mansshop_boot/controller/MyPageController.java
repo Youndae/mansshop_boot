@@ -13,11 +13,14 @@ import com.example.mansshop_boot.domain.dto.mypage.qna.in.MemberQnAModifyDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.in.QnAReplyInsertDTO;
 import com.example.mansshop_boot.domain.dto.mypage.qna.out.*;
+import com.example.mansshop_boot.domain.dto.notification.out.NotificationDTO;
+import com.example.mansshop_boot.domain.dto.notification.out.NotificationListDTO;
 import com.example.mansshop_boot.domain.dto.pageable.LikePageDTO;
 import com.example.mansshop_boot.domain.dto.pageable.OrderPageDTO;
 import com.example.mansshop_boot.domain.dto.response.*;
 import com.example.mansshop_boot.domain.dto.response.serviceResponse.PagingListDTO;
 import com.example.mansshop_boot.service.MyPageService;
+import com.example.mansshop_boot.service.NotificationService;
 import com.example.mansshop_boot.service.ResponseMappingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -44,6 +47,8 @@ public class MyPageController {
     private final MyPageService myPageService;
 
     private final ResponseMappingService responseMappingService;
+
+	private final NotificationService notificationService;
 
     /**
      *
@@ -531,4 +536,16 @@ public class MyPageController {
                 .body(new ResponseMessageDTO(responseMessage));
     }
 
+
+	@Operation(summary = "회원의 알림 리스트 조회")
+	@DefaultApiResponse
+	@SwaggerAuthentication
+	@GetMapping("/notification")
+	public ResponseEntity<PagingResponseDTO<NotificationListDTO>> getNotification(@RequestParam(name = "page", required = false, defaultValue = "1") int page, 
+																			Principal principal) {
+		MyPagePageDTO pageDTO = new MyPagePageDTO(page);
+		PagingListDTO<NotificationListDTO> responseDTO = notificationService.getNotificationList(pageDTO, principal);
+
+		return responseMappingService.mappingPagingResponseDTO(responseDTO);
+	}
 }

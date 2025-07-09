@@ -11,7 +11,6 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -108,10 +107,20 @@ public class RabbitMQConfig {
         return createQueueWithDLQExchange(RabbitMQPrefix.QUEUE_FAILED_ORDER.getKey(), RabbitMQPrefix.EXCHANGE_ORDER.getKey());
     }
 
+	@Bean
+	public Queue notificationQueue() {
+		return createQueueWithDLQExchange(RabbitMQPrefix.QUEUE_NOTIFICATION.getKey(), RabbitMQPrefix.EXCHANGE_NOTIFICATION.getKey());
+	}
+
     @Bean
     public DirectExchange orderExchange() {
         return createExchange(exchange.get(RabbitMQPrefix.EXCHANGE_ORDER.getKey()).getName(), true);
     }
+
+	@Bean
+	public DirectExchange notificationExchange() {
+		return createExchange(exchange.get(RabbitMQPrefix.EXCHANGE_NOTIFICATION.getKey()).getName(), true);
+	}
 
     @Bean
     public Binding orderProductBinding() {
@@ -166,6 +175,14 @@ public class RabbitMQConfig {
         );
     }
 
+	@Bean
+	public Binding notificationBinding() {
+		return setBinding(notificationQueue(),
+				notificationExchange(),
+				queue.get(RabbitMQPrefix.QUEUE_NOTIFICATION.getKey()).getRouting()
+		);
+	}
+
     @Bean
     public Queue orderProductDLQ() {
         return createQueue(queue.get(RabbitMQPrefix.QUEUE_ORDER_PRODUCT.getKey()).getDlq());
@@ -196,10 +213,20 @@ public class RabbitMQConfig {
         return createQueue(queue.get(RabbitMQPrefix.QUEUE_FAILED_ORDER.getKey()).getDlq());
     }
 
+	@Bean
+	public Queue notificationDLQ() {
+		return createQueue(queue.get(RabbitMQPrefix.QUEUE_NOTIFICATION.getKey()).getDlq());
+	}
+
     @Bean
     public DirectExchange orderDLQExchange() {
         return createExchange(exchange.get(RabbitMQPrefix.EXCHANGE_ORDER.getKey()).getDlq(), true);
     }
+
+	@Bean
+	public DirectExchange notificationDLQExchange() {
+		return createExchange(exchange.get(RabbitMQPrefix.EXCHANGE_NOTIFICATION.getKey()).getDlq(), true);
+	}
 
     @Bean
     public Binding orderProductDLQBinding() {
@@ -232,7 +259,7 @@ public class RabbitMQConfig {
     public Binding productSummaryDLQBinding() {
 
         return setBinding(productSummaryDLQ(),
-                createExchange(exchange.get(RabbitMQPrefix.EXCHANGE_ORDER.getKey()).getDlq(), true),
+				orderDLQExchange(),
                 queue.get(RabbitMQPrefix.QUEUE_PRODUCT_SUMMARY.getKey()).getDlqRouting()
         );
     }
@@ -241,7 +268,7 @@ public class RabbitMQConfig {
     public Binding orderCartDLQBinding() {
 
         return setBinding(orderCartDLQ(),
-                createExchange(exchange.get(RabbitMQPrefix.EXCHANGE_ORDER.getKey()).getDlq(), true),
+				orderDLQExchange(),
                 queue.get(RabbitMQPrefix.QUEUE_ORDER_CART.getKey()).getDlqRouting()
         );
     }
@@ -249,9 +276,17 @@ public class RabbitMQConfig {
     @Bean
     public Binding failedOrderDLQBinding() {
 
-        return setBinding(orderCartDLQ(),
-                createExchange(exchange.get(RabbitMQPrefix.EXCHANGE_ORDER.getKey()).getDlq(), true),
+        return setBinding(failedOrderDLQ(),
+				orderDLQExchange(),
                 queue.get(RabbitMQPrefix.QUEUE_FAILED_ORDER.getKey()).getDlqRouting()
         );
     }
+
+	@Bean
+	public Binding notificationDLQBinding() {
+		return setBinding(notificationDLQ(),
+				notificationDLQExchange(),
+				queue.get(RabbitMQPrefix.QUEUE_NOTIFICATION.getKey()).getDlqRouting()
+		);
+	}
 }

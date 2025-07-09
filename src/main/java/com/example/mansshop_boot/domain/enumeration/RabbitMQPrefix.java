@@ -13,7 +13,10 @@ public enum RabbitMQPrefix {
     QUEUE_PERIOD_SUMMARY("periodSalesSummary"),
     QUEUE_PRODUCT_SUMMARY("productSalesSummary"),
     QUEUE_ORDER_CART("orderCart"),
-    QUEUE_FAILED_ORDER("failedOrder");
+    QUEUE_FAILED_ORDER("failedOrder"),
+
+	EXCHANGE_NOTIFICATION("notification"),
+	QUEUE_NOTIFICATION("notificationSend");
 
     private final String key;
 }
