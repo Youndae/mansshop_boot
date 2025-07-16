@@ -125,15 +125,15 @@ public class AdminQnAServiceImpl implements AdminQnAService {
         productQnAReplyRepository.save(productQnAReply);
         patchProductQnAStatus(productQnA);
 
-		String notifictionTitle = productQnA.getProduct().getProductName() + NotificationType.PRODUCT_QNA_REPLY.getTitle();
+		String notificationTitle = productQnA.getProduct().getProductName() + NotificationType.PRODUCT_QNA_REPLY.getTitle();
 
 		rabbitTemplate.convertAndSend(
 			rabbitMQProperties.getExchange().get(RabbitMQPrefix.EXCHANGE_NOTIFICATION.getKey()).getName(),
 			rabbitMQProperties.getQueue().get(RabbitMQPrefix.QUEUE_NOTIFICATION.getKey()).getRouting(),
 			new NotificationSendDTO(
 				productQnA.getMember().getUserId(), 
-				NotificationType.PRODUCT_QNA_REPLY, 
-				notifictionTitle, 
+				NotificationType.PRODUCT_QNA_REPLY,
+                notificationTitle,
 				productQnA.getId()
 			)
 		);
@@ -222,14 +222,14 @@ public class AdminQnAServiceImpl implements AdminQnAService {
         if(postReplyResult.equals(Result.OK.getResultKey())){
 			MemberQnA memberQnA = memberQnARepository.findById(insertDTO.qnaId()).orElseThrow(IllegalArgumentException::new);
 			String response = patchMemberQnAStatus(memberQnA);
-			String notifictionTitle = memberQnA.getMemberQnATitle() + NotificationType.MEMBER_QNA_REPLY.getTitle();
+			String notificationTitle = memberQnA.getMemberQnATitle() + NotificationType.MEMBER_QNA_REPLY.getTitle();
 			rabbitTemplate.convertAndSend(
 				rabbitMQProperties.getExchange().get(RabbitMQPrefix.EXCHANGE_NOTIFICATION.getKey()).getName(),
 				rabbitMQProperties.getQueue().get(RabbitMQPrefix.QUEUE_NOTIFICATION.getKey()).getRouting(),
 				new NotificationSendDTO(
 					memberQnA.getMember().getUserId(), 
-					NotificationType.MEMBER_QNA_REPLY, 
-					notifictionTitle, 
+					NotificationType.MEMBER_QNA_REPLY,
+                    notificationTitle,
 					insertDTO.qnaId()
 				)
 			);

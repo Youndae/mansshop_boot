@@ -36,7 +36,8 @@ out/
 src/main/generated/
 logback-spring/
 logback-test-spring/
-
+.env.dev
+.env.test
 
 ### NetBeans ###
 /nbproject/private/

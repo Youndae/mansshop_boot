@@ -28,8 +28,10 @@
 <img src="src/main/resources/README_image/structure.jpg">
 
 * React 기반 Frontend와 Java, Spring Boot 기반 Backend의 통합 빌드
+  * 통합 빌드 목적
+    * Frontend와 Backend가 분리된 환경은 경험해봤으나, 통합된 환경은 경험해보지 못했기에 여러 환경에 대한 관심과 경험을 쌓기 위한 설계
   * Gradle build를 통해 frontend가 같이 빌드
-  * 백엔드에서 WebController라는 이름의 컨트롤러를 통해 forward:index.html을 반환
+  * Backend에서 WebController라는 이름의 컨트롤러를 통해 forward:index.html을 반환
   * Frontend에서는 Axios를 통한 통신
 * Frontend 구조 설계
   * src/main/frontend에 위치
@@ -53,13 +55,13 @@
 <br />
 
 # 개발 환경
-|Category| Tech Stack|
-|---|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|Backend| - Spring Boot 3.2.5 <br/> - JDK 17 <br/> - Gradle <br/> - Spring Data JPA <br/> - QueryDSL <br/> - RabbitMQ 3.12 Management <br/> - SpringSecurity <br/> - JWT <br/> - OAuth2(Google, Kakao, Naver) <br/> - Swagger( springdoc-openapi 2.6.0 ) <br/> - Java Mail <br/> - I'mport 결제 API ( iamport-rest-client )|
-|Frontend| - React 18.3.1 <br/> - Axios <br/> - reduxjs/toolkit <br/> - react-redus <br/> - redux-persist <br/> - react-dom <br/> - http-proxy-middleware <br/> - styled-components <br/> - dayjs <br/> - Kakao 우편번호 서비스 API ( react-daum-postcode )|
-|Database| - MySQL <br/> - Redis|
-|Environment| - IntelliJ <br/> - GitHub <br/> - Docker ( MySQL, Redis, RabbitMQ )|
-|test| - mailhog <br/> - awaitility 4.2.0|
+|Category| Tech Stack |
+|---|---|
+|Backend| - Spring Boot 3.2.5 <br/> - JDK 17 <br/> - Gradle <br/> - Spring Data JPA <br/> - QueryDSL <br/> - RabbitMQ 3.12 Management <br/> - SpringSecurity <br/> - JWT <br/> - OAuth2(Google, Kakao, Naver) <br/> - Swagger( springdoc-openapi 2.6.0 ) <br/> - Java Mail <br/> - I'mport 결제 API ( iamport-rest-client ) |
+|Frontend| - React 18.3.1 <br/> - Axios <br/> - reduxjs/toolkit <br/> - react-redus <br/> - redux-persist <br/> - react-dom <br/> - http-proxy-middleware <br/> - styled-components <br/> - dayjs <br/> - Kakao 우편번호 서비스 API ( react-daum-postcode ) |
+|Database| - MySQL <br/> - Redis |
+|Environment| - IntelliJ <br/> - GitHub <br/> - Docker ( Local ( MySQL, Redis, RabbitMQ ) ) <br/> - Dockerfile <br/> - Docker Compose |
+|test| - mailhog <br/> - awaitility 4.2.0 |
 
 <br />
 
@@ -71,19 +73,32 @@
 
 <strong>
 이 프로젝트는 배포 테스트를 수행했습니다. AWS 환경에서 수행했으며 GitHub Webhook과 Jenkins를 통해 push 이벤트 감지를 통한 자동 배포 및 빌드까지 구축했습니다.<br/>
-RabbitMQ의 경우 도입 이전 배포 테스트 수행으로 인해 RabbitMQ에 대한 처리는 workflow에 빠져있는 상태입니다.
+RabbitMQ의 경우 도입 이전 배포 테스트 수행으로 인해 RabbitMQ에 대한 처리는 workflow에 빠져있는 상태입니다.   
+Docker를 활용한 배포 역시 아직 수행하지 않았기에 추후 Docker, RabbitMQ를 포함한 배포테스트를 진행할 계획입니다.
 </strong>
 
 <br/>
 <br/>
 
 # ERD
-<img src="src/main/resources/README_image/erd.jpg">
+<img src="src/main/resources/README_image/ERD_image.png">
 
 <br/>
 
 
 # 페이지별 기능 상세
+
+<details>
+  <summary><strong>공통</strong></summary>
+
+* 실시간 알림
+  * 관리자의 주문 확인
+  * 상품 문의 답변
+  * 회원 문의 답변
+  * 리뷰 답변
+</details>
+
+<br/>
 
 <details>
   <summary><strong>메인 화면</strong></summary>
@@ -142,6 +157,7 @@ RabbitMQ의 경우 도입 이전 배포 테스트 수행으로 인해 RabbitMQ�
 * 작성한 리뷰 목록
   * 작성한 리뷰 상세 및 삭제
   * 리뷰 수정
+* 알림 목록
 * 정보 수정
 </details>
 
@@ -200,6 +216,9 @@ RabbitMQ의 경우 도입 이전 배포 테스트 수행으로 인해 RabbitMQ�
     * 검색 ( 상품명 )
     * 상품별 매출 상세 정보
       * 옵션별 매출 내역
+* 데이터 관리 ( RabbitMQ DLQ 관리 )
+  * 실패 메시지 관리
+  * 실패 주문 관리
 </details>
 
 <br/>
@@ -212,6 +231,7 @@ RabbitMQ의 경우 도입 이전 배포 테스트 수행으로 인해 RabbitMQ�
     1. [인증 인가 처리](#인증-인가-처리)
     2. [OAuth2 요청 및 토큰 발급 처리](#OAuth2-요청-및-토큰-발급-처리)
     3. [S3 연결을 통한 이미지 출력 처리](#S3-연결을-통한-이미지-출력-처리)
+    4. [실시간 알림 처리](#실시간-알림-처리)
   * [개선 및 문제 해결](#개선-및-문제-해결)
     1. [JMeter 테스트 수행 및 결과](#JMeter-테스트-수행-및-결과)
     2. [주문 및 매출 집계 처리 개선 RabbitMQ 적용](#주문-및-매출-집계-처리-개선-RabbitMQ-적용)
@@ -540,6 +560,236 @@ public class MainServiceImpl implements MainService {
 
 <br />
 
+### 실시간 알림 처리
+
+<br/>
+
+로그인 상태에서는 실시간으로 알림을 받을 수 있도록 구현했습니다.   
+알림 종류로는 상품 문의, 회원 문의, 리뷰의 답변과 주문 상태값이 상품 준비중으로 변경되는 경우로 총 4가지의 알림이 발생합니다.   
+프론트엔드에서는 Toast로 알림이 출력되며 상품 문의, 회원 문의는 바로 해당 문의 상세 페이지로 이동할 수 있도록 구현했습니다.   
+
+알림 기능 구현에는 WebSocket + STOMP 구조로 구현했습니다.   
+STOMP를 사용함으로써 pub/sub 구조를 보다 간결하게 처리할 수 있었으며, 프론트엔드에서 Redux를 통해 사용자 아이디를 관리하고 있기에 사용자 아이디를 기반으로 세션을 생성하고 추적할 수 있도록 구현했습니다.   
+
+관리자의 기능 요청에 의해 알림 발생이 필요한 경우 RabbitMQ를 통해 비동기 처리로 알림 서비스를 호출하는 구조로 설계했습니다.   
+
+```java
+//알림이 발생하는 관리자 기능 중 하나인 상품 문의 답변 작성
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class AdminQnAServiceImpl implements AdminQnAService {
+    
+    //...
+    private final ProductQnARepository productQnARepository;
+    private final ProductQnAReplyRepository productQnAReplyRepository;
+    private final RabbitTemplate rabbitTemplate;
+    private final RabbitMQProperties rabbitMQProperties;
+    
+    @Override
+    public String postProductQnAReply(QnAReplyInsertDTO insertDTO, Principal principal) {
+        // productQnA 데이터 검증 및 productQnAReply Entity Save, productQnA 답변 상태값 갱신
+        // ...
+      
+        // 알림 제목
+        String notificationTitle = productQnA.getProduct().getProductName() + NotificationType.PRODUCT_QNA_REPLY.getTitle();
+        
+        rabbitTemplate.convertAndSend(
+            rabbitMQProperties.getExchange().get(RabbitMQPrefix.EXCHANGE_NOTIFICATION.getKey()).getName(),
+            rabbitMQProperties.getQueue().get(RabbitMQPrefix.QUEUE_NOTIFICATION.getKey()).getRouting(),
+            new NotificationSendDTO(
+                    productQnA.getMember().getUserId(),
+                    NotificationType.PRODUCT_QNA_REPLY,
+                    notificationTitle,
+                    productQnA.getId()
+            )
+        );
+        
+        return Result.OK.getResultKey();
+    } 
+}
+```
+
+알림 제목의 기본적인 틀은 NotificationType이라는 enum으로 관리합니다.   
+회원 및 상품 문의의 경우 문의 제목 또는 상품명이 포함된 제목으로 설계했기 때문에 별도의 알림 제목 값을 만들어 추가하게 됩니다.   
+
+```java
+@Component
+@Slf4j
+public class NotificationConsumer {
+    private final NotificationService notificationService;
+    
+    public NotificationConsumer(NotificationService notificationService) {
+        this.notificationService = notificationService;
+    }
+    
+    @RabbitListener(queues = "${rabbitmq.queue.notificationSend.name}", concurrency = "3")
+    public void consumeNotification(NotificationSendDTO notificationDTO) {
+        notificationService.sendNotification(notificationDTO);
+    }
+}
+```
+
+RabbitMQ의 역할은 단순히 비동기적으로 알림 서비스를 호출하는 역할만 담당합니다.   
+RabbitMQ에서도 STOMP Plugin 설치 후 Queue로 관리하는 방법도 있지만, 현재 애플리케이션에서는 알림 메시지의 유실에 대해 좀 더 관대하게 처리해도 되며 이 알림 큐 역시 DLQ가 존재하기 때문에 STOMP plugin까지 사용하는건 과한 오버스펙이라고 생각했습니다.   
+
+```java
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class NotificationServiceImpl implements NotificationService {
+    
+    private final MemberRepository memberRepository;
+    private final NotificationRepository notificationRepository;
+    private final SimpMessagingTemplate messageTemplate;
+    private final PrincipalService principalService;
+    private final RedisTemplate<String, String> redisTemplate;
+
+    @Value("${notification.redis.prefix}")
+    private String redisPrefix;
+  
+    @Value("${notification.redis.ttl}")
+    private Long redisTtl;
+  
+    @Value("${notification.redis.status}")
+    private String redisStatus;
+    
+    @Override
+    public void sendNotification(NotificationSendDTO sendDTO) {
+        Member member = memberRepository.findByUserId(sendDTO.userId());
+  
+        if(member == null){
+          log.warn("Notification user Not Found");
+          throw new CustomAccessDeniedException(ErrorCode.ACCESS_DENIED, ErrorCode.ACCESS_DENIED.getMessage());
+        }
+        
+        Notification notification = Notification.builder()
+                .member(member)
+                .type(sendDTO.type().getType())
+                .title(sendDTO.title())
+                .relatedId(sendDTO.relatedId())
+                .isRead(false)
+                .build();
+  
+        notificationRepository.save(notification);
+  
+        NotificationDTO responseMessage = new NotificationDTO(sendDTO.title(), sendDTO.relatedId());
+  
+        if(isUserOnline(sendDTO.userId()))
+          messageTemplate.convertAndSendToUser(sendDTO.userId(), "/queue/notifications", responseMessage);
+
+    }
+
+    @Override
+    public void updateUserOnlineStatus(Principal principal) {
+        String userId = principalService.getUserIdByPrincipal(principal);
+        String key = redisPrefix + userId;
+    
+        redisTemplate.opsForValue().set(key, redisStatus, redisTtl, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public boolean isUserOnline(String userId) {
+        String key = redisPrefix + userId;
+        String status = redisTemplate.opsForValue().get(key);
+    
+        return status != null && status.equals(redisStatus);
+    }
+}
+```
+
+알림 서비스에서는 Notification 테이블에 알림 데이터를 저장한 뒤 convertAndSendToUser를 통해 알림을 발송하게 됩니다.   
+WebSocket 연결 상태가 정상인 경우에만 알림을 전달할 수 있도록 처리했고, 이 처리를 위해 사용자의 연결 상태를 Redis에서 관리하게 됩니다.
+프론트엔드에서 Health Check로 30초마다 요청을 보내게 되고, 그때마다 Redis 데이터의 만료시간을 갱신하도록 처리했습니다.
+알림을 보내기 전 Redis 데이터를 체크함으로써 사용자가 현재 알림을 받을 수 있는 상태인지 확인하고 알림을 보내도록 해 불필요하게 온라인 상태가 아닌 사용자에게는 알림이 발생하지 않도록 했습니다.
+
+사용자 아이디를 기반으로 세션을 구분하기 때문에 프론트엔드에서 연결을 시도할 때 JWT가 필요했습니다.   
+AccessToken의 경우 requestHeader에 담겨져 보내지기 때문에 괜찮았지만, RefreshToken, ino는 Cookie에 저장되기 때문에 전달이 되지 않는다는 문제가 있었습니다.
+
+```java
+@Configuration
+@EnableWebSocketMessageBroker
+@Slf4j
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+    //...
+
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+      registry.addEndpoint("/ws")
+              .addInterceptors(
+                  new HandshakeInterceptor() {
+                    @Override
+                    public boolean beforeHandshake(ServerHttpRequest request,
+                                                   ServerHttpResponse response,
+                                                   WebSocketHandler wsHandler,
+                                                   Map<String, Object> attributes) throws Exception {
+                      if(request instanceof ServletServerHttpRequest) {
+                        HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
+                        Cookie[] cookies = servletRequest.getCookies();
+
+                        if(cookies != null) {
+                          for(Cookie cookie : cookies) {
+                            if(cookie.getName().equals(inoHeader))
+                              attributes.put("ino", cookie.getValue());
+                          }
+                        }else
+                          log.warn("WebSocket Connection cookie is null");
+                      }
+
+                      return true;
+                    }
+
+                    @Override
+                    public void afterHandshake(ServerHttpRequest request, 
+                                               ServerHttpResponse response, 
+                                               WebSocketHandler wsHandler, 
+                                               Exception exception) {}
+                  }
+              )
+              .withSockJS()
+              .setSessionCookieNeeded(true)
+              .setHeartbeatTime(25000)
+              .setDisconnectDelay(30000);
+    }
+  
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+      registration
+            .interceptors(
+                new ChannelInterceptor() {
+                  @Override
+                  public Message<?> preSend(Message<?> message, MessageChannel channel) {
+                    StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+      
+                    if(accessor != null && accessor.getCommand() == StompCommand.CONNECT) {
+                      String token = accessor.getFirstNativeHeader(accessHeader);
+                      String inoValue = (String) accessor.getSessionAttributes().get("ino");
+      
+                      if (token != null) {
+                        String tokenValue = token.replace(tokenPrefix, "");
+                        String userId = tokenProvider.verifyAccessToken(tokenValue, inoValue);
+      
+                        if(userId != null && !userId.equals("WRONG_TOKEN") && !userId.equals("TOKEN_EXPIRATION") && !userId.equals("TOKEN_STEALING")) {
+                          accessor.setUser(() -> userId);
+                          log.info("WebSocket Principal set : {}", userId);
+                        }
+                      }
+                    }
+      
+                    return message;
+                  }
+                }
+          );
+    }
+  
+    //...
+}
+```
+
+이 문제는 WebSocket 설정 파일에서 Interceptor를 통해 해결할 수 있었습니다.   
+Endpoint 설정에서 Interceptor를 통해 request에 담긴 쿠키를 꺼내 attributes에 담도록 함으로써 ClientInboundChannel의 Interceptor에서 모든 토큰을 확인, 검증 할 수 있도록 처리했습니다.
+
+<br/>
 
 ## 개선 및 문제 해결
 
