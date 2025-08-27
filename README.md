@@ -10,6 +10,8 @@
 
 ### JSP 버전 github
 * https://github.com/Youndae/mansShop
+### MultiModule 버전 github
+* https://github.com/Youndae/mansShop_multi
 
 <br />
 
